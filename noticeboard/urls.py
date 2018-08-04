@@ -29,7 +29,7 @@ from django.contrib import admin
 from boards import views
 
 urlpatterns = [
-    url('admin/', admin.site.urls),
-    url('', views.home, name='home'),
-
-]
+    url(r'^$', views.home, name='home'),
+    url(r'^boards/(?P<pk>\d+)/$', views.board_topics, name='board_topics'),
+    url('^admin/', admin.site.urls),
+              ]

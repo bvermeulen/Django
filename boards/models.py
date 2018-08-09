@@ -6,6 +6,11 @@ class Board(models.Model):
     name = models.CharField(max_length=30, unique=True)
     description = models.CharField(max_length=100)
 
+    def get_post_count(self):
+        return sum(self.topics.get(id=i).posts.all().count() \
+                   for i in range(1, self.topics.count()+1))
+
+
     def __str__(self):
         return self.name
 

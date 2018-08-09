@@ -24,13 +24,14 @@ Including another URLconf
     2. Add a URL to urlpatterns:  url(r'^blog/', include('blog.urls'))
 """
 from django.conf.urls import url
+from django.urls import path
 from django.contrib import admin
 
 from boards import views
 
 urlpatterns = [
-    url(r'^$', views.home, name='home'),
-    url(r'^boards/(?P<pk>\d+)/$', views.board_topics, name='board_topics'),
-    url(r'^boards/(?P<pk>\d+)/new/$', views.new_topic, name='new_topic'),
-    url('^admin/', admin.site.urls),
+    path('', views.home, name='home'),
+    path('boards/<int:pk>/', views.board_topics, name='board_topics'),
+    path('boards/<int:pk>/new/', views.new_topic, name='new_topic'),
+    path('admin/', admin.site.urls),
               ]

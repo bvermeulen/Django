@@ -40,6 +40,8 @@ urlpatterns = [
     path('boards/<int:pk>/', views.board_topics, name='board_topics'),
     path('boards/<int:pk>/new/', views.new_topic, name='new_topic'),
     path('admin/', admin.site.urls),
+    path('boards/<int:pk>/topics/<int:topic_pk>/', views.topic_posts, name='topic_posts'),
+    # url(r'^boards/(?P<pk>\d+)/topics/(?P<topic_pk>\d+)/$', views.topic_posts, name='topic_posts'),
 
     path('reset/', auth_views.PasswordResetView.as_view(
          template_name='password_reset.html',

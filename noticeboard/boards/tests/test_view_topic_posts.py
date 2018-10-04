@@ -12,7 +12,7 @@ class TopicPostsTests(TestCase):
         user = User.objects.create_user(username='john', email='john@doe.com', password='123')
         topic = Topic.objects.create(subject='Hello, world', board=board, starter=user)
         Post.objects.create(message='Lorem ipsum dolor sit amet', topic=topic, created_by=user)
-        context = {'pk': board.pk, 'topic_pk': topic.pk}
+        context = {'board_pk': board.pk, 'topic_pk': topic.pk}
         url = reverse('topic_posts', kwargs=context)
         self.response = self.client.get(url)
 

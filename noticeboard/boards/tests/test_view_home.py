@@ -18,5 +18,5 @@ class HomeTests(TestCase):
         self.assertEquals(view.func, home)
 
     def test_home_view_contains_link_to_topics_page(self):
-        board_topics_url = reverse('board_topics', kwargs={'pk': self.board.pk})
+        board_topics_url = reverse('board_topics', kwargs={'board_pk': self.board.pk})
         self.assertContains(self.response, 'href="{0}"'.format(board_topics_url))

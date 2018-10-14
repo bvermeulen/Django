@@ -105,7 +105,7 @@ def reply_topic(request, board_pk, topic_pk):
             topic_url = reverse('topic_posts',
                                 kwargs={'board_pk': board_pk,
                                         'topic_pk': topic_pk})
-            topic_post_url = f'{topic_url}?page={topic.get_page_count()}#{post.pk}'
+            topic_post_url = f'{topic_url}?page={topic.get_page_count()}'
             return redirect(topic_post_url)
     else:
         form = PostForm()
@@ -131,5 +131,9 @@ class PostUpdateView(UpdateView):
         post.updated_by = self.request.user
         post.updated_at = timezone.now()
         post.save()
-        return redirect('topic_posts', board_pk=post.topic.board.pk,
-                        topic_pk=post.topic.pk)
+
+        topic_url = reverse('topic_posts',
+                            kwargs={'board_pk': post.topic.board.pk,
+                                    'topic_pk': post.topic.pk},)
+        topic_post_url = f'{topic_url}?page={post.topic.get_page_number(post.pk)}'
+        return redirect(topic_post_url)

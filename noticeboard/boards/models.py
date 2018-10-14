@@ -31,9 +31,11 @@ class Topic(models.Model):
                                 related_name='topics')
     views = models.PositiveIntegerField(default=0)
 
+    posts_per_page = 2
+
     def get_page_count(self):
         count = self.posts.count()
-        pages = count / 2
+        pages = count / self.posts_per_page
         return math.ceil(pages)
 
     def has_many_pages(self, count=None):
@@ -47,6 +49,11 @@ class Topic(models.Model):
             return range(1,4)
         else:
             return range(1, count+1)
+
+    def get_page_number(self, post_pk):
+        for i, post in enumerate(self.posts.all()):
+            if post.pk == post_pk:
+                return int(i/self.posts_per_page)+1
 
     def __str__(self):
         return self.subject

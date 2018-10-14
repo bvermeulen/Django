@@ -41,7 +41,6 @@
                 <a href="{{ topic_url }}?page={{ i }}">{{ i }}</a>
               {% endfor %}
               {% if topic.has_many_pages %}
-                {{ topic_get_page_count }}
                 ... <a href="{{ topic_url }}?page={{ topic.get_page_count }}">Last Page</a>
               {% endif %}
             </small>

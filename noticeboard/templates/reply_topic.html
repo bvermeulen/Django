@@ -1,10 +1,8 @@
 {% extends 'base.html' %}
 
-{% load static %}
+{% load static misc_tags %}
 
 {% block title %}Post a reply{% endblock %}
-
-
 
 {% block breadcrumb %}
   <li class="breadcrumb-item"><a href="{% url 'home' %}">Boards</a></li>
@@ -32,7 +30,8 @@
     <button type="submit" class="btn btn-success">Post a reply</button>
   </form>
 
-  {% for post in topic.posts.all %}
+  {% get_last_n_posts topic 5 as last_posts %}
+  {% for post in last_posts %}
     <div class="card mb-2">
       <div class="card-body p-3">
         <div class="row mb-3">

@@ -2,8 +2,11 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.utils.text import Truncator
 from django.utils.html import mark_safe
+from django import template
 from markdown import markdown
+import math
 
+register = template.Library()
 
 class Board(models.Model):
     name = models.CharField(max_length=30, unique=True)
@@ -27,6 +30,23 @@ class Topic(models.Model):
     starter = models.ForeignKey(User, on_delete=models.CASCADE,
                                 related_name='topics')
     views = models.PositiveIntegerField(default=0)
+
+    def get_page_count(self):
+        count = self.posts.count()
+        pages = count / 2
+        return math.ceil(pages)
+
+    def has_many_pages(self, count=None):
+        if count is None:
+            count = self.get_page_count()
+        return count > 3
+
+    def get_page_range(self):
+        count = self.get_page_count()
+        if self.has_many_pages():
+            return range(1,4)
+        else:
+            return range(1, count+1)
 
     def __str__(self):
         return self.subject

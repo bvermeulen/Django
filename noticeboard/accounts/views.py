@@ -7,6 +7,7 @@ from django.utils.decorators import method_decorator
 from django.urls import reverse_lazy
 from .forms import SignUpForm
 
+
 def signup(request):
     if request.method == 'POST':
         form = SignUpForm(request.POST)

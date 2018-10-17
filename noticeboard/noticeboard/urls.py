@@ -32,7 +32,8 @@ from accounts import views as accounts_views
 from boards import views
 
 urlpatterns = [
-    path('', views.BoardListView.as_view(), name='home'),
+    path('', views.HomeListView.as_view(), name='home'),
+    path('boards/', views.BoardListView.as_view(), name='boards'),
     path('boards/<int:board_pk>/', views.TopicListView.as_view(), name='board_topics'),
     path('boards/<int:board_pk>/new/', views.new_topic, name='new_topic'),
     path('boards/<int:board_pk>/topics/<int:topic_pk>/posts/',

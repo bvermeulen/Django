@@ -5,15 +5,22 @@ from django.views.generic import UpdateView, ListView
 from django.utils import timezone
 from django.utils.decorators import method_decorator
 from django.db.models import Count
+
 from .forms import NewTopicForm, PostForm
-from .models import Board, Topic, Post
+from .models import Home, Board, Topic, Post
 import pdb
+
+
+class HomeListView(ListView):
+    model = Home
+    context_object_name = 'home'
+    template_name = 'home.html'
 
 
 class BoardListView(ListView):
     model = Board
     context_object_name = 'boards'
-    template_name = 'home.html'
+    template_name = 'boards.html'
 
 
 class TopicListView(ListView):

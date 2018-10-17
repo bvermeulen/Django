@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib import admin
 from django.contrib.auth.models import User
 from django.utils.text import Truncator
 from django.utils.html import mark_safe
@@ -6,7 +7,10 @@ from django import template
 from markdown import markdown
 import math
 
-register = template.Library()
+
+class Home(models.Model):
+    pass
+
 
 class Board(models.Model):
     name = models.CharField(max_length=30, unique=True)

@@ -1,0 +1,117 @@
+{% extends 'base_news.html' %}
+
+	<head>
+		<!-- <title>News display html</title> -->
+		{% block content %}
+		<style type='text/css'>
+			.item1 { grid-area: newsheader; margin: 0% 10px}
+			.item2 { grid-area: newscontrol; border: 1px solid; margin: 0% 10px}
+			.item3 { grid-area: newsmain; border: 1px solid; margin: 0% 10px}
+			.item4 { grid-area: newssites; border: 1px solid; margin: 0% 3px}
+
+			.grid-container {
+				display: grid;
+				grid-template-columns: 75% 25%;
+				grid-template-rows: auto;
+				grid-template-areas:
+					"newsheader newsheader"
+					"newscontrol newssites"
+					"newsmain newssites";
+				grid-gap: 1px;
+			}
+			legend {
+				margin-left: 18px;
+				font-size: 10px;
+				width: auto;
+				margin-bottom: 0;
+				color: #A8A8A8;
+			}
+			.textarea {
+				min-height: 200px;
+				height: auto;
+				border: 1px solid;
+				margin-left: 3px;
+				margin-right: 3px;
+			}
+			.btn {
+				height: 30px;
+				border-radius: 8px;
+				margin: 2px 2px;
+				border: 1px solid #ABA8A8;
+				background-color: #F8F8F8;
+				font-size: 12px;
+			}
+			.smallfont {
+				font-size: 10px;
+				color: #A8A8A8;
+				margin-left: 3px;
+			}
+			body {
+				font: normal 100% Helvetica, sans-serif;
+			}
+		</style>
+		<script >
+			var timeout = setTimeout("window.location.href='{% url 'newspage' %}'",{{ delay }} );
+	  		function Pause() {
+	    		clearTimeout(timeout);
+	 		}
+	  		function Run() {
+	  	 		timeout = setTimeout("window.location.href='{% url 'newspage' %}'",{{ delay }});
+	 		}
+			document.addEventListener('keydown', (event) => {
+  				const keyName = event.key;
+  				console.log(`Key pressed: ${keyName}`);
+ 				var form = document.getElementById("controlform");
+   			if (keyName == 'ArrowRight') {
+  					document.getElementById("keyinput").value = 'next';
+  					form.submit();
+ 					}
+	  			else if (keyName == 'ArrowLeft') {
+  				   document.getElementById("keyinput").value = 'previous';
+  				   form.submit();
+  	  				}
+			}, false);
+	  	</script>
+	</head>
+		<div class="grid-container">
+
+			<h2 class="item1" style=" font-weight: bold; text-align: left;">News feed from: {{ news_site }}</h2>
+
+			<fieldset id='control' class="item2">
+				<legend>Control</legend>
+				<button class="btn" style="float: left" onclick="Pause();">Pause</button>
+				<button class="btn"  style="float: left" onclick="Run();">Run</button>
+				<form id="controlform" style="float: left" method="post">
+					{% csrf_token %}
+					<input type="hidden"name="control_btn" id="keyinput"/>
+					<input class="btn" type="submit" name="control_btn" value="previous">
+					<input class="btn" type="submit" name="control_btn" value="next">
+				</form>
+				<button class="btn" onclick="window.location.href='{% url 'home' %}'">home</button>
+				</fieldset>
+
+			<fieldset id='display' class="item3">
+				<legend>Display</legend>
+				<h3 style="font-weight: bold; margin-left: 3px">{{ news_title }}</h3>
+				<small class="smallfont">{{ reference }}</small>
+				<div id="summarytext" class="textarea" contenteditable="false">{{ news_summary|safe }}</div>
+				<small class="smallfont" style="clear: both;">{{ status }}</small>
+ 			</fieldset>
+
+			<fieldset id='sites', class="item4">
+			<legend>News sites</legend>
+				<form method="post">
+					{% csrf_token %}
+					{% for site in newssites %}
+						{% if site == news_site %}
+							<input class="btn" type="submit" name="site_btn" value="{{ site }}" style="width: 45%; background-color: #DADADA; display: inline-block;">
+						{% else %}
+							<input class="btn" type="submit" name="site_btn" value="{{ site }}" style="width: 45%; display: inline-block;">
+						{% endif %}
+						{% if forloop.counter|divisibleby:2 %}
+							<br>
+						{% endif %}
+					{% endfor %}
+				</form>
+			</fieldset>
+		{% endblock content %}

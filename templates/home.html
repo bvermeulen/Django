@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+
+{% load humanize %}
+
+{% block breadcrumb %}
+  <li class="breadcrumb-item active">Home</li>
+{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+  <a href="{% url 'boards' %}" class="btn btn-primary">Boards</a>
+  <a href="{% url 'newspage' %}" class="btn btn-primary">News</a>
+</div>
+{% endblock %}

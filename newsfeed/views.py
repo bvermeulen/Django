@@ -20,9 +20,9 @@ class NewsFeed:
         if user:
             try:
                 newssites = [item.news_site for item in UserNewsSite.objects.get(
-                                user=user).news_sites.all()]
+                             user=user).news_sites.all()]
 
-            except Exception:
+            except (ObjectDoesNotExist, TypeError):
                 newssites = [item.news_site for item in UserNewsSite.objects.get(
                              user__username='default_user').news_sites.all()]
 

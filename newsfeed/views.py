@@ -10,7 +10,6 @@ class NewsFeed:
     '''  NewsFeed class with view methods:
          - newspage
     '''
-    DEFAULT_NEWS_SITE = 'Nu.nl'
     DELAY_FACTOR = 35
 
     @classmethod
@@ -21,22 +20,19 @@ class NewsFeed:
             try:
                 newssites = [item.news_site for item in UserNewsSite.objects.get(
                                 user=user).news_sites.all()]
-                current_news_site = newssites[0]
 
             except Exception:
                 newssites = [item.news_site for item in UserNewsSite.objects.get(
                              user__username='default_user').news_sites.all()]
-                current_news_site = cls.DEFAULT_NEWS_SITE
 
         else:
             newssites = [item.news_site for item in UserNewsSite.objects.get(
                          user__username='default_user').news_sites.all()]
-            current_news_site = cls.DEFAULT_NEWS_SITE
 
         if not ip_address:
             ip_address = request.META.get('REMOTE_ADDR', '')
             request.session['ip_address'] = ip_address
-            request.session['current_news_site'] = current_news_site
+            request.session['current_news_site'] = newssites[0]
             request.session['news_site'] = ''
             request.session['item'] = 0
             request.session['news_items'] = 0

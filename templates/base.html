@@ -8,6 +8,17 @@
     	<link rel="stylesheet" href="{% static 'css/app.css' %}">
       <link rel="icon" href="{% static 'img/favicon.ico' %}">
  	 	{% block stylesheet %}{% endblock %}
+    <style>
+    .footer {
+       position: fixed;
+       left: 0;
+       bottom: 0;
+       width: 100%;
+       background-color: lightgrey;
+       color: black;
+       text-align: left;
+    }
+    </style>
   	</head>
   	<body>
 		{% block body %}
@@ -50,8 +61,12 @@
 	    		{% block breadcrumb %}
 	     		{% endblock %}
 	     	</ol>
-	     	{% block content %}
-			  {% endblock %}
+	     	{% block content %}{% endblock %}
+        <div class="footer">
+          <div class="container">
+            <small>powered by AWS</small>
+          </div>
+        </div>
 	 	</div>
 		{% endblock body %}
 	 	<script src="{% static 'js/jquery-3.3.1.min.js' %}"></script>

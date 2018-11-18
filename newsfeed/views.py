@@ -4,6 +4,7 @@ from .module_news import update_news
 from .models import NewsSite, UserNewsSite
 from .forms import SelectedSitesForm
 from django.db.utils import IntegrityError
+from django.core.exceptions import ObjectDoesNotExist
 import time
 
 class NewsFeed:
@@ -103,8 +104,11 @@ class NewsFeed:
 
         choices = []
         user = request.user
-        for site in UserNewsSite.objects.get(user=user).news_sites.all():
-            choices.append(site.news_site)
+        try:
+            for site in UserNewsSite.objects.get(user=user).news_sites.all():
+                choices.append(site.news_site)
+        except ObjectDoesNotExist:
+            pass
 
         if request.method == 'POST':
             form = SelectedSitesForm(request.POST)

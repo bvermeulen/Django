@@ -6,6 +6,7 @@
     	<link href="https://fonts.googleapis.com/css?family=Peralta|Teko|Russo+One" rel="stylesheet">
     	<link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
     	<link rel="stylesheet" href="{% static 'css/app.css' %}">
+      <link rel="icon" href="{% static 'img/favicon.ico' %}">
  	 	{% block stylesheet %}{% endblock %}
   	</head>
   	<body>
@@ -46,3 +47,7 @@
       {% block content %}
       {% endblock %}
     {% endblock body %}
+    <script src="{% static 'js/jquery-3.3.1.min.js' %}"></script>
+		<script src="{% static 'js/popper.min.js' %}"></script>
+		<script src="{% static 'js/bootstrap.min.js' %}"></script>
+    {% block javascript %}{% endblock %}

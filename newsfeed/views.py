@@ -1,6 +1,9 @@
-from django.shortcuts import render, redirect
+from django.contrib.auth.models import User
+from django.shortcuts import render, redirect, reverse
 from .module_news import update_news
-from .models import NewsSite
+from .models import NewsSite, UserNewsSite
+from .forms import SelectedSitesForm
+from django.db.utils import IntegrityError
 import time
 
 class NewsFeed:
@@ -12,11 +15,28 @@ class NewsFeed:
 
     @classmethod
     def newspage(cls, request):
+        user = request.user
         ip_address = request.session.get('ip_address','')
+        if user:
+            try:
+                newssites = [item.news_site for item in UserNewsSite.objects.get(
+                                user=user).news_sites.all()]
+                current_news_site = newssites[0]
+
+            except Exception:
+                newssites = [item.news_site for item in UserNewsSite.objects.get(
+                             user__username='default_user').news_sites.all()]
+                current_news_site = cls.DEFAULT_NEWS_SITE
+
+        else:
+            newssites = [item.news_site for item in UserNewsSite.objects.get(
+                         user__username='default_user').news_sites.all()]
+            current_news_site = cls.DEFAULT_NEWS_SITE
+
         if not ip_address:
             ip_address = request.META.get('REMOTE_ADDR', '')
             request.session['ip_address'] = ip_address
-            request.session['current_news_site'] = cls.DEFAULT_NEWS_SITE
+            request.session['current_news_site'] = current_news_site
             request.session['news_site'] = ''
             request.session['item'] = 0
             request.session['news_items'] = 0
@@ -53,6 +73,9 @@ class NewsFeed:
             feed = request.session['feed']
 
         news_items = len(feed["entries"])
+        if news_items == 0:
+            home_url = reverse('home')
+            return redirect(home_url)
 
         reference_text = ''.join(['News update from ', NewsSite.objects.get(
                                  news_site=current_news_site).news_url,
@@ -68,7 +91,6 @@ class NewsFeed:
         request.session['item'] = item
         request.session['news_items'] = news_items
 
-        newssites = [item.news_site for item in NewsSite.objects.all()]
         context = {'newssites': newssites,
                    'news_site': current_news_site,
                    'reference': reference_text,
@@ -79,3 +101,36 @@ class NewsFeed:
                   }
 
         return render(request, 'newspage.html', context)
+
+    @classmethod
+    def newssites(cls, request):
+
+        choices = []
+        user = request.user
+        for site in UserNewsSite.objects.get(user=user).news_sites.all():
+            choices.append(site.news_site)
+
+        if request.method == 'POST':
+            form = SelectedSitesForm(request.POST)
+            if form.is_valid():
+                selected_sites = form.cleaned_data.get('selected_sites')
+
+                UserNewsSite.objects.filter(user=user).delete()
+                try:
+                    usersites = UserNewsSite(user=user)
+                    usersites.save()
+                except IntegrityError:
+                    usersites = UserNewsSite.objects.get(user=user)
+
+                for site in selected_sites:
+                    newssite = NewsSite.objects.get(news_site=site)
+                    usersites.news_sites.add(newssite)
+                    usersites.save()
+
+                newsfeed_url = reverse('newspage')
+                return redirect(newsfeed_url)
+        else:
+            form = SelectedSitesForm()
+            form.fields['selected_sites'].initial = choices
+
+        return render(request, 'newssites.html', {'form':form})

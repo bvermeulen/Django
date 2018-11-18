@@ -15,4 +15,4 @@ class UserNewsSite(models.Model):
     news_sites = models.ManyToManyField(NewsSite)
 
     def __str__(self):
-        return User.objects.get(username=self.user).username
+        return User.objects.get(username=self.user).news_sites

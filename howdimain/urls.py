@@ -47,6 +47,7 @@ urlpatterns = [
          boards_views.PostUpdateView.as_view(), name='edit_post'),
 
     path('news/', news_views.NewsFeed().newspage, name='newspage'),
+    path('news/sites/', news_views.NewsFeed().newssites, name='newssites'),
 
     path('admin/', admin.site.urls),
     path('signup/', accounts_views.signup, name='signup'),

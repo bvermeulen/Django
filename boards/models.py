@@ -3,7 +3,7 @@ from django.contrib.auth.models import User
 from django.utils.text import Truncator
 from django.utils.html import mark_safe
 from django import template
-from markdown import markdown
+import markdown2
 import math
 
 register = template.Library()
@@ -75,7 +75,9 @@ class Post(models.Model):
                                    null=True, related_name='+')
 
     def get_message_as_markdown(self):
-        return mark_safe(markdown(self.message, safe_mode='escape'))
+        markdown_text = mark_safe(markdown2.markdown(self.message, safe_mode='escape'))
+        print(markdown_text)
+        return markdown_text
 
     def __str__(self):
             truncated_message = Truncator(self.message)

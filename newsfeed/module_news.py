@@ -6,35 +6,10 @@ from .models import NewsSite, UserNewsSite
 from django.db.utils import IntegrityError
 
 
-news_list = {'CNN World News':
-             'http://rss.cnn.com/rss/edition_world.rss',
-             'The Guardian':
-             'https://www.theguardian.com/business/economics/rss',
-             'NOS algemeen':
-             'http://feeds.nos.nl/nosnieuwsalgemeen',
-             'Nu.nl':
-             'http://www.nu.nl/rss/Algemeen',
-             'BBC World News':
-             'http://feeds.bbci.co.uk/news/world/rss.xml',
-             'BBC Technology':
-             'http://feeds.bbci.co.uk/news/technology/rss.xml',
-             'BBC Business':
-             'http://feeds.bbci.co.uk/news/business/rss.xml',
-             'Hacker fp':
-             'https://hnrss.org/frontpage',
-             'Django':
-             'https://hnrss.org/newest?q=Django',
-             'Thailand':
-             'https://tradingeconomics.com/thailand/rss',
-             'Mad Money':
-             'https://www.cnbc.com/id/15838459/device/rss/rss.html',
-             }
-
-
-def update_news(news_site):
+def update_news(news_url):
     '''  Function to update the news and display the news site
     '''
-    return feedparser.parse(news_list[news_site])
+    return feedparser.parse(news_url)
 
 
 def add_news_site_to_model():

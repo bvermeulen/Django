@@ -62,7 +62,8 @@ class NewsFeed:
         do_update_news = (current_news_site != news_site) or \
                          (item == 0) and not button_cntr
         if do_update_news:
-            feed = update_news(current_news_site)
+            feed = update_news(NewsSite.objects.get(
+                   news_site=current_news_site).news_url)
             request.session['feed'] = feed
             news_site = current_news_site
             item = 0

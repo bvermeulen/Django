@@ -7,7 +7,6 @@ from django.utils.decorators import method_decorator
 from django.db.models import Count
 from .forms import NewTopicForm, PostForm
 from .models import Home, Board, Topic, Post
-import pdb
 
 
 class HomeListView(ListView):

@@ -3,8 +3,9 @@ from django.contrib.auth.models import User
 from django.utils.text import Truncator
 from django.utils.html import mark_safe
 from django import template
-import markdown2
 import math
+from markdown import markdown
+from utils.mdx_del_ins import DelInsExtension
 
 register = template.Library()
 
@@ -75,8 +76,9 @@ class Post(models.Model):
                                    null=True, related_name='+')
 
     def get_message_as_markdown(self):
-        markdown_text = mark_safe(markdown2.markdown(self.message, safe_mode='escape'))
-        print(markdown_text)
+        markdown_text = mark_safe(markdown(self.message,
+                    extensions=['tables', 'fenced_code', DelInsExtension()],
+                    safe_mode='escape'))
         return markdown_text
 
     def __str__(self):

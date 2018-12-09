@@ -4,12 +4,13 @@ import re
 from django.contrib.auth.models import User
 from .models import NewsSite, UserNewsSite
 from django.db.utils import IntegrityError
+from django.core import serializers
 
 
 def update_news(news_url):
     '''  Function to update the news and display the news site
     '''
-    return feedparser.parse(news_url)
+    return feedparser.parse(news_url)["items"]
 
 
 def add_news_site_to_model():

@@ -5,6 +5,7 @@ from .models import NewsSite, UserNewsSite
 from .forms import SelectedSitesForm
 from django.db.utils import IntegrityError
 from django.core.exceptions import ObjectDoesNotExist
+from pprint import pprint
 import time
 
 class NewsFeed:
@@ -12,6 +13,7 @@ class NewsFeed:
          - newspage
     '''
     DELAY_FACTOR = 35
+    MIN_CHARS = 250
 
     @classmethod
     def newspage(cls, request):
@@ -29,6 +31,10 @@ class NewsFeed:
         else:
             newssites = [item.news_site for item in UserNewsSite.objects.get(
                          user__username='default_user').news_sites.all()]
+
+        if newssites == []:
+            newssites_url = reverse('newssites')
+            return redirect(newssites_url)
 
         if not ip_address:
             ip_address = request.META.get('REMOTE_ADDR', '')
@@ -62,15 +68,15 @@ class NewsFeed:
         update_news_true = (current_news_site != news_site) or \
                       (item == 0) and not button_cntr
         if update_news_true:
-            feed = update_news(NewsSite.objects.get(
+            feed_items = update_news(NewsSite.objects.get(
                    news_site=current_news_site).news_url)
-            request.session['feed'] = feed
+            request.session['feed'] = feed_items
             news_site = current_news_site
             item = 0
         else:
-            feed = request.session['feed']
+            feed_items = request.session['feed']
 
-        news_items = len(feed["entries"])
+        news_items = len(feed_items)
         if news_items == 0:
             home_url = reverse('home')
             return redirect(home_url)
@@ -80,9 +86,9 @@ class NewsFeed:
                                  ' on ', time.ctime()])
         status_text = ''.join(['News item: ', str(item+1), ' from ',
                               str(news_items)])
-        news_title = feed["entries"][item]["title"]
-        news_summary = feed["entries"][item]["summary"]
-        delay = len(news_summary)*cls.DELAY_FACTOR
+        news_title = feed_items[item]["title"]
+        news_summary = feed_items[item]["summary"]
+        delay = max(cls.MIN_CHARS, (len(news_title)+len(news_summary)))*cls.DELAY_FACTOR
 
         request.session['news_site'] = news_site
         request.session['current_news_site'] = current_news_site

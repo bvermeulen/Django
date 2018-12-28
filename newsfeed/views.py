@@ -7,13 +7,18 @@ from django.db.utils import IntegrityError
 from django.core.exceptions import ObjectDoesNotExist
 from pprint import pprint
 import time
+import re
 
 class NewsFeed:
     '''  NewsFeed class with view methods:
          - newspage
+         - newssites
     '''
     DELAY_FACTOR = 35
-    MIN_CHARS = 250
+    MIN_CHARS = 350
+    BANNER_LENGTH = 150
+    HELP_ARROWS = 'You can use left/ right arrow to toggle news items. '
+    HELP_BANNER = 'Press Banner to toggle banner on/ off. '
 
     @classmethod
     def newspage(cls, request):
@@ -43,11 +48,13 @@ class NewsFeed:
             request.session['news_site'] = ''
             request.session['item'] = 0
             request.session['news_items'] = 0
+            request.session['banner'] = False
 
         news_site = request.session['news_site']
         current_news_site = request.session['current_news_site']
         item = request.session['item']
         news_items = request.session['news_items']
+        banner = request.session['banner']
 
         button_cntr = request.POST.get('control_btn')
         button_site = request.POST.get('site_btn')
@@ -55,6 +62,8 @@ class NewsFeed:
             item += 1
         elif button_cntr == 'previous':
             item -= 1
+        elif button_cntr == 'Banner':
+            banner = not banner
         else:
             assert False, 'button value incorrect: check template'
         try:
@@ -88,12 +97,21 @@ class NewsFeed:
                               str(news_items)])
         news_title = feed_items[item]["title"]
         news_summary = feed_items[item]["summary"]
-        delay = max(cls.MIN_CHARS, (len(news_title)+len(news_summary)))*cls.DELAY_FACTOR
+        news_summary_flat_text = re.sub(r'<.*?>', '', news_summary)
+        length_summary = len(news_summary)
+        delay = max(cls.MIN_CHARS, (len(news_title)+length_summary))*cls.DELAY_FACTOR/1000
+        if length_summary > cls.BANNER_LENGTH:
+            show_banner_button = False
+            help_banner = ''
+        else:
+            show_banner_button = True
+            help_banner = cls.HELP_BANNER
 
         request.session['news_site'] = news_site
         request.session['current_news_site'] = current_news_site
         request.session['item'] = item
         request.session['news_items'] = news_items
+        request.session['banner'] = banner
 
         context = {'newssites': newssites,
                    'news_site': current_news_site,
@@ -101,7 +119,12 @@ class NewsFeed:
                    'status': status_text,
                    'news_title': news_title,
                    'news_summary': news_summary,
+                   'news_summary_flat_text': news_summary_flat_text,
                    'delay': delay,
+                   'show_banner_button': show_banner_button,
+                   'banner': banner,
+                   'help_arrows': cls.HELP_ARROWS,
+                   'help_banner': help_banner,
                   }
 
         return render(request, 'newspage.html', context)

@@ -6,8 +6,14 @@ from .forms import SelectedSitesForm
 from django.db.utils import IntegrityError
 from django.core.exceptions import ObjectDoesNotExist
 from pprint import pprint
+from utils.plogger import Logger
 import time
 import re
+
+
+logformat = '%(asctime)s:%(levelname)s:%(message)s'
+Logger.set_logger('logs/howdimain.log', logformat, 'INFO')
+
 
 class NewsFeed:
     '''  NewsFeed class with view methods:
@@ -20,15 +26,16 @@ class NewsFeed:
     HELP_ARROWS = 'You can use left/ right arrow to toggle news items. '
     HELP_BANNER = 'Press Banner to toggle banner on/ off. '
 
+
     @classmethod
     def newspage(cls, request):
+        logger = Logger.getlogger()
+
         user = request.user
-        ip_address = request.session.get('ip_address','')
         if user:
             try:
                 newssites = [item.news_site for item in UserNewsSite.objects.get(
                              user=user).news_sites.all()]
-
             except (ObjectDoesNotExist, TypeError):
                 newssites = [item.news_site for item in UserNewsSite.objects.get(
                              user__username='default_user').news_sites.all()]
@@ -41,20 +48,18 @@ class NewsFeed:
             newssites_url = reverse('newssites')
             return redirect(newssites_url)
 
-        if not ip_address:
-            ip_address = request.META.get('REMOTE_ADDR', '')
-            request.session['ip_address'] = ip_address
-            request.session['current_news_site'] = newssites[0]
-            request.session['news_site'] = ''
-            request.session['item'] = 0
-            request.session['news_items'] = 0
-            request.session['banner'] = False
-
-        news_site = request.session['news_site']
-        current_news_site = request.session['current_news_site']
-        item = request.session['item']
-        news_items = request.session['news_items']
-        banner = request.session['banner']
+        try:
+            news_site = request.session['news_site']
+            current_news_site = request.session['current_news_site']
+            item = request.session['item']
+            news_items = request.session['news_items']
+            banner = request.session['banner']
+        except (KeyError, AttributeError):
+            current_news_site = newssites[0]
+            news_site = ''
+            item = 0
+            news_items = 0
+            banner = False
 
         button_cntr = request.POST.get('control_btn')
         button_site = request.POST.get('site_btn')
@@ -75,10 +80,12 @@ class NewsFeed:
             current_news_site = button_site
 
         update_news_true = (current_news_site != news_site) or \
-                      (item == 0) and not button_cntr
+                      (item == 0 and not button_cntr)
+        logger.info(f'update: {update_news_true}')
         if update_news_true:
             feed_items = update_news(NewsSite.objects.get(
                    news_site=current_news_site).news_url)
+            logger.info(f'{feed_items}')
             request.session['feed'] = feed_items
             news_site = current_news_site
             item = 0

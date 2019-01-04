@@ -11,10 +11,6 @@ import time
 import re
 
 
-logformat = '%(asctime)s:%(levelname)s:%(message)s'
-Logger.set_logger('logs/howdimain.log', logformat, 'INFO')
-
-
 class NewsFeed:
     '''  NewsFeed class with view methods:
          - newspage
@@ -25,7 +21,7 @@ class NewsFeed:
     BANNER_LENGTH = 150
     HELP_ARROWS = 'You can use left/ right arrow to toggle news items. '
     HELP_BANNER = 'Press Banner to toggle banner on/ off. '
-
+    user_logged_in = ''
 
     @classmethod
     def newspage(cls, request):
@@ -36,6 +32,10 @@ class NewsFeed:
             try:
                 newssites = [item.news_site for item in UserNewsSite.objects.get(
                              user=user).news_sites.all()]
+                if user != cls.user_logged_in:
+                    logger.info(f'user: {user} logged in')
+                    cls.user_logged_in = user
+
             except (ObjectDoesNotExist, TypeError):
                 newssites = [item.news_site for item in UserNewsSite.objects.get(
                              user__username='default_user').news_sites.all()]
@@ -81,11 +81,9 @@ class NewsFeed:
 
         update_news_true = (current_news_site != news_site) or \
                       (item == 0 and not button_cntr)
-        logger.info(f'update: {update_news_true}')
         if update_news_true:
             feed_items = update_news(NewsSite.objects.get(
                    news_site=current_news_site).news_url)
-            logger.info(f'{feed_items}')
             request.session['feed'] = feed_items
             news_site = current_news_site
             item = 0

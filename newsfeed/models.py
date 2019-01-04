@@ -14,5 +14,5 @@ class UserNewsSite(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     news_sites = models.ManyToManyField(NewsSite)
 
-    def __str__(self):
+    def __unicode__(self):
         return User.objects.get(username=self.user).news_sites

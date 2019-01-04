@@ -12,6 +12,12 @@ https://docs.djangoproject.com/en/1.11/ref/settings/
 
 import os
 from decouple import config, Csv
+from utils.plogger import Logger
+from utils.run_once import run_once
+
+logformat = '%(asctime)s:%(levelname)s:%(message)s'
+Logger.set_logger(config('LOG_FILE'), logformat, 'INFO')
+logger = Logger.getlogger()
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -21,12 +27,9 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = config('SECRET_KEY')
-
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config('DEBUG', default=False, cast=bool)
-
 ALLOWED_HOSTS = config('ALLOWED_HOSTS', cast=Csv())
-ALLOWED_HOSTS.append('127.0.0.1')
 
 # Application definition
 
@@ -42,7 +45,6 @@ INSTALLED_APPS = [
     'boards',
     'accounts',
     'newsfeed',
-
 ]
 
 MIDDLEWARE = [
@@ -78,8 +80,8 @@ WSGI_APPLICATION = 'howdimain.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'howdiweb',
-        'USER': 'howdiwebuser',
+        'NAME': config('DB_NAME'),
+        'USER': config('DB_USER'),
         'PASSWORD': config('DB_PASSWORD'),
         'HOST': 'localhost',
         'PORT': '5432',
@@ -91,44 +93,61 @@ DATABASES = {
 # https://docs.djangoproject.com/en/1.11/ref/settings/#auth-password-validators
 
 AUTH_PASSWORD_VALIDATORS = [
-    {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
-    },
+    {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',},
+    {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',},
+    {'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',},
+    {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',},
 ]
-
 
 # Internationalization
 # https://docs.djangoproject.com/en/1.11/topics/i18n/
 
 LANGUAGE_CODE = 'en-us'
-
 TIME_ZONE = 'UTC'
-
 USE_I18N = True
-
 USE_L10N = True
-
 USE_TZ = True
-
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.11/howto/static-files/
 
 STATIC_URL = '/static/'
-
+STATIC_ROOT = os.path.join(os.path.dirname(BASE_DIR), 'staticfiles')
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static'),]
 
 LOGIN_URL = 'login'
 LOGOUT_REDIRECT_URL = 'home'
 LOGIN_REDIRECT_URL = 'home'
 
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+EMAIL_BACKEND = config('EMAIL_BACKEND', default='django.core.mail.backends.smtp.EmailBackend')
+EMAIL_HOST = config('EMAIL_HOST', default='')
+EMAIL_PORT = config('EMAIL_PORT', default=587, cast=int)
+EMAIL_HOST_USER = config('EMAIL_HOST_USER', default='')
+EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD', default='')
+EMAIL_USE_TLS = config('EMAIL_USE_TLS', default=True, cast=bool)
+DEFAULT_FROM_EMAIL = '<noreply@howdiweb.nl>'
+EMAIL_SUBJECT_PREFIX = '[Howdiweb] '
+
+@run_once
+def log_settings():
+    nl = '\n'
+    run_once = True
+    logger.info(f'{nl}------------------------------------------------------------'\
+                f'{nl}        howdiweb started: bruno_vermeulen2001@yahoo.com'\
+                f"{nl}        Logfile: {config('LOG_FILE')}"\
+                f"{nl}        Debug: {config('DEBUG')}"\
+                f"{nl}        Alowed hosts: {ALLOWED_HOSTS}"\
+                f'{nl}------------------------------------------------------------')
+
+    logger.info(f'{nl}ALLOWED_HOSTS: {ALLOWED_HOSTS}'\
+                f"{nl}DB_NAME: {config('DB_NAME')}"\
+                f"{nl}DB_USER: {config('DB_USER')}"\
+                f"{nl}DB_PASSWORD: {config('DB_PASSWORD')}"\
+                f'{nl}EMAIL_HOST: {EMAIL_HOST}'\
+                f'{nl}EMAIL_PORT: {EMAIL_PORT}'\
+                f'{nl}EMAIL_HOST_USER: {EMAIL_HOST_USER}'\
+                f'{nl}EMAIL_HOST_PASSWORD: {EMAIL_HOST_PASSWORD}'\
+                f'{nl}EMAIL_USE_TLS: {EMAIL_USE_TLS}'
+                f'{nl}------------------------------------------------------------')
+
+log_settings()

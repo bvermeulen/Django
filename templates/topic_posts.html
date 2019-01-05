@@ -16,7 +16,7 @@
     <a href="{% url 'reply_topic' topic.board.pk topic.pk %}" class="btn btn-primary" role="button">Reply</a>
   </div>
   {% for post in posts %}
-    <div id="{{ post.pk }}" class="card {% if forloop.last %}mb-4{% else %}mb-2{% endif %} {% if forloop.first %}border-dark{% endif %}">
+    <div id="{{ post.pk }}" class="card {% if forloop.last %}mb-4{% else %}mb-2{% endif %} border-dark">
       {% if forloop.first %}
         <div class="card-header text-white bg-dark py-2 px-3">{{ topic.subject }}</div>
       {% endif %}
@@ -37,11 +37,20 @@
             </div>
             {{ post.get_message_as_markdown }}
             {% if post.created_by == user %}
-            <div class="mt-3">
-              <a href="{% url 'edit_post' post.topic.board.pk post.topic.pk post.pk %}"
-                 class="btn btn-primary btn-sm"
-                 role="button">Edit</a>
-            </div>
+              <div class="mt-3; btn-group">
+                <a href="{% url 'edit_post' post.topic.board.pk post.topic.pk post.pk %}"
+                  style="margin:1px"
+                  class="btn btn-primary btn-sm"
+                  role="button">Edit</a>
+                <form id="delete_form" method="post">
+                {% csrf_token %}
+                <button style="margin:1px" class="btn btn-primary btn-sm"
+                       onclick="Validate()">Delete</button>
+                <input type="hidden", name="deleted_post_pk", value="{{ post.pk }}"></input>
+                {{ post.pk }}
+
+                </form>
+              </div>
             {% endif %}
           </div>
         </div>
@@ -51,4 +60,20 @@
 
   {% include 'includes/pagination.html' %}
 
+{% endblock %}
+
+{% block javascript %}
+  <script>
+    var form = document.getElementById("delete_form");
+    function Validate() {
+  		confirmed = confirm('Do you really want to delete?');
+      if (confirmed) {
+        form.submit();
+        }
+      else {
+        document.getElementById("del_button").value = "Delete";
+        }
+
+  	}
+  </script>
 {% endblock %}

@@ -41,6 +41,8 @@ class Topic(models.Model):
     def get_page_count(self):
         count = self.posts.count()
         pages = count / self.posts_per_page
+        if pages == 0:
+            pages += 1
         return math.ceil(pages)
 
     def has_many_pages(self, count=None):
@@ -58,7 +60,11 @@ class Topic(models.Model):
     def get_page_number(self, post_pk):
         for i, post in enumerate(self.posts.all()):
             if post.pk == post_pk:
+                print(f'item: {i}, page: {int(i/self.posts_per_page)+1}')
                 return int(i/self.posts_per_page)+1
+
+        print(f'item: none, page: 1')
+        return 1
 
     def __str__(self):
         return self.subject

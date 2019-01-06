@@ -42,12 +42,11 @@
                   style="margin:1px"
                   class="btn btn-primary btn-sm"
                   role="button">Edit</a>
-                <form id="delete_form" method="post">
-                {% csrf_token %}
-                <button style="margin:1px" class="btn btn-primary btn-sm"
-                       onclick="Validate()">Delete</button>
-                <input type="hidden", name="deleted_post_pk", value="{{ post.pk }}"></input>
-                {{ post.pk }}
+                <form method="post">
+                  {% csrf_token %}
+                  <input type="hidden", name="deleted_post_pk", value="{{ post.pk }}"></input>
+                  <button style="margin:1px" class="btn btn-primary btn-sm"
+                         onclick="return Validate()">Delete</button>
 
                 </form>
               </div>
@@ -64,16 +63,14 @@
 
 {% block javascript %}
   <script>
-    var form = document.getElementById("delete_form");
     function Validate() {
   		confirmed = confirm('Do you really want to delete?');
       if (confirmed) {
         form.submit();
-        }
+      }
       else {
-        document.getElementById("del_button").value = "Delete";
-        }
-
+        return false;
+      }
   	}
   </script>
 {% endblock %}

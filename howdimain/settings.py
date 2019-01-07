@@ -124,7 +124,7 @@ LOGIN_URL = 'login'
 LOGOUT_REDIRECT_URL = 'home'
 LOGIN_REDIRECT_URL = 'home'
 
-EMAIL_BACKEND = config('EMAIL_BACKEND', default='django.core.mail.backends.smtp.EmailBackend')
+EMAIL_BACKEND = config('EMAIL_BACKEND', default='django.core.mail.backends.console.EmailBackend')
 EMAIL_HOST = config('EMAIL_HOST', default='')
 EMAIL_PORT = config('EMAIL_PORT', default=587, cast=int)
 EMAIL_HOST_USER = config('EMAIL_HOST_USER', default='')
@@ -144,10 +144,10 @@ def log_settings():
                 f"{nl}        Alowed hosts: {ALLOWED_HOSTS}"\
                 f'{nl}------------------------------------------------------------')
 
-    logger.info(f'{nl}ALLOWED_HOSTS: {ALLOWED_HOSTS}'\
-                f"{nl}DB_NAME: {config('DB_NAME')}"\
+    logger.info(f"{nl}DB_NAME: {config('DB_NAME')}"\
                 f"{nl}DB_USER: {config('DB_USER')}"\
                 f"{nl}DB_PASSWORD: {config('DB_PASSWORD')}"\
+                f'{nl}EMAIL_BACKEND: {EMAIL_BACKEND}'\
                 f'{nl}EMAIL_HOST: {EMAIL_HOST}'\
                 f'{nl}EMAIL_PORT: {EMAIL_PORT}'\
                 f'{nl}EMAIL_HOST_USER: {EMAIL_HOST_USER}'\

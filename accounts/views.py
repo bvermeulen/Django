@@ -5,7 +5,9 @@ from django.shortcuts import render, redirect
 from django.views.generic import UpdateView
 from django.utils.decorators import method_decorator
 from django.urls import reverse_lazy
+from .models import Signup
 from .forms import SignUpForm
+
 
 def signup(request):
     if request.method == 'POST':
@@ -13,6 +15,7 @@ def signup(request):
         if form.is_valid():
             user = form.save()
             login(request, user)
+            Signup().send_welcome_email(user)
             return redirect('home')
     else:
         form = SignUpForm()

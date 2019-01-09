@@ -1,3 +1,4 @@
+from django.core import mail
 from django.contrib.auth.models import User
 from django.urls import reverse
 from django.urls import resolve
@@ -27,11 +28,11 @@ class SignUpTests(TestCase):
 
     def test_form_inputs(self):
         '''
-        The view must contain five inputs: csrf, username, email,
-        password1, password2
+        The view must contain seven inputs: csrf, username, email,
+        password1, password2, first_name, last_name
         '''
-        self.assertContains(self.response, '<input', 5)
-        self.assertContains(self.response, 'type="text"', 1)
+        self.assertContains(self.response, '<input', 7)
+        self.assertContains(self.response, 'type="text"', 3)
         self.assertContains(self.response, 'type="email"', 1)
         self.assertContains(self.response, 'type="password"', 2)
 
@@ -40,12 +41,14 @@ class SuccessfulSignUpTests(TestCase):
     def setUp(self):
         url = reverse('signup')
         data = {
-            'username': 'john',
+            'username': 'johndean',
             'email': 'john@hotmail.com',
             'password1': 'abcdef123456',
-            'password2': 'abcdef123456'
-        }
+            'password2': 'abcdef123456',
+            'first_name': 'john',
+            'last_name': 'dean'}
         self.response = self.client.post(url, data)
+        self.email = mail.outbox[0]
         self.home_url = reverse('home')
 
     def test_redirection(self):
@@ -56,6 +59,13 @@ class SuccessfulSignUpTests(TestCase):
 
     def test_user_creation(self):
         self.assertTrue(User.objects.exists())
+
+    def test_send_email(self):
+        ''' test if email has been send '''
+        self.assertEqual(['john@hotmail.com', 'admin@howdiweb.nl'], self.email.to)
+        self.assertEqual('[Howdiweb] Welcome message', self.email.subject)
+        self.assertIn('john', self.email.body)
+        self.assertIn('johndean', self.email.body)
 
     def test_user_authentication(self):
         '''

@@ -9,12 +9,12 @@ from django.contrib.auth.models import User
 class LoginRequiredNewTopicTests(TestCase):
     def setUp(self):
         Board.objects.create(name='Django', description='Django board')
-        self.url = reverse('new_topic', kwargs={'board_pk': 1})
-        self.response = self.client.get(self.url)
 
     def test_redirection(self):
         login_url = reverse('login')
-        self.assertRedirects(self.response, '{login_url}?next={url}'.format(login_url=login_url, url=self.url))
+        url = reverse('new_topic', kwargs={'board_pk': 1})
+        response = self.client.get(url)
+        self.assertRedirects(response, '{login_url}?next={url}'.format(login_url=login_url, url=url))
 
 
 class NewTopicTests(TestCase):

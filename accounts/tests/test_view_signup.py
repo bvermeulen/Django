@@ -5,6 +5,7 @@ from django.urls import resolve
 from django.test import TestCase
 from ..views import signup
 from ..forms import SignUpForm
+from pprint import pprint
 
 
 class SignUpTests(TestCase):
@@ -42,7 +43,7 @@ class SuccessfulSignUpTests(TestCase):
         url = reverse('signup')
         data = {
             'username': 'johndean',
-            'email': 'john@hotmail.com',
+            'email': 'johndean@hotmail.com',
             'password1': 'abcdef123456',
             'password2': 'abcdef123456',
             'first_name': 'john',
@@ -62,7 +63,7 @@ class SuccessfulSignUpTests(TestCase):
 
     def test_send_email(self):
         ''' test if email has been send '''
-        self.assertEqual(['john@hotmail.com', 'admin@howdiweb.nl'], self.email.to)
+        self.assertEqual(['johndean@hotmail.com', 'admin@howdiweb.nl'], self.email.to)
         self.assertEqual('[Howdiweb] Welcome message', self.email.subject)
         self.assertIn('john', self.email.body)
         self.assertIn('johndean', self.email.body)
@@ -95,3 +96,19 @@ class InvalidSignUpTests(TestCase):
 
     def test_dont_create_user(self):
         self.assertFalse(User.objects.exists())
+
+    def test_user_already_exists(self):
+        '''
+        A submission with a user with same email should return to the same page
+        '''
+        exist_user = User.objects.create(username='joebiden', email='johndean@hotmail.com')
+        url = reverse('signup')
+        data = {
+        'username': 'johndean',
+        'email': 'johndean@hotmail.com',
+        'password1': 'abcdef123456',
+        'password2': 'abcdef123456',
+        'first_name': 'john',
+        'last_name': 'dean',}
+        response = self.client.post(url, data)
+        self.assertEquals(response.status_code, 200)

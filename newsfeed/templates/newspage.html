@@ -39,7 +39,7 @@
 			<div class="card-text">
 			{% if banner and show_banner_button %}
 				<svg style="background-color:lightgrey;" viewBox="0, 0, 300, 30">
-					<text  x="500" y="15" style="font-size:6px">
+					<text  x="500" y="15" style="font-size:10px; font-weight: bold">
 						{{ news_summary_flat_text|safe }}
 						<animate attributeName="x" from="300" to="-300" dur="{{ delay }}s" repeatCount="indefinite">
 					</text>
@@ -77,5 +77,48 @@
 				form.submit();
 				}
 	}, false);
+
+	document.addEventListener('touchstart', handleTouchStart, false);
+	document.addEventListener('touchmove', handleTouchMove, false);
+
+	var xDown = null;
+	var yDown = null;
+
+	function handleTouchStart(event) {
+		xDown = event.touches[0].clientX;
+		yDown = event.touches[0].clientY;
+	};
+
+	function handleTouchMove(event) {
+		var form = document.getElementById("controlform");
+		if ( ! xDown || ! yDown) {
+			return;
+		}
+		var xUp = event.touches[0].clientX;
+		var yUp = event.touches[0].clientY;
+		var xDiff = xDown - xUp;
+		var yDiff = yDown - yUp;
+
+		if (Math.abs(xDiff) > Math.abs(yDiff)) {
+			if (xDiff > 0) {
+				// alert('left swipe')
+				document.getElementById("keyinput").value = "previous";
+				form.submit();
+			} else {
+				// alert('right swipe')
+				document.getElementById("keyinput").value = "next";
+				form.submit();
+			}
+		} else {
+			if (yDiff > 0) {
+				alert('up swipe')
+			} else {
+				alert('down swipe')
+			}
+		}
+
+		xDown = null;
+		yDown = null;
+		};
 	</script>
 {% endblock %}

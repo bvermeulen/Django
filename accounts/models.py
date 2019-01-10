@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib.auth.models import User
 from django.core.mail import EmailMessage, send_mail
 from django.template.loader import render_to_string
 
@@ -18,3 +19,9 @@ class Signup(models.Model):
 
         email.content_subtype = 'html'
         email.send(fail_silently=True)
+
+    def email_exist(self, user):
+        for existing_user in User.objects.all():
+            if user.email == existing_user.email:
+                return True
+        return False

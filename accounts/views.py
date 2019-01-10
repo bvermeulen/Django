@@ -10,17 +10,26 @@ from .forms import SignUpForm
 
 
 def signup(request):
+    signup_methods = Signup()
+    error_message = ''
     if request.method == 'POST':
         form = SignUpForm(request.POST)
         if form.is_valid():
-            user = form.save()
-            login(request, user)
-            Signup().send_welcome_email(user)
-            return redirect('home')
+            user = form.save(commit=False)
+            if signup_methods.email_exist(user):
+                error_message = f'A user with email {user.email} already exists'
+                form = SignUpForm()
+
+            else:
+                user.save()
+                login(request, user)
+                signup_methods.send_welcome_email(user)
+                return redirect('home')
     else:
         form = SignUpForm()
 
-    return render(request, 'signup.html', {'form': form})
+    return render(request, 'signup.html', {'form': form,
+                                           'error_message': error_message})
 
 @method_decorator(login_required, name='dispatch')
 class UserUpdateView(UpdateView):

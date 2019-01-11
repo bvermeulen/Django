@@ -5,7 +5,6 @@ from .models import NewsSite, UserNewsSite
 from .forms import SelectedSitesForm
 from django.db.utils import IntegrityError
 from django.core.exceptions import ObjectDoesNotExist
-from pprint import pprint
 from utils.plogger import Logger
 import time
 import re

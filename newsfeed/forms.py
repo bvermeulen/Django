@@ -8,7 +8,6 @@ class SelectedSitesForm(forms.Form):
 
         newssite_choices = []
         for site in NewsSite.objects.all():
-            print(site)
             newssite_choices.append((site, site))
 
         newssite_choices = tuple(newssite_choices)

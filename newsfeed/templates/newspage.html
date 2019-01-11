@@ -59,12 +59,14 @@
 	var timeout = setTimeout("window.location.href='{% url 'newspage' %}'",{{ delay }}*900 );
 	function Pause() {
 		clearTimeout(timeout);
-	}
+		}
 	function Run() {
 		timeout = setTimeout("window.location.href='{% url 'newspage' %}'",{{ delay }}*900);
-	}
+		}
 
-	document.addEventListener('keydown', (event) => {
+	document.addEventListener('keydown', handleKeyDown, false);
+
+	function handleKeyDown(event) {
 		const keyName = event.key;
 		console.log(`Key pressed: ${keyName}`);
 		var form = document.getElementById("controlform");
@@ -76,49 +78,40 @@
 				document.getElementById("keyinput").value = "previous";
 				form.submit();
 				}
-	}, false);
+		};
 
 	document.addEventListener('touchstart', handleTouchStart, false);
 	document.addEventListener('touchmove', handleTouchMove, false);
 
 	var xDown = null;
-	var yDown = null;
 
 	function handleTouchStart(event) {
 		xDown = event.touches[0].clientX;
-		yDown = event.touches[0].clientY;
-	};
+		};
 
 	function handleTouchMove(event) {
 		var form = document.getElementById("controlform");
-		if ( ! xDown || ! yDown) {
+		if ( ! xDown ) {
 			return;
-		}
-		var xUp = event.touches[0].clientX;
-		var yUp = event.touches[0].clientY;
-		var xDiff = xDown - xUp;
-		var yDiff = yDown - yUp;
+			}
 
-		if (Math.abs(xDiff) > Math.abs(yDiff)) {
-			if (xDiff > 0) {
-				// alert('left swipe')
-				document.getElementById("keyinput").value = "previous";
-				form.submit();
-			} else {
-				// alert('right swipe')
-				document.getElementById("keyinput").value = "next";
-				form.submit();
+		var xUp = event.touches[0].clientX;
+		var xDiff = xDown - xUp;
+
+		if (xDiff > 10) {
+			// swipe left
+			document.getElementById("keyinput").value = "next";
+			form.submit();
 			}
-		} else {
-			if (yDiff > 0) {
-				alert('up swipe')
-			} else {
-				alert('down swipe')
+
+		if (xDiff < -10) {
+			// swipe right
+			document.getElementById("keyinput").value = "previous";
+			form.submit();
 			}
-		}
 
 		xDown = null;
-		yDown = null;
 		};
+
 	</script>
 {% endblock %}

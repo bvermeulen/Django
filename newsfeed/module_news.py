@@ -62,7 +62,7 @@ def add_news_sites_to_default_user():
         usersites.save()
     except IntegrityError:
         usersites = UserNewsSite.objects.get(user=user)
-        print('User has already a selectection')
+        print('User has already a selection')
 
     for selectednewssite in ['BBC World News']:
         newssite = NewsSite.objects.get(news_site=selectednewssite)

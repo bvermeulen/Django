@@ -28,14 +28,14 @@ def signup(request):
     else:
         form = SignUpForm()
 
-    return render(request, 'signup.html', {'form': form,
-                                           'error_message': error_message})
+    return render(request, 'accounts/signup.html', {'form': form,
+                                                    'error_message': error_message})
 
 @method_decorator(login_required, name='dispatch')
 class UserUpdateView(UpdateView):
     model = User
     fields = ('first_name', 'last_name', 'email', )
-    template_name = 'my_account.html'
+    template_name = 'accounts/my_account.html'
     success_url = reverse_lazy('home')
 
     def get_object(self):

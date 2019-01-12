@@ -149,12 +149,12 @@ def log_settings():
 
     logger.info(f"{nl}DB_NAME: {config('DB_NAME')}"\
                 f"{nl}DB_USER: {config('DB_USER')}"\
-                f"{nl}DB_PASSWORD: {config('DB_PASSWORD')}"\
+                f"{nl}DB_PASSWORD: {'NOT SHOWN'}"\
                 f'{nl}EMAIL_BACKEND: {EMAIL_BACKEND}'\
                 f'{nl}EMAIL_HOST: {EMAIL_HOST}'\
                 f'{nl}EMAIL_PORT: {EMAIL_PORT}'\
                 f'{nl}EMAIL_HOST_USER: {EMAIL_HOST_USER}'\
-                f'{nl}EMAIL_HOST_PASSWORD: {EMAIL_HOST_PASSWORD}'\
+                f"{nl}EMAIL_HOST_PASSWORD: {'NOT SHOWN'}"\
                 f'{nl}EMAIL_USE_TLS: {EMAIL_USE_TLS}'
                 f'{nl}------------------------------------------------------------')
 

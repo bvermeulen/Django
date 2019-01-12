@@ -39,7 +39,7 @@ class NewsSitesTests(TestCase):
         url = reverse('newssites')
         self.response = self.client.get(url, follow=True)
 
-    def test_newssites_url_resolves_newspage_view(self):
+    def test_newssites_url_resolves_newssites_view(self):
         view = resolve('/news/sites/')
         self.assertEquals(view.func, newssites)
 

@@ -1,4 +1,5 @@
-{% load static %}<!DOCTYPE html>
+<!DOCTYPE html>
+{% load static %}
 <html>
   	<head>
    	<meta charset="utf-8">
@@ -57,14 +58,13 @@
 		</nav>
 
 	  	<div class="container">
-	     	<ol class="breadcrumb my-4">
-	    		{% block breadcrumb %}{% endblock %}
-	     	</ol>
+        {% block breadcrumb %}{% endblock %}
 	     	{% block content %}{% endblock %}
         <div class="footer">
           <div class="container">
-            <small>powered by <a style="color:black; text_decoration=none" href="https://www.digitalocean.com/">
-              DigitalOcean</a>   &copy; Copyright 2019 Howdimain</small>
+            <small>powered by DigitalOcean<a style="color:black; text_decoration=none" href="https://www.digitalocean.com/">
+            <img src="{% static 'img/512px-DigitalOcean_logo.svg' %}" style="width:30px; height:30px; vertical-align:middle"></a>
+            <span style="float:right;vertical-align:middle;">&copy; Copyright 2019 Howdimain</span></small>
           </div>
         </div>
 	 	</div>

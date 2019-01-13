@@ -3,6 +3,7 @@
 {% block title %}Start a New Topic{% endblock %}
 
 {% block breadcrumb %}
+<ol class="breadcrumb my-4">
   <li class="breadcrumb-item"><a href="{% url 'home' %}"
             >Home</a></li>
   <li class="breadcrumb-item"><a href="{% url 'boards' %}"
@@ -11,6 +12,7 @@
             >{{board.name}}</a></li>
   <li class="breadcrumb-item active"
             >New topic</li>
+</ol>
 {% endblock %}
 
 {% block content %}
@@ -19,4 +21,6 @@
     {% include 'includes/form.html' %}
     <button type="submit" class="btn btn-success">Post</button>
   </form>
+  <br>
+  <br>
 {% endblock %}

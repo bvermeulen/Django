@@ -7,9 +7,11 @@
 {% endblock %}
 
 {% block breadcrumb %}
+<ol class="breadcrumb my-4">
   <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a></li>
   <li class="breadcrumb-item"><a href="{% url 'boards' %}">Boards</a></li>
   <li class="breadcrumb-item active">{{ board.name }}</li>
+</ol>
 {% endblock %}
 
 {% block content %}
@@ -56,5 +58,6 @@
   </table>
 
   {% include 'includes/pagination.html' %}
-
-{% endblock %}
+  <br>
+  <br>
+  {% endblock %}

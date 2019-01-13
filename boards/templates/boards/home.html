@@ -3,7 +3,9 @@
 {% load humanize %}
 
 {% block breadcrumb %}
+<ol class="breadcrumb my-4">
   <li class="breadcrumb-item active">Home</li>
+</ol>
 {% endblock %}
 
 {% block content %}
@@ -11,4 +13,6 @@
   <a href="{% url 'boards' %}" class="btn btn-primary">Boards</a>
   <a href="{% url 'newspage' %}" class="btn btn-primary">News</a>
 </div>
+<br>
+<br>
 {% endblock %}

@@ -5,10 +5,12 @@
 {% block title %}{{ topic.subject }}{% endblock %}
 
 {% block breadcrumb %}
+<ol class="breadcrumb my-4">
   <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a></li>
   <li class="breadcrumb-item"><a href="{% url 'boards' %}">Boards</a></li>
   <li class="breadcrumb-item"><a href="{% url 'board_topics' topic.board.pk %}">{{ topic.board.name }}</a></li>
   <li class="breadcrumb-item active">{{ topic.subject }}</li>
+</ol>
 {% endblock %}
 
 {% block content %}
@@ -58,6 +60,8 @@
   {% endfor %}
 
   {% include 'includes/pagination.html' %}
+  <br>
+  <br>
 
 {% endblock %}
 
@@ -73,4 +77,5 @@
       }
   	}
   </script>
+
 {% endblock %}

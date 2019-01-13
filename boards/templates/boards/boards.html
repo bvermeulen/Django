@@ -3,8 +3,10 @@
 {% load humanize %}
 
 {% block breadcrumb %}
+<ol class="breadcrumb my-4">
   <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a></li>
   <li class="breadcrumb-item active">Boards</li>
+</ol>
 {% endblock %}
 
 {% block content %}
@@ -43,6 +45,8 @@
       </td>
       </tr>
     {% endfor %}
-     </tbody>
+     </body>
   </table>
+  <br>
+  <br>
 {% endblock %}

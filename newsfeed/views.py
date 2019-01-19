@@ -133,26 +133,30 @@ def newssites(request):
             choices.append(site.news_site)
     except ObjectDoesNotExist:
         pass
-        if request.method == 'POST':
-            form = SelectedSitesForm(request.POST)
 
+    if request.method == 'POST':
+        form = SelectedSitesForm(request.POST)
         if form.is_valid():
             selected_sites = form.cleaned_data.get('selected_sites')
 
+            # delete all entries for this user and then recreate with selection
             UserNewsSite.objects.filter(user=user).delete()
             try:
                 usersites = UserNewsSite(user=user)
                 usersites.save()
+                logger.info(f'User {user.username} made a new news selection')
             except IntegrityError:
-                usersites = UserNewsSite.objects.get(user=user)
+                logger.info('==> Check program this option is not possible')
 
             for site in selected_sites:
                 newssite = NewsSite.objects.get(news_site=site)
                 usersites.news_sites.add(newssite)
-                usersites.save()
 
+            usersites.save()
             newsfeed_url = reverse('newspage')
             return redirect(newsfeed_url)
+        else:
+            print('form is not valid')
     else:
         form = SelectedSitesForm()
         form.fields['selected_sites'].initial = choices

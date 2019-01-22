@@ -156,7 +156,7 @@ def newssites(request):
             newsfeed_url = reverse('newspage')
             return redirect(newsfeed_url)
         else:
-            print('form is not valid')
+            logger.info('==> form is not valid')
     else:
         form = SelectedSitesForm()
         form.fields['selected_sites'].initial = choices

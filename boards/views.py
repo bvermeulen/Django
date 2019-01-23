@@ -53,7 +53,7 @@ def new_topic(request, board_pk):
                 message=form.cleaned_data.get('message'),
                 topic=topic,
                 created_by=request.user)
-            return redirect('boards/topic_posts', board_pk=board.pk, topic_pk=topic.pk)
+            return redirect('topic_posts', board_pk=board.pk, topic_pk=topic.pk)
 
     else:
         form = NewTopicForm()

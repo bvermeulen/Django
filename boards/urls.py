@@ -2,7 +2,6 @@ from django.urls import path
 from boards import views
 
 urlpatterns = [
-    path('', views.HomeListView.as_view(), name='home'),
     path('boards/', views.BoardListView.as_view(), name='boards'),
     path('boards/<int:board_pk>/',
          views.TopicListView.as_view(), name='board_topics'),

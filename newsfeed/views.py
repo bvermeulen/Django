@@ -14,8 +14,18 @@ logger = Logger.getlogger()
 DELAY_FACTOR = 35
 MIN_CHARS = 350
 BANNER_LENGTH = 150
-HELP_ARROWS = 'You can use left/ right arrow to toggle news items. '
+HELP_ARROWS = 'Use left/ right arrow to toggle news items. '
 HELP_BANNER = 'Press Banner to toggle banner on/ off. '
+
+
+def get_client_ip(request):
+    x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+    if x_forwarded_for:
+        ip = x_forwarded_for.split(',')[-1].strip()
+    else:
+        ip = request.META.get('REMOTE_ADDR')
+    return ip
+
 
 def newspage(request):
     user = request.user
@@ -43,12 +53,13 @@ def newspage(request):
         news_items = request.session['news_items']
         banner = request.session['banner']
     except (KeyError, AttributeError):
-        logger.info(f'New {user} is browsing news at {request.META.get("REMOTE_ADDR")}')
         current_news_site = newssites[0]
         news_site = ''
         item = 0
         news_items = 0
         banner = False
+
+    logger.info(f'{user} is browsing news at {get_client_ip(request)}')
 
     button_cntr = request.POST.get('control_btn')
     button_site = request.POST.get('site_btn')

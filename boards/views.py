@@ -6,13 +6,7 @@ from django.utils import timezone
 from django.utils.decorators import method_decorator
 from django.db.models import Count
 from .forms import NewTopicForm, PostForm
-from .models import Home, Board, Topic, Post
-
-
-class HomeListView(ListView):
-    model = Home
-    context_object_name = 'home'
-    template_name = 'boards/home.html'
+from .models import Board, Topic, Post
 
 
 class BoardListView(ListView):

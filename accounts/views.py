@@ -5,8 +5,23 @@ from django.shortcuts import render, redirect
 from django.views.generic import UpdateView
 from django.utils.decorators import method_decorator
 from django.urls import reverse_lazy
-from .models import Signup
+from .models import Signup, Home
 from .forms import SignUpForm
+
+
+def home_page(request):
+    welcome_text = Home.objects.last().welcome_text
+    welcome_image = Home.objects.last().welcome_image
+    member_text = Home.objects.last().member_text
+    member_image = Home.objects.last().member_image
+
+    context = {'welcome_image': welcome_image,
+               'welcome_text': welcome_text,
+               'member_image': member_image,
+               'member_text': member_text,
+              }
+
+    return render(request, 'accounts/home.html', context)
 
 
 def signup(request):

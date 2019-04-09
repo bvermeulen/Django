@@ -9,10 +9,6 @@ from utils.mdx_del_ins import DelInsExtension
 
 register = template.Library()
 
-class Home(models.Model):
-    pass
-
-
 class Board(models.Model):
     name = models.CharField(max_length=30, unique=True)
     description = models.CharField(max_length=100)

@@ -5,6 +5,7 @@ from django.contrib.auth import views as auth_views
 from accounts import views
 
 urlpatterns = [
+    path('', views.home_page, name='home'),
     path('signup/', views.signup, name='signup'),
     path('settings/account/', views.UserUpdateView.as_view(),
          name='my_account'),

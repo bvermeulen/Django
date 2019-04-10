@@ -9,12 +9,14 @@ from .forms import NewTopicForm, PostForm
 from .models import Board, Topic, Post
 
 
+@method_decorator(login_required, name='dispatch')
 class BoardListView(ListView):
     model = Board
     context_object_name = 'boards'
     template_name = 'boards/boards.html'
 
 
+@method_decorator(login_required, name='dispatch')
 class TopicListView(ListView):
     model = Topic
     context_object_name = 'topics'
@@ -55,6 +57,7 @@ def new_topic(request, board_pk):
     return render(request, 'boards/new_topic.html', {'board': board, 'form': form})
 
 
+@method_decorator(login_required, name='dispatch')
 class PostListView(ListView):
     model = Post
     context_object_name = 'posts'

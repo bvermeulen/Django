@@ -52,12 +52,14 @@ def newspage(request):
         item = request.session['item']
         news_items = request.session['news_items']
         banner = request.session['banner']
+        error_message = request.session['error_message']
     except (KeyError, AttributeError):
         current_news_site = newssites[0]
         news_site = ''
         item = 0
         news_items = 0
         banner = False
+        error_message = ''
 
     logger.info(f'{user} is browsing news at {get_client_ip(request)}')
 
@@ -91,9 +93,22 @@ def newspage(request):
         feed_items = request.session['feed']
 
     news_items = len(feed_items)
+
+    # test if newsfeed is not empty, if it is return to defauilt newssite
+    # and reset session
     if news_items == 0:
-        home_url = reverse('home')
-        return redirect(home_url)
+        default_site = str(UserNewsSite.objects.get(
+                           user__username='default_user').news_sites.first())
+        error_message = f'Newssite {current_news_site} is not available, '\
+                        f'revert to default site {default_site}'
+        logger.info(f'{current_news_site} is not available, revert to default site')
+        request.session['news_site'] = ''
+        request.session['current_news_site'] = default_site
+        request.session['item'] = 0
+        request.session['news_items'] = 0
+        request.session['banner'] = banner
+        request.session['error_message'] = error_message
+        return redirect(reverse('newspage'))
 
     reference_text = ''.join(['News update from ', NewsSite.objects.get(
                              news_site=current_news_site).news_url,
@@ -112,11 +127,13 @@ def newspage(request):
         show_banner_button = True
         help_banner = HELP_BANNER
 
+    # store status in session for next time newsfeed is called
     request.session['news_site'] = news_site
     request.session['current_news_site'] = current_news_site
     request.session['item'] = item
     request.session['news_items'] = news_items
     request.session['banner'] = banner
+    request.session['error_message'] = ''
 
     context = {'newssites': newssites,
                'news_site': current_news_site,
@@ -130,9 +147,11 @@ def newspage(request):
                'banner': banner,
                'help_arrows': HELP_ARROWS,
                'help_banner': help_banner,
+               'error_message': error_message,
               }
 
     return render(request, 'newsfeed/newspage.html', context)
+
 
 @login_required
 def newssites(request):

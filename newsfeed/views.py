@@ -110,15 +110,29 @@ def newspage(request):
         request.session['error_message'] = error_message
         return redirect(reverse('newspage'))
 
+    try:
+        news_published = feed_items[item]["published"]
+    except KeyError:
+        try:
+            news_published = feed_items[item]["updated"]
+        except KeyError:
+            news_published = time.ctime()
+
     reference_text = ''.join(['News update from ', NewsSite.objects.get(
-                             news_site=current_news_site).news_url,
-                             ' on ', time.ctime()])
+                               news_site=current_news_site).news_url,
+                              ' on ', news_published])
     status_text = ''.join(['News item: ', str(item+1), ' from ',
                           str(news_items)])
     news_title = feed_items[item]["title"]
+    news_link = feed_items[item]["link"]
+
     news_summary = feed_items[item]["summary"]
     news_summary_flat_text = re.sub(r'<.*?>', '', news_summary)
-    length_summary = len(news_summary)
+    if news_summary == news_title or news_summary_flat_text == '':
+        news_summary = ''
+        news_summary_flat_text = ''
+
+    length_summary = len(news_summary_flat_text)
     delay = max(MIN_CHARS, (len(news_title)+length_summary))*DELAY_FACTOR/1000
     if length_summary > BANNER_LENGTH:
         show_banner_button = False
@@ -139,6 +153,7 @@ def newspage(request):
                'news_site': current_news_site,
                'reference': reference_text,
                'status': status_text,
+               'news_link': news_link,
                'news_title': news_title,
                'news_summary': news_summary,
                'news_summary_flat_text': news_summary_flat_text,

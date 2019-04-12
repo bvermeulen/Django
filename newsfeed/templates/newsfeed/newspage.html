@@ -39,8 +39,9 @@
 		<div class="card" style="border-width: 2px">
 			<card class="card-body">
 			<h2 class="card-title" style="background-color:lightgrey">{{ news_title }}</h2>
+			<a href='{{ news_link }}'>link ...</a>
 			<div class="card-text">
-			{% if banner and show_banner_button %}
+			{% if banner and show_banner_button and news_summary_flat_text %}
 				<svg style="background-color:lightgrey;" viewBox="0, 0, 300, 30">
 					<text  x="500" y="15" style="font-size:10px; font-weight: bold">
 						{{ news_summary_flat_text|safe }}

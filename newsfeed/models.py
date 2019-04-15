@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from datetime import datetime
 
 
 class NewsSite(models.Model):
@@ -16,3 +17,15 @@ class UserNewsSite(models.Model):
 
     def __unicode__(self):
         return User.objects.get(username=self.user).news_sites
+
+
+class UserAnnotatedNews(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    news_site = models.ManyToManyField(NewsSite)
+    title = models.TextField(max_length=200)
+    summary = models.TextField(max_length=4000)
+    link = models.URLField()
+    published = models.DateTimeField(null=True)
+
+    def __str__(self):
+        return self.title

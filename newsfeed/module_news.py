@@ -1,10 +1,8 @@
 import feedparser
-import time
-import re
+from datetime import datetime
 from django.contrib.auth.models import User
 from .models import NewsSite, UserNewsSite
 from django.db.utils import IntegrityError
-from django.core import serializers
 
 news_list = {'CNN World News':
              'http://rss.cnn.com/rss/edition_world.rss',
@@ -30,10 +28,31 @@ news_list = {'CNN World News':
              'https://www.cnbc.com/id/15838459/device/rss/rss.html',
              }
 
+
 def update_news(news_url):
     '''  Function to update the news and display the news site
     '''
     return feedparser.parse(news_url)["items"]
+
+
+def feedparser_time_to_datetime(feed_item):
+    ''' Converts the feedparser parsed time (published_parsed or
+        updated_parsed) [a python time tuple] to a datetime object. If there is
+        no parsed time, the current time is taken
+        Parameter:
+        :feed_item: dictionary with either published_parsed or updated_parsed
+        Return:
+        :news_published: datetime object with converted time
+    '''
+    try:
+        news_published = datetime(*feed_item['published_parsed'][0:6])
+    except KeyError:
+        try:
+            news_published = datetime(*feed_item['updated_parsed'][0:6])
+        except KeyError:
+            news_published = datetime.now()
+
+    return news_published
 
 
 def add_news_site_to_model():

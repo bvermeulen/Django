@@ -1,61 +1,62 @@
 {% extends 'base.html' %}
 
 {% block content %}
-	<div class="container">
-		<h2 class="item1" style=" font-weight: bold; text-align: left;">News feed from: {{ news_site }}</h2>
-		{% if error_message %}
-			<div> <font color="red" <strong>{{ error_message }}</strong></font> <br><br></div>
-		{% endif %}
-	</div>
+	 <div class="container">
+	  	<h2 class="item1" style=" font-weight: bold; text-align: left;">News feed from: {{ news_site }}</h2>
+	  	{% if error_message %}
+		    	<div> <font color="red" <strong>{{ error_message }}</strong></font> <br><br></div>
+		  {% endif %}
+	 </div>
 
-	<div class="container">
-		<div class="btn-group">
-			<form id="controlform" method="post">
-				{% csrf_token %}
-				<button type="button" class="btn btn-primary" onclick="window.location.href='{% url 'home' %}'">home</button>
-				<button type="button" class="btn btn-primary" onclick="Pause();">Pause</button>
-				<button type="button" class="btn  btn-primary" onclick="Run();">Run</button>
-				<input type="hidden" name="control_btn" id="keyinput"/>
-				<input type="submit" class="btn btn-primary" name="control_btn" value="previous">
-				<input type="submit" class="btn btn-primary" name="control_btn" value="next">
-				{% if show_banner_button %}
-					<input type="submit" class="btn btn-primary" name="control_btn" value="Banner">
-				{% endif %}
-				<button class="btn dropdown-toggle btn-primary" type="button" data-toggle="dropdown">Sites<span class="caret"></span></button>
-				<ul class="dropdown-menu">
-					{% for site in newssites %}
-						<li><input type="submit" class="btn" name="site_btn" value="{{ site }}"></li>
-					{% endfor %}
-				</ul>
-				{% if user.is_authenticated %}
-					<button type="button" class="btn btn-primary" onclick="window.location.href='{% url 'newssites' %}'">select sites</div>
-				{% endif %}
-			</form>
-		</div>
-	</div>
+	 <form id="controlform" method="post">
+	 <div class="container">
+     {% csrf_token %}
+		 <button type="button" class="btn btn-primary" onclick="window.location.href='{% url 'home' %}'">home</button>
+		 <button type="button" class="btn btn-primary" onclick="Pause();">Pause</button>
+		 <button type="button" class="btn  btn-primary" onclick="Run();">Run</button>
+		 <input type="hidden" name="control_btn" id="keyinput"></input>
+		 <input type="submit" class="btn btn-primary" name="control_btn" value="previous"></input>
+		 <input type="submit" class="btn btn-primary" name="control_btn" value="next"></input>
+		 {% if show_banner_button %}
+		   <input type="submit" class="btn btn-primary" name="control_btn" value="Banner"></input>
+		 {% endif %}
+		 <button class="btn dropdown-toggle btn-primary" type="button" data-toggle="dropdown">Sites<span class="caret"></span></button>
+		 <ul class="dropdown-menu">
+		 	 {% for site in news_sites %}
+			   <li><input type="submit" class="btn btn-sm" name="site_btn" value="{{ site }}"></input></li>
+			 {% endfor %}
+		 </ul>
+		 {% if user.is_authenticated %}
+		   <button type="button" class="btn btn-primary" onclick="window.location.href='{% url 'newssites' %}'">select sites</button>
+		 {% endif %}
+	 </div>
 
-	<div class="container">
-		<small>{{ reference }}</small>
-		<div class="card" style="border-width: 2px">
-			<card class="card-body">
-			<h2 class="card-title" style="background-color:lightgrey">{{ news_title }}</h2>
-			<a href='{{ news_link }}'>link ...</a>
-			<div class="card-text">
-			{% if banner and show_banner_button and news_summary_flat_text %}
-				<svg style="background-color:lightgrey;" viewBox="0, 0, 300, 30">
-					<text  x="500" y="15" style="font-size:10px; font-weight: bold">
-						{{ news_summary_flat_text|safe }}
-						<animate attributeName="x" from="300" to="-300" dur="{{ delay }}s" repeatCount="indefinite">
-					</text>
-				</svg>
-			{% else %}
-				<div class="textarea" contenteditable="false" style="background-color:lightgrey">{{ news_summary|safe }}</div>
-			{% endif %}
-			</div>
-		</div>
-		<small><p style="text-align:left;">{{ status }}<span style="float:right;">{{ help_arrows }}{{ help_banner }}</span></small>
-		<br><br><br>
-	</div>
+	 <div class="container">
+	   <small>{{ reference }}</small>
+		 <div class="card" style="border-width: 2px">
+		   <card class="card-body">
+			 <h2 class="card-title" style="background-color:lightgrey">{{ news_title }}</h2>
+			 <a href='{{ news_link }}'>link</a>
+			 {% if user.is_authenticated %}
+			   <input type="submit" class="btn btn-link" name="control_btn" value="store this news item"></input>
+			 {% endif %}
+			 <div class="card-text">
+			 {% if banner and show_banner_button and news_summary_flat_text %}
+				 <svg style="background-color:lightgrey;" viewBox="0, 0, 300, 30">
+				 <text  x="500" y="15" style="font-size:10px; font-weight: bold">
+				   {{ news_summary_flat_text|safe }}
+				   <animate attributeName="x" from="300" to="-300" dur="{{ delay }}s" repeatCount="indefinite">
+				 </text>
+				 </svg>
+			 {% else %}
+			   <div class="textarea" contenteditable="false" style="background-color:lightgrey">{{ news_summary|safe }}</div>
+			 {% endif %}
+			 </div>
+		 </div>
+		 <small><p style="text-align:left;">{{ status }}<span style="float:right;">{{ help_arrows }}{{ help_banner }}</span></small>
+		 <br><br><br>
+  </div>
+  </form>
 {% endblock content %}
 
 {% block javascript %}

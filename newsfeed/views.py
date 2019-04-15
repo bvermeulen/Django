@@ -1,14 +1,14 @@
 from django.contrib.auth.models import User
 from django.shortcuts import render, redirect, reverse
 from django.contrib.auth.decorators import login_required
-from .module_news import update_news
-from .models import NewsSite, UserNewsSite
+from .module_news import update_news, feedparser_time_to_datetime
+from .models import NewsSite, UserNewsSite, UserAnnotatedNews
 from .forms import SelectedSitesForm
 from django.db.utils import IntegrityError
 from django.core.exceptions import ObjectDoesNotExist
-from utils.plogger import Logger
-import time
 import re
+
+from utils.plogger import Logger
 
 logger = Logger.getlogger()
 DELAY_FACTOR = 35
@@ -16,6 +16,11 @@ MIN_CHARS = 350
 BANNER_LENGTH = 150
 HELP_ARROWS = 'Use left/ right arrow to toggle news items. '
 HELP_BANNER = 'Press Banner to toggle banner on/ off. '
+
+cntr_banner = 'Banner'
+cntr_next = 'next'
+cntr_previous = 'previous'
+cntr_store = 'store this news item'
 
 
 def get_client_ip(request):
@@ -31,33 +36,31 @@ def newspage(request):
     user = request.user
     if user:
         try:
-            newssites = [item.news_site for item in UserNewsSite.objects.get(
-                         user=user).news_sites.all()]
+            news_sites = [item.news_site for item in UserNewsSite.objects.get(
+                          user=user).news_sites.all()]
 
         except (ObjectDoesNotExist, TypeError):
-            newssites = [item.news_site for item in UserNewsSite.objects.get(
-                         user__username='default_user').news_sites.all()]
+            news_sites = [item.news_site for item in UserNewsSite.objects.get(
+                          user__username='default_user').news_sites.all()]
 
     else:
-        newssites = [item.news_site for item in UserNewsSite.objects.get(
-                     user__username='default_user').news_sites.all()]
+        news_sites = [item.news_site for item in UserNewsSite.objects.get(
+                      user__username='default_user').news_sites.all()]
 
-    if newssites == []:
-        newssites_url = reverse('newssites')
-        return redirect(newssites_url)
+    if news_sites == []:
+        news_sites_url = reverse('newssites')
+        return redirect(news_sites_url)
 
     try:
         news_site = request.session['news_site']
         current_news_site = request.session['current_news_site']
         item = request.session['item']
-        news_items = request.session['news_items']
         banner = request.session['banner']
         error_message = request.session['error_message']
     except (KeyError, AttributeError):
-        current_news_site = newssites[0]
+        current_news_site = news_sites[0]
         news_site = ''
         item = 0
-        news_items = 0
         banner = False
         error_message = ''
 
@@ -65,18 +68,16 @@ def newspage(request):
 
     button_cntr = request.POST.get('control_btn')
     button_site = request.POST.get('site_btn')
-    if not button_cntr or button_cntr == 'next':
+    if not button_cntr or button_cntr == cntr_next:
         item += 1
-    elif button_cntr == 'previous':
+    elif button_cntr == cntr_previous:
         item -= 1
-    elif button_cntr == 'Banner':
+    elif button_cntr == cntr_banner:
         banner = not banner
+    elif button_cntr == cntr_store:
+        pass
     else:
         assert False, 'button value incorrect: check template'
-    try:
-        item = item % news_items
-    except ZeroDivisionError:
-        pass
 
     if button_site:
         current_news_site = button_site
@@ -105,33 +106,46 @@ def newspage(request):
         request.session['news_site'] = ''
         request.session['current_news_site'] = default_site
         request.session['item'] = 0
-        request.session['news_items'] = 0
-        request.session['banner'] = banner
         request.session['error_message'] = error_message
         return redirect(reverse('newspage'))
 
-    try:
-        news_published = feed_items[item]["published"]
-    except KeyError:
-        try:
-            news_published = feed_items[item]["updated"]
-        except KeyError:
-            news_published = time.ctime()
+    item = item % news_items
+    news_published = feedparser_time_to_datetime(feed_items[item])
 
     reference_text = ''.join(['News update from ', NewsSite.objects.get(
-                               news_site=current_news_site).news_url,
-                              ' on ', news_published])
+        news_site=current_news_site).news_url,
+        ' on ', news_published.strftime('%a, %d %B %Y %H:%M:%S GMT')])
     status_text = ''.join(['News item: ', str(item+1), ' from ',
-                          str(news_items)])
+        str(news_items)])
+
     news_title = feed_items[item]["title"]
     news_link = feed_items[item]["link"]
-
     news_summary = feed_items[item]["summary"]
     news_summary_flat_text = re.sub(r'<.*?>', '', news_summary)
     if news_summary == news_title or news_summary_flat_text == '':
         news_summary = ''
         news_summary_flat_text = ''
 
+    # if button was entered to store the news then this is done here
+    if button_cntr == cntr_store and user.is_authenticated:
+        logger.info(f'Annotate news by {user.username} of {news_title}')
+        userannotated = UserAnnotatedNews()
+        userannotated.user = user
+        userannotated.title = news_title
+        userannotated.summary = news_summary
+        userannotated.link = news_link
+        userannotated.published = news_published
+        userannotated.save()
+        userannotated.news_site.add(NewsSite.objects.get(news_site=news_site))
+
+    # store status session for next time newsfeed is called
+    request.session['news_site'] = news_site
+    request.session['current_news_site'] = current_news_site
+    request.session['item'] = item
+    request.session['banner'] = banner
+    request.session['error_message'] = ''
+
+    # render the newspage
     length_summary = len(news_summary_flat_text)
     delay = max(MIN_CHARS, (len(news_title)+length_summary))*DELAY_FACTOR/1000
     if length_summary > BANNER_LENGTH:
@@ -141,15 +155,7 @@ def newspage(request):
         show_banner_button = True
         help_banner = HELP_BANNER
 
-    # store status in session for next time newsfeed is called
-    request.session['news_site'] = news_site
-    request.session['current_news_site'] = current_news_site
-    request.session['item'] = item
-    request.session['news_items'] = news_items
-    request.session['banner'] = banner
-    request.session['error_message'] = ''
-
-    context = {'newssites': newssites,
+    context = {'news_sites': news_sites,
                'news_site': current_news_site,
                'reference': reference_text,
                'status': status_text,

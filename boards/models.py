@@ -32,7 +32,7 @@ class Topic(models.Model):
                                 related_name='topics')
     views = models.PositiveIntegerField(default=0)
 
-    posts_per_page = 2
+    posts_per_page = 4
 
     def get_page_count(self):
         count = self.posts.count()

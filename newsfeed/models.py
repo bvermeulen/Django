@@ -15,17 +15,17 @@ class UserNewsSite(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     news_sites = models.ManyToManyField(NewsSite)
 
-    def __unicode__(self):
-        return User.objects.get(username=self.user).news_sites
+    def __str__(self):
+        return self.user.username
 
 
-class UserAnnotatedNews(models.Model):
+class UserNewsItem(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     news_site = models.ManyToManyField(NewsSite)
-    title = models.TextField(max_length=200)
+    title = models.TextField(max_length=400)
     summary = models.TextField(max_length=4000)
     link = models.URLField()
     published = models.DateTimeField(null=True)
 
     def __str__(self):
-        return self.title
+        return self.user.username

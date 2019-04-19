@@ -23,8 +23,8 @@ cntr_next = 'next'
 cntr_previous = 'previous'
 cntr_store = 'store this news item'
 
-NewsStat = recordtype('NewsStat',
-            'current_news_site news_site item news_items banner error_message')
+NewsStatus = recordtype('NewsStatus',
+             'current_news_site news_site item news_items banner error_message')
 
 
 def get_client_ip(request):
@@ -36,14 +36,14 @@ def get_client_ip(request):
     return ip
 
 
-def set_session_newsstatus(request, newsstat):
-    for key, value in newsstat._asdict().items():
+def set_session_newsstatus(request, newsstatus):
+    for key, value in newsstatus._asdict().items():
         request.session[key] = value
 
 
 def get_session_newsstatus(request):
-    ns_keys = NewsStat(*[None]*6)
-    return NewsStat(*[request.session[key] for key, _ in ns_keys._asdict().items()])
+    ns_keys = NewsStatus(*[None]*6)
+    return NewsStatus(*[request.session[key] for key, _ in ns_keys._asdict().items()])
 
 
 def store_news_item(user, title, summary, link, published, site):
@@ -80,12 +80,12 @@ def newspage(request):
     try:
         ns = get_session_newsstatus(request)
     except (KeyError, AttributeError):
-        ns = NewsStat(current_news_site=news_sites[0],
-                      news_site='',
-                      item=0,
-                      news_items=0,
-                      banner=False,
-                      error_message='')
+        ns = NewsStatus(current_news_site=news_sites[0],
+                        news_site='',
+                        item=0,
+                        news_items=0,
+                        banner=False,
+                        error_message='')
 
     logger.info(f'{user} is browsing news at {get_client_ip(request)}')
 

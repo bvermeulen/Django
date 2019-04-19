@@ -7,6 +7,7 @@ from .forms import SelectedSitesForm
 from django.db.utils import IntegrityError
 from django.core.exceptions import ObjectDoesNotExist
 import re
+from recordtype import recordtype
 
 from utils.plogger import Logger
 
@@ -22,6 +23,9 @@ cntr_next = 'next'
 cntr_previous = 'previous'
 cntr_store = 'store this news item'
 
+NewsStat = recordtype('NewsStat',
+            'current_news_site news_site item news_items banner error_message')
+
 
 def get_client_ip(request):
     x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
@@ -32,101 +36,104 @@ def get_client_ip(request):
     return ip
 
 
+def set_session_newsstatus(request, newsstat):
+    for key, value in newsstat._asdict().items():
+        request.session[key] = value
+
+
+def get_session_newsstatus(request):
+    ns_keys = NewsStat(*[None]*6)
+    return NewsStat(*[request.session[key] for key, _ in ns_keys._asdict().items()])
+
+
 def newspage(request):
     user = request.user
-    if user:
-        try:
-            news_sites = [item.news_site for item in UserNewsSite.objects.get(
-                          user=user).news_sites.all()]
+    try:
+        news_sites = [item.news_site for item in UserNewsSite.objects.get(
+                      user=user).news_sites.all()]
 
-        except (ObjectDoesNotExist, TypeError):
-            news_sites = [item.news_site for item in UserNewsSite.objects.get(
-                          user__username='default_user').news_sites.all()]
-
-    else:
+    except (ObjectDoesNotExist, TypeError):
         news_sites = [item.news_site for item in UserNewsSite.objects.get(
                       user__username='default_user').news_sites.all()]
 
     if news_sites == []:
-        news_sites_url = reverse('newssites')
-        return redirect(news_sites_url)
+        return redirect(reverse('newssites'))
 
     try:
-        news_site = request.session['news_site']
-        current_news_site = request.session['current_news_site']
-        item = request.session['item']
-        banner = request.session['banner']
-        error_message = request.session['error_message']
+        ns = get_session_newsstatus(request)
     except (KeyError, AttributeError):
-        current_news_site = news_sites[0]
-        news_site = ''
-        item = 0
-        banner = False
-        error_message = ''
+        ns = NewsStat(current_news_site=news_sites[0],
+                      news_site='',
+                      item=0,
+                      news_items=0,
+                      banner=False,
+                      error_message='')
 
     logger.info(f'{user} is browsing news at {get_client_ip(request)}')
 
     button_cntr = request.POST.get('control_btn')
     button_site = request.POST.get('site_btn')
     if not button_cntr or button_cntr == cntr_next:
-        item += 1
+        ns.item += 1
     elif button_cntr == cntr_previous:
-        item -= 1
+        ns.item -= 1
     elif button_cntr == cntr_banner:
-        banner = not banner
+        ns.banner = not ns.banner
     elif button_cntr == cntr_store:
         pass
     else:
         assert False, 'button value incorrect: check template'
 
-    if button_site:
-        current_news_site = button_site
+    if ns.news_items != 0:
+        ns.item = ns.item % ns.news_items
+    else:
+        ns.item = 0
 
-    update_news_true = (current_news_site != news_site) or \
-                  (item == 0 and not button_cntr)
+    if button_site:
+        ns.current_news_site = button_site
+
+    update_news_true = (ns.current_news_site != ns.news_site) or \
+                  (ns.item == 0 and not button_cntr)
     if update_news_true:
         feed_items = update_news(NewsSite.objects.get(
-               news_site=current_news_site).news_url)
+               news_site=ns.current_news_site).news_url)
         request.session['feed'] = feed_items
-        news_site = current_news_site
-        item = 0
+        ns.news_site = ns.current_news_site
+        ns.item = 0
     else:
         feed_items = request.session['feed']
 
-    news_items = len(feed_items)
+    ns.news_items = len(feed_items)
 
     # test if newsfeed is not empty, if it is return to defauilt newssite
     # and reset session
-    if news_items == 0:
+    if ns.news_items == 0:
         default_site = str(UserNewsSite.objects.get(
                            user__username='default_user').news_sites.first())
-        error_message = f'Newssite {current_news_site} is not available, '\
+        ns.error_message = f'Newssite {ns.current_news_site} is not available, '\
                         f'revert to default site {default_site}'
-        logger.info(f'{current_news_site} is not available, revert to default site')
-        request.session['news_site'] = ''
-        request.session['current_news_site'] = default_site
-        request.session['item'] = 0
-        request.session['error_message'] = error_message
+        logger.info(f'{ns.current_news_site} is not available, revert to default site')
+        ns.current_news_site = default_site
+        set_session_newsstatus(request, ns)
         return redirect(reverse('newspage'))
 
-    item = item % news_items
-    news_published = feedparser_time_to_datetime(feed_items[item])
+    news_published = feedparser_time_to_datetime(feed_items[ns.item])
 
     reference_text = ''.join(['News update from ', NewsSite.objects.get(
-        news_site=current_news_site).news_url,
+        news_site=ns.current_news_site).news_url,
         ' on ', news_published.strftime('%a, %d %B %Y %H:%M:%S GMT')])
-    status_text = ''.join(['News item: ', str(item+1), ' from ',
-        str(news_items)])
+    status_text = ''.join(['News item: ', str(ns.item+1), ' from ',
+        str(ns.news_items)])
 
-    news_title = feed_items[item]["title"]
-    news_link = feed_items[item]["link"]
-    news_summary = feed_items[item]["summary"]
+    news_title = feed_items[ns.item]["title"]
+    news_link = feed_items[ns.item]["link"]
+    news_summary = feed_items[ns.item]["summary"]
     news_summary_flat_text = re.sub(r'<.*?>', '', news_summary)
     if news_summary == news_title or news_summary_flat_text == '':
         news_summary = ''
         news_summary_flat_text = ''
 
-    # if button was entered to store the news then this is done here
+    # if button was entered to store the news item then this is done here
     if button_cntr == cntr_store and user.is_authenticated:
         logger.info(f'Annotate news by {user.username} of {news_title}')
         userannotated = UserAnnotatedNews()
@@ -136,14 +143,7 @@ def newspage(request):
         userannotated.link = news_link
         userannotated.published = news_published
         userannotated.save()
-        userannotated.news_site.add(NewsSite.objects.get(news_site=news_site))
-
-    # store status session for next time newsfeed is called
-    request.session['news_site'] = news_site
-    request.session['current_news_site'] = current_news_site
-    request.session['item'] = item
-    request.session['banner'] = banner
-    request.session['error_message'] = ''
+        userannotated.news_site.add(NewsSite.objects.get(news_site=ns.current_news_site))
 
     # render the newspage
     length_summary = len(news_summary_flat_text)
@@ -156,7 +156,7 @@ def newspage(request):
         help_banner = HELP_BANNER
 
     context = {'news_sites': news_sites,
-               'news_site': current_news_site,
+               'news_site': ns.current_news_site,
                'reference': reference_text,
                'status': status_text,
                'news_link': news_link,
@@ -165,11 +165,16 @@ def newspage(request):
                'news_summary_flat_text': news_summary_flat_text,
                'delay': delay,
                'show_banner_button': show_banner_button,
-               'banner': banner,
+               'banner': ns.banner,
                'help_arrows': HELP_ARROWS,
                'help_banner': help_banner,
-               'error_message': error_message,
+               'error_message': ns.error_message,
               }
+
+    # store status session for next time newsfeed is called but remove the
+    # error message
+    ns.error_message = ''
+    set_session_newsstatus(request, ns)
 
     return render(request, 'newsfeed/newspage.html', context)
 

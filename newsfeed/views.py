@@ -2,7 +2,7 @@ from django.contrib.auth.models import User
 from django.shortcuts import render, redirect, reverse
 from django.contrib.auth.decorators import login_required
 from .module_news import update_news, feedparser_time_to_datetime
-from .models import NewsSite, UserNewsSite, UserAnnotatedNews
+from .models import NewsSite, UserNewsSite, UserNewsItem
 from .forms import SelectedSitesForm
 from django.db.utils import IntegrityError
 from django.core.exceptions import ObjectDoesNotExist
@@ -23,8 +23,13 @@ cntr_next = 'next'
 cntr_previous = 'previous'
 cntr_store = 'store this news item'
 
+<<<<<<< HEAD
 NewsStat = recordtype('NewsStat',
             'current_news_site news_site item news_items banner error_message')
+=======
+NewsStatus = recordtype('NewsStatus',
+             'current_news_site news_site item news_items banner error_message')
+>>>>>>> ea62716a7cbe26f8673db7a91270cfde237f27fc
 
 
 def get_client_ip(request):
@@ -36,14 +41,42 @@ def get_client_ip(request):
     return ip
 
 
+<<<<<<< HEAD
 def set_session_newsstatus(request, newsstat):
     for key, value in newsstat._asdict().items():
+=======
+def set_session_newsstatus(request, newsstatus):
+    for key, value in newsstatus._asdict().items():
+>>>>>>> ea62716a7cbe26f8673db7a91270cfde237f27fc
         request.session[key] = value
 
 
 def get_session_newsstatus(request):
+<<<<<<< HEAD
     ns_keys = NewsStat(*[None]*6)
     return NewsStat(*[request.session[key] for key, _ in ns_keys._asdict().items()])
+=======
+    ns_keys = NewsStatus(*[None]*6)
+    return NewsStatus(*[request.session[key] for key, _ in ns_keys._asdict().items()])
+
+
+def store_news_item(user, title, summary, link, published, site):
+    logger.info(f'Store news by {user.username} of {title}')
+    usernewsitem = UserNewsItem.objects.filter(user=user).filter(link=link).first()
+    if usernewsitem and usernewsitem.published < published:
+        usernewsitem.delete()
+        usernewsitem = None
+
+    if usernewsitem == None:
+        usernewsitem = UserNewsItem()
+        usernewsitem.user = user
+        usernewsitem.title = title
+        usernewsitem.summary = summary
+        usernewsitem.link = link
+        usernewsitem.published = published
+        usernewsitem.save()
+        usernewsitem.news_site.add(NewsSite.objects.get(news_site=site))
+>>>>>>> ea62716a7cbe26f8673db7a91270cfde237f27fc
 
 
 def newspage(request):
@@ -62,12 +95,21 @@ def newspage(request):
     try:
         ns = get_session_newsstatus(request)
     except (KeyError, AttributeError):
+<<<<<<< HEAD
         ns = NewsStat(current_news_site=news_sites[0],
                       news_site='',
                       item=0,
                       news_items=0,
                       banner=False,
                       error_message='')
+=======
+        ns = NewsStatus(current_news_site=news_sites[0],
+                        news_site='',
+                        item=0,
+                        news_items=0,
+                        banner=False,
+                        error_message='')
+>>>>>>> ea62716a7cbe26f8673db7a91270cfde237f27fc
 
     logger.info(f'{user} is browsing news at {get_client_ip(request)}')
 
@@ -135,6 +177,7 @@ def newspage(request):
 
     # if button was entered to store the news item then this is done here
     if button_cntr == cntr_store and user.is_authenticated:
+<<<<<<< HEAD
         logger.info(f'Annotate news by {user.username} of {news_title}')
         userannotated = UserAnnotatedNews()
         userannotated.user = user
@@ -144,6 +187,10 @@ def newspage(request):
         userannotated.published = news_published
         userannotated.save()
         userannotated.news_site.add(NewsSite.objects.get(news_site=ns.current_news_site))
+=======
+        store_news_item(user, news_title, news_summary, news_link,
+                        news_published, ns.current_news_site)
+>>>>>>> ea62716a7cbe26f8673db7a91270cfde237f27fc
 
     # render the newspage
     length_summary = len(news_summary_flat_text)

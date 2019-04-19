@@ -1,5 +1,5 @@
 import feedparser
-from datetime import datetime
+from datetime import datetime, timezone
 from django.contrib.auth.models import User
 from .models import NewsSite, UserNewsSite
 from django.db.utils import IntegrityError
@@ -52,7 +52,7 @@ def feedparser_time_to_datetime(feed_item):
         except KeyError:
             news_published = datetime.now()
 
-    return news_published
+    return news_published.replace(tzinfo=timezone.utc)
 
 
 def add_news_site_to_model():

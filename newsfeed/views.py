@@ -110,7 +110,7 @@ def newspage(request):
         ns.current_news_site = button_site
 
     update_news_true = (ns.current_news_site != ns.news_site) or \
-                  (ns.item == 0 and not button_cntr)
+                       (ns.item == 0 and not button_cntr)
     if update_news_true:
         feed_items = update_news(NewsSite.objects.get(
                news_site=ns.current_news_site).news_url)
@@ -128,7 +128,7 @@ def newspage(request):
         default_site = str(UserNewsSite.objects.get(
                            user__username='default_user').news_sites.first())
         ns.error_message = f'Newssite {ns.current_news_site} is not available, '\
-                        f'revert to default site {default_site}'
+                           f'revert to default site {default_site}'
         logger.info(f'{ns.current_news_site} is not available, revert to default site')
         ns.current_news_site = default_site
         set_session_newsstatus(request, ns)
@@ -140,7 +140,7 @@ def newspage(request):
         news_site=ns.current_news_site).news_url,
         ' on ', news_published.strftime('%a, %d %B %Y %H:%M:%S GMT')])
     status_text = ''.join(['News item: ', str(ns.item+1), ' from ',
-        str(ns.news_items)])
+                  str(ns.news_items)])
 
     news_title = feed_items[ns.item]["title"]
     news_link = feed_items[ns.item]["link"]
@@ -187,6 +187,16 @@ def newspage(request):
     set_session_newsstatus(request, ns)
 
     return render(request, 'newsfeed/newspage.html', context)
+
+
+@login_required
+def mynewsitems(request):
+    user = request.user
+    newsitems = UserNewsItem.objects.filter(user=user)
+
+    context = {'newsitems': newsitems}
+
+    return render(request, 'newsfeed/mynewsitems.html', context)
 
 
 @login_required

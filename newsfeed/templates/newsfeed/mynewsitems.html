@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+
+{% block breadcrumb %}
+<ol class="breadcrumb my-4">
+  <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a></li>
+  <li class="breadcrumb-item"><a href="{% url 'newspage' %}">News</a></li>
+  <li class="breadcrumb-item active">My News</li>
+</ol>
+{% endblock %}
+
+{% block content %}
+<table class="table table-striped mb-4">
+  <thead class="thead-inverse">
+  <tr>
+    <th>Site</th>
+    <th>Date</th>
+    <th>Item</th>
+  </tr>
+  </thead>
+  <tbody>
+  {% for item in newsitems %}
+    <tr>
+    <td class="align-left">{{ item.news_site.first.news_site }}</td>
+    <td class="align-left">{{ item.published }}</td>
+    <td class="align-middle">{{ item.title }}
+      <a href="{{ item.link}}">  (link)</a></td>
+    </tr>
+  {% endfor %}
+</table>
+{% endblock content %}
+
+{% block javascript %}
+<script></script>
+{% endblock %}

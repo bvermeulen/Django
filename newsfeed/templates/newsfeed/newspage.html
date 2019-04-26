@@ -28,6 +28,7 @@
 		 </ul>
 		 {% if user.is_authenticated %}
 		   <button type="button" class="btn btn-primary" onclick="window.location.href='{% url 'newssites' %}'">select sites</button>
+			 <button type="button" class="btn btn-primary" onclick="window.location.href='{% url 'mynewsitems' %}'">my news</button>
 		 {% endif %}
 	 </div>
 
@@ -118,5 +119,5 @@
 		xDown = null;
 		};
 
-	</script>
+</script>
 {% endblock %}

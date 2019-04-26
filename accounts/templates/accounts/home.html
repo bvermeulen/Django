@@ -16,6 +16,9 @@
     <a href="{% url 'signup' %}" class="btn btn-primary">Sign up</a>
   {% endif %}
   <a href="{% url 'newspage' %}" class="btn btn-primary">News</a>
+  {% if user.is_authenticated %}
+    <a href="{% url 'mynewsitems' %}" class="btn btn-primary">My News</a>
+  {% endif %}
 </div>
 
 {% if user.is_authenticated %}

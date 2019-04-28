@@ -21,7 +21,7 @@ class UserNewsSite(models.Model):
 
 class UserNewsItem(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    news_site = models.ManyToManyField(NewsSite)
+    news_site = models.ForeignKey(NewsSite, on_delete=models.CASCADE)
     title = models.TextField(max_length=400)
     summary = models.TextField(max_length=4000)
     link = models.URLField()

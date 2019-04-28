@@ -3,6 +3,7 @@ from datetime import datetime, timezone
 from django.contrib.auth.models import User
 from .models import NewsSite, UserNewsSite
 from django.db.utils import IntegrityError
+import re
 
 news_list = {'CNN World News':
              'http://rss.cnn.com/rss/edition_world.rss',
@@ -26,6 +27,8 @@ news_list = {'CNN World News':
              'https://tradingeconomics.com/thailand/rss',
              'Mad Money':
              'https://www.cnbc.com/id/15838459/device/rss/rss.html',
+             'SLB':
+             'https://www.slb.com/news/press_releases.aspx?r=1',
              }
 
 
@@ -53,6 +56,15 @@ def feedparser_time_to_datetime(feed_item):
             news_published = datetime.now()
 
     return news_published.replace(tzinfo=timezone.utc)
+
+
+def remove_feedburner_reference(summary):
+    feedburner_reference = r'<.*src="http://feeds\.feedburner\.com.*?>'
+    return re.sub(feedburner_reference, '', summary)
+
+
+def remove_all_references(summary):
+    return re.sub(r'<.*?>', '', summary)
 
 
 def add_news_site_to_model():

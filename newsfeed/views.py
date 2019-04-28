@@ -1,7 +1,8 @@
 from django.contrib.auth.models import User
-from django.shortcuts import render, redirect, reverse
+from django.shortcuts import render, redirect, reverse, get_object_or_404
 from django.contrib.auth.decorators import login_required
-from .module_news import update_news, feedparser_time_to_datetime
+from .module_news import (update_news, feedparser_time_to_datetime,
+                          remove_feedburner_reference, remove_all_references)
 from .models import NewsSite, UserNewsSite, UserNewsItem
 from .forms import SelectedSitesForm
 from django.db.utils import IntegrityError
@@ -59,8 +60,8 @@ def store_news_item(user, title, summary, link, published, site):
         usernewsitem.summary = summary
         usernewsitem.link = link
         usernewsitem.published = published
+        usernewsitem.news_site = NewsSite.objects.get(news_site=site)
         usernewsitem.save()
-        usernewsitem.news_site.add(NewsSite.objects.get(news_site=site))
 
 
 def newspage(request):
@@ -145,8 +146,9 @@ def newspage(request):
     news_title = feed_items[ns.item]["title"]
     news_link = feed_items[ns.item]["link"]
     news_summary = feed_items[ns.item]["summary"]
-    news_summary_flat_text = re.sub(r'<.*?>', '', news_summary)
-    if news_summary == news_title or news_summary_flat_text == '':
+    news_summary = remove_feedburner_reference(news_summary)
+    news_summary_flat_text = remove_all_references(news_summary)
+    if news_summary == news_title:
         news_summary = ''
         news_summary_flat_text = ''
 
@@ -191,11 +193,24 @@ def newspage(request):
 
 @login_required
 def mynewsitems(request):
-    user = request.user
-    newsitems = UserNewsItem.objects.filter(user=user)
+    deleted_item_pk = request.POST.get('deleted_item_pk')
+    if deleted_item_pk:
+        get_object_or_404(UserNewsItem, pk=deleted_item_pk).delete()
 
-    context = {'newsitems': newsitems}
+    button_site = request.POST.get('site_btn')
+    if button_site:
+        ns = NewsStatus(current_news_site=button_site,
+                        news_site='',
+                        item=0,
+                        news_items=0,
+                        banner=False,
+                        error_message='')
+        set_session_newsstatus(request, ns)
+        return redirect(reverse('newspage'))
 
+    # order reversed by publishing date
+    context = {'newsitems': UserNewsItem.objects.filter(user=request.user).
+                            order_by('-published')}
     return render(request, 'newsfeed/mynewsitems.html', context)
 
 

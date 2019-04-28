@@ -46,9 +46,9 @@
                   role="button">Edit</a>
                 <form method="post">
                   {% csrf_token %}
-                  <input type="hidden", name="deleted_post_pk", value="{{ post.pk }}"></input>
                   <button style="margin:1px" class="btn btn-primary btn-sm"
-                         onclick="return Validate()">Delete</button>
+                          name="deleted_post_pk" value="{{ post.pk }}"
+                          onclick="return Validate()">Delete</button>
 
                 </form>
               </div>

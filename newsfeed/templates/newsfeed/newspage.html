@@ -27,8 +27,8 @@
 			 {% endfor %}
 		 </ul>
 		 {% if user.is_authenticated %}
+		 	 <button type="button" class="btn btn-primary" onclick="window.location.href='{% url 'mynewsitems' %}'">my news</button>
 		   <button type="button" class="btn btn-primary" onclick="window.location.href='{% url 'newssites' %}'">select sites</button>
-			 <button type="button" class="btn btn-primary" onclick="window.location.href='{% url 'mynewsitems' %}'">my news</button>
 		 {% endif %}
 	 </div>
 
@@ -36,7 +36,7 @@
 	   <small>{{ reference }}</small>
 		 <div class="card" style="border-width: 2px">
 		   <card class="card-body">
-			 <h2 class="card-title" style="background-color:lightgrey">{{ news_title }}</h2>
+			 <h2 class="card-title" style="background-color:lightgrey">{{ news_title|safe }}</h2>
 			 <a href='{{ news_link }}'>link</a>
 			 {% if user.is_authenticated %}
 			   <input type="submit" class="btn btn-link" name="control_btn" value="store this news item"></input>

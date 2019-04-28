@@ -9,26 +9,47 @@
 {% endblock %}
 
 {% block content %}
+<form id="newsitemform" method="post">
+{% csrf_token %}
 <table class="table table-striped mb-4">
   <thead class="thead-inverse">
   <tr>
     <th>Site</th>
-    <th>Date</th>
+    <th style="min-width:110px;">Date</th>
     <th>Item</th>
+    <th></th>
   </tr>
   </thead>
   <tbody>
   {% for item in newsitems %}
     <tr>
-    <td class="align-left">{{ item.news_site.first.news_site }}</td>
-    <td class="align-left">{{ item.published }}</td>
+    <td class="align-middle">
+      <input type="submit" class="align-middle btn btn-link" name="site_btn" value="{{ item.news_site.news_site }}">
+    </td>
+    <td class="align-middle align-left">{{ item.published|date:"d b Y" }}</td>
     <td class="align-middle">{{ item.title }}
       <a href="{{ item.link}}">  (link)</a></td>
+    <td>
+      <button class="btn btn-outline-secondary btn-sm" name="deleted_item_pk"
+              value="{{ item.pk }}" onclick="return Validate()">Delete</button>
+    </td>
     </tr>
   {% endfor %}
 </table>
+</form>
+<br><br><br><br>
 {% endblock content %}
 
 {% block javascript %}
-<script></script>
+<script>
+  function Validate() {
+  	confirmed = confirm('Do you really want to delete this item?');
+    if (confirmed) {
+      form.submit();
+    }
+    else {
+      return false;
+    }
+  }
+</script>
 {% endblock %}

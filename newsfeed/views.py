@@ -2,7 +2,8 @@ from django.contrib.auth.models import User
 from django.shortcuts import render, redirect, reverse, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from .module_news import (update_news, feedparser_time_to_datetime,
-                          remove_feedburner_reference, remove_all_references)
+                          remove_feedburner_reference, remove_all_references,
+                          restore_feedparserdict)
 from .models import NewsSite, UserNewsSite, UserNewsItem
 from .forms import SelectedSitesForm
 from django.db.utils import IntegrityError
@@ -120,6 +121,9 @@ def newspage(request):
         ns.item = 0
     else:
         feed_items = request.session['feed']
+        # restore feed items to FeedParserDict - for some reason Django sessions
+        # converts them to Dict
+        feed_items = restore_feedparserdict(feed_items)
 
     ns.news_items = len(feed_items)
 
@@ -137,15 +141,15 @@ def newspage(request):
 
     news_published = feedparser_time_to_datetime(feed_items[ns.item])
 
-    reference_text = ''.join(['News update from ', NewsSite.objects.get(
+    reference_text = ''.join([NewsSite.objects.get(
         news_site=ns.current_news_site).news_url,
-        ' on ', news_published.strftime('%a, %d %B %Y %H:%M:%S GMT')])
+        ' at ', news_published.strftime('%a, %d %B %Y %H:%M:%S GMT')])
     status_text = ''.join(['News item: ', str(ns.item+1), ' from ',
                   str(ns.news_items)])
 
-    news_title = feed_items[ns.item]["title"]
-    news_link = feed_items[ns.item]["link"]
-    news_summary = feed_items[ns.item]["summary"]
+    news_title = feed_items[ns.item].title
+    news_link = feed_items[ns.item].link
+    news_summary = feed_items[ns.item].summary
     news_summary = remove_feedburner_reference(news_summary)
     news_summary_flat_text = remove_all_references(news_summary)
     if news_summary == news_title:

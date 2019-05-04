@@ -35,8 +35,13 @@ news_list = {'CNN World News':
 def update_news(news_url):
     '''  Function to update the news and display the news site
     '''
-    return feedparser.parse(news_url)["items"]
+    return feedparser.parse(news_url).entries
 
+
+def restore_feedparserdict(feed_items):
+    for i in range(len(feed_items)):
+        feed_items[i] = feedparser.FeedParserDict(feed_items[i])
+    return feed_items
 
 def feedparser_time_to_datetime(feed_item):
     ''' Converts the feedparser parsed time (published_parsed or
@@ -48,11 +53,11 @@ def feedparser_time_to_datetime(feed_item):
         :news_published: datetime object with converted time
     '''
     try:
-        news_published = datetime(*feed_item['published_parsed'][0:6])
-    except KeyError:
+        news_published = datetime(*feed_item.published_parsed[0:6])
+    except AttributeError:
         try:
-            news_published = datetime(*feed_item['updated_parsed'][0:6])
-        except KeyError:
+            news_published = datetime(*feed_item.updated_parsed[0:6])
+        except AttributeError:
             news_published = datetime.now()
 
     return news_published.replace(tzinfo=timezone.utc)

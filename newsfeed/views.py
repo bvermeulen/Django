@@ -66,6 +66,8 @@ def store_news_item(user, title, summary, link, published, site):
 
 
 def newspage(request):
+    ''' views function to render newspage.html
+    '''
     user = request.user
     try:
         news_sites = [item.news_site for item in UserNewsSite.objects.get(
@@ -197,6 +199,8 @@ def newspage(request):
 
 @login_required
 def mynewsitems(request):
+    ''' views function to render mynewsitems.html
+    '''
     deleted_item_pk = request.POST.get('deleted_item_pk')
     if deleted_item_pk:
         get_object_or_404(UserNewsItem, pk=deleted_item_pk).delete()
@@ -220,7 +224,8 @@ def mynewsitems(request):
 
 @login_required
 def newssites(request):
-
+    ''' views function to render newssites.html
+    '''
     choices = []
     user = request.user
     try:

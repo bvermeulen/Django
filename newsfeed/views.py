@@ -145,7 +145,7 @@ def newspage(request):
 
     reference_text = ''.join([NewsSite.objects.get(
         news_site=ns.current_news_site).news_url,
-        ' at ', news_published.strftime('%a, %d %B %Y %H:%M:%S GMT')])
+        ', updated: ', news_published.strftime('%a, %d %B %Y %H:%M:%S GMT')])
     status_text = ''.join(['News item: ', str(ns.item+1), ' from ',
                   str(ns.news_items)])
 

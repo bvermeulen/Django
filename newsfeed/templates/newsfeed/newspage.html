@@ -12,8 +12,7 @@
 	 <div class="container">
      {% csrf_token %}
 		 <button type="button" class="btn btn-primary" onclick="window.location.href='{% url 'home' %}'">home</button>
-		 <button type="button" class="btn btn-primary" onclick="Pause();">Pause</button>
-		 <button type="button" class="btn  btn-primary" onclick="Run();">Run</button>
+		 <button type="button" class="btn btn-primary" id="button_pause" onclick="Pause();">Pause</button>
 		 <input type="hidden" name="control_btn" id="keyinput"></input>
 		 <input type="submit" class="btn btn-primary" name="control_btn" value="previous"></input>
 		 <input type="submit" class="btn btn-primary" name="control_btn" value="next"></input>
@@ -63,34 +62,41 @@
 {% block javascript %}
 <script>
 	var timeout = setTimeout("window.location.href='{% url 'newspage' %}'",{{ delay }}*900 );
+	var pause_status = true;
+	var button_pause = document.getElementById("button_pause");
 	function Pause() {
-		clearTimeout(timeout);
-		}
-	function Run() {
-		timeout = setTimeout("window.location.href='{% url 'newspage' %}'",{{ delay }}*900);
-		}
+		if (pause_status == true) {
+			clearTimeout(timeout);
+			button_pause.classList.remove("btn-primary");
+			button_pause.classList.add("btn-warning");
+			pause_status = false;
+			}
+		else {
+			timeout = setTimeout("window.location.href='{% url 'newspage' %}'",{{ delay }}*900);
+			button_pause.classList.remove("btn-warning");
+			button_pause.classList.add("btn-primary");
+			pause_status = true;
+			}
+		};
 
 	document.addEventListener('keydown', handleKeyDown, false);
-
 	function handleKeyDown(event) {
 		const keyName = event.key;
 		console.log(`Key pressed: ${keyName}`);
 		var form = document.getElementById("controlform");
 		if (keyName == 'ArrowRight') {
 			document.getElementById("keyinput").value = "next";
-				form.submit();
-				}
-			else if (keyName == 'ArrowLeft') {
-				document.getElementById("keyinput").value = "previous";
-				form.submit();
-				}
+			form.submit();
+			}
+		else if (keyName == 'ArrowLeft') {
+			document.getElementById("keyinput").value = "previous";
+			form.submit();
+			}
 		};
 
 	document.addEventListener('touchstart', handleTouchStart, false);
 	document.addEventListener('touchmove', handleTouchMove, false);
-
 	var xDown = null;
-
 	function handleTouchStart(event) {
 		xDown = event.touches[0].clientX;
 		};

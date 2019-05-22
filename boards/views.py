@@ -30,7 +30,7 @@ class TopicListView(ListView):
     def get_queryset(self):
         self.board = get_object_or_404(Board, pk=self.kwargs.get('board_pk'))
         queryset = self.board.topics.order_by('-last_updated', ).\
-                                     annotate(replies=Count('posts')-1)
+                                     annotate(contributions=Count('posts'))
         return queryset
 
 
@@ -48,7 +48,10 @@ def new_topic(request, board_pk):
             Post.objects.create(
                 message=form.cleaned_data.get('message'),
                 topic=topic,
-                created_by=request.user)
+                created_by=request.user,
+                created_at=timezone.now,
+                updated_by=request.user,
+                updated_at=timezone.now,)
             return redirect('topic_posts', board_pk=board.pk, topic_pk=topic.pk)
 
     else:
@@ -62,7 +65,7 @@ class PostListView(ListView):
     model = Post
     context_object_name = 'posts'
     template_name = 'boards/topic_posts.html'
-    paginate_by = 4
+    paginate_by = 2
 
     def get_context_data(self, **kwargs):
         session_key = f'viewed_topic_{self.topic.pk}'
@@ -78,7 +81,7 @@ class PostListView(ListView):
         self.topic = get_object_or_404(Topic,
                                        board__pk=self.kwargs.get('board_pk'),
                                        pk=self.kwargs.get('topic_pk'))
-        queryset = self.topic.posts.order_by('created_at')
+        queryset = self.topic.posts.order_by('-updated_at')
         return queryset
 
     def post(self, request, *args, **kwargs):
@@ -94,19 +97,9 @@ class PostListView(ListView):
 
         if len(original_post_pks) == 1:
             new_post_pk = None
-            new_index_pk = None
+            # new_index_pk = None
         else:
             new_post_pk = original_post_pks[new_index_pk]
-
-        # nl = '\n'
-        # print(f'original_post_pks: {original_post_pks}{nl}'\
-        #       f'deleted_index_pk: {deleted_index_pk}{nl}'\
-        #       f'deleted_post_pk: {deleted_post_pk}{nl}'\
-        #       f'deleted message: {get_object_or_404(Post, pk=deleted_post_pk).message}{nl}'\
-        #       f'new_index_pk: {new_index_pk}{nl}'\
-        #       f'new_post_pk: {new_post_pk}')
-        # if new_post_pk:
-        #     print(f'new message: {get_object_or_404(Post, pk=new_post_pk).message}')
 
         get_object_or_404(Post, pk=deleted_post_pk).delete()
 
@@ -132,6 +125,7 @@ def reply_topic(request, board_pk, topic_pk):
             post = form.save(commit=False)
             post.topic = topic
             post.created_by = request.user
+            post.created_at = timezone.now()
             post.save()
 
             topic.last_updated = timezone.now()

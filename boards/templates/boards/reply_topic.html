@@ -2,7 +2,9 @@
 
 {% load static misc_tags %}
 
-{% block title %}Post a reply{% endblock %}
+{% load martortags %}
+
+{% block title %}Post addition{% endblock %}
 
 {% block breadcrumb %}
 <ol class="breadcrumb my-4">
@@ -10,19 +12,8 @@
   <li class="breadcrumb-item"><a href="{% url 'boards' %}">Boards</a></li>
   <li class="breadcrumb-item"><a href="{% url 'board_topics' topic.board.pk %}">{{ topic.board.name }}</a></li>
   <li class="breadcrumb-item"><a href="{% url 'topic_posts' topic.board.pk topic.pk %}">{{ topic.subject }}</a></li>
-  <li class="breadcrumb-item active">Post a reply</li>
+  <li class="breadcrumb-item active">Post addition</li>
 </ol>
-{% endblock %}
-
-{% block stylesheet %}
-  <link rel="stylesheet" href="{% static 'css/simplemde.min.css' %}">
-{% endblock %}
-
-{% block javascript %}
-  <script src="{% static 'js/simplemde.min.js' %}"></script>
-  <script>
-    var simplemde = new SimpleMDE({forceSync:true});
-  </script>
 {% endblock %}
 
 {% block content %}
@@ -30,7 +21,11 @@
   <form method="post" class="mb-4">
     {% csrf_token %}
     {% include 'includes/form.html' %}
-    <button type="submit" class="btn btn-success">Post a reply</button>
+    <button type="submit" class="btn btn-primary btn-sm">Post contribution</button>
+    <a href="{% url 'topic_posts' topic.board.pk topic.pk %}"
+       class="btn btn-outline-secondary btn-sm"
+       role="button">Cancel</a>
+
   </form>
 
   {% get_last_n_posts topic 5 as last_posts %}
@@ -44,7 +39,9 @@
           <div class="col-6 text-right"><small class="text-muted">{{ post.created_at }}</small>
           </div>
         </div>
-        {{ post.get_message_as_markdown }}
+        <!-- <div class="ui segment martor-preview"> -->
+          {{ post.get_message_as_markdown|safe_markdown }}
+        <!-- </div> -->
       </div>
     </div>
   {% endfor %}

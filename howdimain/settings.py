@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'boards',
     'accounts',
     'newsfeed',
+    'martor',
 ]
 
 MIDDLEWARE = [
@@ -97,9 +98,60 @@ DATABASES = {
 #     }
 # }
 
+
+# Global martor settings
+# Input: string boolean, `true/false`
+MARTOR_ENABLE_CONFIGS = {
+    'imgur': 'true',     # to enable/disable imgur/custom uploader.
+    'mention': 'false',  # to enable/disable mention
+    'jquery': 'true',    # to include/revoke jquery (require for admin default django)
+    'living': 'false',   # to enable/disable live updates in preview
+}
+
+# To setup the martor editor with label or not (default is False)
+MARTOR_ENABLE_LABEL = False
+
+# Imgur API Keys
+MARTOR_IMGUR_CLIENT_ID = config('IMGUR_CLIENT_ID')
+MARTOR_IMGUR_API_KEY   = config('IMGUR_SECRET_KEY')
+
+# Safe Mode
+MARTOR_MARKDOWN_SAFE_MODE = True # default
+
+# Markdownify
+MARTOR_MARKDOWNIFY_FUNCTION = 'martor.utils.markdownify' # default
+MARTOR_MARKDOWNIFY_URL = '/martor/markdownify/' # default
+
+# Markdown extensions (default)
+MARTOR_MARKDOWN_EXTENSIONS = [
+    'markdown.extensions.extra',
+    'markdown.extensions.nl2br',
+    'markdown.extensions.smarty',
+    'markdown.extensions.fenced_code',
+
+    # Custom markdown extensions.
+    'martor.extensions.urlize',
+    'martor.extensions.del_ins',    # ~~strikethrough~~ and ++underscores++
+    'martor.extensions.mention',    # to parse markdown mention
+    'martor.extensions.emoji',      # to parse markdown emoji
+    'martor.extensions.mdx_video',  # to parse embed/iframe video
+]
+
+# Markdown Extensions Configs
+MARTOR_MARKDOWN_EXTENSION_CONFIGS = {}
+
+# Markdown urls
+MARTOR_UPLOAD_URL = '/martor/uploader/' # default
+MARTOR_SEARCH_USERS_URL = '/martor/search-user/' # default
+
+# Markdown Extensions
+# MARTOR_MARKDOWN_BASE_EMOJI_URL = 'https://www.webfx.com/tools/emoji-cheat-sheet/graphics/emojis/'     # from webfx
+MARTOR_MARKDOWN_BASE_EMOJI_URL = 'https://github.githubassets.com/images/icons/emoji/'                  # default from github
+# MARTOR_MARKDOWN_BASE_MENTION_URL = 'https://python.web.id/author/'                                      # please change this to your domain
+
+
 # Password validation
 # https://docs.djangoproject.com/en/1.11/ref/settings/#auth-password-validators
-
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',},
     {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',},
@@ -109,7 +161,6 @@ AUTH_PASSWORD_VALIDATORS = [
 
 # Internationalization
 # https://docs.djangoproject.com/en/1.11/topics/i18n/
-
 LANGUAGE_CODE = 'en-us'
 TIME_ZONE = 'UTC'
 USE_I18N = True
@@ -159,7 +210,8 @@ def log_settings():
                 f'{nl}EMAIL_PORT: {EMAIL_PORT}'\
                 f'{nl}EMAIL_HOST_USER: {EMAIL_HOST_USER}'\
                 f"{nl}EMAIL_HOST_PASSWORD: {'NOT SHOWN'}"\
-                f'{nl}EMAIL_USE_TLS: {EMAIL_USE_TLS}'
+                f'{nl}EMAIL_USE_TLS: {EMAIL_USE_TLS}'\
+                f'{nl}IMGUR CLIENT ID: {MARTOR_IMGUR_CLIENT_ID}'\
                 f'{nl}------------------------------------------------------------')
 
 log_settings()

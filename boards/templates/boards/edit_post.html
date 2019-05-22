@@ -4,24 +4,13 @@
 
 {% block title %}Edit post{% endblock %}
 
-{% block stylesheet %}
-  <link rel="stylesheet" href="{% static 'css/simplemde.min.css' %}">
-{% endblock %}
-
-{% block javascript %}
-  <script src="{% static 'js/simplemde.min.js' %}"></script>
-  <script>
-    var simplemde = new SimpleMDE({forceSync:true});
-  </script>
-{% endblock %}
-
 {% block breadcrumb %}
 <ol class="breadcrumb my-4">
   <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a></li>
   <li class="breadcrumb-item"><a href="{% url 'boards' %}">Boards</a></li>
   <li class="breadcrumb-item"><a href="{% url 'board_topics' post.topic.board.pk %}">{{ post.topic.board.name }}</a></li>
   <li class="breadcrumb-item"><a href="{% url 'topic_posts' post.topic.board.pk post.topic.pk %}">{{ post.topic.subject }}</a></li>
-  <li class="breadcrumb-item active">Edit post</li>
+  <li class="breadcrumb-item active">Edit contribution</li>
 </ol>
 {% endblock %}
 
@@ -29,12 +18,18 @@
   <form method="post" class="mb-4" novalidate>
     {% csrf_token %}
     {% include 'includes/form.html' %}
-    <button type="submit" class="btn btn-success">Save changes</button>
-    <button type="submit" class="btn btn-success" value="delete">Delete post</button>
+    <button type="submit" class="btn btn-primary btn-sm">Save changes</button>
+    <button style="margin:1px" class="btn btn-primary btn-sm"
+            name="deleted_post_pk" value="{{ post.pk }}"
+            onclick="return Validate()">Delete contribtion</button>
     <a href="{% url 'topic_posts' post.topic.board.pk post.topic.pk %}"
-       class="btn btn-outline-secondary"
+       class="btn btn-outline-secondary btn-sm"
        role="button">Cancel</a>
   </form>
   <br>
   <br>
+{% endblock %}
+
+{% block javascript %}
+  <script src="{% static 'js/board.js' %}"></script>
 {% endblock %}

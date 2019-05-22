@@ -32,6 +32,7 @@ urlpatterns = [
     path('', include('boards.urls')),
     path('', include('accounts.urls')),
     path('', include('newsfeed.urls')),
+    path('martor/', include('martor.urls')),
     ]
 
 if settings.DEBUG:

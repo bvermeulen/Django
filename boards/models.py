@@ -1,13 +1,10 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.utils.text import Truncator
-from django.utils.html import mark_safe
 from django import template
+from martor.models import MartorField
+from martor.utils import markdownify
 import math
-from markdown import markdown
-from utils.mdx_del_ins import DelInsExtension
-
-register = template.Library()
 
 class Board(models.Model):
     name = models.CharField(max_length=30, unique=True)
@@ -32,7 +29,7 @@ class Topic(models.Model):
                                 related_name='topics')
     views = models.PositiveIntegerField(default=0)
 
-    posts_per_page = 4
+    posts_per_page = 2
 
     def get_page_count(self):
         count = self.posts.count()
@@ -65,22 +62,18 @@ class Topic(models.Model):
 
 
 class Post(models.Model):
-    message = models.TextField(max_length=4000)
+    message = MartorField(max_length=8000)
     topic = models.ForeignKey(Topic, on_delete=models.CASCADE,
                               related_name='posts')
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(null=True)
     created_by = models.ForeignKey(User, on_delete=models.CASCADE,
                                    related_name='posts')
+    created_at = models.DateTimeField(auto_now_add=True)
     updated_by = models.ForeignKey(User, on_delete=models.CASCADE,
-                                   null=True, related_name='+')
+                                   null=True)
+    updated_at = models.DateTimeField(null=True)
 
     def get_message_as_markdown(self):
-        markdown_text = mark_safe(markdown(self.message,
-                    extensions=['tables', 'fenced_code', DelInsExtension()],
-                    safe_mode='escape'))
-        return markdown_text
+        return self.message
 
     def __str__(self):
-            truncated_message = Truncator(self.message)
-            return truncated_message.chars(30)
+            return Truncator(self.message).chars(30)

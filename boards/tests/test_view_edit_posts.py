@@ -98,7 +98,7 @@ class SuccessfulPostUpdateViewTests(PostUpdateViewTestCase):
 class InvalidPostUpdateViewTests(PostUpdateViewTestCase):
     def setUp(self):
         '''
-        Submit an empty dictionary to the `reply_topic` view
+        Submit an empty dictionary to the `add_to_topic` view
         '''
         super().setUp()
         self.client.login(username=self.username, password=self.password)

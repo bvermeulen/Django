@@ -32,11 +32,11 @@
     </thead>
     <tbody>
       {% for topic in topics %}
-      {% url 'topic_posts' board.pk topic.pk as topic_url %}
+        {% url 'topic_posts' board.pk topic.pk as topic_url %}
         <tr>
           <td>
             <p class="mb-0">
-              <a href="{{ topic_url }}?page={{ topic.get_page_count }}">{{ topic.subject }}</a>
+              <a href="{{ topic_url }}">{{ topic.subject }}</a>
             </p>
             <small class="text-muted">
               Pages:

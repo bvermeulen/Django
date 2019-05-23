@@ -50,8 +50,9 @@ def new_topic(request, board_pk):
                 topic=topic,
                 created_by=request.user,
                 created_at=timezone.now,
-                updated_by=request.user,
-                updated_at=timezone.now,)
+                # first post for topic then updated is same as created
+                updated_by=created_by,
+                updated_at=created_at,)
             return redirect('topic_posts', board_pk=board.pk, topic_pk=topic.pk)
 
     else:
@@ -86,7 +87,6 @@ class PostListView(ListView):
 
     def post(self, request, *args, **kwargs):
         deleted_post_pk = int(request.POST.get('deleted_post_pk'))
-
         original_post_pks = [post.pk for post in self.get_queryset()]
         deleted_index_pk = original_post_pks.index(deleted_post_pk)
         if deleted_index_pk == 0:
@@ -117,7 +117,7 @@ class PostListView(ListView):
 
 
 @login_required
-def reply_topic(request, board_pk, topic_pk):
+def add_to_topic(request, board_pk, topic_pk):
     topic = get_object_or_404(Topic, board__pk=board_pk, pk=topic_pk)
     if request.method == 'POST':
         form = PostForm(request.POST)
@@ -126,6 +126,10 @@ def reply_topic(request, board_pk, topic_pk):
             post.topic = topic
             post.created_by = request.user
             post.created_at = timezone.now()
+            # if new post is added then make updated same as created
+            post.updated_by = post.created_by
+            post.updated_at = post.created_at
+
             post.save()
 
             topic.last_updated = timezone.now()
@@ -134,13 +138,13 @@ def reply_topic(request, board_pk, topic_pk):
             topic_url = reverse('topic_posts',
                                 kwargs={'board_pk': board_pk,
                                         'topic_pk': topic_pk})
-            topic_post_url = f'{topic_url}?page={topic.get_page_count()}'
+            topic_post_url = f'{topic_url}?page={topic.get_page_number(post.pk)}'
             return redirect(topic_post_url)
     else:
         form = PostForm()
 
     context = {'topic': topic, 'form': form}
-    return render(request, 'boards/reply_topic.html', context)
+    return render(request, 'boards/add_to_topic.html', context)
 
 
 @method_decorator(login_required, name='dispatch')
@@ -150,10 +154,6 @@ class PostUpdateView(UpdateView):
     template_name = 'boards/edit_post.html'
     pk_url_kwarg = 'post_pk'
     context_object_name = 'post'
-
-    def get_queryset(self):
-        queryset = super().get_queryset()
-        return queryset.filter(created_by=self.request.user)
 
     def form_valid(self, form):
         post = form.save(commit=False)

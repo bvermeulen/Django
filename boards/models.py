@@ -51,10 +51,9 @@ class Topic(models.Model):
             return range(1, count+1)
 
     def get_page_number(self, post_pk):
-        for i, post in enumerate(self.posts.all()):
+        for i, post in enumerate(self.posts.all().order_by('-updated_at')):
             if post.pk == post_pk:
                 return int(i/self.posts_per_page)+1
-
         return 1
 
     def __str__(self):

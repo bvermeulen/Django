@@ -1,104 +1,105 @@
 <!DOCTYPE html>
 {% load static %}
 <html>
-  	<head>
-      <title>{% block title %}Howdiweb{% endblock %}</title>
-   	  <meta charset="utf-8">
+  <head>
+    <meta charset="utf-8">
+    <title>{% block title %}Howdiweb{% endblock %}</title>
 
-      <link href="{% static 'plugins/css/ace.min.css' %}" type="text/css" media="all" rel="stylesheet" />
-      <link href="{% static 'plugins/css/semantic.min.css' %}" type="text/css" media="all" rel="stylesheet" />
-      <link href="{% static 'plugins/css/resizable.min.css' %}" type="text/css" media="all" rel="stylesheet" />
-      <link href="{% static 'martor/css/martor.min.css' %}" type="text/css" media="all" rel="stylesheet" />
+    <link href="{% static 'plugins/css/ace.min.css' %}" type="text/css" media="all" rel="stylesheet" />
+    <link href="{% static 'plugins/css/semantic.min.css' %}" type="text/css" media="all" rel="stylesheet" />
+    <link href="{% static 'plugins/css/resizable.min.css' %}" type="text/css" media="all" rel="stylesheet" />
+    <link href="{% static 'martor/css/martor.min.css' %}" type="text/css" media="all" rel="stylesheet" />
 
-      <link href="https://fonts.googleapis.com/css?family=Peralta|Teko|Russo+One" rel="stylesheet">
-      <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
-      <link rel="stylesheet" href="{% static 'css/app.css' %}">
-      <link rel="icon" href="{% static 'img/favicon.ico' %}">
+    <link href="https://fonts.googleapis.com/css?family=Peralta|Teko|Russo+One" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+    <link rel="stylesheet" href="{% static 'css/app.css' %}">
+    <link rel="icon" href="{% static 'img/favicon.ico' %}">
 
-      {% block stylesheet %}{% endblock %}
+    {% block stylesheet %}{% endblock %}
 
-      <style>
+    <style>
       .footer {
-         position: fixed;
-         left: 0;
-         bottom: 0;
-         width: 100%;
-         background-color: lightgrey;
-         color: black;
-         text-align: left;
+        position: fixed;
+        left: 0;
+        bottom: 0;
+        width: 100%;
+        background-color: lightgrey;
+        color: black;
+        text-align: left;
       }
-      </style>
+    </style>
 
+  </head>
 
-  	</head>
-  	<body>
-		{% block body %}
-		<nav class="navbar navbar-expand-sm navbar-dark bg-dark">
-		  <div class="container">
-		    <a class="navbar-brand" href="{% url 'home' %}">Howdiweb</a>
-		    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#mainMenu" aria-controls="mainMenu" aria-expanded="false" aria-label="Toggle navigation">
-		      <span class="navbar-toggler-icon"></span>
-		    </button>
-		    <div class="collapse navbar-collapse" id="mainMenu">
-		      {% if user.is_authenticated %}
-            <ul class="navbar-nav ml-auto">
-          	   <li class="nav-item dropdown">
-          		    <a class="nav-link dropdown-toggle" href="#" id="userMenu" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                    {{ user.username }}
-          		    </a>
-                  <div class="dropdown-menu dropdown-menu-right" aria-labelledby="userMenu">
-                    <a class="dropdown-item" href="{% url 'my_account' %}">My account</a>
-                    <a class="dropdown-item" href="{% url 'password_change' %}">Change password</a>
-                    <div class="dropdown-divider"></div>
-                    <a class="dropdown-item" href="{% url 'logout' %}">Log out</a>
-                  </div>
-               </li>
-               {% if user.is_staff %}
-                  <a href="{% url 'admin:index' %}" class="btn btn-primary ml-2">Admin</a>
-               {% endif %}
-            </ul>
-		      {% else %}
-		        <form class="form-inline ml-auto">
-		          <a href="{% url 'login' %}" class="btn btn-outline-secondary">Log in</a>
-		          <a href="{% url 'signup' %}" class="btn btn-primary ml-2">Sign up</a>
-		        </form>
-		      {% endif %}
-		    </div>
-		  </div>
-		</nav>
+  <body>
+  {% block body %}
+  <nav class="navbar navbar-expand-sm navbar-dark bg-dark">
+    <div class="container">
+      <a class="navbar-brand" href="{% url 'home' %}">Howdiweb</a>
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#mainMenu" aria-controls="mainMenu" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="mainMenu">
+        {% if user.is_authenticated %}
+          <ul class="navbar-nav ml-auto">
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#" id="userMenu" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                {{ user.username }}
+              </a>
+              <div class="dropdown-menu dropdown-menu-right" aria-labelledby="userMenu">
+                <a class="dropdown-item" href="{% url 'my_account' %}">My account</a>
+                <a class="dropdown-item" href="{% url 'password_change' %}">Change password</a>
+                <div class="dropdown-divider"></div>
+                <a class="dropdown-item" href="{% url 'logout' %}">Log out</a>
+              </div>
+            </li>
+            {% if user.is_staff %}
+              <a href="{% url 'admin:index' %}" class="btn btn-primary ml-2">Admin</a>
+            {% endif %}
+          </ul>
+        {% else %}
+          <form class="form-inline ml-auto">
+            <a href="{% url 'login' %}" class="btn btn-outline-secondary">Log in</a>
+            <a href="{% url 'signup' %}" class="btn btn-primary ml-2">Sign up</a>
+          </form>
+        {% endif %}
+      </div>
+    </div>
+  </nav>
 
-	  	<div class="container">
-        {% block breadcrumb %}{% endblock %}
-	     	{% block content %}{% endblock %}
-        <div class="footer">
-          <div class="container">
-            <small>powered by DigitalOcean<a style="color:black" href="https://www.digitalocean.com/"></small>
-            <img src="{% static 'img/512px-DigitalOcean_logo.png' %}" style="width:40px; height:30px; vertical-align:middle"></a>
-            <span style="float:right;"><small>&copy; Copyright 2019 Howdimain</small></span>
-          </div>
-        </div>
-	 	</div>
-		{% endblock body %}
-		<script src="{% static 'js/popper.min.js' %}"></script>
-		<script src="{% static 'js/bootstrap.min.js' %}"></script>
-    <script src="{% static 'js/jquery-3.3.1.min.js' %}"></script>
+  <div class="container">
+    {% block breadcrumb %}{% endblock %}
+    {% block content %}{% endblock %}
+    <div class="footer">
+      <div class="container">
+        <small>powered by DigitalOcean<a style="color:black" href="https://www.digitalocean.com/"></small>
+        <img src="{% static 'img/512px-DigitalOcean_logo.png' %}" style="width:40px; height:30px; vertical-align:middle"></a>
+        <span style="float:right;"><small>&copy; Copyright 2019 Howdimain</small></span>
+      </div>
+    </div>
+  </div>
+  {% endblock body %}
 
-    <script src="{% static 'plugins/js/ace.js' %}"></script>
-    <script src="{% static 'plugins/js/semantic.min.js' %}"></script>
-    <script src="{% static 'plugins/js/mode-markdown.js' %}"></script>
-    <script src="{% static 'plugins/js/ext-language_tools.js' %}"></script>
-    <script src="{% static 'plugins/js/theme-github.js' %}"></script>
-    <script src="{% static 'plugins/js/highlight.min.js' %}"></script>
-    <script src="{% static 'plugins/js/resizable.min.js' %}"></script>
-    <script src="{% static 'plugins/js/emojis.min.js' %}"></script>
-    <script src="{% static 'martor/js/martor.min.js' %}"></script>
+  <script src="{% static 'js/jquery-3.3.1.min.js' %}"></script>
+  <script src="{% static 'js/popper.min.js' %}"></script>
+  <script src="{% static 'js/bootstrap.min.js' %}"></script>
 
-    <script>
-    $('pre').each(function(i, block){
-        hljs.highlightBlock(block);
-    });
-    </script>
+  <script src="{% static 'plugins/js/ace.js' %}"></script>
+  <script src="{% static 'plugins/js/semantic.min.js' %}"></script>
+  <script src="{% static 'plugins/js/mode-markdown.js' %}"></script>
+  <script src="{% static 'plugins/js/ext-language_tools.js' %}"></script>
+  <script src="{% static 'plugins/js/theme-github.js' %}"></script>
+  <script src="{% static 'plugins/js/highlight.min.js' %}"></script>
+  <script src="{% static 'plugins/js/resizable.min.js' %}"></script>
+  <script src="{% static 'plugins/js/emojis.min.js' %}"></script>
+  <script src="{% static 'martor/js/martor.min.js' %}"></script>
 
-    {% block javascript %}{% endblock %}
-	</body>
+  <script>
+  $('pre').each(function(i, block){
+    hljs.highlightBlock(block);
+  });
+  </script>
+
+  {% block javascript %}{% endblock %}
+  </body>
 </html>

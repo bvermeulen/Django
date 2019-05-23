@@ -85,6 +85,7 @@ class PostListView(ListView):
         queryset = self.topic.posts.order_by('-updated_at')
         return queryset
 
+    # handle deletion of a post
     def post(self, request, *args, **kwargs):
         deleted_post_pk = int(request.POST.get('deleted_post_pk'))
         original_post_pks = [post.pk for post in self.get_queryset()]
@@ -154,6 +155,44 @@ class PostUpdateView(UpdateView):
     template_name = 'boards/edit_post.html'
     pk_url_kwarg = 'post_pk'
     context_object_name = 'post'
+
+    def get_queryset(self):
+        self.topic = get_object_or_404(Topic,
+                                       board__pk=self.kwargs.get('board_pk'),
+                                       pk=self.kwargs.get('topic_pk'))
+        queryset = self.topic.posts.order_by('-updated_at')
+        return queryset
+
+    # handle deletion of a post
+    def post(self, request, *args, **kwargs):
+        deleted_post_pk = int(request.POST.get('deleted_post_pk'))
+        original_post_pks = [post.pk for post in self.get_queryset()]
+        deleted_index_pk = original_post_pks.index(deleted_post_pk)
+        if deleted_index_pk == 0:
+            # note index 0 will be deleted so index 1 will become index 0
+            new_index_pk = 1
+        else:
+            new_index_pk = deleted_index_pk - 1
+
+        if len(original_post_pks) == 1:
+            new_post_pk = None
+            # new_index_pk = None
+        else:
+            new_post_pk = original_post_pks[new_index_pk]
+
+        get_object_or_404(Post, pk=deleted_post_pk).delete()
+
+        if new_post_pk:
+            topic_url = reverse('topic_posts',
+                                kwargs={'board_pk': self.topic.board.pk,
+                                        'topic_pk': self.topic.pk,})
+            topic_post_url = f'{topic_url}?page={self.topic.get_page_number(new_post_pk)}'
+            return redirect(topic_post_url)
+        else:
+            # if no posts left for the topic then also delete the topic
+            get_object_or_404(Topic, pk=self.topic.pk).delete()
+            board_url = reverse('board_topics', kwargs={'board_pk': self.topic.board.pk})
+            return redirect(board_url)
 
     def form_valid(self, form):
         post = form.save(commit=False)

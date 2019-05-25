@@ -2,9 +2,23 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.utils.text import Truncator
 from django import template
+from django.core.exceptions import ObjectDoesNotExist
 from martor.models import MartorField
 from martor.utils import markdownify
 import math
+
+
+class AllowedUser(models.Model):
+    primary_user = models.ForeignKey(User, on_delete=models.CASCADE, null=True,
+                                     related_name='+')
+    allowed_user = models.ManyToManyField(User)
+
+    def get_list_allowed_users(self):
+        return self.allowed_user.all()
+
+    def __str__(self):
+        return self.primary_user.username
+
 
 class Board(models.Model):
     name = models.CharField(max_length=30, unique=True)
@@ -68,8 +82,16 @@ class Post(models.Model):
                                    related_name='posts')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_by = models.ForeignKey(User, on_delete=models.CASCADE,
-                                   null=True)
+                                   related_name='+', null=True)
     updated_at = models.DateTimeField(null=True)
+
+    def get_allowed_users(self):
+        try:
+            allowed_list = AllowedUser.objects.get(primary_user=self.created_by).get_list_allowed_users()
+        except ObjectDoesNotExist:
+            allowed_list = []
+        return allowed_list
+
 
     def get_message_as_markdown(self):
         return self.message

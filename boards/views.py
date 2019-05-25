@@ -6,8 +6,8 @@ from django.utils import timezone
 from django.utils.decorators import method_decorator
 from django.db.models import Count
 from .forms import NewTopicForm, PostForm
-from .models import Board, Topic, Post
-
+from .models import Board, Topic, Post, AllowedUser
+import jsonpickle
 
 @method_decorator(login_required, name='dispatch')
 class BoardListView(ListView):
@@ -29,8 +29,8 @@ class TopicListView(ListView):
 
     def get_queryset(self):
         self.board = get_object_or_404(Board, pk=self.kwargs.get('board_pk'))
-        queryset = self.board.topics.order_by('-last_updated', ).\
-                                     annotate(contributions=Count('posts'))
+        queryset = self.board.topics.order_by('-last_updated', )\
+                                    .annotate(contributions=Count('posts'))
         return queryset
 
 
@@ -74,20 +74,22 @@ class PostListView(ListView):
             self.topic.views += 1
             self.topic.save()
             self.request.session[session_key] = True
-
         kwargs['topic'] = self.topic
+
         return super().get_context_data(**kwargs)
 
     def get_queryset(self):
         self.topic = get_object_or_404(Topic,
                                        board__pk=self.kwargs.get('board_pk'),
                                        pk=self.kwargs.get('topic_pk'))
+
         queryset = self.topic.posts.order_by('-updated_at')
+
         return queryset
 
     # handle deletion of a post
-    def post(self, request, *args, **kwargs):
-        deleted_post_pk = int(request.POST.get('deleted_post_pk'))
+    def post(self, *args, **kwargs):
+        deleted_post_pk = int(self.request.POST.get('deleted_post_pk'))
         original_post_pks = [post.pk for post in self.get_queryset()]
         deleted_index_pk = original_post_pks.index(deleted_post_pk)
         if deleted_index_pk == 0:
@@ -113,8 +115,8 @@ class PostListView(ListView):
         else:
             # if no posts left for the topic then also delete the topic
             get_object_or_404(Topic, pk=self.topic.pk).delete()
-            board_url = reverse('board_topics', kwargs={'board_pk': self.topic.board.pk})
-            return redirect(board_url)
+            topics_url = reverse('board_topics', kwargs={'board_pk': self.topic.board.pk})
+            return redirect(topcis_url)
 
 
 @login_required
@@ -161,13 +163,23 @@ class PostUpdateView(UpdateView):
                                        board__pk=self.kwargs.get('board_pk'),
                                        pk=self.kwargs.get('topic_pk'))
         queryset = self.topic.posts.order_by('-updated_at')
+
+        post = get_object_or_404(Post, pk=self.kwargs.get('post_pk'))
+        self.allowed_to_edit = post.created_by == self.request.user or \
+                               self.request.user in post.get_allowed_users()
+
         return queryset
 
     # handle deletion of a post
-    def post(self, request, *args, **kwargs):
-        deleted_post_pk = int(request.POST.get('deleted_post_pk'))
+    def delete_post(self):
+        try:
+            deleted_post_pk = int(self.request.POST.get('deleted_post_pk'))
+        except TypeError:
+            return False
+
         original_post_pks = [post.pk for post in self.get_queryset()]
         deleted_index_pk = original_post_pks.index(deleted_post_pk)
+
         if deleted_index_pk == 0:
             # note index 0 will be deleted so index 1 will become index 0
             new_index_pk = 1
@@ -175,33 +187,44 @@ class PostUpdateView(UpdateView):
             new_index_pk = deleted_index_pk - 1
 
         if len(original_post_pks) == 1:
-            new_post_pk = None
+            self.new_post_pk = None
             # new_index_pk = None
         else:
-            new_post_pk = original_post_pks[new_index_pk]
+            self.new_post_pk = original_post_pks[new_index_pk]
 
         get_object_or_404(Post, pk=deleted_post_pk).delete()
 
-        if new_post_pk:
-            topic_url = reverse('topic_posts',
-                                kwargs={'board_pk': self.topic.board.pk,
-                                        'topic_pk': self.topic.pk,})
-            topic_post_url = f'{topic_url}?page={self.topic.get_page_number(new_post_pk)}'
-            return redirect(topic_post_url)
-        else:
-            # if no posts left for the topic then also delete the topic
-            get_object_or_404(Topic, pk=self.topic.pk).delete()
-            board_url = reverse('board_topics', kwargs={'board_pk': self.topic.board.pk})
-            return redirect(board_url)
+        return True
 
     def form_valid(self, form):
-        post = form.save(commit=False)
-        post.updated_by = self.request.user
-        post.updated_at = timezone.now()
-        post.save()
+        if not self.allowed_to_edit:
+            topic_url = reverse('topic_posts',
+                                kwargs={'board_pk': self.topic.board.pk,
+                                        'topic_pk': self.topic.pk},)
+            topic_post_url = f'{topic_url}?page={self.topic.get_page_number(self.kwargs.get("post_pk"))}'
+            return redirect(topic_post_url)
 
-        topic_url = reverse('topic_posts',
-                            kwargs={'board_pk': post.topic.board.pk,
-                                    'topic_pk': post.topic.pk},)
-        topic_post_url = f'{topic_url}?page={post.topic.get_page_number(post.pk)}'
-        return redirect(topic_post_url)
+        if self.delete_post():
+            if self.new_post_pk:
+                topic_url = reverse('topic_posts',
+                                    kwargs={'board_pk': self.topic.board.pk,
+                                            'topic_pk': self.topic.pk,})
+                topic_post_url = f'{topic_url}?page={self.topic.get_page_number(self.new_post_pk)}'
+                return redirect(topic_post_url)
+            else:
+                # if no posts left for the topic then also delete the topic
+                get_object_or_404(Topic, pk=self.topic.pk).delete()
+                topics_url = reverse('board_topics', kwargs={'board_pk': self.topic.board.pk})
+                return redirect(topics_url)
+
+        else:
+            post = form.save(commit=False)
+            post.updated_by = self.request.user
+            post.updated_at = timezone.now()
+            post.save()
+
+            topic_url = reverse('topic_posts',
+                                kwargs={'board_pk': post.topic.board.pk,
+                                        'topic_pk': post.topic.pk},)
+            topic_post_url = f'{topic_url}?page={post.topic.get_page_number(post.pk)}'
+            return redirect(topic_post_url)

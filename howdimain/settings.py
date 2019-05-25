@@ -177,7 +177,6 @@ MEDIA_ROOT = os.path.join(os.path.dirname(BASE_DIR), 'media')
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(os.path.dirname(BASE_DIR), 'staticfiles')
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
-print(BASE_DIR, STATIC_ROOT, STATICFILES_DIRS)
 
 LOGIN_URL = 'login'
 LOGOUT_REDIRECT_URL = 'home'

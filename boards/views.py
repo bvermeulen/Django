@@ -39,26 +39,33 @@ def new_topic(request, board_pk):
     board = get_object_or_404(Board, pk=board_pk)
 
     if request.method == 'POST':
-        form = NewTopicForm(request.POST)
-        if form.is_valid():
-            topic = form.save(commit=False)
+        form1 = NewTopicForm(request.POST)
+        form2 = PostForm(request.POST)
+        if form1.is_valid() and form2.is_valid():
+            topic = form1.save(commit=False)
+            post = form2.save(commit=False)
             topic.board = board
             topic.starter = request.user
             topic.save()
-            Post.objects.create(
-                message=form.cleaned_data.get('message'),
-                topic=topic,
-                created_by=request.user,
-                created_at=timezone.now,
-                # first post for topic then updated is same as created
-                updated_by=created_by,
-                updated_at=created_at,)
+
+            post.topic = topic
+            post.created_by = topic.starter
+            post.created_at = timezone.now()
+            # first post for topic then updated is same as created
+            post.updated_by= post.created_by
+            post.updated_at= post.created_at
+            post.save()
+
             return redirect('topic_posts', board_pk=board.pk, topic_pk=topic.pk)
 
     else:
-        form = NewTopicForm()
+        form1 = NewTopicForm()
+        form2 = PostForm()
 
-    return render(request, 'boards/new_topic.html', {'board': board, 'form': form})
+    context = { 'board': board,
+                'form1': form1,
+                'form2': form2, }
+    return render(request, 'boards/new_topic.html', context)
 
 
 @method_decorator(login_required, name='dispatch')
@@ -116,7 +123,7 @@ class PostListView(ListView):
             # if no posts left for the topic then also delete the topic
             get_object_or_404(Topic, pk=self.topic.pk).delete()
             topics_url = reverse('board_topics', kwargs={'board_pk': self.topic.board.pk})
-            return redirect(topcis_url)
+            return redirect(topics_url)
 
 
 @login_required

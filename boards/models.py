@@ -5,6 +5,10 @@ from django import template
 from django.core.exceptions import ObjectDoesNotExist
 from martor.models import MartorField
 from martor.utils import markdownify
+from .boards_settings import (MESSAGE_FIELD_SIZE, BOARD_NAME_SIZE,
+                              DESCRIPTION_SIZE, TOPIC_SUBJECT_SIZE,
+                              HAS_MANY_PAGES_LIMIT,
+                             )
 import math
 
 
@@ -21,8 +25,8 @@ class AllowedUser(models.Model):
 
 
 class Board(models.Model):
-    name = models.CharField(max_length=30, unique=True)
-    description = models.CharField(max_length=100)
+    name = models.CharField(max_length=BOARD_NAME_SIZE, unique=True)
+    description = models.CharField(max_length=DESCRIPTION_SIZE)
 
     def get_posts_count(self):
         return Post.objects.filter(topic__board=self).count()
@@ -35,7 +39,7 @@ class Board(models.Model):
 
 
 class Topic(models.Model):
-    subject = models.CharField(max_length=255)
+    subject = models.CharField(max_length=TOPIC_SUBJECT_SIZE)
     last_updated = models.DateTimeField(auto_now_add=True)
     board = models.ForeignKey(Board, on_delete=models.CASCADE,
                               related_name='topics')
@@ -55,12 +59,12 @@ class Topic(models.Model):
     def has_many_pages(self, count=None):
         if count is None:
             count = self.get_page_count()
-        return count > 3
+        return count > HAS_MANY_PAGES_LIMIT
 
     def get_page_range(self):
         count = self.get_page_count()
         if self.has_many_pages():
-            return range(1,4)
+            return range(1,HAS_MANY_PAGES_LIMIT+1)
         else:
             return range(1, count+1)
 
@@ -75,7 +79,9 @@ class Topic(models.Model):
 
 
 class Post(models.Model):
-    message = MartorField(max_length=8000)
+    message = MartorField(max_length=MESSAGE_FIELD_SIZE,
+                          help_text=f'Maximum length is {MESSAGE_FIELD_SIZE} characters',
+                          )
     topic = models.ForeignKey(Topic, on_delete=models.CASCADE,
                               related_name='posts')
     created_by = models.ForeignKey(User, on_delete=models.CASCADE,
@@ -84,6 +90,7 @@ class Post(models.Model):
     updated_by = models.ForeignKey(User, on_delete=models.CASCADE,
                                    related_name='+', null=True)
     updated_at = models.DateTimeField(null=True)
+    allowed_editor = models.ManyToManyField(User, blank=True)
 
     def get_allowed_users(self):
         try:

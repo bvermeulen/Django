@@ -40,8 +40,8 @@
               <div class="col-6 text-right">
               </div>
             </div>
-              {{ post.get_message_as_markdown|safe_markdown }}
-            {% if post.created_by == user or user in post.get_allowed_users %}
+            {{ post.get_message_as_markdown|safe_markdown }}
+            {% if user == post.created_by or user in post.allowed_editor.all %}
               <div class="mt-3; btn-group">
                 <a href="{% url 'edit_post' post.topic.board.pk post.topic.pk post.pk %}"
                   style="margin:1px"

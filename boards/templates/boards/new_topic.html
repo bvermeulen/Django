@@ -1,7 +1,5 @@
 {% extends 'base.html' %}
 
-{% load form_tags widget_tweaks %}
-
 {% block title %}Start a New Topic{% endblock %}
 
 {% block breadcrumb %}
@@ -20,13 +18,13 @@
 {% block content %}
   <form method="post" novalidate>
     {% csrf_token %}
-    {% include "includes/form.html" with form=form1 %}
-    {% include "includes/form.html" with form=form2 %}
-
     <button type="submit" class="btn btn-primary btn_sm">Submit new topic</button>
     <a href="{% url 'board_topics' board.pk %}"
        class="btn btn-outline-secondary btn-sm"
        role="button">Cancel</a>
+
+    {% include "includes/form.html" with form=form1 %}
+    {% include "includes/form.html" with form=form2 %}
 
   </form>
   <br>

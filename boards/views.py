@@ -172,8 +172,8 @@ class PostUpdateView(UpdateView):
         queryset = self.topic.posts.order_by('-updated_at')
 
         post = get_object_or_404(Post, pk=self.kwargs.get('post_pk'))
-        self.allowed_to_edit = post.created_by == self.request.user or \
-                               self.request.user in post.get_allowed_users()
+        self.allowed_to_edit = self.request.user == post.created_by or \
+                               self.request.user in post.allowed_editor.all()
 
         return queryset
 
@@ -204,6 +204,8 @@ class PostUpdateView(UpdateView):
         return True
 
     def form_valid(self, form):
+        # check against manual editing of html input in browser if  user is
+        # allowed to edit this post
         if not self.allowed_to_edit:
             topic_url = reverse('topic_posts',
                                 kwargs={'board_pk': self.topic.board.pk,
@@ -229,6 +231,10 @@ class PostUpdateView(UpdateView):
             post.updated_by = self.request.user
             post.updated_at = timezone.now()
             post.save()
+
+            self.topic.last_updated = timezone.now()
+            self.topic.save()
+
 
             topic_url = reverse('topic_posts',
                                 kwargs={'board_pk': post.topic.board.pk,

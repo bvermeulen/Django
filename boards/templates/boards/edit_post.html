@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
 
 {% load static %}
+{% load crispy_forms_tags %}
 
 {% block title %}Edit post{% endblock %}
 
@@ -17,14 +18,21 @@
 {% block content %}
   <form method="post" class="mb-4" novalidate>
     {% csrf_token %}
-    {% include 'includes/form.html' %}
     <button type="submit" class="btn btn-primary btn-sm">Save changes</button>
     <button style="margin:1px" class="btn btn-primary btn-sm"
             name="deleted_post_pk" value="{{ post.pk }}"
             onclick="return Validate()">Delete contribtion</button>
+    <button class="btn dropdown-toggle btn-primary btn-sm" data-toggle="dropdown"
+      >Allowed editors<span class="caret"></span></button>
+    <ul class="dropdown-menu">
+      {{ form.allowed_editor|as_crispy_field }}
+    </ul>
     <a href="{% url 'topic_posts' post.topic.board.pk post.topic.pk %}"
        class="btn btn-outline-secondary btn-sm"
        role="button">Cancel</a>
+    <br></br>
+    {{ form.subject|as_crispy_field }}
+    {{ form.message|as_crispy_field }}
   </form>
   <br>
   <br>

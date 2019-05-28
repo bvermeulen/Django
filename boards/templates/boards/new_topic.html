@@ -1,5 +1,7 @@
 {% extends 'base.html' %}
 
+{% load crispy_forms_tags %}
+
 {% block title %}Start a New Topic{% endblock %}
 
 {% block breadcrumb %}
@@ -18,14 +20,19 @@
 {% block content %}
   <form method="post" novalidate>
     {% csrf_token %}
-    <button type="submit" class="btn btn-primary btn_sm">Submit new topic</button>
+    <button type="submit" class="btn btn-primary btn-sm">Submit new topic</button>
+    <button class="btn dropdown-toggle btn-primary btn-sm" data-toggle="dropdown"
+      >Allowed editors<span class="caret"></span></button>
+ 		<ul class="dropdown-menu">
+      {{ form2.allowed_editor|as_crispy_field }}
+    </ul>
     <a href="{% url 'board_topics' board.pk %}"
-       class="btn btn-outline-secondary btn-sm"
+       class="btn btn-outline-primary btn-sm"
        role="button">Cancel</a>
-
-    {% include "includes/form.html" with form=form1 %}
-    {% include "includes/form.html" with form=form2 %}
-
+    <br></br>
+    {{ form1.subject|as_crispy_field }}
+    {{ form2.subject|as_crispy_field }}
+    {{ form2.message|as_crispy_field }}
   </form>
   <br>
   <br>

@@ -7,7 +7,6 @@ from django.utils.decorators import method_decorator
 from django.db.models import Count
 from .forms import NewTopicForm, PostForm
 from .models import Board, Topic, Post, AllowedUser
-import jsonpickle
 
 @method_decorator(login_required, name='dispatch')
 class BoardListView(ListView):
@@ -55,6 +54,8 @@ def new_topic(request, board_pk):
             post.updated_by= post.created_by
             post.updated_at= post.created_at
             post.save()
+            # save the m2m field 'allowed user'
+            form2.save_m2m()
 
             return redirect('topic_posts', board_pk=board.pk, topic_pk=topic.pk)
 
@@ -141,6 +142,7 @@ def add_to_topic(request, board_pk, topic_pk):
             post.updated_at = post.created_at
 
             post.save()
+            form.save_m2m()
 
             topic.last_updated = timezone.now()
             topic.save()
@@ -160,10 +162,16 @@ def add_to_topic(request, board_pk, topic_pk):
 @method_decorator(login_required, name='dispatch')
 class PostUpdateView(UpdateView):
     model = Post
-    fields = ('message', )
+    form_class = PostForm
+    labels = {'subject': 'post subject'}
     template_name = 'boards/edit_post.html'
     pk_url_kwarg = 'post_pk'
     context_object_name = 'post'
+
+    def get_context_data(self, **kwargs):
+        post = get_object_or_404(Post, pk=self.kwargs.get('post_pk'))
+        kwargs['allowed_editor'] = self.post.allowed_editor
+        return super().get_context_data(**kwargs)
 
     def get_queryset(self):
         self.topic = get_object_or_404(Topic,
@@ -171,9 +179,9 @@ class PostUpdateView(UpdateView):
                                        pk=self.kwargs.get('topic_pk'))
         queryset = self.topic.posts.order_by('-updated_at')
 
-        post = get_object_or_404(Post, pk=self.kwargs.get('post_pk'))
-        self.allowed_to_edit = self.request.user == post.created_by or \
-                               self.request.user in post.allowed_editor.all()
+        self.post = get_object_or_404(Post, pk=self.kwargs.get('post_pk'))
+        self.allowed_to_edit = self.request.user == self.post.created_by or \
+                               self.request.user in self.post.allowed_editor.all()
 
         return queryset
 
@@ -227,14 +235,14 @@ class PostUpdateView(UpdateView):
                 return redirect(topics_url)
 
         else:
-            post = form.save(commit=False)
+            # note if commit=False, then post.save() must be followed by form.save_m2m()
+            post = form.save()
             post.updated_by = self.request.user
             post.updated_at = timezone.now()
             post.save()
 
             self.topic.last_updated = timezone.now()
             self.topic.save()
-
 
             topic_url = reverse('topic_posts',
                                 kwargs={'board_pk': post.topic.board.pk,

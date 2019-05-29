@@ -168,20 +168,15 @@ class PostUpdateView(UpdateView):
     pk_url_kwarg = 'post_pk'
     context_object_name = 'post'
 
-    def get_context_data(self, **kwargs):
-        post = get_object_or_404(Post, pk=self.kwargs.get('post_pk'))
-        kwargs['allowed_editor'] = self.post.allowed_editor
-        return super().get_context_data(**kwargs)
-
     def get_queryset(self):
         self.topic = get_object_or_404(Topic,
                                        board__pk=self.kwargs.get('board_pk'),
                                        pk=self.kwargs.get('topic_pk'))
         queryset = self.topic.posts.order_by('-updated_at')
 
-        self.post = get_object_or_404(Post, pk=self.kwargs.get('post_pk'))
-        self.allowed_to_edit = self.request.user == self.post.created_by or \
-                               self.request.user in self.post.allowed_editor.all()
+        _post = get_object_or_404(Post, pk=self.kwargs.get('post_pk'))
+        self.allowed_to_edit = self.request.user == _post.created_by or \
+                               self.request.user in _post.allowed_editor.all()
 
         return queryset
 

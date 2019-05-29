@@ -17,10 +17,10 @@ class NewTopicForm(forms.ModelForm):
 
 class PostForm(forms.ModelForm):
     allowed_editor = forms.ModelMultipleChoiceField(widget=forms.CheckboxSelectMultiple(),
-                                                    required=False,
-                                                    label='',
-                                                    help_text='Selection is not required',
-                                                    queryset=User.objects.all())
+        required=False,
+        label='',
+        help_text='Selection is not required',
+        queryset=User.objects.all().order_by('username'))
 
     class Meta:
         model = Post

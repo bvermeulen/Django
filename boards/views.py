@@ -241,12 +241,12 @@ class PostUpdateView(UpdateView):
             # note if commit=False, then post.save() must be followed by form.save_m2m()
             post = form.save(commit=False)
             post.updated_by = self.request.user
-            post.updated_at = timezone.now()
+            post.updated_at = self.topic.last_updated
             post.save()
             form.save_m2m()
 
             topic_url = reverse('topic_posts',
-                                kwargs={'board_pk': post.topic.board.pk,
-                                        'topic_pk': post.topic.pk},)
-            topic_post_url = f'{topic_url}?page={post.topic.get_page_number(post.pk)}'
+                                kwargs={'board_pk': self.topic.board.pk,
+                                        'topic_pk': self.topic.pk},)
+            topic_post_url = f'{topic_url}?page={self.topic.get_page_number(post.pk)}'
             return redirect(topic_post_url)

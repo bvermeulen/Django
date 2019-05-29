@@ -7,6 +7,7 @@ from django.utils.decorators import method_decorator
 from django.db.models import Count
 from .forms import NewTopicForm, PostForm
 from .models import Board, Topic, Post, AllowedUser
+from .boards_settings import POSTS_PER_PAGE, TOPICS_PER_PAGE
 
 @method_decorator(login_required, name='dispatch')
 class BoardListView(ListView):
@@ -20,7 +21,7 @@ class TopicListView(ListView):
     model = Topic
     context_object_name = 'topics'
     template_name = 'boards/topics.html'
-    paginate_by = 10
+    paginate_by = TOPICS_PER_PAGE
 
     def get_context_data(self, **kwargs):
         kwargs['board'] = self.board
@@ -75,7 +76,7 @@ class PostListView(ListView):
     model = Post
     context_object_name = 'posts'
     template_name = 'boards/topic_posts.html'
-    paginate_by = 2
+    paginate_by = POSTS_PER_PAGE
 
     def get_context_data(self, **kwargs):
         session_key = f'viewed_topic_{self.topic.pk}'
@@ -206,7 +207,6 @@ class PostUpdateView(UpdateView):
             self.new_post_pk = original_post_pks[new_index_pk]
 
         get_object_or_404(Post, pk=deleted_post_pk).delete()
-
         return True
 
     def form_valid(self, form):
@@ -224,16 +224,18 @@ class PostUpdateView(UpdateView):
 
         if self.delete_post():
             if self.new_post_pk:
+                # redirect to the topic post page
                 topic_url = reverse('topic_posts',
                                     kwargs={'board_pk': self.topic.board.pk,
                                             'topic_pk': self.topic.pk,})
-                topic_post_url = f'{topic_url}?page={self.topic.get_page_number(self.new_post_pk)}'
-                return redirect(topic_post_url)
+                url_after_delete = f'{topic_url}?page={self.topic.get_page_number(self.new_post_pk)}'
             else:
                 # if no posts left for the topic then also delete the topic
+                # and redirect to the boards page
                 get_object_or_404(Topic, pk=self.topic.pk).delete()
-                topics_url = reverse('board_topics', kwargs={'board_pk': self.topic.board.pk})
-                return redirect(topics_url)
+                url_after_delete = reverse('board_topics', kwargs={'board_pk': self.topic.board.pk})
+
+            return redirect(url_after_delete)
 
         else:
             # note if commit=False, then post.save() must be followed by form.save_m2m()

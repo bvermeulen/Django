@@ -11,23 +11,23 @@
 	 <form id="controlform" method="post">
 	 <div class="container">
      {% csrf_token %}
-		 <button type="button" class="btn btn-primary" onclick="window.location.href='{% url 'home' %}'">home</button>
-		 <button type="button" class="btn btn-primary" id="button_pause" onclick="Pause();">Pause</button>
+		 <button type="button" class="btn btn-primary btn-sm" onclick="window.location.href='{% url 'home' %}'">home</button>
+		 <button type="button" class="btn btn-primary btn-sm" id="button_pause" onclick="Pause();">Pause</button>
 		 <input type="hidden" name="control_btn" id="keyinput"></input>
-		 <input type="submit" class="btn btn-primary" name="control_btn" value="previous"></input>
-		 <input type="submit" class="btn btn-primary" name="control_btn" value="next"></input>
+		 <input type="submit" class="btn btn-primary btn-sm" name="control_btn" value="previous"></input>
+		 <input type="submit" class="btn btn-primary btn-sm" name="control_btn" value="next"></input>
 		 {% if show_banner_button %}
-		   <input type="submit" class="btn btn-primary" name="control_btn" value="Banner"></input>
+		   <input type="submit" class="btn btn-primary btn-sm" name="control_btn" value="Banner"></input>
 		 {% endif %}
-		 <button class="btn dropdown-toggle btn-primary" type="button" data-toggle="dropdown">Sites<span class="caret"></span></button>
+		 <button class="btn dropdown-toggle btn-primary btn-sm" type="button" data-toggle="dropdown">Sites<span class="caret"></span></button>
 		 <ul class="dropdown-menu">
 		 	 {% for site in news_sites %}
 			   <li><input type="submit" class="btn btn-sm" name="site_btn" value="{{ site }}"></input></li>
 			 {% endfor %}
 		 </ul>
 		 {% if user.is_authenticated %}
-		 	 <button type="button" class="btn btn-primary" onclick="window.location.href='{% url 'mynewsitems' %}'">my news</button>
-		   <button type="button" class="btn btn-primary" onclick="window.location.href='{% url 'newssites' %}'">select sites</button>
+		 	 <button type="button" class="btn btn-primary btn-sm" onclick="window.location.href='{% url 'mynewsitems' %}'">my news</button>
+		   <button type="button" class="btn btn-primary btn-sm" onclick="window.location.href='{% url 'newssites' %}'">select sites</button>
 		 {% endif %}
 	 </div>
 

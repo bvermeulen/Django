@@ -8,6 +8,7 @@ from martor.utils import markdownify
 from .boards_settings import (MESSAGE_FIELD_SIZE, BOARD_NAME_SIZE,
                               DESCRIPTION_SIZE, TOPIC_SUBJECT_SIZE,
                               HAS_MANY_PAGES_LIMIT, POST_SUBJECT_SIZE,
+                              POSTS_PER_PAGE,
                              )
 import math
 
@@ -47,11 +48,9 @@ class Topic(models.Model):
                                 related_name='topics')
     views = models.PositiveIntegerField(default=0)
 
-    posts_per_page = 2
-
     def get_page_count(self):
         count = self.posts.count()
-        pages = count / self.posts_per_page
+        pages = count / POSTS_PER_PAGE
         if pages == 0:
             pages += 1
         return math.ceil(pages)
@@ -71,7 +70,7 @@ class Topic(models.Model):
     def get_page_number(self, post_pk):
         for i, post in enumerate(self.posts.all().order_by('-updated_at')):
             if post.pk == post_pk:
-                return int(i/self.posts_per_page)+1
+                return int(i/POSTS_PER_PAGE)+1
         return 1
 
     def __str__(self):

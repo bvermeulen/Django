@@ -16,8 +16,13 @@ class NewTopicForm(forms.ModelForm):
 
 
 class PostForm(forms.ModelForm):
+    allowed_editor = forms.ModelMultipleChoiceField(widget=forms.CheckboxSelectMultiple(),
+                                                    required=False,
+                                                    label='',
+                                                    help_text='Selection is not required',
+                                                    queryset=User.objects.all())
+
     class Meta:
         model = Post
         fields = ['allowed_editor', 'post_subject', 'message']
-        labels = {'post_subject': 'Post subject', 'allowed_editor': ''}
-        help_texts = {'allowed_editor': 'Hold cntrl or shift key and use spacebar to select/unselect'}
+        labels = {'post_subject': 'Post subject'}

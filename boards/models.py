@@ -39,7 +39,7 @@ class Board(models.Model):
 
 
 class Topic(models.Model):
-    subject = models.CharField(max_length=TOPIC_SUBJECT_SIZE)
+    topic_subject = models.CharField(max_length=TOPIC_SUBJECT_SIZE)
     last_updated = models.DateTimeField(auto_now_add=True)
     board = models.ForeignKey(Board, on_delete=models.CASCADE,
                               related_name='topics')
@@ -75,11 +75,11 @@ class Topic(models.Model):
         return 1
 
     def __str__(self):
-        return self.subject
+        return Truncator(self.topic_subject).chars(30)
 
 
 class Post(models.Model):
-    subject = models.CharField(max_length=POST_SUBJECT_SIZE, null=True)
+    post_subject = models.CharField(max_length=POST_SUBJECT_SIZE, null=True)
     message = MartorField(max_length=MESSAGE_FIELD_SIZE,
                           help_text=f'Maximum length is {MESSAGE_FIELD_SIZE} characters',
                           )
@@ -105,4 +105,4 @@ class Post(models.Model):
         return self.message
 
     def __str__(self):
-            return Truncator(self.message).chars(30)
+            return Truncator(self.post_subject).chars(30)

@@ -45,11 +45,12 @@ def new_topic(request, board_pk):
             post = form2.save(commit=False)
             topic.board = board
             topic.starter = request.user
+            topic.last_updated = timezone.now()
             topic.save()
 
             post.topic = topic
             post.created_by = topic.starter
-            post.created_at = timezone.now()
+            post.created_at = topic.last_updated
             # first post for topic then updated is same as created
             post.updated_by= post.created_by
             post.updated_at= post.created_at
@@ -114,6 +115,9 @@ class PostListView(ListView):
 
         get_object_or_404(Post, pk=deleted_post_pk).delete()
 
+        self.topic.last_updated = timezone.now()
+        self.topic.save()
+
         if new_post_pk:
             topic_url = reverse('topic_posts',
                                 kwargs={'board_pk': self.topic.board.pk,
@@ -163,7 +167,6 @@ def add_to_topic(request, board_pk, topic_pk):
 class PostUpdateView(UpdateView):
     model = Post
     form_class = PostForm
-    labels = {'subject': 'post subject'}
     template_name = 'boards/edit_post.html'
     pk_url_kwarg = 'post_pk'
     context_object_name = 'post'
@@ -216,6 +219,9 @@ class PostUpdateView(UpdateView):
             topic_post_url = f'{topic_url}?page={self.topic.get_page_number(self.kwargs.get("post_pk"))}'
             return redirect(topic_post_url)
 
+        self.topic.last_updated = timezone.now()
+        self.topic.save()
+
         if self.delete_post():
             if self.new_post_pk:
                 topic_url = reverse('topic_posts',
@@ -231,13 +237,11 @@ class PostUpdateView(UpdateView):
 
         else:
             # note if commit=False, then post.save() must be followed by form.save_m2m()
-            post = form.save()
+            post = form.save(commit=False)
             post.updated_by = self.request.user
             post.updated_at = timezone.now()
             post.save()
-
-            self.topic.last_updated = timezone.now()
-            self.topic.save()
+            form.save_m2m()
 
             topic_url = reverse('topic_posts',
                                 kwargs={'board_pk': post.topic.board.pk,

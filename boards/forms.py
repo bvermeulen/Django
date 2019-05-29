@@ -11,13 +11,13 @@ class NewTopicForm(forms.ModelForm):
 
     class Meta:
         model = Topic
-        fields = ['subject',]
-        labels = {'subject': 'Topic'}
+        fields = ['topic_subject',]
+        labels = {'topic_subject': 'Topic'}
 
 
 class PostForm(forms.ModelForm):
     class Meta:
         model = Post
-        fields = ['allowed_editor', 'subject', 'message']
-        labels = {'subject': 'Post subject', 'allowed_editor': ''}
+        fields = ['allowed_editor', 'post_subject', 'message']
+        labels = {'post_subject': 'Post subject', 'allowed_editor': ''}
         help_texts = {'allowed_editor': 'Hold cntrl or shift key and use spacebar to select/unselect'}

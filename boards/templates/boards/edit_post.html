@@ -10,7 +10,7 @@
   <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a></li>
   <li class="breadcrumb-item"><a href="{% url 'boards' %}">Boards</a></li>
   <li class="breadcrumb-item"><a href="{% url 'board_topics' post.topic.board.pk %}">{{ post.topic.board.name }}</a></li>
-  <li class="breadcrumb-item"><a href="{% url 'topic_posts' post.topic.board.pk post.topic.pk %}">{{ post.topic.subject }}</a></li>
+  <li class="breadcrumb-item"><a href="{% url 'topic_posts' post.topic.board.pk post.topic.pk %}">{{ post.topic.topic_subject }}</a></li>
   <li class="breadcrumb-item active">Edit contribution</li>
 </ol>
 {% endblock %}
@@ -31,7 +31,7 @@
        class="btn btn-outline-secondary btn-sm"
        role="button">Cancel</a>
     <br></br>
-    {{ form.subject|as_crispy_field }}
+    {{ form.post_subject|as_crispy_field }}
     {{ form.message|as_crispy_field }}
   </form>
   <br>

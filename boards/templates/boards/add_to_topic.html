@@ -11,7 +11,7 @@
   <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a></li>
   <li class="breadcrumb-item"><a href="{% url 'boards' %}">Boards</a></li>
   <li class="breadcrumb-item"><a href="{% url 'board_topics' topic.board.pk %}">{{ topic.board.name }}</a></li>
-  <li class="breadcrumb-item"><a href="{% url 'topic_posts' topic.board.pk topic.pk %}">{{ topic.subject }}</a></li>
+  <li class="breadcrumb-item"><a href="{% url 'topic_posts' topic.board.pk topic.pk %}">{{ topic.topic_subject }}</a></li>
   <li class="breadcrumb-item active">Post addition</li>
 </ol>
 {% endblock %}
@@ -29,7 +29,7 @@
     <a href="{% url 'topic_posts' topic.board.pk topic.pk %}"
        class="btn btn-outline-primary btn-sm"
        role="button">Cancel</a>
-    {{ form.subject|as_crispy_field }}
+    {{ form.post_subject|as_crispy_field }}
     {{ form.message|as_crispy_field }}
   </form>
 
@@ -37,8 +37,8 @@
   {% for post in last_posts %}
     <div class="card-body p-2">
       <div class="card mb-2 border-dark">
-        {% if post.subject %}
-          <div class="card-header text-black bg-grey py-2 px-3">{{ post.subject }}</div>
+        {% if post.post_subject %}
+          <div class="card-header text-black bg-grey py-2 px-3">{{ post.post_subject }}</div>
         {% endif %}
 
         <div class="row mb-4">

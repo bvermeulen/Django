@@ -8,12 +8,36 @@ from django.db.models import Count
 from .forms import NewTopicForm, PostForm
 from .models import Board, Topic, Post, AllowedUser
 from .boards_settings import POSTS_PER_PAGE, TOPICS_PER_PAGE
+from utils.plogger import Logger
+
+logger = Logger.getlogger()
+
+
+def get_client_ip(request):
+    x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+    if x_forwarded_for:
+        ip = x_forwarded_for.split(',')[-1].strip()
+    else:
+        ip = request.META.get('REMOTE_ADDR')
+    return ip
+
+
+def log_record(user, comment, subject, ip):
+        logger.info(f'user {user}, {comment}{subject}, ip: {ip}')
+
 
 @method_decorator(login_required, name='dispatch')
 class BoardListView(ListView):
     model = Board
     context_object_name = 'boards'
     template_name = 'boards/boards.html'
+
+    def get_context_data(self, **kwargs):
+        log_record(self.request.user,
+                   'showing boards',
+                   '',
+                   get_client_ip(self.request))
+        return super().get_context_data(**kwargs)
 
 
 @method_decorator(login_required, name='dispatch')
@@ -31,6 +55,12 @@ class TopicListView(ListView):
         self.board = get_object_or_404(Board, pk=self.kwargs.get('board_pk'))
         queryset = self.board.topics.order_by('-last_updated', )\
                                     .annotate(contributions=Count('posts'))
+
+        log_record(self.request.user,
+                   'showing topics for board ',
+                   self.board.name,
+                   get_client_ip(self.request))
+
         return queryset
 
 
@@ -94,6 +124,11 @@ class PostListView(ListView):
                                        pk=self.kwargs.get('topic_pk'))
 
         queryset = self.topic.posts.order_by('-updated_at')
+
+        log_record(self.request.user,
+                   'showing posts for topic ',
+                   self.topic.topic_subject,
+                   get_client_ip(self.request))
 
         return queryset
 

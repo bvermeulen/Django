@@ -10,7 +10,6 @@ from django.db.utils import IntegrityError
 from django.core.exceptions import ObjectDoesNotExist
 import re
 from recordtype import recordtype
-
 from utils.plogger import Logger
 
 logger = Logger.getlogger()
@@ -47,8 +46,9 @@ def get_session_newsstatus(request):
     return NewsStatus(*[request.session[key] for key, _ in ns_keys._asdict().items()])
 
 
-def store_news_item(user, title, summary, link, published, site):
-    logger.info(f'Store news by {user.username} of {title}')
+def store_news_item(user, title, summary, link, published, site, ip):
+    logger.info(f'user {user.username}, storing news from {site} with topic {title[:15]}..., ip: {ip}')
+
     usernewsitem = UserNewsItem.objects.filter(user=user).filter(link=link).first()
     if usernewsitem and usernewsitem.published < published:
         usernewsitem.delete()
@@ -89,8 +89,6 @@ def newspage(request):
                         news_items=0,
                         banner=False,
                         error_message='')
-
-    logger.info(f'{user} is browsing news at {get_client_ip(request)}')
 
     button_cntr = request.POST.get('control_btn')
     button_site = request.POST.get('site_btn')
@@ -159,9 +157,11 @@ def newspage(request):
         news_summary_flat_text = ''
 
     # if button was entered to store the news item then this is done here
+    ip_address = get_client_ip(request)
     if button_cntr == cntr_store and user.is_authenticated:
         store_news_item(user, news_title, news_summary, news_link,
-                        news_published, ns.current_news_site)
+                        news_published, ns.current_news_site,
+                        ip_address)
 
     # render the newspage
     length_summary = len(news_summary_flat_text)
@@ -189,10 +189,11 @@ def newspage(request):
                'error_message': ns.error_message,
               }
 
-    # store status session for next time newsfeed is called but remove the
-    # error message
+    # store status session for next time newsfeed is called but remove
+    # the error message
     ns.error_message = ''
     set_session_newsstatus(request, ns)
+    logger.info(f'user {user}, browsing news: {ns.current_news_site}, ip: {ip_address}')
 
     return render(request, 'newsfeed/newspage.html', context)
 
@@ -201,6 +202,9 @@ def newspage(request):
 def mynewsitems(request):
     ''' views function to render mynewsitems.html
     '''
+    ip_address = get_client_ip(request)
+    logger.info(f'user {request.user}, watching personal newsitems, ip: {ip_address}')
+
     deleted_item_pk = request.POST.get('deleted_item_pk')
     if deleted_item_pk:
         get_object_or_404(UserNewsItem, pk=deleted_item_pk).delete()
@@ -244,7 +248,7 @@ def newssites(request):
             try:
                 usersites = UserNewsSite(user=user)
                 usersites.save()
-                logger.info(f'User {user.username} made a new news selection')
+                logger.info(f'user {user.username}, made a new news selection')
             except IntegrityError:
                 logger.info('==> Check program this option is not possible')
 

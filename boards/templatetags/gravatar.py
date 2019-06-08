@@ -17,4 +17,3 @@ def gravatar(user):
         params=urlencode({'d': default, 's': str(size)})
     )
     return url
-    

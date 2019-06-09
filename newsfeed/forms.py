@@ -10,7 +10,7 @@ class SelectedSitesForm(forms.Form):
         for site in NewsSite.objects.all():
             newssite_choices.append((site, site))
 
-        newssite_choices = tuple(newssite_choices)
+        newssite_choices.sort(key=lambda site: site[0].news_site)
 
         self.fields['selected_sites'] = forms.MultipleChoiceField(
                             choices=newssite_choices,

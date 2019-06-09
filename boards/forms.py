@@ -20,7 +20,7 @@ class PostForm(forms.ModelForm):
         required=False,
         label='',
         help_text='Selection is not required',
-        queryset=User.objects.all().order_by('username'))
+        queryset=User.objects.all().exclude(username='default_user').order_by('username'))
 
     class Meta:
         model = Post

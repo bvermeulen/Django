@@ -46,49 +46,134 @@ def get_session_newsstatus(request):
     return NewsStatus(*[request.session[key] for key, _ in ns_keys._asdict().items()])
 
 
-def store_news_item(user, title, summary, link, published, site, ip):
-    logger.info(f'user {user.username}, storing news from {site} with topic {title[:15]}..., ip: {ip}')
-
+def store_news_item(user, ns, feed_items, ip):
+    ''' store news item to model UserNewsItem
+        arguments:
+        :user: user (type model User)
+        :ns: newstatus (type recordtype)
+        :feed_items: feed items (feedparser dict type)
+        :ip: ip address (type string)
+    '''
+    link = feed_items[ns.item].link
     usernewsitem = UserNewsItem.objects.filter(user=user).filter(link=link).first()
-    if usernewsitem and usernewsitem.published < published:
+    news_published = feedparser_time_to_datetime(feed_items[ns.item])
+    if usernewsitem and usernewsitem.published < news_published:
         usernewsitem.delete()
         usernewsitem = None
 
     if usernewsitem == None:
         usernewsitem = UserNewsItem()
         usernewsitem.user = user
-        usernewsitem.title = title
-        usernewsitem.summary = summary
+        usernewsitem.title = feed_items[ns.item].title
+        usernewsitem.summary = feed_items[ns.item].summary
         usernewsitem.link = link
-        usernewsitem.published = published
-        usernewsitem.news_site = NewsSite.objects.get(news_site=site)
+        usernewsitem.published = news_published
+        usernewsitem.news_site = NewsSite.objects\
+            .get(news_site=ns.current_news_site)
         usernewsitem.save()
+
+        logger.info(f'user {user.username}, storing news from '\
+                    f'{usernewsitem.news_site} with topic '\
+                    f'{usernewsitem.title[:15]}..., ip: {ip}')
+
+
+def create_news_context(ns, news_sites, feed_items):
+    ''' create news context to be rendered to newspage
+        arguments:
+        :ns: news status (type recordtype)
+        :feed_items: feed items (feedparser dict type)
+        return:
+        :context: dict with newspage items
+    '''
+    news_published = feedparser_time_to_datetime(feed_items[ns.item])
+
+    reference_text = ''.join([NewsSite.objects.get(
+        news_site=ns.current_news_site).news_url,
+        ', updated: ', news_published.strftime('%a, %d %B %Y %H:%M:%S GMT')])
+    status_text = ''.join(['News item: ', str(ns.item+1), ' from ',
+                  str(ns.news_items)])
+
+    news_title = feed_items[ns.item].title
+    news_link = feed_items[ns.item].link
+    news_summary = feed_items[ns.item].summary
+    news_summary = remove_feedburner_reference(news_summary)
+    news_summary_flat_text = remove_all_references(news_summary)
+    if news_summary == news_title:
+        news_summary = ''
+        news_summary_flat_text = ''
+
+    length_summary = len(news_summary_flat_text)
+    delay = max(MIN_CHARS, (len(news_title)+length_summary))*DELAY_FACTOR/1000
+    if length_summary > BANNER_LENGTH:
+        show_banner_button = False
+        help_banner = ''
+    else:
+        show_banner_button = True
+        help_banner = HELP_BANNER
+
+    context = {'news_sites': news_sites,
+               'news_site': ns.current_news_site,
+               'reference': reference_text,
+               'status': status_text,
+               'news_link': news_link,
+               'news_title': news_title,
+               'news_summary': news_summary,
+               'news_summary_flat_text': news_summary_flat_text,
+               'delay': delay,
+               'show_banner_button': show_banner_button,
+               'banner': ns.banner,
+               'help_arrows': HELP_ARROWS,
+               'help_banner': help_banner,
+               'error_message': ns.error_message,
+              }
+
+    return context
+
+
+def obtain_news_sites_and_news_status_for_user(request, user):
+    default_news_sites = [item.news_site for item in UserNewsSite.objects.get(
+                  user__username='default_user').news_sites.all()]
+
+    try:
+        news_sites = [item.news_site for item in UserNewsSite.objects.get(
+                      user=user).news_sites.all()]
+
+    except (ObjectDoesNotExist, TypeError):
+        news_sites = default_news_sites
+
+    if news_sites == []:
+        # empty newssites to result in a redirect to newssites to select a
+        # newssite.
+        ns = None
+    else:
+        try:
+            ns = get_session_newsstatus(request)
+
+            # check if current news site is not deleted. If it is then select
+            # the default site
+            if ns.current_news_site not in [
+                site.news_site for site in NewsSite.objects.all()]:
+                ns.current_news_site = default_news_sites[0]
+
+        except (KeyError, AttributeError):
+            ns = NewsStatus(current_news_site=news_sites[0],
+                            news_site='',
+                            item=0,
+                            news_items=0,
+                            banner=False,
+                            error_message='')
+
+    news_sites.sort()
+    return news_sites, ns
 
 
 def newspage(request):
     ''' views function to render newspage.html
     '''
     user = request.user
-    try:
-        news_sites = [item.news_site for item in UserNewsSite.objects.get(
-                      user=user).news_sites.all()]
-
-    except (ObjectDoesNotExist, TypeError):
-        news_sites = [item.news_site for item in UserNewsSite.objects.get(
-                      user__username='default_user').news_sites.all()]
-
+    news_sites, ns = obtain_news_sites_and_news_status_for_user(request, user)
     if news_sites == []:
         return redirect(reverse('newssites'))
-
-    try:
-        ns = get_session_newsstatus(request)
-    except (KeyError, AttributeError):
-        ns = NewsStatus(current_news_site=news_sites[0],
-                        news_site='',
-                        item=0,
-                        news_items=0,
-                        banner=False,
-                        error_message='')
 
     button_cntr = request.POST.get('control_btn')
     button_site = request.POST.get('site_btn')
@@ -125,10 +210,9 @@ def newspage(request):
         # converts them to Dict
         feed_items = restore_feedparserdict(feed_items)
 
-    ns.news_items = len(feed_items)
-
     # test if newsfeed is not empty, if it is return to defauilt newssite
     # and reset session
+    ns.news_items = len(feed_items)
     if ns.news_items == 0:
         default_site = str(UserNewsSite.objects.get(
                            user__username='default_user').news_sites.first())
@@ -139,62 +223,19 @@ def newspage(request):
         set_session_newsstatus(request, ns)
         return redirect(reverse('newspage'))
 
-    news_published = feedparser_time_to_datetime(feed_items[ns.item])
-
-    reference_text = ''.join([NewsSite.objects.get(
-        news_site=ns.current_news_site).news_url,
-        ', updated: ', news_published.strftime('%a, %d %B %Y %H:%M:%S GMT')])
-    status_text = ''.join(['News item: ', str(ns.item+1), ' from ',
-                  str(ns.news_items)])
-
-    news_title = feed_items[ns.item].title
-    news_link = feed_items[ns.item].link
-    news_summary = feed_items[ns.item].summary
-    news_summary = remove_feedburner_reference(news_summary)
-    news_summary_flat_text = remove_all_references(news_summary)
-    if news_summary == news_title:
-        news_summary = ''
-        news_summary_flat_text = ''
-
-    # if button was entered to store the news item then this is done here
+    # if button was pressed to store the news item then this is done here
     ip_address = get_client_ip(request)
     if button_cntr == cntr_store and user.is_authenticated:
-        store_news_item(user, news_title, news_summary, news_link,
-                        news_published, ns.current_news_site,
-                        ip_address)
+        store_news_item(user, ns, feed_items, ip_address)
 
-    # render the newspage
-    length_summary = len(news_summary_flat_text)
-    delay = max(MIN_CHARS, (len(news_title)+length_summary))*DELAY_FACTOR/1000
-    if length_summary > BANNER_LENGTH:
-        show_banner_button = False
-        help_banner = ''
-    else:
-        show_banner_button = True
-        help_banner = HELP_BANNER
+    context = create_news_context(ns, news_sites, feed_items)
 
-    context = {'news_sites': news_sites,
-               'news_site': ns.current_news_site,
-               'reference': reference_text,
-               'status': status_text,
-               'news_link': news_link,
-               'news_title': news_title,
-               'news_summary': news_summary,
-               'news_summary_flat_text': news_summary_flat_text,
-               'delay': delay,
-               'show_banner_button': show_banner_button,
-               'banner': ns.banner,
-               'help_arrows': HELP_ARROWS,
-               'help_banner': help_banner,
-               'error_message': ns.error_message,
-              }
-
-    # store status session for next time newsfeed is called but remove
+    # store status session for next time newsfeed is called and remove
     # the error message
     ns.error_message = ''
     set_session_newsstatus(request, ns)
-    logger.info(f'user {user}, browsing news: {ns.current_news_site}, ip: {ip_address}')
 
+    logger.info(f'user {user}, browsing news: {ns.current_news_site}, ip: {ip_address}')
     return render(request, 'newsfeed/newspage.html', context)
 
 

@@ -12,8 +12,8 @@ https://docs.djangoproject.com/en/1.11/ref/settings/
 
 import os
 from decouple import config, Csv
-from utils.plogger import Logger
-from utils.run_once import run_once
+from howdimain.utils.plogger import Logger
+from howdimain.utils.run_once import run_once
 
 logformat = '%(asctime)s:%(levelname)s:%(message)s'
 Logger.set_logger(config('LOG_FILE'), logformat, 'INFO')

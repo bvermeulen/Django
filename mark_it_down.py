@@ -1,5 +1,5 @@
 import markdown
-from utils.mdx_del_ins import DelInsExtension
+from howdimain.utils.mdx_del_ins import DelInsExtension
 from django.utils.html import mark_safe
 
 

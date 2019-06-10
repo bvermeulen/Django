@@ -10,7 +10,8 @@ from django.db.utils import IntegrityError
 from django.core.exceptions import ObjectDoesNotExist
 import re
 from recordtype import recordtype
-from utils.plogger import Logger
+from howdimain.utils.plogger import Logger
+from howdimain.utils.get_ip import get_client_ip
 
 logger = Logger.getlogger()
 DELAY_FACTOR = 35
@@ -26,14 +27,6 @@ cntr_store = 'store this news item'
 
 NewsStatus = recordtype('NewsStatus',
              'current_news_site news_site item news_items banner error_message')
-
-def get_client_ip(request):
-    x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
-    if x_forwarded_for:
-        ip = x_forwarded_for.split(',')[-1].strip()
-    else:
-        ip = request.META.get('REMOTE_ADDR')
-    return ip
 
 
 def set_session_newsstatus(request, newsstatus):

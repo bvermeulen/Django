@@ -1,5 +1,6 @@
-# try to get the logsettings printed out only once but not working !! 
-
+''' function to run a function only run
+'''
+# try to get the logsettings printed out only once but not working !!
 def run_once(f):
     def wrapper(*args, **kwargs):
         if not wrapper.has_run:

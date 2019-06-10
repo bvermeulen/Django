@@ -5,22 +5,18 @@ from django.views.generic import UpdateView, ListView
 from django.utils import timezone
 from django.utils.decorators import method_decorator
 from django.db.models import Count
+from django.core.exceptions import ObjectDoesNotExist
 from .forms import NewTopicForm, PostForm
-from .models import Board, Topic, Post, AllowedUser
-from .boards_settings import POSTS_PER_PAGE, TOPICS_PER_PAGE
-from utils.plogger import Logger
+from .models import Board, Topic, Post
+from howdimain.howdimain_vars import POSTS_PER_PAGE, TOPICS_PER_PAGE
+from howdimain.utils.plogger import Logger
+from howdimain.utils.get_ip import get_client_ip
 
 logger = Logger.getlogger()
-
-
-def get_client_ip(request):
-    x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
-    if x_forwarded_for:
-        ip = x_forwarded_for.split(',')[-1].strip()
-    else:
-        ip = request.META.get('REMOTE_ADDR')
-    return ip
-
+try:
+    moderator = User.objects.get(username='moderator')
+except ObjectDoesNotExist:
+    moderator = ''
 
 def log_record(user, comment, subject, ip):
         logger.info(f'user {user}, {comment}{subject}, ip: {ip}')
@@ -97,7 +93,8 @@ def new_topic(request, board_pk):
 
     context = { 'board': board,
                 'form1': form1,
-                'form2': form2, }
+                'form2': form2,
+    }
     return render(request, 'boards/new_topic.html', context)
 
 
@@ -114,8 +111,9 @@ class PostListView(ListView):
             self.topic.views += 1
             self.topic.save()
             self.request.session[session_key] = True
-        kwargs['topic'] = self.topic
 
+        kwargs['topic'] = self.topic
+        kwargs['moderator'] = moderator
         return super().get_context_data(**kwargs)
 
     def get_queryset(self):
@@ -215,6 +213,7 @@ class PostUpdateView(UpdateView):
 
         _post = get_object_or_404(Post, pk=self.kwargs.get('post_pk'))
         self.allowed_to_edit = self.request.user == _post.created_by or \
+                               self.request.user == moderator or \
                                self.request.user in _post.allowed_editor.all()
 
         return queryset

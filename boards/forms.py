@@ -3,9 +3,7 @@ from django import forms
 from django.db.models import ManyToManyField
 from .models import Topic, Post
 from martor.fields import MartorFormField
-from .boards_settings import MESSAGE_FIELD_SIZE
-
-nl = '\n'
+from howdimain.howdimain_vars import MESSAGE_FIELD_SIZE, EXCLUDE_USERS
 
 class NewTopicForm(forms.ModelForm):
 
@@ -20,7 +18,7 @@ class PostForm(forms.ModelForm):
         required=False,
         label='',
         help_text='Selection is not required',
-        queryset=User.objects.all().exclude(username='default_user').order_by('username'))
+        queryset=User.objects.all().exclude(username__in=EXCLUDE_USERS).order_by('username'))
 
     class Meta:
         model = Post

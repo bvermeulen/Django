@@ -13,10 +13,7 @@ from howdimain.utils.plogger import Logger
 from howdimain.utils.get_ip import get_client_ip
 
 logger = Logger.getlogger()
-try:
-    moderator = User.objects.get(username='moderator')
-except ObjectDoesNotExist:
-    moderator = ''
+
 
 def log_record(user, comment, subject, ip):
         logger.info(f'user {user}, {comment}{subject}, ip: {ip}')
@@ -105,6 +102,7 @@ class PostListView(ListView):
     template_name = 'boards/topic_posts.html'
     paginate_by = POSTS_PER_PAGE
 
+
     def get_context_data(self, **kwargs):
         session_key = f'viewed_topic_{self.topic.pk}'
         if not self.request.session.get(session_key, False):
@@ -112,6 +110,10 @@ class PostListView(ListView):
             self.topic.save()
             self.request.session[session_key] = True
 
+        try:
+            moderator = User.objects.get(username='moderator')
+        except ObjectDoesNotExist:
+            moderator = ''
         kwargs['topic'] = self.topic
         kwargs['moderator'] = moderator
         return super().get_context_data(**kwargs)
@@ -212,6 +214,10 @@ class PostUpdateView(UpdateView):
         queryset = self.topic.posts.order_by('-updated_at')
 
         _post = get_object_or_404(Post, pk=self.kwargs.get('post_pk'))
+        try:
+            moderator = User.objects.get(username='moderator')
+        except ObjectDoesNotExist:
+            moderator = ''
         self.allowed_to_edit = self.request.user == _post.created_by or \
                                self.request.user == moderator or \
                                self.request.user in _post.allowed_editor.all()

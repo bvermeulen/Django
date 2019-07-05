@@ -14,6 +14,9 @@ from recordtype import recordtype
 from howdimain.utils.plogger import Logger
 from howdimain.utils.get_ip import get_client_ip
 
+from pprint import pprint
+
+
 logger = Logger.getlogger()
 DELAY_FACTOR = 35
 MIN_CHARS = 350
@@ -303,28 +306,48 @@ def newssites(request):
             return redirect(newsfeed_url)
 
         else:
+            # new site is selected, so set select_sites to initial choices
             form_select_sites = SelectedSitesForm()
             form_select_sites.fields['selected_sites'].initial = choices
 
         if form_new_site.is_valid():
-            test_feed = update_news(form_new_site.cleaned_data['news_url'])
+            test_feed = update_news(form_new_site.cleaned_data.get('news_url'))
             if test_feed:
                 form_new_site.save()
                 form_new_site = NewSiteForm()
+                form_new_site.initial['news_site'] = 'site name'
+                form_new_site.initial['news_url'] = 'url'
+
             else:
                 new_site_error_message = \
-                    f'Site {form_new_site.cleaned_data["news_site"]} is not valid'
+                    f'Site {form_new_site.cleaned_data.get("news_site")} did not '\
+                    f'return a valid RSS'
 
+            # update to include the new news site
             form_select_sites = SelectedSitesForm()
             form_select_sites.fields['selected_sites'].initial = choices
 
         else:
-            print(f'new site is not valid')
+            # error handling: if news_site is valid then url is incorrect
+            if form_new_site.cleaned_data.get('news_site'):
+                new_site_error_message = \
+                    f'URL {form_new_site.data.get("news_url")} is not properly formed'
+            else:
+                new_site_error_message = \
+                    f'URL News site {form_new_site.data.get("news_site")} already exists'
+
+            _site = form_new_site.data.get('news_site')
+            _url = form_new_site.data.get('news_url')
+            form_new_site = NewSiteForm()
+            form_new_site.initial['news_site'] = _site
+            form_new_site.initial['news_url'] = _url
 
     else:
         form_new_site = NewSiteForm()
+        form_new_site.initial['news_site'] = 'site name'
+        form_new_site.initial['news_url'] = 'url'
         form_select_sites = SelectedSitesForm()
-        form_select_sites.fields['selected_sites'].initial = choices
+        form_select_sites.initial['selected_sites'] = choices
 
     context = { 'form_select_sites': form_select_sites,
                 'form_new_site': form_new_site,

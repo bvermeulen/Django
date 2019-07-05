@@ -1,7 +1,5 @@
 {% extends 'base.html' %}
 
-
-
 {% block breadcrumb %}
 <ol class="breadcrumb my-4">
   <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a></li>
@@ -25,7 +23,6 @@
         </ul>
 `      </div>
     `  <div style="clear:left">
-        <br>
         <input type='submit' value='submit' class="btn btn-primary"></input>
         <a href="{% url 'newspage' %}" class="btn btn-primary">Cancel</a>
       </div>
@@ -34,11 +31,11 @@
     <form method="post">
       {% csrf_token %}
       <div style="clear:left">
-        <br>
-        <p>Enter a new site</p>
-        <p>{{ new_site_error_message }}</p>
-        {{ form_new_site }}
-        <input type='submit' value='add' class="btn btn-primary"></input>
+        <br><br>
+        <p>Enter a new site ...</p>
+        <p><font color="red"> {{ new_site_error_message }}</font></p>
+        <div> {{ form_new_site.news_site }} {{ form_new_site.news_url }}
+        <input type='submit' value='add' class="btn-sm btn-primary"></input></div>
         <br><br>
       </div>
     </form>

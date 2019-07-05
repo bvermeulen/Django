@@ -24,4 +24,7 @@ class NewSiteForm(forms.ModelForm):
     class Meta:
         model = NewsSite
         fields = ['news_site', 'news_url']
-        labels = {'news_site': 'Site', 'news_url': 'url'}
+        widgets={
+            'news_site': forms.TextInput(attrs={'style': 'width:10%'}),
+            'news_url': forms.TextInput(attrs={'style': 'width:40%'})
+                }

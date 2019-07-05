@@ -5,10 +5,11 @@ from .module_news import (update_news, feedparser_time_to_datetime,
                           remove_feedburner_reference, remove_all_references,
                           restore_feedparserdict)
 from .models import NewsSite, UserNewsSite, UserNewsItem
-from .forms import SelectedSitesForm
+from .forms import SelectedSitesForm, NewSiteForm
 from django.db.utils import IntegrityError
 from django.core.exceptions import ObjectDoesNotExist
 import re
+import datetime
 from recordtype import recordtype
 from howdimain.utils.plogger import Logger
 from howdimain.utils.get_ip import get_client_ip
@@ -26,7 +27,7 @@ cntr_previous = 'previous'
 cntr_store = 'store this news item'
 
 NewsStatus = recordtype('NewsStatus',
-             'current_news_site news_site item news_items banner error_message')
+             'current_news_site news_site updated item news_items banner error_message')
 
 
 def set_session_newsstatus(request, newsstatus):
@@ -35,7 +36,7 @@ def set_session_newsstatus(request, newsstatus):
 
 
 def get_session_newsstatus(request):
-    ns_keys = NewsStatus(*[None]*6)
+    ns_keys = NewsStatus(*[None]*7)
     return NewsStatus(*[request.session[key] for key, _ in ns_keys._asdict().items()])
 
 
@@ -151,6 +152,7 @@ def obtain_news_sites_and_news_status_for_user(request, user):
         except (KeyError, AttributeError):
             ns = NewsStatus(current_news_site=news_sites[0],
                             news_site='',
+                            updated='',
                             item=0,
                             news_items=0,
                             banner=False,
@@ -189,13 +191,16 @@ def newspage(request):
     if button_site:
         ns.current_news_site = button_site
 
+    today = datetime.date.today().strftime("%d-%m-%Y")
     update_news_true = (ns.current_news_site != ns.news_site) or \
-                       (ns.item == 0 and not button_cntr)
+                       (ns.item == 0 and not button_cntr) or \
+                       (ns.updated != today)
     if update_news_true:
         feed_items = update_news(NewsSite.objects.get(
                news_site=ns.current_news_site).news_url)
         request.session['feed'] = feed_items
         ns.news_site = ns.current_news_site
+        ns.updated = today
         ns.item = 0
     else:
         feed_items = request.session['feed']
@@ -246,8 +251,9 @@ def mynewsitems(request):
     button_site = request.POST.get('site_btn')
     if button_site:
         ns = NewsStatus(current_news_site=button_site,
-                        news_site='',
                         item=0,
+                        news_site='',
+                        published='',
                         news_items=0,
                         banner=False,
                         error_message='')
@@ -264,6 +270,7 @@ def mynewsitems(request):
 def newssites(request):
     ''' views function to render newssites.html
     '''
+    new_site_error_message = ''
     choices = []
     user = request.user
     try:
@@ -273,10 +280,11 @@ def newssites(request):
         pass
 
     if request.method == 'POST':
-        form = SelectedSitesForm(request.POST)
-        if form.is_valid():
-            selected_sites = form.cleaned_data.get('selected_sites')
 
+        form_select_sites = SelectedSitesForm(request.POST)
+        form_new_site = NewSiteForm(request.POST)
+        if form_select_sites.is_valid() and not form_new_site.is_valid():
+            selected_sites = form_select_sites.cleaned_data.get('selected_sites')
             # delete all entries for this user and then recreate with selection
             UserNewsSite.objects.filter(user=user).delete()
             try:
@@ -293,10 +301,33 @@ def newssites(request):
             usersites.save()
             newsfeed_url = reverse('newspage')
             return redirect(newsfeed_url)
-        else:
-            logger.info('==> form is not valid')
-    else:
-        form = SelectedSitesForm()
-        form.fields['selected_sites'].initial = choices
 
-    return render(request, 'newsfeed/newssites.html', {'form':form})
+        else:
+            form_select_sites = SelectedSitesForm()
+            form_select_sites.fields['selected_sites'].initial = choices
+
+        if form_new_site.is_valid():
+            test_feed = update_news(form_new_site.cleaned_data['news_url'])
+            if test_feed:
+                form_new_site.save()
+                form_new_site = NewSiteForm()
+            else:
+                new_site_error_message = \
+                    f'Site {form_new_site.cleaned_data["news_site"]} is not valid'
+
+            form_select_sites = SelectedSitesForm()
+            form_select_sites.fields['selected_sites'].initial = choices
+
+        else:
+            print(f'new site is not valid')
+
+    else:
+        form_new_site = NewSiteForm()
+        form_select_sites = SelectedSitesForm()
+        form_select_sites.fields['selected_sites'].initial = choices
+
+    context = { 'form_select_sites': form_select_sites,
+                'form_new_site': form_new_site,
+                'new_site_error_message': new_site_error_message, }
+
+    return render(request, 'newsfeed/newssites.html', context)

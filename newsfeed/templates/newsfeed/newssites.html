@@ -1,5 +1,7 @@
 {% extends 'base.html' %}
 
+
+
 {% block breadcrumb %}
 <ol class="breadcrumb my-4">
   <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a></li>
@@ -9,13 +11,36 @@
 {% endblock %}
 
 {% block content %}
-  <div class="container">
     <form method="post">
       {% csrf_token %}
-      {{ form.as_p }}
-      <input type='submit' value='submit' class="btn btn-primary"></input>
-      <a href="{% url 'newspage' %}" class="btn btn-primary">Cancel</a>
+      <div class="container">
+        <ul style="width:100%; list-style-type:none">
+        {% for field in form_select_sites %}
+          {% for item in field %}
+            <li style="float:left; width:20%;">
+              {{ item }}
+            </li>
+          {% endfor %}
+        {% endfor %}
+        </ul>
+`      </div>
+    `  <div style="clear:left">
+        <br>
+        <input type='submit' value='submit' class="btn btn-primary"></input>
+        <a href="{% url 'newspage' %}" class="btn btn-primary">Cancel</a>
+      </div>
     </form>
-    <br><br>
+
+    <form method="post">
+      {% csrf_token %}
+      <div style="clear:left">
+        <br>
+        <p>Enter a new site</p>
+        <p>{{ new_site_error_message }}</p>
+        {{ form_new_site }}
+        <input type='submit' value='add' class="btn btn-primary"></input>
+        <br><br>
+      </div>
+    </form>
 
 {% endblock content %}

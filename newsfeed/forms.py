@@ -1,6 +1,7 @@
 from django import forms
 from .models import NewsSite
 
+
 class SelectedSitesForm(forms.Form):
 
     def __init__(self, *args, **kwargs):
@@ -16,3 +17,11 @@ class SelectedSitesForm(forms.Form):
                             choices=newssite_choices,
                             widget=forms.CheckboxSelectMultiple(),
                             )
+
+
+class NewSiteForm(forms.ModelForm):
+
+    class Meta:
+        model = NewsSite
+        fields = ['news_site', 'news_url']
+        labels = {'news_site': 'Site', 'news_url': 'url'}

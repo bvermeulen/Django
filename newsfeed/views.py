@@ -14,8 +14,6 @@ from recordtype import recordtype
 from howdimain.utils.plogger import Logger
 from howdimain.utils.get_ip import get_client_ip
 
-from pprint import pprint
-
 
 logger = Logger.getlogger()
 DELAY_FACTOR = 35
@@ -256,7 +254,7 @@ def mynewsitems(request):
         ns = NewsStatus(current_news_site=button_site,
                         item=0,
                         news_site='',
-                        published='',
+                        updated='',
                         news_items=0,
                         banner=False,
                         error_message='')
@@ -308,7 +306,7 @@ def newssites(request):
         else:
             # new site is selected, so set select_sites to initial choices
             form_select_sites = SelectedSitesForm()
-            form_select_sites.fields['selected_sites'].initial = choices
+            form_select_sites.initial['selected_sites'] = choices
 
         if form_new_site.is_valid():
             test_feed = update_news(form_new_site.cleaned_data.get('news_url'))
@@ -325,7 +323,7 @@ def newssites(request):
 
             # update to include the new news site
             form_select_sites = SelectedSitesForm()
-            form_select_sites.fields['selected_sites'].initial = choices
+            form_select_sites.initial['selected_sites'] = choices
 
         else:
             # error handling: if news_site is valid then url is incorrect

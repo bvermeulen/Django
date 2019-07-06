@@ -9,15 +9,16 @@ https://docs.djangoproject.com/en/1.11/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/1.11/ref/settings/
 """
-
 import os
 from decouple import config, Csv
 from howdimain.utils.plogger import Logger
-from howdimain.utils.run_once import run_once
 
 logformat = '%(asctime)s:%(levelname)s:%(message)s'
 Logger.set_logger(config('LOG_FILE'), logformat, 'INFO')
 logger = Logger.getlogger()
+HOWDIMAIN_VERSION='1.0'
+HOWDIMAIN_DATE='6 JULY 2019'
+HOWDIMAIN_AUTHOR='bruno.vermeulen@hotmail.com'
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -176,7 +177,6 @@ MEDIA_ROOT = os.path.join(os.path.dirname(BASE_DIR), 'media')
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.11/howto/static-files/
-
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(os.path.dirname(BASE_DIR), 'staticfiles')
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
@@ -194,27 +194,24 @@ EMAIL_USE_TLS = config('EMAIL_USE_TLS', default=True, cast=bool)
 DEFAULT_FROM_EMAIL = '<noreply@howdiweb.nl>'
 EMAIL_SUBJECT_PREFIX = '[Howdiweb] '
 
-@run_once
-def log_settings():
-    nl = '\n'
-    run_once = True
-    logger.info(f'{nl}------------------------------------------------------------'\
-                f'{nl}        howdiweb started: bruno_vermeulen2001@yahoo.com'\
-                f"{nl}        Logfile: {config('LOG_FILE')}"\
-                f"{nl}        Debug: {config('DEBUG')}"\
-                f"{nl}        Alowed hosts: {ALLOWED_HOSTS}"\
-                f'{nl}------------------------------------------------------------')
+nl = '\n'
+logger.info(f'{nl}------------------------------------------------------------'\
+            f'{nl}        Howdimain version: {HOWDIMAIN_VERSION}'\
+            f'{nl}        Version date: {HOWDIMAIN_DATE}'\
+            f'{nl}        Author: {HOWDIMAIN_AUTHOR}'\
+            f"{nl}        Logfile: {config('LOG_FILE')}"\
+            f"{nl}        Debug: {config('DEBUG')}"\
+            f"{nl}        Alowed hosts: {ALLOWED_HOSTS}"\
+            f'{nl}------------------------------------------------------------')
 
-    logger.info(f"{nl}DB_NAME: {config('DB_NAME')}"\
-                f"{nl}DB_USER: {config('DB_USER')}"\
-                f"{nl}DB_PASSWORD: {'NOT SHOWN'}"\
-                f'{nl}EMAIL_BACKEND: {EMAIL_BACKEND}'\
-                f'{nl}EMAIL_HOST: {EMAIL_HOST}'\
-                f'{nl}EMAIL_PORT: {EMAIL_PORT}'\
-                f'{nl}EMAIL_HOST_USER: {EMAIL_HOST_USER}'\
-                f"{nl}EMAIL_HOST_PASSWORD: {'NOT SHOWN'}"\
-                f'{nl}EMAIL_USE_TLS: {EMAIL_USE_TLS}'\
-                f'{nl}IMGUR CLIENT ID: {MARTOR_IMGUR_CLIENT_ID}'\
-                f'{nl}------------------------------------------------------------')
-
-log_settings()
+logger.info(f"{nl}DB_NAME: {config('DB_NAME')}"\
+            f"{nl}DB_USER: {config('DB_USER')}"\
+            f"{nl}DB_PASSWORD: {'NOT SHOWN'}"\
+            f'{nl}EMAIL_BACKEND: {EMAIL_BACKEND}'\
+            f'{nl}EMAIL_HOST: {EMAIL_HOST}'\
+            f'{nl}EMAIL_PORT: {EMAIL_PORT}'\
+            f'{nl}EMAIL_HOST_USER: {EMAIL_HOST_USER}'\
+            f"{nl}EMAIL_HOST_PASSWORD: {'NOT SHOWN'}"\
+            f'{nl}EMAIL_USE_TLS: {EMAIL_USE_TLS}'\
+            f'{nl}IMGUR CLIENT ID: {MARTOR_IMGUR_CLIENT_ID}'\
+            f'{nl}------------------------------------------------------------')

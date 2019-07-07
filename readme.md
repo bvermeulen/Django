@@ -1,18 +1,18 @@
 # Howdiweb
 >Website application with topic board and personal news feeds
-
-The website is available at: https://www.howdiweb.nl  
-
-![](howdiweb_screenshot.png)
+>
+>The website is available at: https://www.howdiweb.nl  
+>
+>![](howdiweb_screenshot.png)
 
 ## Framworks used
-- Python 3.6
+- Python 3.6.8
 - Django 2.2.3
 - Database PostgreSQL
 - Email Imgur
 - Markdown editor Martor
 - RSS feed through Feedparser
-- Instance is running on Digital Ocean at ip 174.138.5.244
+- Instance is running on Digital Ocean at ip `174.138.5.244`
 - Requirements are listed in `requirements.txt`:
 
 ## Environment variables
@@ -39,7 +39,7 @@ EMAIL_HOST = smtp.mailgun.org
 EMAIL_HOST_USER =
 EMAIL_HOST_PASSWORD =
 ```
-To work with `.env` the add the follwing settings in Django `settings.py`:
+To work with `.env` add the following settings to Django `settings.py`:
 ```
 from decouple import config, Csv
 SECRET_KEY = config('SECRET_KEY')

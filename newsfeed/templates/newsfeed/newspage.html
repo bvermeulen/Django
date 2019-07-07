@@ -14,10 +14,10 @@
 		 <button type="button" class="btn btn-primary btn-sm" onclick="window.location.href='{% url 'home' %}'">home</button>
 		 <button type="button" class="btn btn-primary btn-sm" id="button_pause" onclick="Pause();">Pause</button>
 		 <input type="hidden" name="control_btn" id="keyinput"></input>
-		 <input type="submit" class="btn btn-primary btn-sm" name="control_btn" value="previous"></input>
-		 <input type="submit" class="btn btn-primary btn-sm" name="control_btn" value="next"></input>
+		 <input type="submit" class="btn btn-primary btn-sm" name="control_btn" value="{{ controls.previous }}"></input>
+		 <input type="submit" class="btn btn-primary btn-sm" name="control_btn" value="{{ controls.next }}"></input>
 		 {% if show_banner_button %}
-		   <input type="submit" class="btn btn-primary btn-sm" name="control_btn" value="Banner"></input>
+		   <input type="submit" class="btn btn-primary btn-sm" name="control_btn" value="{{ controls.banner }}"></input>
 		 {% endif %}
 		 <button class="btn dropdown-toggle btn-primary btn-sm" type="button" data-toggle="dropdown">Sites<span class="caret"></span></button>
 		 <ul class="dropdown-menu">
@@ -38,7 +38,7 @@
 			 <h2 class="card-title" style="background-color:lightgrey">{{ news_title|safe }}</h2>
 			 <a href='{{ news_link }}'>link</a>
 			 {% if user.is_authenticated %}
-			   <input type="submit" class="btn btn-link" name="control_btn" value="store this news item"></input>
+			   <input type="submit" class="btn btn-link" name="control_btn" value="{{ controls.store }}"></input>
 			 {% endif %}
 			 <div class="card-text">
 			 {% if banner and show_banner_button and news_summary_flat_text %}
@@ -85,11 +85,11 @@
 		console.log(`Key pressed: ${keyName}`);
 		var form = document.getElementById("controlform");
 		if (keyName == 'ArrowRight') {
-			document.getElementById("keyinput").value = "next";
+			document.getElementById("keyinput").value = "{{ controls.next }}";
 			form.submit();
 			}
 		else if (keyName == 'ArrowLeft') {
-			document.getElementById("keyinput").value = "previous";
+			document.getElementById("keyinput").value = "{{ controls.previous }}";
 			form.submit();
 			}
 		};
@@ -112,13 +112,13 @@
 
 		if (xDiff > 10) {
 			// swipe left
-			document.getElementById("keyinput").value = "next";
+			document.getElementById("keyinput").value = "{{ controls.next }}";
 			form.submit();
 			}
 
 		if (xDiff < -10) {
 			// swipe right
-			document.getElementById("keyinput").value = "previous";
+			document.getElementById("keyinput").value = "{{ controls.previous }}";
 			form.submit();
 			}
 

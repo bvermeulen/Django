@@ -7,16 +7,18 @@ from .views_utils import (set_session_newsstatus, get_session_newsstatus,
                           obtain_news_sites_and_news_status_for_user,
 )
 import datetime
+from collections import namedtuple
 from howdimain.utils.plogger import Logger
 from howdimain.utils.get_ip import get_client_ip
 
 
 logger = Logger.getlogger()
-cntr_banner = 'Banner'
-cntr_next = 'next'
-cntr_previous = 'previous'
-cntr_store = 'store this news item'
+Controls = namedtuple('Controls', 'banner store next previous')
 
+# these controls determine what is shown on the template buttons and links
+cntr = Controls('Banner', 'store this news item',
+                '\u25B6', # left arrow unicode
+                '\u25C0') # right arrow unicode
 
 def newspage(request):
     ''' views function to render newspage.html
@@ -28,13 +30,13 @@ def newspage(request):
 
     button_cntr = request.POST.get('control_btn')
     button_site = request.POST.get('site_btn')
-    if not button_cntr or button_cntr == cntr_next:
+    if not button_cntr or button_cntr == cntr.next:
         ns.item += 1
-    elif button_cntr == cntr_previous:
+    elif button_cntr == cntr.previous:
         ns.item -= 1
-    elif button_cntr == cntr_banner:
+    elif button_cntr == cntr.banner:
         ns.banner = not ns.banner
-    elif button_cntr == cntr_store:
+    elif button_cntr == cntr.store:
         pass
     else:
         assert False, 'button value incorrect: check template'
@@ -79,7 +81,7 @@ def newspage(request):
 
     # if button was pressed to store the news item then this is done here
     ip_address = get_client_ip(request)
-    if button_cntr == cntr_store and user.is_authenticated:
+    if button_cntr == cntr.store and user.is_authenticated:
         store_news_item(user, ns, feed_items, ip_address)
 
     context = create_news_context(ns, news_sites, feed_items)
@@ -88,6 +90,8 @@ def newspage(request):
     # the error message
     ns.error_message = ''
     set_session_newsstatus(request, ns)
+
+    context['controls'] = cntr
 
     logger.info(f'user {user}, browsing news: {ns.current_news_site}, ip: {ip_address}')
     return render(request, 'newsfeed/newspage.html', context)

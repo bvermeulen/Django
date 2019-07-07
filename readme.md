@@ -35,13 +35,14 @@ IMGUR_SECRET_KEY =
  
 # email mailgun
 EMAIL_BACKEND = django.core.mail.backends.smtp.EmailBackend
-EMAIL_HOST = smtp.mailgun.org
+EMAIL_HOST = 
 EMAIL_HOST_USER =
 EMAIL_HOST_PASSWORD =
 ```
-To work with `.env` add the following settings to Django `settings.py`:
+To work with `.env` add the following to Django `settings.py`:
 ```
 from decouple import config, Csv
+...
 SECRET_KEY = config('SECRET_KEY')
 DEBUG = config('DEBUG', default=False, cast=bool)
 ALLOWED_HOSTS = config('ALLOWED_HOSTS', cast=Csv())
@@ -49,7 +50,6 @@ etc
 ```
 
 ## Author
-For any question please contact me  
 Name: Bruno Vermeulen  
-Email: bruno.vermeulen@hotmail.com  
-Date: 7 July 2019  
+For any question please contact me at bruno.vermeulen@hotmail.com  
+Last update: 7 July 2019  

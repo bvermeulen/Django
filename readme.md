@@ -5,7 +5,7 @@
 >
 >![](howdiweb_screenshot.png)
 
-## Framworks used
+## Frameworks used
 - Python 3.6.8
 - Django 2.2.3
 - Database PostgreSQL

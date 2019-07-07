@@ -2,30 +2,43 @@
 >Website application with topic board and personal news feed if user is logged in
 
 The website is available at:  
-https://howdiweb.nl  
 https://www.howdiweb.nl  
-
-*note to enter https as http does not forward (yet)*
 
 ![](howdiweb_screenshot.png)
 
-## Settings
-- Web application in Django 2.1
+## Framworks used
 - Python 3.6
-- Instance is running on AWS Elastic Beanstalk
-- Database PostgreSQL on AWS RDS
+- Web application in Django 2.2.3
+- Database PostgreSQL
+- Email Imgur
+- Markdown editor Martor
+- RSS feed through Feedparser
+- Instance is running on Digital Ocean at ip 174.138.5.244
 - Requirements are listed in requirements.txt:
 
-The environment file .env is not provided. Following settings must be given:  
-SECRET_KEY = 'some_secret_key'  
-DEBUG = True [or False]  
-ALLOWED_HOSTS = mywebserver.com  
-AWS_ACCESS_KEY_ID = 'myawsaccesskey'  
-AWS_SECRET_ACCESS_KEY = 'myawssecretkey'  
-DATABASE_PASSWORD = 'mydatabasepassword'  
+## Environment variables are give in the file .env
+For obvious reasons the content file is not. Following settings must be given:  
+SECRET_KEY =
+LOG_FILE =
+DEBUG =
+ALLOWED_HOSTS =
 
+# postgresql database on localhost
+DB_NAME =
+DB_USER =
+DB_PASSWORD =
+
+# imgur client_id and key
+IMGUR_CLIENT_ID =
+IMGUR_SECRET_KEY =
+
+# email mailgun
+EMAIL_BACKEND = django.core.mail.backends.smtp.EmailBackend
+EMAIL_HOST = smtp.mailgun.org
+EMAIL_HOST_USER =
+EMAIL_HOST_PASSWORD =
 
 ## Author
 Name: Bruno Vermeulen  
 Email: bruno.vermeulen@hotmail.com  
-Date: 17 November 2018  
+Date: 7 July 2019  

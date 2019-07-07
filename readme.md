@@ -1,5 +1,5 @@
 # Howdiweb
->Website application with topic board and personal news feed if user is logged in
+>>Website application with topic board and personal news feeds
 
 The website is available at:  
 https://www.howdiweb.nl  
@@ -17,8 +17,8 @@ https://www.howdiweb.nl
 - Requirements are listed in requirements.txt:
 
 ## Environment variables
-Environment variables are give in the file .env and for obvious readons is not provided.   
-Following settings must be given:  
+Environment variables are give in the file `.env` and for obvious reasons is not provided.   
+Following settings must be given:
 ```
 SECRET_KEY =
 LOG_FILE =
@@ -39,6 +39,14 @@ EMAIL_BACKEND = django.core.mail.backends.smtp.EmailBackend
 EMAIL_HOST = smtp.mailgun.org
 EMAIL_HOST_USER =
 EMAIL_HOST_PASSWORD =
+```
+To work with `.env` and the following in Django sessions.py:
+```
+from decouple import config, Csv
+SECRET_KEY = config('SECRET_KEY')
+DEBUG = config('DEBUG', default=False, cast=bool)
+ALLOWED_HOSTS = config('ALLOWED_HOSTS', cast=Csv())
+etc
 ```
 
 ## Author

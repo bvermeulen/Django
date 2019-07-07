@@ -1,3 +1,4 @@
+from django.core.exceptions import ObjectDoesNotExist
 from ..models import NewsSite, UserNewsSite, UserNewsItem
 from ..module_news import (feedparser_time_to_datetime,
                           remove_feedburner_reference, remove_all_references,
@@ -65,7 +66,7 @@ def create_news_context(ns, news_sites, feed_items):
     BANNER_LENGTH = 150
     HELP_ARROWS = 'Use left/ right arrow to toggle news items. '
     HELP_BANNER = 'Press Banner to toggle banner on/ off. '
-    
+
     news_published = feedparser_time_to_datetime(feed_items[ns.item])
 
     reference_text = ''.join([NewsSite.objects.get(

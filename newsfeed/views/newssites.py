@@ -1,10 +1,10 @@
 from django.shortcuts import render, redirect, reverse
 from django.contrib.auth.decorators import login_required
+from django.core.exceptions import ObjectDoesNotExist
+from django.db.utils import IntegrityError
 from ..module_news import update_news
 from ..models import NewsSite, UserNewsSite
 from ..forms import SelectedSitesForm, NewSiteForm
-from django.db.utils import IntegrityError
-from django.core.exceptions import ObjectDoesNotExist
 from howdimain.utils.plogger import Logger
 
 

@@ -53,8 +53,3 @@ etc
 Name: Bruno Vermeulen  
 For any question please contact me at bruno.vermeulen@hotmail.com  
 Last update: 7 July 2019  
-
-
-<img 
- src="https://i.imgur.com/rO4sQ8W.jpg" 
- width="500" />

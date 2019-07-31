@@ -43,11 +43,12 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django.contrib.humanize',
     'widget_tweaks',
-    'boards',
-    'accounts',
-    'newsfeed',
     'martor',
     'crispy_forms',
+    'accounts',
+    'boards',
+    'newsfeed',
+    'stock',
 ]
 
 CRISPY_TEMPLATE_PACK = 'bootstrap4'

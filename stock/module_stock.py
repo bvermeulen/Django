@@ -5,6 +5,7 @@ import csv
 import json
 from pprint import pprint
 from howdimain.utils.plogger import Logger
+from decouple import config
 
 logger = Logger.getlogger()
 
@@ -60,7 +61,7 @@ class WorldTradingData:
         website: https://www.worldtradingdata.com
     '''
     def setup(cls,):
-        cls.api_token = haha
+        cls.api_token = config('API_token')
         cls.stock_url = 'https://api.worldtradingdata.com/api/v1/stock'
         cls.intraday_url = 'https://intraday.worldtradingdata.com/api/v1/intraday'
 

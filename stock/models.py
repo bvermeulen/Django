@@ -53,4 +53,5 @@ class StockSelection(models.Model):
         unique_together = ['stock', 'portfolio']
 
     def __str__(self):
-        return f'{self.portfolio.user.username}, {self.portfolio.portfolio_name}: {self.stock.symbol}, {self.quantity}'
+        return f'{self.portfolio.user.username}, {self.portfolio.portfolio_name}: '\
+               f'{self.stock.symbol}, {self.quantity}'

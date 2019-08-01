@@ -60,7 +60,7 @@ class WorldTradingData:
         website: https://www.worldtradingdata.com
     '''
     def setup(cls,):
-        cls.api_token = 'XPsD3KxEK4iO7MtxVKn6jAV6Zym2mAfCm55LEWnHQeYYBwbjKaIScE2pGDKd'
+        cls.api_token = haha
         cls.stock_url = 'https://api.worldtradingdata.com/api/v1/stock'
         cls.intraday_url = 'https://intraday.worldtradingdata.com/api/v1/intraday'
 

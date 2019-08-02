@@ -11,5 +11,4 @@ from stock import module_stock as ms
 wtd = ms.WorldTradingData()
 wtd.setup()
 exchanges = ['NYSE', 'NASDAQ', 'AEX', 'LSE']
-wtd.parse_stock_name('Wolt', 'SLB', 'Apple', 'msft', 'Schlu', markets=exchanges)
-wtd.stock_symbols
+symbols = wtd.parse_stock_name('Schlu', markets=exchanges)

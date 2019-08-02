@@ -6,6 +6,7 @@ import json
 from pprint import pprint
 from howdimain.utils.plogger import Logger
 from decouple import config
+import datetime
 
 logger = Logger.getlogger()
 
@@ -65,8 +66,8 @@ class WorldTradingData:
         cls.stock_url = 'https://api.worldtradingdata.com/api/v1/stock'
         cls.intraday_url = 'https://intraday.worldtradingdata.com/api/v1/intraday'
 
-    def get_data(cls, *stock_symbols):
-        symbols = ','.join(cls.stock_symbols).upper()
+    def get_stock_trade_info(cls, stock_symbols):
+        symbols = ','.join(stock_symbols).upper()
         symbols = '?symbol=' + symbols
         token = '&api_token=' + cls.api_token
         url = ''.join([cls.stock_url,
@@ -76,18 +77,27 @@ class WorldTradingData:
         try:
             res.raise_for_status()
         except Exception as exception:
-            print(f'exception: {exception}')
+            logger.info(f'unable to get stock data for {url}')
+            return []
 
-        stock_dict = json.loads(res.content)
-        pprint(stock_dict)
+        orig_stock_info = json.loads(res.content).get('data')
 
-    def parse_stock_name(cls, *stock_names, markets=None):
+        # convert date string to datetime object
+        stock_info = []
+        for stock in orig_stock_info:
+            stock['last_trade_time'] = datetime.datetime.strptime(
+                stock.get('last_trade_time'), "%Y-%m-%d %H:%M:%S")
+            stock_info.append(stock)
+
+        return stock_info
+
+    def parse_stock_name(cls, stock_string, markets=None):
         ''' parse stock names searching the worldtradingdata database in three
             passes: 1) is the stock name the actual ticker symbol,
             2) if not does it start with the stock_name or 3) does the company
             name contain the stock_name.
 
-            arguments: stock names, like: 'Wolters', 'AAPL', 'msft'
+            arguments: string with stock names, like: 'Wolters, AAPL, 'msft'
             returns: list of ticker symbols
 
             Stock is Django model containing stock information
@@ -96,7 +106,9 @@ class WorldTradingData:
             markets = []
 
         #  use set to avoid duplicates
-        cls.stock_symbols = set()
+        stock_symbols = set()
+        stock_names = stock_string.replace(',', ' ').split()
+        # TODO parsing is not correct if spaces are giving between names
 
         def add_stock_symbol_if_valid(stock_symbol):
             '''  only add if stock_symbol is listed on one of the markets or
@@ -104,10 +116,9 @@ class WorldTradingData:
             '''
             if markets == [] or Stock.objects.filter(symbol=stock_symbol).\
                                     first().exchange.exchange_short in markets:
-                cls.stock_symbols.add(stock_symbol)
+                stock_symbols.add(stock_symbol)
             else:
                 pass
-
 
         for stock_name in stock_names:
             #  check is stock name is not empty
@@ -133,4 +144,4 @@ class WorldTradingData:
                     add_stock_symbol_if_valid(stock_symbol)
 
 
-        cls.stock_symbols = list(cls.stock_symbols)
+        return list(stock_symbols)

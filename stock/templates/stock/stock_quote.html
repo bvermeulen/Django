@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+
+{% block breadcrumb %}
+<ol class="breadcrumb my-4">
+  <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a></li>
+  <li class="breadcrumb-item active">Stock Quotes</li>
+</ol>
+{% endblock %}
+
+{% block content %}
+<form id="stockquote" method="post">
+{% csrf_token %}
+<div>
+  {{ form.quote_string }}
+  <input type='submit' value='Quote' class="btn-sm btn-primary"></input>
+</div>
+<br>
+<table class="table table-striped mb-4">
+  <thead class="thead-inverse">
+  <tr>
+    <th>Symbol</th>
+    <th>Company</th>
+    <th>Market</th>
+    <th>Currency</th>
+    <th>Price</th>
+    <th>Change</th>
+    <th>Time</th>
+  </tr>
+  </thead>
+  <tbody>
+  {% for stock in stock_info %}
+    <tr>
+    <td class="align-left">{{ stock.symbol }}</td>
+    <td class="align-left">{{ stock.name|truncatechars:20 }}</td>
+    <td class="align-left">{{ stock.stock_exchange_short }}</td>
+    <td class="align-left">{{ stock.currency }}</td>
+    <td class="align-left">{{ stock.price }}</td>
+    <td class="align-left">{{ stock.day_change }}</td>
+    <td class="align-left">{{ stock.last_trade_time|date:"h:i a" }}</td>
+    </tr>
+  {% endfor %}
+</table>
+</form>
+<br><br><br><br>
+{% endblock content %}
+
+{% block javascript %}
+{% endblock %}

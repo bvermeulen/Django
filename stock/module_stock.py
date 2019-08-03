@@ -67,6 +67,8 @@ class WorldTradingData:
         cls.intraday_url = 'https://intraday.worldtradingdata.com/api/v1/intraday'
 
     def get_stock_trade_info(cls, stock_symbols):
+        ''' return the stock info as a dict retrieved from url json, key 'data'
+        '''
         symbols = ','.join(stock_symbols).upper()
         symbols = '?symbol=' + symbols
         token = '&api_token=' + cls.api_token
@@ -105,10 +107,9 @@ class WorldTradingData:
         if markets is None:
             markets = []
 
-        #  use set to avoid duplicates
+        #  use set to avoid duplicates and extract stock names from the string
         stock_symbols = set()
-        stock_names = stock_string.replace(',', ' ').split()
-        # TODO parsing is not correct if spaces are giving between names
+        stock_names = [stock.strip() for stock in stock_string.split(',')]
 
         def add_stock_symbol_if_valid(stock_symbol):
             '''  only add if stock_symbol is listed on one of the markets or

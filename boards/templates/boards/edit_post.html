@@ -24,7 +24,7 @@
             onclick="return Validate()">Delete contribtion</button>
     <button class="btn dropdown-toggle btn-primary btn-sm" data-toggle="dropdown"
       >Allowed editors<span class="caret"></span></button>
-    <ul class="dropdown-menu">
+    <ul class="dropdown-menu"  style="height:40%; overflow:hidden; overflow-y:scroll;">
       {{ form.allowed_editor|as_crispy_field }}
     </ul>
     <a href="{% url 'topic_posts' post.topic.board.pk post.topic.pk %}"

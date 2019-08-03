@@ -84,12 +84,13 @@ class WorldTradingData:
 
         orig_stock_info = json.loads(res.content).get('data')
 
-        # convert date string to datetime object
+        # if there is stock info, convert date string to datetime object
         stock_info = []
-        for stock in orig_stock_info:
-            stock['last_trade_time'] = datetime.datetime.strptime(
-                stock.get('last_trade_time'), "%Y-%m-%d %H:%M:%S")
-            stock_info.append(stock)
+        if orig_stock_info:
+            for stock in orig_stock_info:
+                stock['last_trade_time'] = datetime.datetime.strptime(
+                    stock.get('last_trade_time'), "%Y-%m-%d %H:%M:%S")
+                stock_info.append(stock)
 
         return stock_info
 

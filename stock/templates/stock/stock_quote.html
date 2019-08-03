@@ -1,5 +1,7 @@
 {% extends 'base.html' %}
 
+{% load crispy_forms_tags %}
+
 {% block breadcrumb %}
 <ol class="breadcrumb my-4">
   <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a></li>
@@ -13,6 +15,14 @@
 {% csrf_token %}
 <div>
   {{ form.quote_string }}
+
+  <button class="btn dropdown-toggle btn-primary btn-sm" data-toggle="dropdown"
+    >Markets<span class="caret"></span></button>
+
+    <ul class="dropdown-menu", style="height:40%; overflow:hidden; overflow-y:scroll;">
+      {{ form.markets|as_crispy_field }}
+    </ul>
+
   <input type='submit' value='Quote' class="btn-sm btn-primary"></input>
 </div>
 <br>

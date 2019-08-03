@@ -9,7 +9,7 @@ class Exchange(models.Model):
     time_zone_name = models.CharField(max_length=30)
 
     def __str__(self):
-        return self.exchange_short
+        return self.exchange_long
 
 
 class Currency(models.Model):

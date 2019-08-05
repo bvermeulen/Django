@@ -61,6 +61,10 @@ class WorldTradingData:
     ''' methods to handle trading data
         website: https://www.worldtradingdata.com
     '''
+    up_triangle = '\u25B3'    # white up triangle
+    down_triangle = '\u25BD'  # white down triangle
+    rectangle = '\u25AD'      # white rectangle
+
     def setup(cls,):
         cls.api_token = config('API_token')
         cls.stock_url = 'https://api.worldtradingdata.com/api/v1/stock'
@@ -90,6 +94,19 @@ class WorldTradingData:
             for stock in orig_stock_info:
                 stock['last_trade_time'] = datetime.datetime.strptime(
                     stock.get('last_trade_time'), "%Y-%m-%d %H:%M:%S")
+
+                if abs(float(stock.get('change_pct'))) < 0.001:
+                    stock['font_color'] = 'black'
+                    stock['caret_up_down'] = cls.rectangle
+
+                elif float(stock.get('change_pct')) < 0:
+                    stock['font_color'] = 'red'
+                    stock['caret_up_down'] = cls.down_triangle
+
+                else:
+                    stock['font_color'] = 'green'
+                    stock['caret_up_down'] = cls.up_triangle
+
                 stock_info.append(stock)
 
         return stock_info
@@ -141,7 +158,7 @@ class WorldTradingData:
 
             else:
                 #  check if name of the companay contains the stock_name (exact match)
-                for stock in Stock.objects.filter(company__contains=stock_name):
+                for stock in Stock.objects.filter(company__icontains=stock_name):
                     stock_symbol = Stock.objects.get(symbol=stock.symbol).symbol
                     add_stock_symbol_if_valid(stock_symbol)
 

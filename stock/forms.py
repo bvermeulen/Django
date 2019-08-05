@@ -1,17 +1,20 @@
 from django import forms
 from .models import Exchange
 
-class StockQuoteForm(forms.ModelForm):
-    quote_string = forms.CharField(max_length=50,
-        widget=forms.TextInput(attrs={'size':'40%'}))
+class StockQuoteForm(forms.Form):
 
-    markets = forms.ModelMultipleChoiceField(
-                widget=forms.CheckboxSelectMultiple(),
-                required=False,
-                label='',
-                queryset=Exchange.objects.all().order_by('exchange_long')
-    )
+    def __init__(self, *args, **kwargs):
+        super(StockQuoteForm, self).__init__(*args, **kwargs)
 
-    class Meta:
-        model = Exchange
-        fields = ['quote_string', 'markets']
+        self.fields['quote_string'] = forms.CharField(max_length=50,
+            widget=forms.TextInput(attrs={'size':'40%'}))
+
+        choices = [(exchange.exchange_short, exchange.exchange_long)\
+            for exchange in Exchange.objects.all().order_by('exchange_long')]
+
+        self.fields['markets'] = forms.MultipleChoiceField(
+            widget=forms.CheckboxSelectMultiple(),
+            choices=choices,
+            required=False,
+            label='',
+        )

@@ -7,11 +7,8 @@ class SelectedSitesForm(forms.Form):
     def __init__(self, *args, **kwargs):
         super(SelectedSitesForm, self).__init__(*args, **kwargs)
 
-        newssite_choices = []
-        for site in NewsSite.objects.all():
-            newssite_choices.append((site, site))
-
-        newssite_choices.sort(key=lambda site: site[0].news_site)
+        newssite_choices = [(site.pk, site.news_site)\
+         for site in NewsSite.objects.all().order_by('news_site')]
 
         self.fields['selected_sites'] = forms.MultipleChoiceField(
                             choices=newssite_choices,

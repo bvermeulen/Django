@@ -13,16 +13,14 @@
       {% csrf_token %}
       <div class="container">
         <ul style="width:100%; list-style-type:none">
-        {% for field in form_select_sites %}
-          {% for item in field %}
-            <li style="float:left; width:20%;">
-              {{ item }}
-            </li>
-          {% endfor %}
+        {% for item in form_select_sites.selected_sites %}
+          <li style="float:left; width:20%;">
+            {{ item }}
+          </li>
         {% endfor %}
         </ul>
-`      </div>
-    `  <div style="clear:left">
+`     </div>
+    ` <div style="clear:left">
         <input type='submit' value='submit' class="btn btn-primary"></input>
         <a href="{% url 'newspage' %}" class="btn btn-primary">Cancel</a>
       </div>

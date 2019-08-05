@@ -20,7 +20,7 @@
 		   <input type="submit" class="btn btn-primary btn-sm" name="control_btn" value="{{ controls.banner }}"></input>
 		 {% endif %}
 		 <button class="btn dropdown-toggle btn-primary btn-sm" type="button" data-toggle="dropdown">Sites<span class="caret"></span></button>
-		 <ul class="dropdown-menu">
+		 <ul class="dropdown-menu" style="height:40%; overflow:hidden; overflow-y:scroll;">
 		 	 {% for site in news_sites %}
 			   <li><input type="submit" class="btn btn-sm" name="site_btn" value="{{ site }}"></input></li>
 			 {% endfor %}

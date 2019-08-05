@@ -11,6 +11,7 @@
 
 {% block content %}
 {% now "Y-m-d" as current_date %}
+
 <form id="stockquote" method="post">
 {% csrf_token %}
 <div>
@@ -32,10 +33,11 @@
     <th>Symbol</th>
     <th>Company</th>
     <th>Market</th>
-    <th>Currency</th>
+    <th>Cur.</th>
+    <th></th>
     <th>Price</th>
-    <th>Change</th>
-    <th>Percentage</th>
+    <th>+/-</th>
+    <th>Pct</th>
     <th>Low</th>
     <th>High</th>
     <th>Previous</th>
@@ -49,9 +51,10 @@
     <td class="align-left">{{ stock.name|truncatechars:20 }}</td>
     <td class="align-left">{{ stock.stock_exchange_short }}</td>
     <td class="align-left">{{ stock.currency }}</td>
-    <td class="align-left">{{ stock.price }}</td>
-    <td class="align-left">{{ stock.day_change }}</td>
-    <td class="align-left">{{ stock.change_pct }}%</td>
+    <td class="align-left" style="width:5px; color:{{ stock.font_color }}">{{ stock.caret_up_down }}</td>
+    <td class="align-left" style="color:{{ stock.font_color }}">{{ stock.price }}</td>
+    <td class="align-left" style="color:{{ stock.font_color }}">{{ stock.day_change }}</td>
+    <td class="align-left" style="color:{{ stock.font_color }}"">{{ stock.change_pct }}%</td>
     <td class="align-left">{{ stock.day_low }}</td>
     <td class="align-left">{{ stock.day_high }}</td>
     <td class="align-left">{{ stock.close_yesterday }}</td>
@@ -64,6 +67,7 @@
   {% endfor %}
 </table>
 </form>
+<small>Data provided by <a href="https://{{ data_provider_url }}">{{ data_provider_url }}</a></small>
 <br><br><br><br>
 {% endblock content %}
 

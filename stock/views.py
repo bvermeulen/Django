@@ -14,14 +14,16 @@ class QuoteView(View):
     wtd.setup()
     markets = ['NASDAQ', 'NYSE', 'AEX']
 
+    data_provider_url = 'www.worldtradingdata.com'
+
     def get(self, request):
         quote_string = request.session.get('quote_string', '')
         markets = request.session.get('markets', self.markets)
-        market_objects = Exchange.objects.filter(exchange_short__in=markets)
         form = self.form_class(initial={'quote_string': quote_string,
-                                        'markets': market_objects})
+                                        'markets': markets})
         context = {'stock_info': [],
                    'form': form,
+                   'data_provider_url': self.data_provider_url,
         }
 
         return render(request, self.template_name, context)
@@ -29,13 +31,11 @@ class QuoteView(View):
     def post(self, request):
         quote_string = request.session.get('quote_string', '')
         markets = request.session.get('markets', self.markets)
-        market_objects = Exchange.objects.filter(exchange_short__in=markets)
 
         form = self.form_class(request.POST)
         if form.is_valid():
             quote_string = form.cleaned_data.get('quote_string')
-            market_objects = form.cleaned_data.get('markets')
-            markets = [market.exchange_short for market in market_objects]
+            markets = form.cleaned_data.get('markets')
             symbols = self.wtd.parse_stock_name(
                 quote_string,
                 markets=markets)
@@ -48,9 +48,10 @@ class QuoteView(View):
             stock_info = []
 
         form = self.form_class(initial={'quote_string': quote_string,
-                                        'markets': market_objects})
+                                        'markets': markets})
         context = {'stock_info': stock_info,
                    'form': form,
+                   'data_provider_url': self.data_provider_url,
         }
 
         return render(request, self.template_name, context)

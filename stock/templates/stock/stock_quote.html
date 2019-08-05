@@ -30,8 +30,8 @@
 <table class="table table-striped mb-4">
   <thead class="thead-inverse">
   <tr>
-    <th>Symbol</th>
     <th>Company</th>
+    <th>Symbol</th>
     <th>Market</th>
     <th>Cur.</th>
     <th></th>
@@ -47,8 +47,8 @@
   <tbody>
   {% for stock in stock_info %}
     <tr>
-    <td class="align-left">{{ stock.symbol }}</td>
     <td class="align-left">{{ stock.name|truncatechars:20 }}</td>
+    <td class="align-left">{{ stock.symbol }}</td>
     <td class="align-left">{{ stock.stock_exchange_short }}</td>
     <td class="align-left">{{ stock.currency }}</td>
     <td class="align-left" style="width:5px; color:{{ stock.font_color }}">{{ stock.caret_up_down }}</td>

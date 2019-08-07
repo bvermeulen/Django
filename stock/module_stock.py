@@ -1,12 +1,12 @@
-from .models import Exchange, Currency, Stock
-from django.db.utils import IntegrityError
+import datetime
+from collections import namedtuple
 import requests
 import csv
 import json
-from pprint import pprint
+from .models import Exchange, Currency, Stock
+from django.db.utils import IntegrityError
 from howdimain.utils.plogger import Logger
 from decouple import config
-import datetime
 
 logger = Logger.getlogger()
 
@@ -69,16 +69,18 @@ class WorldTradingData:
         cls.api_token = config('API_token')
         cls.stock_url = 'https://api.worldtradingdata.com/api/v1/stock'
         cls.intraday_url = 'https://intraday.worldtradingdata.com/api/v1/intraday'
+        cls.range = '1'     #  number of days (1-30)
+        cls.interval = '1'  #  interval in minutes
 
     def get_stock_trade_info(cls, stock_symbols):
-        ''' return the stock info as a dict retrieved from url json, key 'data'
+        ''' return the stock trade info as a dict retrieved from url json, key 'data'
         '''
-        symbols = ','.join(stock_symbols).upper()
-        symbols = '?symbol=' + symbols
-        token = '&api_token=' + cls.api_token
         url = ''.join([cls.stock_url,
-                       symbols,
-                       token])
+                       '?symbol=' + ','.join(stock_symbols).upper(),
+                       '&sort_by=name',
+                       '&api_token=' + cls.api_token],
+                       )
+
         res = requests.get(url)
         try:
             res.raise_for_status()
@@ -89,6 +91,7 @@ class WorldTradingData:
         orig_stock_info = json.loads(res.content).get('data')
 
         # if there is stock info, convert date string to datetime object
+        # and add display attributes
         stock_info = []
         if orig_stock_info:
             for stock in orig_stock_info:
@@ -110,6 +113,40 @@ class WorldTradingData:
                 stock_info.append(stock)
 
         return stock_info
+
+    def stock_intraday_info(cls, stock_symbol):
+        '''  return stock intraday info as a dict retrieved from url json, key 'data'
+        '''
+        url = ''.join([cls.intraday_url,
+                       '?symbol=' + stock_symbol.upper(),
+                       '&range=' + cls.range,
+                       '&interval=' + cls.interval,
+                       '&sort=asc'
+                       '&api_token=' + cls.api_token],
+                       )
+
+        res = requests.get(url)
+        try:
+            res.raise_for_status()
+        except Exception as exception:
+            logger.info(f'unable to get stock data for {url}')
+            return []
+
+        intraday_info = json.loads(res.content).get('intraday')
+
+        # if there is intraday info, convert date string and provide time and
+        # create list of date/time, price tuples
+        trade = namedtuple('trade', 'time price')
+        intraday_trades = []
+        if intraday_info:
+            for time_stamp, price_info in intraday_info.items():
+                intraday_trades.append(
+                    trade(time=datetime.datetime.strptime(time_stamp, "%Y-%m-%d %H:%M:%S"),
+                             price=price_info.get('open'))
+                    )
+
+        return intraday_trades
+
 
     def parse_stock_name(cls, stock_string, markets=None):
         ''' parse stock names searching the worldtradingdata database in three

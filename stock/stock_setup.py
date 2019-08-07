@@ -12,3 +12,4 @@ wtd = ms.WorldTradingData()
 wtd.setup()
 exchanges = ['NYSE', 'NASDAQ', 'AEX', 'LSE']
 symbols = wtd.parse_stock_name('Schlu', markets=exchanges)
+wtd.stock_intraday_info('AMZN')

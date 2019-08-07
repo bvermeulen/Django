@@ -1,0 +1,28 @@
+{% extends 'base.html' %}<html>
+
+{% load static %}
+
+{%block title %}Intraday trading{% endblock %}
+
+{% block breadcrumb %}
+<ol class="breadcrumb my-4">
+  <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a></li>
+	<li class="breadcrumb-item"><a href="{% url 'stock_quote' %}">Quotes</a></li>
+  <li class="breadcrumb-item active">Stock Trading</li>
+</ol>
+{% endblock %}
+
+{% block content %}
+
+	<div id="chart-container">FusionCharts()</div>
+	<br><br>
+	<small>Data provided by <a href="https://{{ data_provider_url }}">{{ data_provider_url }}</a></small>
+	<br><br>
+
+{% endblock content %}
+
+{% block javascript %}
+	<script type="text/javascript" src="{% static "fusioncharts/types/fusioncharts.js" %}"></script>
+	<script type="text/javascript" src="{% static "fusioncharts/themes/fusioncharts.theme.fusion.js" %}"></script>
+	{{ chart_js|safe }}
+{% endblock javascript %}

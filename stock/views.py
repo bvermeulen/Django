@@ -1,10 +1,13 @@
+import json
+import requests
 from django.shortcuts import render, redirect, reverse
 from django.views.generic import View
 from .forms import StockQuoteForm
 from .models import Exchange
 from .module_stock import WorldTradingData
 from collections import OrderedDict
-frrom .howdimain.utils.fusioncharts import FusionCharts
+from howdimain.utils.fusioncharts import FusionCharts, FusionTable, TimeSeries
+from .test_data import test_data
 
 
 class QuoteView(View):
@@ -64,38 +67,48 @@ class IntraDayView(View):
     wtd.setup()
     data_provider_url = 'www.worldtradingdata.com'
 
-    def get(self, request, symbol):
-        intraday_prices = wtd.get_stock_intraday_info(symbol)
+    def get(self, request):
+        symbol = 'UNA.AS'
+        intraday_trades = self.wtd.get_stock_intraday_info(symbol)
+        date = "06-08-2019"
 
-        chart_data = OrderedDict()
-        chart_data['chart'] = {
-            'caption': symbol,
-            'subCaption':'Intraday trading',
-            'xAxisName': 'Time',
-            'yAxisName': 'Price',
-            'theme': 'fusion',
-        }
+        schema = [{'name': 'Time',
+                   'type': 'date',
+                   'format': '%d-%m-%Y %-I:%-M',
+                  },
+                  {'name': 'Price',
+                   'type': 'number',
+                  }]
 
-        chart_data['data'] = []
+        chart_data = []
         for trade in intraday_trades:
-            chart_data['data'].append({
-                'label': trade.time.strftime('%H:%M:%S'),
-                'value': float(trade.price)
-                }
-        )
+            chart_data.append([
+                trade.time.strftime('%d-%m-%Y %H:%M'),
+                float(trade.price)
+                ])
 
-        trade_line = FusionCharts('line2d',
+        chart_data = test_data   # for debugging only
+        schema = json.dumps(schema)
+        chart_data = json.dumps(chart_data)
+
+        time_series = TimeSeries(FusionTable(schema, chart_data))
+        time_series.AddAttribute('caption', {'text': f'{symbol}'})
+        time_series.AddAttribute('subcaption', {'text': f'{date}'})
+        time_series.AddAttribute('navigator', {'enabled': 0})
+        time_series.AddAttribute('chart', {'showlegend': 0})
+        time_series.AddAttribute('extensions', {'customRangeSelector': {'enabled': 0}})
+
+        trade_line = FusionCharts('timeseries',
                                   'trades',
                                   '600', '400',
-                                  'trades-container',
+                                  'chart-container',
                                   'json',
-                                  chart_data,
-        )
+                                  time_series,
+                                 )
 
-        context = {'chart': trade_line.render(),
+        context = {'chart_js': trade_line.render(),
                    'data_provider_url': self.data_provider_url,
         }
-
 
 
         return render(request, self.template_name, context)

@@ -70,7 +70,7 @@ class WorldTradingData:
         cls.stock_url = 'https://api.worldtradingdata.com/api/v1/stock'
         cls.intraday_url = 'https://intraday.worldtradingdata.com/api/v1/intraday'
         cls.range = '1'     #  number of days (1-30)
-        cls.interval = '1'  #  interval in minutes
+        cls.interval = '5'  #  interval in minutes
 
     def get_stock_trade_info(cls, stock_symbols):
         ''' return the stock trade info as a dict retrieved from url json, key 'data'
@@ -114,7 +114,7 @@ class WorldTradingData:
 
         return stock_info
 
-    def stock_intraday_info(cls, stock_symbol):
+    def get_stock_intraday_info(cls, stock_symbol):
         '''  return stock intraday info as a dict retrieved from url json, key 'data'
         '''
         url = ''.join([cls.intraday_url,

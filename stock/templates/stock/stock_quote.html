@@ -2,6 +2,8 @@
 
 {% load crispy_forms_tags %}
 
+{% block title %}Stock quote{% endblock %}
+
 {% block breadcrumb %}
 <ol class="breadcrumb my-4">
   <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a></li>
@@ -47,7 +49,7 @@
   <tbody>
   {% for stock in stock_info %}
     <tr>
-    <td class="align-left">{{ stock.name|truncatechars:20 }}</td>
+    <td class="align-left"><a href="{% url 'stock_intraday' stock.symbol %}">{{ stock.name|truncatechars:20 }}</a></td>
     <td class="align-left">{{ stock.symbol }}</td>
     <td class="align-left">{{ stock.stock_exchange_short }}</td>
     <td class="align-left">{{ stock.currency }}</td>

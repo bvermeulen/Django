@@ -8,6 +8,8 @@ from django.db.utils import IntegrityError
 from howdimain.utils.plogger import Logger
 from decouple import config
 
+from .test_data import test_json
+
 logger = Logger.getlogger()
 
 class PopulateStock:
@@ -131,8 +133,9 @@ class WorldTradingData:
         except Exception as exception:
             logger.info(f'unable to get stock data for {url}')
             return []
-
         intraday_info = json.loads(res.content).get('intraday')
+
+        # intraday_info = test_json.get('intraday')   #  for DEBUG only
 
         # if there is intraday info, convert date string and provide time and
         # create list of date/time, price tuples
@@ -142,7 +145,19 @@ class WorldTradingData:
             for time_stamp, price_info in intraday_info.items():
                 intraday_trades.append(
                     trade(time=datetime.datetime.strptime(time_stamp, "%Y-%m-%d %H:%M:%S"),
-                             price=price_info.get('open'))
+                          price=price_info.get('open'))
+                    )
+
+            # add start and end time
+            start_time = intraday_trades[0].time.strftime("%Y-%m-%d") + ' 08:00:00'
+            intraday_trades.insert(0,
+                    trade(time=datetime.datetime.strptime(start_time, "%Y-%m-%d %H:%M:%S"),
+                          price=None)
+                    )
+            end_time = intraday_trades[-1].time.strftime("%Y-%m-%d") + ' 18:00:00'
+            intraday_trades.append(
+                    trade(time=datetime.datetime.strptime(end_time, "%Y-%m-%d %H:%M:%S"),
+                          price=None)
                     )
 
         return intraday_trades

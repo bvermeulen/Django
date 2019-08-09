@@ -7,9 +7,9 @@ from .models import Exchange, Stock
 from .module_stock import WorldTradingData
 from howdimain.utils.fusioncharts import FusionCharts, FusionTable, TimeSeries
 from howdimain.utils.min_max import get_min, get_max
+from .stock_lists import indexes
 
 from pprint import pprint
-
 
 class QuoteView(View):
     model = Exchange
@@ -41,11 +41,20 @@ class QuoteView(View):
         if form.is_valid():
             quote_string = form.cleaned_data.get('quote_string')
             markets = form.cleaned_data.get('markets')
-            symbols = self.wtd.parse_stock_name(
-                quote_string,
-                markets=markets)
+            if quote_string.upper() in indexes:
+                symbols =indexes.get(quote_string.upper())[0:20]
+                stock_info = self.wtd.get_stock_trade_info(symbols)
+                symbols =indexes.get(quote_string.upper())[20:40]
+                stock_info += self.wtd.get_stock_trade_info(symbols)
 
-            stock_info = self.wtd.get_stock_trade_info(symbols)
+            else:
+                symbols = self.wtd.parse_stock_name(
+                    quote_string,
+                    markets=markets)
+                stock_info = self.wtd.get_stock_trade_info(symbols)
+
+
+
             request.session['quote_string'] = quote_string
             request.session['markets'] = markets
 
@@ -127,8 +136,6 @@ class IntraDayView(View):
                                   'json',
                                   time_series,
                                  )
-
-        time_series.AddAttribute('extensions', {'customRangeSelector': {'enabled': 0}})
 
         context = {'chart_js': trade_line.render(),
                    'data_provider_url': self.data_provider_url,

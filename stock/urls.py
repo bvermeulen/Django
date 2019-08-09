@@ -1,5 +1,5 @@
 from django.urls import path
-from stock import views
+from stock import views, fusion_test
 
 urlpatterns = [
     path('stock/stock_quote', views.QuoteView.as_view(), name='stock_quote'),

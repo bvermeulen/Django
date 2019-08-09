@@ -6,7 +6,7 @@ class StockQuoteForm(forms.Form):
     def __init__(self, *args, **kwargs):
         super(StockQuoteForm, self).__init__(*args, **kwargs)
 
-        self.fields['quote_string'] = forms.CharField(max_length=50,
+        self.fields['quote_string'] = forms.CharField(max_length=150,
             widget=forms.TextInput(attrs={'size':'40%'}))
 
         choices = [(exchange.exchange_short, exchange.exchange_long)\

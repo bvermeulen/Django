@@ -6,6 +6,7 @@ import json
 from .models import Exchange, Currency, Stock
 from django.db.utils import IntegrityError
 from howdimain.utils.plogger import Logger
+from howdimain.utils.min_max import get_min, get_max
 from decouple import config
 
 from .test_data import test_json
@@ -74,6 +75,27 @@ class WorldTradingData:
         cls.range = '1'     #  number of days (1-30)
         cls.interval = '5'  #  interval in minutes
 
+        cls.schema = [{'name': 'Time',
+                       'type': 'date',
+                       'format': '%d-%m-%Y %-I:%-M',
+                      },
+                      {'name': 'open',
+                       'type': 'number',
+                      },
+                      {'name': 'close',
+                       'type': 'number',
+                      },
+                      {'name': 'low',
+                       'type': 'number',
+                      },
+                      {'name': 'high',
+                       'type': 'number',
+                      },
+                      {'name': 'volume',
+                       'type': 'number',
+                      },
+                     ]
+
     def get_stock_trade_info(cls, stock_symbols):
         ''' return the stock trade info as a dict retrieved from url json, key 'data'
         '''
@@ -135,29 +157,39 @@ class WorldTradingData:
             return []
         intraday_info = json.loads(res.content).get('intraday')
 
-        # intraday_info = test_json.get('intraday')   #  for DEBUG only
-
         # if there is intraday info, convert date string and provide time and
         # create list of date/time, price tuples
-        trade = namedtuple('trade', 'time price')
+        trade = namedtuple('trade', 'time open close low high volume')
         intraday_trades = []
+        min_low = None; max_high = None
         if intraday_info:
             for time_stamp, price_info in intraday_info.items():
                 intraday_trades.append(
                     trade(time=datetime.datetime.strptime(time_stamp, "%Y-%m-%d %H:%M:%S"),
-                          price=price_info.get('open'))
+                          open=price_info.get('open'),
+                          close=price_info.get('close'),
+                          low=price_info.get('low'),
+                          high=price_info.get('high'),
+                          volume=price_info.get('volume'),
+                          )
                     )
+
+                min_low = get_min(price_info.get('low'), min_low)
+                max_high = get_max(price_info.get('high'), max_high)
+
+            initial_open = intraday_trades[0].open
+            last_close = intraday_trades[-1].close
 
             # add start and end time
             start_time = intraday_trades[0].time.strftime("%Y-%m-%d") + ' 08:00:00'
             intraday_trades.insert(0,
                     trade(time=datetime.datetime.strptime(start_time, "%Y-%m-%d %H:%M:%S"),
-                          price=None)
+                          open=None, close=None, low=None, high=None, volume=None)
                     )
             end_time = intraday_trades[-1].time.strftime("%Y-%m-%d") + ' 18:00:00'
             intraday_trades.append(
                     trade(time=datetime.datetime.strptime(end_time, "%Y-%m-%d %H:%M:%S"),
-                          price=None)
+                          open=initial_open, close=last_close, low=min_low, high=max_high, volume=None)
                     )
 
         return intraday_trades

@@ -9,7 +9,14 @@ from howdimain.utils.fusioncharts import FusionCharts, FusionTable, TimeSeries
 from howdimain.utils.min_max import get_min, get_max
 from .stock_lists import indexes
 
+from .test_data import chart_js_test
 from pprint import pprint
+
+font_red = '#FF3333'
+font_green = 'green'
+font_white = 'white'
+font_weight = 'bolder'
+font_size = '16'
 
 class QuoteView(View):
     model = Exchange
@@ -53,8 +60,6 @@ class QuoteView(View):
                     markets=markets)
                 stock_info = self.wtd.get_stock_trade_info(symbols)
 
-
-
             request.session['quote_string'] = quote_string
             request.session['markets'] = markets
 
@@ -70,6 +75,7 @@ class QuoteView(View):
 
         return render(request, self.template_name, context)
 
+
 class IntraDayView(View):
     template_name = 'stock/stock_intraday.html'
 
@@ -79,10 +85,13 @@ class IntraDayView(View):
 
     def get(self, request, symbol):
 
+        if not Stock.objects.filter(symbol=symbol):
+            return redirect(reverse('stock_quote'))
+
         intraday_trades = self.wtd.get_stock_intraday_info(symbol)
 
         chart_data = []
-        min_price = None; max_price = None; max_volume = None
+        min_price,  max_price, max_volume = [None] * 3
         for trade in intraday_trades:
             chart_data.append([
                 trade.time.strftime('%d-%m-%Y %H:%M'),
@@ -93,29 +102,47 @@ class IntraDayView(View):
             max_volume = get_max(trade.volume, max_volume)
 
         if not min_price or not max_price or not max_volume:
-            min_price = 0
-            max_price = 0
-            max_volume = 0
+            min_price, max_price, max_volume = [0] * 3
 
         schema = json.dumps(self.wtd.schema)
         chart_data = json.dumps(chart_data)
 
-        caption = ''.join([Stock.objects.filter(symbol=symbol).first().company,' (', symbol,')'])
         try:
-            date_subcaption = intraday_trades[0].time.strftime('%d %B %Y')
-            date_interval = intraday_trades[0].time.strftime('%d-%m-%Y')
+            initial_open = intraday_trades[1].open
+            latest_close = intraday_trades[-2].close
+            prc_change = 100 * (float(latest_close) -
+                                float(initial_open)) / float(initial_open)
+
         except IndexError:
-            date_subcaption = ''
-            date_interval = ''
+            initial_open, final_close, prc_change = [''] * 3
+
+        if abs(float(prc_change)) < 0.01:
+            txt_color = 'txt_normal'
+            caret = self.wtd.rectangle
+        elif float(prc_change) < 0:
+            txt_color = 'txt_red'
+            caret = self.wtd.down_triangle
+        else:
+            txt_color = 'txt_green'
+            caret = self.wtd.up_triangle
+
+        caption = ''.join([Stock.objects.get(symbol=symbol).company,
+                           ' (', symbol, ')' ])
+        subcaption = ''.join([Stock.objects.get(symbol=symbol).currency.currency,
+                              f' {float(latest_close):.2f} ({prc_change:.1f}%)',
+                              f' {caret}'])
 
         time_series = TimeSeries(FusionTable(schema, chart_data))
-        time_series.AddAttribute('chart', "{'multicanvas': false, 'theme': 'candy', 'showlegend': 0}")
-        time_series.AddAttribute('caption', {'text': f'{caption}'})
-        time_series.AddAttribute('subcaption', {'text': f'{date_subcaption}'})
-        time_series.AddAttribute('navigator', {'enabled': 0})
-        time_series.AddAttribute('extensions', {'customRangeSelector': {'enabled': 0}})  # not working
-        interval = "[{'initialinterval': {" + "'from': " + f"'{date_interval} 10:00', 'to': " + f"'{date_interval} 15:00'" + "}}]"
-        time_series.attributes.append({'xaxis': interval})  # not working
+        time_series.AddAttribute('styleDefinition',
+            {'txt_red': {'fill': font_red, 'font-weight': font_weight, 'font-size': font_size},
+             'txt_green': {'fill': font_green, 'font-weight': font_weight, 'font-size': font_size},
+             'txt_normal': {'fill': font_white, 'font-weight': font_weight, 'font-size': font_size}})
+
+        time_series.AddAttribute('chart', {'multicanvas': '0', 'theme': 'candy', 'showlegend': '0',})
+        time_series.AddAttribute('caption', {'text': caption, })
+        time_series.AddAttribute('subcaption', {'text': subcaption, 'style': {'text': txt_color}, })
+        time_series.AddAttribute('navigator', {'enabled': '0'})
+        time_series.AddAttribute('extensions', {'customrangeselector': {'enabled': '0'}})
         time_series.AddAttribute('yaxis', [
             {'plot': [{'value':{'open':'open','high':'high','low':'low','close':'close'},
                        'type':'candlestick'}],
@@ -125,13 +152,14 @@ class IntraDayView(View):
                       },
             {'plot': [{'value': 'volume',
                        'type': 'column'}],
+                     'title': 'Volume',
                      'max': max_volume * 3,
                       },
             ])
 
         trade_line = FusionCharts('timeseries',
-                                  'ex1',
-                                  '700', '450',
+                                  'trades',
+                                  '700', '400',
                                   'chart-container',
                                   'json',
                                   time_series,

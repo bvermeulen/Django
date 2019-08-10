@@ -10,6 +10,7 @@ from howdimain.utils.min_max import get_min, get_max
 from decouple import config
 
 from .test_data import test_json
+from pprint import pprint
 
 logger = Logger.getlogger()
 
@@ -163,19 +164,19 @@ class WorldTradingData:
         intraday_trades = []
         min_low = None; max_high = None
         if intraday_info:
-            for time_stamp, price_info in intraday_info.items():
+            for time_stamp, trade_info in intraday_info.items():
                 intraday_trades.append(
                     trade(time=datetime.datetime.strptime(time_stamp, "%Y-%m-%d %H:%M:%S"),
-                          open=price_info.get('open'),
-                          close=price_info.get('close'),
-                          low=price_info.get('low'),
-                          high=price_info.get('high'),
-                          volume=price_info.get('volume'),
-                          )
+                          open=trade_info.get('open'),
+                          close=trade_info.get('close'),
+                          low=trade_info.get('low'),
+                          high=trade_info.get('high'),
+                          volume=trade_info.get('volume'),
+                         )
                     )
 
-                min_low = get_min(price_info.get('low'), min_low)
-                max_high = get_max(price_info.get('high'), max_high)
+                min_low = get_min(trade_info.get('low'), min_low)
+                max_high = get_max(trade_info.get('high'), max_high)
 
             initial_open = intraday_trades[0].open
             last_close = intraday_trades[-1].close

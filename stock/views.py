@@ -114,23 +114,27 @@ class IntraDayView(View):
                                 float(initial_open)) / float(initial_open)
 
         except IndexError:
-            initial_open, final_close, prc_change = [''] * 3
+            initial_open, latest_close, prc_change = [None] * 3
 
-        if abs(float(prc_change)) < 0.01:
-            txt_color = 'txt_normal'
-            caret = self.wtd.rectangle
-        elif float(prc_change) < 0:
-            txt_color = 'txt_red'
-            caret = self.wtd.down_triangle
+        if initial_open and latest_close and prc_change:
+            if abs(float(prc_change)) < 0.01:
+                txt_color = 'txt_normal'
+                caret = self.wtd.rectangle
+            elif float(prc_change) < 0:
+                txt_color = 'txt_red'
+                caret = self.wtd.down_triangle
+            else:
+                txt_color = 'txt_green'
+                caret = self.wtd.up_triangle
+
+            subcaption = ''.join([Stock.objects.get(symbol=symbol).currency.currency,
+                                  f' {float(latest_close):.2f} ({prc_change:.1f}%)',
+                                  f' {caret}'])
         else:
-            txt_color = 'txt_green'
-            caret = self.wtd.up_triangle
+            subcaption = ''
 
         caption = ''.join([Stock.objects.get(symbol=symbol).company,
                            ' (', symbol, ')' ])
-        subcaption = ''.join([Stock.objects.get(symbol=symbol).currency.currency,
-                              f' {float(latest_close):.2f} ({prc_change:.1f}%)',
-                              f' {caret}'])
 
         time_series = TimeSeries(FusionTable(schema, chart_data))
         time_series.AddAttribute('styleDefinition',

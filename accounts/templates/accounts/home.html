@@ -19,15 +19,15 @@
   {% if user.is_authenticated %}
     <a href="{% url 'mynewsitems' %}" class="btn btn-primary">My News</a>
   {% endif %}
-  <a href="{% url 'stock_quote' %}" class="btn btn-primary">Stock quote</a>
+  <a href="{% url 'stock_quotes' %}" class="btn btn-primary">Stock quote</a>
 </div>
 
 {% if user.is_authenticated %}
-  <img src="{{member_image.url}}" width="100%"</img>
+  <img src="{{member_image.url}}" width="80%"</img>
   <br><br>
   <div class="textarea" contenteditable="false">{{ member_text|safe }}</div>
 {% else %}
-  <img src="{{welcome_image.url}}" width="100%"</img>
+  <img src="{{welcome_image.url}}" width="80%"</img>
   <br><br>
   <div class="textarea" contenteditable="false">{{ welcome_text|safe }}</div>
 {% endif %}

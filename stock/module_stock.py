@@ -10,7 +10,6 @@ from howdimain.utils.min_max import get_min, get_max
 from decouple import config
 
 from .test_data import test_json
-from pprint import pprint
 
 logger = Logger.getlogger()
 
@@ -73,29 +72,29 @@ class WorldTradingData:
         cls.api_token = config('API_token')
         cls.stock_url = 'https://api.worldtradingdata.com/api/v1/stock'
         cls.intraday_url = 'https://intraday.worldtradingdata.com/api/v1/intraday'
-        cls.range = '1'     #  number of days (1-30)
-        cls.interval = '5'  #  interval in minutes
+        cls.history_url = 'https://api.worldtradingdata.com/api/v1/history'
 
-        cls.schema = [{'name': 'Time',
-                       'type': 'date',
-                       'format': '%d-%m-%Y %-I:%-M',
-                      },
-                      {'name': 'open',
-                       'type': 'number',
-                      },
-                      {'name': 'close',
-                       'type': 'number',
-                      },
-                      {'name': 'low',
-                       'type': 'number',
-                      },
-                      {'name': 'high',
-                       'type': 'number',
-                      },
-                      {'name': 'volume',
-                       'type': 'number',
-                      },
-                     ]
+    @staticmethod
+    def get_schema(format):
+        return [{'name': 'Date',
+                 'type': 'date',
+                 'format': format,
+                },
+                {'name': 'open',
+                 'type': 'number',
+                },
+                {'name': 'close',
+                 'type': 'number',
+                },
+                {'name': 'low',
+                 'type': 'number',
+                },
+                {'name': 'high',
+                 'type': 'number',
+                },
+                {'name': 'volume',
+                 'type': 'number',
+                },]
 
     def get_stock_trade_info(cls, stock_symbols):
         ''' return the stock trade info as a dict retrieved from url json, key 'data'
@@ -105,15 +104,8 @@ class WorldTradingData:
                        '&sort_by=name',
                        '&api_token=' + cls.api_token],
                        )
-
         res = requests.get(url)
-        try:
-            res.raise_for_status()
-        except Exception as exception:
-            logger.info(f'unable to get stock data for {url}')
-            return []
-
-        orig_stock_info = json.loads(res.content).get('data')
+        orig_stock_info = json.loads(res.content).get('data', {})
 
         # if there is stock info, convert date string to datetime object
         # and add display attributes
@@ -142,31 +134,27 @@ class WorldTradingData:
     def get_stock_intraday_info(cls, stock_symbol):
         '''  return stock intraday info as a dict retrieved from url json, key 'data'
         '''
+        range = '1'     #  number of days (1-30)
+        interval = '5'  #  interval in minutes
         url = ''.join([cls.intraday_url,
                        '?symbol=' + stock_symbol.upper(),
-                       '&range=' + cls.range,
-                       '&interval=' + cls.interval,
+                       '&range=' + range,
+                       '&interval=' + interval,
                        '&sort=asc'
-                       '&api_token=' + cls.api_token],
+                       '&api_token=' + cls.api_token ],
                        )
-
         res = requests.get(url)
-        try:
-            res.raise_for_status()
-        except Exception as exception:
-            logger.info(f'unable to get stock data for {url}')
-            return []
-        intraday_info = json.loads(res.content).get('intraday')
+        intraday_info = json.loads(res.content).get('intraday', {})
 
         # if there is intraday info, convert date string and provide time and
-        # create list of date/time, price tuples
-        trade = namedtuple('trade', 'time open close low high volume')
+        # create list of trade_info tuples
+        trade = namedtuple('trade', 'date open close low high volume')
         intraday_trades = []
         min_low = None; max_high = None
         if intraday_info:
             for time_stamp, trade_info in intraday_info.items():
                 intraday_trades.append(
-                    trade(time=datetime.datetime.strptime(time_stamp, "%Y-%m-%d %H:%M:%S"),
+                    trade(date=datetime.datetime.strptime(time_stamp, "%Y-%m-%d %H:%M:%S"),
                           open=trade_info.get('open'),
                           close=trade_info.get('close'),
                           low=trade_info.get('low'),
@@ -182,19 +170,53 @@ class WorldTradingData:
             last_close = intraday_trades[-1].close
 
             # add start and end time
-            start_time = intraday_trades[0].time.strftime("%Y-%m-%d") + ' 08:00:00'
+            start_time = intraday_trades[0].date.strftime("%Y-%m-%d") + ' 08:00:00'
             intraday_trades.insert(0,
-                    trade(time=datetime.datetime.strptime(start_time, "%Y-%m-%d %H:%M:%S"),
+                    trade(date=datetime.datetime.strptime(start_time, "%Y-%m-%d %H:%M:%S"),
                           open=None, close=None, low=None, high=None, volume=None)
                     )
-            end_time = intraday_trades[-1].time.strftime("%Y-%m-%d") + ' 18:00:00'
+            end_time = intraday_trades[-1].date.strftime("%Y-%m-%d") + ' 18:00:00'
             intraday_trades.append(
-                    trade(time=datetime.datetime.strptime(end_time, "%Y-%m-%d %H:%M:%S"),
+                    trade(date=datetime.datetime.strptime(end_time, "%Y-%m-%d %H:%M:%S"),
                           open=initial_open, close=last_close, low=min_low, high=max_high, volume=None)
                     )
+        else:
+            logger.info(f'unable to get stock intraday data for {url}')
 
         return intraday_trades
 
+    def get_stock_history_info(cls, stock_symbol):
+        '''  return stock history info as a dict retrieved from url json, key 'data'
+        '''
+        url = ''.join([cls.history_url,
+                       '?symbol=' + stock_symbol.upper(),
+                       '&sort=newest',
+                       '&api_token=' + cls.api_token],
+                       )
+
+        res = requests.get(url)
+        history_info = json.loads(res.content).get('history', {})
+
+        # if there is intraday info, convert date string and provide date and
+        # create list of trade_info tuples
+        trade = namedtuple('trade', 'date open close low high volume')
+        history_trades = []
+        if history_info:
+            for date_stamp, trade_info in history_info.items():
+                history_trades.append(
+                    trade(date=datetime.datetime.strptime(date_stamp, "%Y-%m-%d"),
+                          open=trade_info.get('open'),
+                          close=trade_info.get('close'),
+                          low=trade_info.get('low'),
+                          high=trade_info.get('high'),
+                          volume=trade_info.get('volume'),
+                         )
+                    )
+
+        else:
+            logger.info(f'unable to get stock history data for {url}')
+
+        return history_trades
 
     def parse_stock_name(cls, stock_string, markets=None):
         ''' parse stock names searching the worldtradingdata database in three

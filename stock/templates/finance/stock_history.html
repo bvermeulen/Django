@@ -2,20 +2,22 @@
 
 {% load static %}
 
-{%block title %}Intraday trading{% endblock %}
+{%block title %}Stock History{% endblock %}
 
 {% block breadcrumb %}
 <ol class="breadcrumb my-4">
   <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a></li>
-	<li class="breadcrumb-item"><a href="{% url 'stock_quote' %}">Quotes</a></li>
-  <li class="breadcrumb-item active">Stock Trading</li>
+  <li class="breadcrumb-item"><a href="{% url 'stock_quotes' %}">Quotes</a></li>
+  <li class="breadcrumb-item"><a href="{% url 'stock_intraday' stock_symbol %}">Latest stock trading</a></li>
+  <li class="breadcrumb-item active">Stock history</li>
 </ol>
 {% endblock %}
 
 {% block content %}
 
 	<div id="chart-container">FusionCharts()</div>
-	<br><br>
+	<div><button class="btn btn-primary btn-sm" onclick="window.location.href='{% url 'stock_quotes' %}'">Quotes</button></div>
+	<br>
 	<small>Data provided by <a href="https://{{ data_provider_url }}">{{ data_provider_url }}</a></small>
 	<br><br><br><br>
 

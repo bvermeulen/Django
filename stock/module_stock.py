@@ -3,13 +3,13 @@ from collections import namedtuple
 import requests
 import csv
 import json
-from .models import Exchange, Currency, Stock
+from django.contrib.auth.models import User
 from django.db.utils import IntegrityError
+from .models import Exchange, Currency, Stock, Portfolio, StockSelection
+from .stock_lists import stock_lists
 from howdimain.utils.plogger import Logger
 from howdimain.utils.min_max import get_min, get_max
 from decouple import config
-
-from .test_data import test_json
 
 logger = Logger.getlogger()
 
@@ -58,6 +58,19 @@ class PopulateStock:
             except IntegrityError:
                 print(f'already in database, stock: {row[1]}')
                 logger.info(f'already in database, stock: {row[1]}')
+
+    def create_default_portfolios(cls,):
+        default_user = User.objects.get(username='default_user')
+
+        portfolio = Portfolio.objects.create(portfolio_name='tech', user=default_user)
+        for stock_symbol in stock_lists.get('TECH'):
+            stock = Stock.objects.get(symbol=stock_symbol)
+            stock_selection = StockSelection.objects.create(stock=stock, quantity=1, portfolio=portfolio)
+
+        portfolio = Portfolio.objects.create(portfolio_name='aex', user=default_user)
+        for stock_symbol in stock_lists.get('AEX'):
+            stock = Stock.objects.get(symbol=stock_symbol)
+            stock_selection = StockSelection.objects.create(stock=stock, quantity=1, portfolio=portfolio)
 
 
 class WorldTradingData:
@@ -114,6 +127,12 @@ class WorldTradingData:
             for stock in orig_stock_info:
                 stock['last_trade_time'] = datetime.datetime.strptime(
                     stock.get('last_trade_time'), "%Y-%m-%d %H:%M:%S")
+
+                try:
+                    _ = float(stock.get('change_pct'))
+
+                except ValueError:
+                    stock['change_pct'] = '0'
 
                 if abs(float(stock.get('change_pct'))) < 0.001:
                     stock['font_color'] = 'black'

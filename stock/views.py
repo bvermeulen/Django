@@ -38,11 +38,15 @@ class QuoteView(View):
         quote_string = request.session.get('quote_string', '')
         markets = request.session.get('markets', self.markets)
         form = self.form_class(initial={'quote_string': quote_string,
-                                        'markets': markets})
+                                        'markets': markets, })
+
+        portfolios = [item.portfolio_name for item in Portfolio.objects.filter(
+            user=self.default_user)]
+        print(portfolios)
         context = {'stock_info': [],
                    'form': form,
-                   'data_provider_url': self.data_provider_url,
-        }
+                   'portfolios': sorted(portfolios),
+                   'data_provider_url': self.data_provider_url, }
 
         return render(request, self.template_name, context)
 
@@ -53,12 +57,13 @@ class QuoteView(View):
         form = self.form_class(request.POST)
         if form.is_valid():
             quote_string = form.cleaned_data.get('quote_string')
+            selected_portfolio = form.cleaned_data.get('selected_portfolio')
             markets = form.cleaned_data.get('markets')
 
             try:
                 symbols = []
                 default_portfolio = Portfolio.objects.filter(
-                    user=self.default_user, portfolio_name=quote_string.lower())
+                    user=self.default_user, portfolio_name=selected_portfolio)
                 for stock in default_portfolio.first().stocks.all():
                     symbols.append(stock.stock.symbol)
                 stock_info = self.wtd.get_stock_trade_info(symbols[0:20])
@@ -76,12 +81,12 @@ class QuoteView(View):
         else:
             stock_info = []
 
-        form = self.form_class(initial={'quote_string': quote_string,
-                                        'markets': markets})
+        portfolios = [item.portfolio_name for item in Portfolio.objects.filter(
+            user=self.default_user)]
         context = {'stock_info': stock_info,
                    'form': form,
-                   'data_provider_url': self.data_provider_url,
-        }
+                   'portfolios': sorted(portfolios),
+                   'data_provider_url': self.data_provider_url, }
 
         return render(request, self.template_name, context)
 

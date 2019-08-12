@@ -62,12 +62,12 @@ class PopulateStock:
     def create_default_portfolios(cls,):
         default_user = User.objects.get(username='default_user')
 
-        portfolio = Portfolio.objects.create(portfolio_name='tech', user=default_user)
+        portfolio = Portfolio.objects.create(portfolio_name='Techno', user=default_user)
         for stock_symbol in stock_lists.get('TECH'):
             stock = Stock.objects.get(symbol=stock_symbol)
             stock_selection = StockSelection.objects.create(stock=stock, quantity=1, portfolio=portfolio)
 
-        portfolio = Portfolio.objects.create(portfolio_name='aex', user=default_user)
+        portfolio = Portfolio.objects.create(portfolio_name='AEX', user=default_user)
         for stock_symbol in stock_lists.get('AEX'):
             stock = Stock.objects.get(symbol=stock_symbol)
             stock_selection = StockSelection.objects.create(stock=stock, quantity=1, portfolio=portfolio)

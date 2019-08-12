@@ -4,6 +4,21 @@
 
 {% block title %}Stock quotes{% endblock %}
 
+{% block stylesheet %}
+<style>
+  .item_select
+      { color: black;
+        font-weight: normal;
+        font-size: 1.1em;
+      }
+  .item_select:hover { color: black;
+                       font-weight: bold;
+                       font-size: 1.2em;
+                       background-color: darkgrey;
+      }
+</style>
+{% endblock %}
+
 {% block breadcrumb %}
 <ol class="breadcrumb my-4">
   <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a></li>
@@ -16,19 +31,26 @@
 
 <form id="stockquote" method="post">
 {% csrf_token %}
-<div>
-  {{ form.quote_string }}
-
-  <button class="btn dropdown-toggle btn-primary btn-sm" data-toggle="dropdown"
-    >Markets<span class="caret"></span></button>
-
-    <ul class="dropdown-menu", style="height:40%; overflow:hidden; overflow-y:scroll;">
-      {{ form.markets|as_crispy_field }}
-    </ul>
-
-  <input type='submit' value='Quote' class="btn-sm btn-primary"></input>
-</div>
-<br>
+  <div>
+    {{ form.quote_string }}
+    <a>
+      <button class="btn dropdown-toggle btn-primary btn-sm" data-toggle="dropdown"
+        >Portfolio's<span class="caret"></span></button>
+        <ul class="dropdown-menu" style="height:40%; overflow:hidden; overflow-y:scroll;">
+     		 	 {% for portfolio in portfolios %}
+     			   <li><input type="submit" class="btn btn-sm item_select" name="selected_portfolio" value="{{ portfolio }}"></input></li>
+     			 {% endfor %}
+     		</ul>
+    </a>
+    <a>
+      <button class="btn dropdown-toggle btn-primary btn-sm" data-toggle="dropdown"
+        >Markets<span class="caret"></span></button>
+        <ul class="dropdown-menu" style="height:40%; overflow:hidden; overflow-y:scroll;">
+          {{ form.markets|as_crispy_field }}
+        </ul>
+    </a>
+    <input type='submit' value='Quote' class="btn-sm btn-primary"></input>
+  </div>
 <table class="table table-striped mb-4">
   <thead class="thead-inverse">
   <tr>

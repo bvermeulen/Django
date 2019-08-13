@@ -42,7 +42,6 @@ class QuoteView(View):
 
         portfolios = [item.portfolio_name for item in Portfolio.objects.filter(
             user=self.default_user)]
-        print(portfolios)
         context = {'stock_info': [],
                    'form': form,
                    'portfolios': sorted(portfolios),

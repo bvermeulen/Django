@@ -62,13 +62,19 @@ class PopulateStock:
     def create_default_portfolios(cls,):
         default_user = User.objects.get(username='default_user')
 
-        portfolio = Portfolio.objects.create(portfolio_name='Techno', user=default_user)
-        for stock_symbol in stock_lists.get('TECH'):
-            stock = Stock.objects.get(symbol=stock_symbol)
-            stock_selection = StockSelection.objects.create(stock=stock, quantity=1, portfolio=portfolio)
+        # portfolio = Portfolio.objects.create(portfolio_name='Techno', user=default_user)
+        # for stock_symbol in stock_lists.get('TECH'):
+        #     stock = Stock.objects.get(symbol=stock_symbol)
+        #     stock_selection = StockSelection.objects.create(stock=stock, quantity=1, portfolio=portfolio)
+        #
+        # portfolio = Portfolio.objects.create(portfolio_name='AEX', user=default_user)
+        # for stock_symbol in stock_lists.get('AEX'):
+        #     stock = Stock.objects.get(symbol=stock_symbol)
+        #     stock_selection = StockSelection.objects.create(stock=stock, quantity=1, portfolio=portfolio)
 
-        portfolio = Portfolio.objects.create(portfolio_name='AEX', user=default_user)
-        for stock_symbol in stock_lists.get('AEX'):
+        portfolio = Portfolio.objects.create(portfolio_name='Dow Jones', user=default_user)
+        for stock_symbol in stock_lists.get('DOW'):
+            print(stock_symbol)
             stock = Stock.objects.get(symbol=stock_symbol)
             stock_selection = StockSelection.objects.create(stock=stock, quantity=1, portfolio=portfolio)
 
@@ -77,9 +83,9 @@ class WorldTradingData:
     ''' methods to handle trading data
         website: https://www.worldtradingdata.com
     '''
-    up_triangle = '\u25B3'    # white up triangle
-    down_triangle = '\u25BD'  # white down triangle
-    rectangle = '\u25AD'      # white rectangle
+    up_triangle = '\u25B2'    # black up triangle
+    down_triangle = '\u25BC'  # black down triangle
+    rectangle = '\u25AC'      # black rectangle
 
     def setup(cls,):
         cls.api_token = config('API_token')

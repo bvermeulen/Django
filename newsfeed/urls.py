@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import newspage, mynewsitems, newssites
+from newsfeed.views import newspage, mynewsitems, newssites
 
 urlpatterns = [
     path('news/', newspage.newspage, name='newspage'),

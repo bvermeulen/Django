@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% load crispy_forms_tags %}
+
+{% block title %}Portfolio{% endblock %}
+
+{% block stylesheet %}
+  <link rel="stylesheet" type="text/css" href="{% static 'css/container-styles.css' %}">
+{% endblock %}
+
+{% block breadcrumb %}
+<ol class="breadcrumb my-4">
+  <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a></li>
+  <li class="breadcrumb-item active">Portfolio</li>
+</ol>
+{% endblock %}
+
+{% block content %}
+  {% now "Y-m-d" as current_date %}
+
+  <form id="portfolio" method="post">
+    {% csrf_token %}
+    <div class="flex-container" style="min-height:10vh">
+      <div class="left" style="min-height:50%">
+        <strong>Portfolios</strong><br>
+        <button class="btn btn-outline-secondary btn-sm" name="new_portfolio"
+                value="new_portfolio" onclick="return NewPortfolio()">New</button>
+      </div>
+      <div class="right" style="background-color:blue; min-height:50%">and I am top right</div>
+    </div>
+
+    <div class="flex-container" style="min-height:70vh">
+      <div class="left" style="background-color:green; min-height:50%">I am bottom left</div>
+      <div class="right" style="background-color:yellow; min-height:50%">and I am bottom right</div>
+    </div>
+    {% for portfolio in form.portfolios %}
+      {% if portfolio.choice_label == form.selected_portfolio.value %}
+        <p><button type="button" class="btn btn-warning btn-sm">{{ portfolio }}</button></p>
+      {% else %}
+        <p><button type="button" class="btn btn-primary btn-sm">{{ portfolio }}</button></p>
+      {% endif %}
+
+    {% endfor %}
+    ---- {{ form.selected_portfolio }}{{ form.symbol }} --- {{ form.currency }}
+    <br>
+    {% for stock in form.fields.stocks %}
+      {{ stock.stock.company }} - {{ stock.quantity }} {{ stock.stock.currency }}<br>
+    {% endfor %}
+  </form>
+  <br><br><br><br>
+{% endblock content %}
+
+{% block javascript %}
+{% endblock %}

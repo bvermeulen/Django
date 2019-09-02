@@ -1,12 +1,11 @@
 import json
-import requests
 import datetime
 from django.contrib.auth.models import User
 from django.shortcuts import render, redirect, reverse
 from django.views.generic import View
-from .forms import StockQuoteForm
-from .models import Exchange, Stock, Portfolio
-from .module_stock import WorldTradingData
+from stock.forms import StockQuoteForm
+from stock.models import Exchange, Stock, Portfolio
+from stock.module_stock import WorldTradingData
 from howdimain.utils.fusioncharts import FusionCharts, FusionTable, TimeSeries
 from howdimain.utils.plogger import Logger
 from howdimain.utils.min_max import get_min, get_max

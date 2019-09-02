@@ -1,0 +1,14 @@
+/* contain stylesheet */
+
+.flex-container {
+  display: flex;
+  flex-direction: row;
+}
+
+.left {
+  width: 20%;
+}
+
+.right {
+  width: 80%;
+}

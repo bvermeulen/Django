@@ -18,6 +18,7 @@
   <a href="{% url 'newspage' %}" class="btn btn-primary">News</a>
   {% if user.is_authenticated %}
     <a href="{% url 'mynewsitems' %}" class="btn btn-primary">My News</a>
+    <a href="{% url 'portfolio' %}" class="btn btn-primary">My Portfolio</a>
   {% endif %}
   <a href="{% url 'stock_quotes' %}" class="btn btn-primary">Stock quote</a>
 </div>

@@ -6,9 +6,30 @@
 }
 
 .left {
-  width: 20%;
+  width: 10%;
 }
 
 .right {
-  width: 80%;
+  width: 90%;
+}
+
+.table-fixed tbody {
+  display: block;
+  height: 50vh;
+  overflow-y: scroll;
+}
+
+.table-fixed thead tr {
+  display: block;
+  width: 99%
+}
+
+.table-fixed tbody tr {
+  display: block;
+  width: 100%;
+}
+
+.custom-thead-grey th {
+  color: #fff;
+  background-color: #888;
 }

@@ -10,13 +10,16 @@ slb = Stock.objects.get(symbol='SLB')
 bpf = Portfolio.objects.get(portfolio_name='AMS', user=bruno)
 f = PortfolioForm(user=default, initial={'selected_portfolio':'Techno'})
 
+from django.contrib.auth.models import User
 from stock.models import Stock, Portfolio, StockSelection
 from stock import module_stock as ms
+from pprint import pprint
 wtd = ms.WorldTradingData()
 wtd.setup()
-exchanges = ['NYSE', 'NASDAQ', 'AEX', 'LSE']
-symbols = wtd.parse_stock_name('Schlu', markets=exchanges)
-wtd.stock_intraday_info('AMZN')
+default = User.objects.get(username='default_user')
+portfolio = Portfolio.objects.get(user=default, portfolio_name='Dow Jones')
+stock_info = wtd.get_portfolio_stock_info(portfolio)
+
 
 import requests
 from howdimain.utils.fusioncharts import FusionCharts, FusionTable, TimeSeries

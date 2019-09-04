@@ -53,41 +53,41 @@
     </a>
     <input type='submit' value='Quote' class="btn-sm btn-primary"></input>
   </div>
-  <table class="table table-fixed table-striped mb-10">
+  <table class="table table-fixed table-striped mb-6 table-sm">
     <thead class="custom-thead-grey">
       <tr>
-        <th style="width:17%">Company</th>
-        <th style="width:10%">Symbol</th>
-        <th style="width:10%">Market</th>
-        <th style="width:5%">Cur.</th>
-        <th style="width:2%"></th>
-        <th style="width:8%">Price</th>
-        <th style="width:7%">+/-</th>
-        <th style="width:7%">Pct</th>
-        <th style="width:7%">Low</th>
-        <th style="width:7%">High</th>
-        <th style="width:7%">Previous</th>
-        <th style="width:14%">Last trade</th>
+        <th style="width:10vw">Company</th>
+        <th style="width:6vw">Symbol</th>
+        <th style="width:6vw">Market</th>
+        <th style="width:6vw">Cur.</th>
+        <th style="width:2vw"></th>
+        <th style="width:7vw">Price</th>
+        <th style="width:7vw">+/-</th>
+        <th style="width:7vw">Pct</th>
+        <th style="width:7vw">Low</th>
+        <th style="width:7vw">High</th>
+        <th style="width:7vw">Previous</th>
+        <th style="width:12vw">Last trade</th>
       </tr>
     </thead>
     <tbody>
     {% for stock in stock_info %}
       <tr>
-        <td style="width:17%"><a href="{% url 'stock_intraday' stock.symbol %}">{{ stock.name|truncatechars:20 }}</a></td>
-        <td style="width:10%">{{ stock.symbol }}</td>
-        <td style="width:10%">{{ stock.stock_exchange_short }}</td>
-        <td style="width:5%">{{ stock.currency }}</td>
-        <td style="width:2%; color:{{ stock.font_color }}">{{ stock.caret_up_down }}</td>
-        <td style="width:8%; color:{{ stock.font_color }}">{{ stock.price }}</td>
-        <td style="width:7%; color:{{ stock.font_color }}">{{ stock.day_change }}</td>
-        <td style="width:7%; color:{{ stock.font_color }}"">{{ stock.change_pct }}%</td>
-        <td style="width:7%">{{ stock.day_low }}</td>
-        <td style="width:7%">{{ stock.day_high }}</td>
-        <td style="width:7%">{{ stock.close_yesterday }}</td>
+        <td style="width:10vw"><a href="{% url 'stock_intraday' stock.symbol %}">{{ stock.name|truncatechars:13 }}</a></td>
+        <td style="width:6vw">{{ stock.symbol }}</td>
+        <td style="width:6vw">{{ stock.stock_exchange_short }}</td>
+        <td style="width:6vw">{{ stock.currency }}</td>
+        <td style="width:2vw; color:{{ stock.font_color }}">{{ stock.caret_up_down }}</td>
+        <td style="width:7vw; color:{{ stock.font_color }}">{{ stock.price }}</td>
+        <td style="width:7vw; color:{{ stock.font_color }}">{{ stock.day_change }}</td>
+        <td style="width:7vw; color:{{ stock.font_color }}"">{{ stock.change_pct }}%</td>
+        <td style="width:7vw">{{ stock.day_low }}</td>
+        <td style="width:7vw">{{ stock.day_high }}</td>
+        <td style="width:7vw">{{ stock.close_yesterday }}</td>
         {% if current_date > stock.last_trade_time|date:"Y-m-d" %}
-          <td style="width:14%">{{ stock.last_trade_time|date:"j M y, H:i" }}</td>
+          <td style="width:12vw">{{ stock.last_trade_time|date:"j M y, H:i" }}</td>
         {% else %}
-          <td style="width:14%">{{ stock.last_trade_time|date:"h:i a" }}</td>
+          <td style="width:12vw">{{ stock.last_trade_time|date:"h:i a" }}</td>
         {% endif %}
       </tr>
     {% endfor %}

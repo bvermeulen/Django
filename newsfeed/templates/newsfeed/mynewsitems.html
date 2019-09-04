@@ -45,7 +45,7 @@
   function Validate() {
   	confirmed = confirm('Do you really want to delete this item?');
     if (confirmed) {
-      form.submit();
+      return true;
     }
     else {
       return false;

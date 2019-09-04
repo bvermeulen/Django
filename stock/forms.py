@@ -27,12 +27,14 @@ class PortfolioForm(forms.Form):
     def __init__(self, *args, user=None, **kwargs):
         super(PortfolioForm, self).__init__(*args, **kwargs)
 
-        self.fields['portfolio_name'] = forms.CharField(required=False)
+        self.fields['portfolio_name'] = forms.CharField(max_length = 20,
+            widget=forms.TextInput(attrs={'size':'10vw'}), required=False)
+        self.fields['new_portfolio'] = forms.CharField(required=False)
         self.fields['symbol'] = forms.CharField(max_length = 10,
-            widget=forms.TextInput(attrs={'size':'10%'}), required=False)
+            widget=forms.TextInput(attrs={'size':'10vw'}), required=False)
         self.fields['currency'] = forms.CharField(required=False)
-        self.fields['change_qty'] = forms.CharField(required=False)
-        self.fields['rename_portfolio'] = forms.CharField(required=False)
+        self.fields['btn1_pressed'] = forms.CharField(required=False)
+        self.fields['btn2_pressed'] = forms.CharField(required=False)
 
         portfolios = [(item.portfolio_name, item.portfolio_name) \
                       for item in Portfolio.objects.\

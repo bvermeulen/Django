@@ -15,6 +15,7 @@ logger = Logger.getlogger()
 
 class PopulateStock:
 
+    @classmethod
     def read_csv(cls, filename):
         cls.stock_data = []
         with open(filename) as csv_file:
@@ -24,6 +25,7 @@ class PopulateStock:
             for row in _stock_data:
                 cls.stock_data.append(row)
 
+    @classmethod
     def exchanges_and_currencies(cls,):
         for i, row in enumerate(cls.stock_data):
             print(f'processing row {i}, stock {row[1]}')
@@ -43,6 +45,7 @@ class PopulateStock:
             except IntegrityError:
                 pass
 
+    @classmethod
     def symbols(cls,):
         for i, row in enumerate(cls.stock_data):
             try:
@@ -59,24 +62,29 @@ class PopulateStock:
                 print(f'already in database, stock: {row[1]}')
                 logger.info(f'already in database, stock: {row[1]}')
 
+    @classmethod
     def create_default_portfolios(cls,):
-        default_user = User.objects.get(username='default_user')
+        default = User.objects.get(username='default_user')
 
-        # portfolio = Portfolio.objects.create(portfolio_name='Techno', user=default_user)
-        # for stock_symbol in stock_lists.get('TECH'):
-        #     stock = Stock.objects.get(symbol=stock_symbol)
-        #     stock_selection = StockSelection.objects.create(stock=stock, quantity=1, portfolio=portfolio)
-        #
-        # portfolio = Portfolio.objects.create(portfolio_name='AEX', user=default_user)
-        # for stock_symbol in stock_lists.get('AEX'):
-        #     stock = Stock.objects.get(symbol=stock_symbol)
-        #     stock_selection = StockSelection.objects.create(stock=stock, quantity=1, portfolio=portfolio)
+        portfolio = Portfolio.objects.create(portfolio_name='Techno', user=default)
+        for stock_symbol in stock_lists.get('TECH'):
+            stock = Stock.objects.get(symbol=stock_symbol)
+            stock_selection = StockSelection.objects.create(stock=stock,
+                quantity=1, portfolio=portfolio)
 
-        portfolio = Portfolio.objects.create(portfolio_name='Dow Jones', user=default_user)
+        portfolio = Portfolio.objects.create(portfolio_name='AEX',
+            user=default_user)
+        for stock_symbol in stock_lists.get('AEX'):
+            stock = Stock.objects.get(symbol=stock_symbol)
+            stock_selection = StockSelection.objects.create(stock=stock,
+                quantity=1, portfolio=portfolio)
+
+        portfolio = Portfolio.objects.create(portfolio_name='Dow Jones', user=default)
         for stock_symbol in stock_lists.get('DOW'):
             print(stock_symbol)
             stock = Stock.objects.get(symbol=stock_symbol)
-            stock_selection = StockSelection.objects.create(stock=stock, quantity=1, portfolio=portfolio)
+            stock_selection = StockSelection.objects.create(stock=stock,
+                quantity=1, portfolio=portfolio)
 
 
 class WorldTradingData:
@@ -87,6 +95,7 @@ class WorldTradingData:
     down_triangle = '\u25BC'  # black down triangle
     rectangle = '\u25AC'      # black rectangle
 
+    @classmethod
     def setup(cls,):
         cls.api_token = config('API_token')
         cls.stock_url = 'https://api.worldtradingdata.com/api/v1/stock'
@@ -115,6 +124,7 @@ class WorldTradingData:
                  'type': 'number',
                 },]
 
+    @classmethod
     def get_stock_trade_info(cls, stock_symbols):
         ''' return the stock trade info as a dict retrieved from url json, key 'data'
         '''
@@ -156,6 +166,7 @@ class WorldTradingData:
 
         return stock_info
 
+    @classmethod
     def get_stock_intraday_info(cls, stock_symbol):
         '''  return stock intraday info as a dict retrieved from url json, key 'data'
         '''
@@ -210,6 +221,7 @@ class WorldTradingData:
 
         return intraday_trades
 
+    @classmethod
     def get_stock_history_info(cls, stock_symbol):
         '''  return stock history info as a dict retrieved from url json, key 'data'
         '''
@@ -243,6 +255,7 @@ class WorldTradingData:
 
         return history_trades
 
+    @classmethod
     def parse_stock_name(cls, stock_string, markets=None):
         ''' parse stock names searching the worldtradingdata database in three
             passes: 1) is the stock name the actual ticker symbol,
@@ -294,5 +307,19 @@ class WorldTradingData:
                     stock_symbol = Stock.objects.get(symbol=stock.symbol).symbol
                     add_stock_symbol_if_valid(stock_symbol)
 
-
         return list(stock_symbols)
+
+    @classmethod
+    def get_portfolio_stock_info(cls, portfolio):
+        symbols_quantities = [(stock.stock.symbol, stock.quantity) for stock in portfolio.stocks.all()]
+        _symbols = [val[0] for val in symbols_quantities]
+        stock_trade_info = cls.get_stock_trade_info(_symbols[0:20])
+        stock_trade_info += cls.get_stock_trade_info(_symbols[20:40])
+
+        stock_info = []
+        for stock in stock_trade_info:
+            stock['quantity'] = [val[1] for val in symbols_quantities
+                                 if val[0] == stock['symbol']][0]
+            stock_info.append(stock)
+
+        return stock_info

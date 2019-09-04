@@ -24,13 +24,17 @@
     <div class="flex-container" style="min-height:10vh">
       <div class="left" style="min-height:50%;">
         <strong>Portfolios</strong><br>
-        <button type="submit" class="btn btn-outline-secondary btn-sm" name="new_portfolio"
-                value="new_portfolio">New</button>
-      </div>
+        <button class="btn btn-outline-secondary btn-sm" onclick="return AskNewName()">New</button>
+    </div>
 
       <div class="right" style="min-height:50%">
         {{ form.portfolio_name }}
+        <button class="btn btn-outline-secondary btn-sm" name="btn1_pressed"
+          value="rename_portfolio">Rename</button>
+        <button class="btn btn-outline-secondary btn-sm" name="btn1_pressed"
+          onclick="return Validate()" value="delete_portfolio">Delete</button>
         {{ form.currency }}
+        <a style="visibility: hidden">{{ form.new_portfolio }}</a>
         <br>
         {{ form.symbol }}
       </div>
@@ -56,17 +60,33 @@
         <table class="table table-fixed table-striped md-4 table-sm">
           <thead class="custom-thead-grey">
             <tr>
-              <th>Company</th>
-              <th>Symbol</th>
-              <th>Qty</th>
+              <th style="width:20vw">Company</th>
+              <th style="width:10vw">Symbol</th>
+              <th style="width:10vw">Currency</th>
+              <th style="width:10vw">Price</th>
+              <th style="width:10vw">Qty</th>
+              <th style="width:10vw">Amount</th>
+              <th style="width:10vw">Change</th>
+              <th style="width:10vw">Delete</th>
             </tr>
           </thead>
           <tbody>
             {% for stock in stocks %}
               <tr>
-                <td>{{ stock.stock.company }}</td>
-                <td>{{ stock.stock.symbol }}</td>
-                <td>{{ stock.quantity }}</td>
+                <td style="width:20vw">{{ stock.company|truncatechars:20 }}</td>
+                <td style="width:10vw">{{ stock.symbol }}</td>
+                <td style="width:10vw">{{ stock.currency }}</td>
+                <td style="width:10vw">{{ stock.price }}</td>
+                <td style="width:10vw">{{ stock.quantity }}</td>
+                <td style="width:10vw">{{ stock.amount }}</td>
+                <td style="width:10vw">
+                  <button class="btn btn-outline-secondary btn-sm" name="btn2_pressed"
+                          value="{{ stock.quantity }}" onclick="return Validate()">Change</button>
+                </td>
+                <td style="width:10vw">
+                  <button class="btn btn-outline-secondary btn-sm" name="btn2_pressed"
+                          value="{{ stock.symbol }}" onclick="return Validate()">Delete</button>
+                </td>
               </tr>
             {% endfor %}
           </tbody>
@@ -78,4 +98,29 @@
 {% endblock content %}
 
 {% block javascript %}
+<script>
+var form = document.getElementById('id_portfolio');
+
+function AskNewName() {
+  var newPortfolio = prompt('Please enter name of new portfolio', '');
+
+  if (newPortfolio != null && newPortfolio != '') {
+    form.new_portfolio.value = newPortfolio;
+    return true;
+  }
+  else {
+    return false;
+  }
+}
+
+function Validate() {
+  confirmed = confirm('Do you really want to delete ' + form.portfolio_name.value + '?');
+  if (confirmed) {
+    return true;
+  }
+  else {
+    return false;
+  }
+}
+</script>
 {% endblock %}

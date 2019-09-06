@@ -35,6 +35,7 @@ class PortfolioForm(forms.Form):
         self.fields['currency'] = forms.CharField(required=False)
         self.fields['btn1_pressed'] = forms.CharField(required=False)
         self.fields['btn2_pressed'] = forms.CharField(required=False)
+        self.fields['quantity'] = forms.CharField(required=False)
 
         portfolios = [(item.portfolio_name, item.portfolio_name) \
                       for item in Portfolio.objects.\

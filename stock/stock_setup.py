@@ -1,13 +1,13 @@
 from stock.models import Stock, Portfolio, StockSelection
 from stock.forms import PortfolioForm
 from django.contrib.auth.models import User
-from pprint impoty pprint
+from pprint import pprint
 bruno = User.objects.get(username='bvermeulen')
 john = User.objects.get(username='johndean121')
 default = User.objects.get(username='default_user')
 apple = Stock.objects.get(symbol='AAPL')
 slb = Stock.objects.get(symbol='SLB')
-bpf = Portfolio.objects.get(portfolio_name='AMS', user=bruno)
+portfolio = Portfolio.objects.get(portfolio_name='Techno', user=default)
 f = PortfolioForm(user=default, initial={'selected_portfolio':'Techno'})
 
 from django.contrib.auth.models import User

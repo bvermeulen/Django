@@ -53,41 +53,41 @@
     </a>
     <input type='submit' value='Quote' class="btn-sm btn-primary"></input>
   </div>
-  <table class="table table-fixed table-striped mb-6 table-sm">
+  <table class="table table-fixed table-striped mb-2 mt-1 table-sm">
     <thead class="custom-thead-grey">
       <tr>
-        <th style="width:10vw">Company</th>
-        <th style="width:6vw">Symbol</th>
-        <th style="width:6vw">Market</th>
-        <th style="width:6vw">Cur.</th>
+        <th colspan="2">Company</th>
+        <th colspan="1">Symbol</th>
+        <th colspan="1">Market</th>
+        <th colspan="1">Currency</th>
         <th style="width:2vw"></th>
-        <th style="width:7vw">Price</th>
-        <th style="width:7vw">+/-</th>
-        <th style="width:7vw">Pct</th>
-        <th style="width:7vw">Low</th>
-        <th style="width:7vw">High</th>
-        <th style="width:7vw">Previous</th>
-        <th style="width:12vw">Last trade</th>
+        <th colspan="1">Price</th>
+        <th colspan="1">+/-</th>
+        <th colspan="1">Pct</th>
+        <th colspan="1">Low</th>
+        <th colspan="1">High</th>
+        <th colspan="1">Previous</th>
+        <th colspan="2">Last trade</th>
       </tr>
     </thead>
     <tbody>
     {% for stock in stock_info %}
       <tr>
-        <td style="width:10vw"><a href="{% url 'stock_intraday' stock.symbol %}">{{ stock.name|truncatechars:13 }}</a></td>
-        <td style="width:6vw">{{ stock.symbol }}</td>
-        <td style="width:6vw">{{ stock.stock_exchange_short }}</td>
-        <td style="width:6vw">{{ stock.currency }}</td>
+        <td colspan="2"><a href="{% url 'stock_intraday' stock.symbol %}">{{ stock.name|truncatechars:18 }}</a></td>
+        <td colspan="1">{{ stock.symbol }}</td>
+        <td colspan="1">{{ stock.stock_exchange_short }}</td>
+        <td colspan="1">{{ stock.currency }}</td>
         <td style="width:2vw; color:{{ stock.font_color }}">{{ stock.caret_up_down }}</td>
-        <td style="width:7vw; color:{{ stock.font_color }}">{{ stock.price }}</td>
-        <td style="width:7vw; color:{{ stock.font_color }}">{{ stock.day_change }}</td>
-        <td style="width:7vw; color:{{ stock.font_color }}"">{{ stock.change_pct }}%</td>
-        <td style="width:7vw">{{ stock.day_low }}</td>
-        <td style="width:7vw">{{ stock.day_high }}</td>
-        <td style="width:7vw">{{ stock.close_yesterday }}</td>
+        <td colspan="1" style="color:{{ stock.font_color }}">{{ stock.price }}</td>
+        <td colspan="1" style="color:{{ stock.font_color }}">{{ stock.day_change }}</td>
+        <td colspan="1" style="color:{{ stock.font_color }}"">{{ stock.change_pct }}%</td>
+        <td colspan="1">{{ stock.day_low }}</td>
+        <td colspan="1">{{ stock.day_high }}</td>
+        <td colspan="1">{{ stock.close_yesterday }}</td>
         {% if current_date > stock.last_trade_time|date:"Y-m-d" %}
-          <td style="width:12vw">{{ stock.last_trade_time|date:"j M y, H:i" }}</td>
+          <td colspan="2">{{ stock.last_trade_time|date:"j M y, H:i" }}</td>
         {% else %}
-          <td style="width:12vw">{{ stock.last_trade_time|date:"h:i a" }}</td>
+          <td colspan="2">{{ stock.last_trade_time|date:"h:i a" }}</td>
         {% endif %}
       </tr>
     {% endfor %}

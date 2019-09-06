@@ -20,13 +20,16 @@
 }
 
 .table-fixed thead tr {
-  display: block;
-  width: 99%
+  display: table;
+  width: 99%;
+  table-layout: fixed;
+
 }
 
 .table-fixed tbody tr {
-  display: block;
+  display: table;
   width: 100%;
+  table-layout: fixed;
 }
 
 .custom-thead-grey th {

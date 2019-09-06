@@ -20,23 +20,28 @@
   {% now "Y-m-d" as current_date %}
 
   <form id="id_portfolio" method="post">
+    <a style="visibility: hidden">{{ form.new_portfolio }} {{ form.quantity }}</a>
     {% csrf_token %}
     <div class="flex-container" style="min-height:10vh">
       <div class="left" style="min-height:50%;">
         <strong>Portfolios</strong><br>
-        <button class="btn btn-outline-secondary btn-sm" onclick="return AskNewName()">New</button>
-    </div>
+        <button class="btn btn-outline-secondary btn-sm"
+        onclick="return AskNewName()">New</button>
+      </div>
 
       <div class="right" style="min-height:50%">
         {{ form.portfolio_name }}
         <button class="btn btn-outline-secondary btn-sm" name="btn1_pressed"
           value="rename_portfolio">Rename</button>
         <button class="btn btn-outline-secondary btn-sm" name="btn1_pressed"
-          onclick="return Validate()" value="delete_portfolio">Delete</button>
+          value="delete_portfolio"
+          onclick="return ConfirmDelete('{{ form.portfolio_name.value }}')">Delete</button>
         {{ form.currency }}
-        <a style="visibility: hidden">{{ form.new_portfolio }}</a>
         <br>
+
         {{ form.symbol }}
+        <button class="btn btn-outline-secondary btn-sm" name="btn1_pressed"
+          value="add_new_symbol">Add</button>
       </div>
     </div>
 
@@ -44,54 +49,54 @@
       <div class="left" style="min-height:50%;">
         {% for portfolio in form.portfolios %}
           <p>
-          {% if portfolio.choice_label == form.portfolio_name.value %}
-            <button type="submit" class="btn btn-primary btn-sm"
-              value={{ portfolio }}</button>
+          {% if portfolio.data.selected %}
+              <button type="button" class="btn btn-primary btn-sm"
+                value={{ portfolio }}</button>
 
           {% else %}
             <button type="submit" class="btn btn-light btn-sm"
-              value={{ portfolio }}</button>
+                value={{ portfolio }}</button>
           {% endif %}
           </p>
         {% endfor %}
       </div>
 
-      <div class="right" style="min-height:100%;">
-        <table class="table table-fixed table-striped md-4 table-sm">
-          <thead class="custom-thead-grey">
+      <div class="right" style="min-height:100%">
+        <table class="table table-fixed table-striped mb-2 mt-1 table-sm">
+          <thead class="col-sm-8 custom-thead-grey">
             <tr>
-              <th style="width:20vw">Company</th>
-              <th style="width:10vw">Symbol</th>
-              <th style="width:10vw">Currency</th>
-              <th style="width:10vw">Price</th>
-              <th style="width:10vw">Qty</th>
-              <th style="width:10vw">Amount</th>
-              <th style="width:10vw">Change</th>
-              <th style="width:10vw">Delete</th>
+              <th colspan="3">Company</th>
+              <th colspan="2">Symbol</th>
+              <th colspan="2">Currency</th>
+              <th colspan="2">Price</th>
+              <th colspan="2">Qty</th>
+              <th colspan="2">Amount</th>
+              <th colspan="2"></th>
+              <th colspan="2"></th>
             </tr>
           </thead>
           <tbody>
             {% for stock in stocks %}
               <tr>
-                <td style="width:20vw">{{ stock.company|truncatechars:20 }}</td>
-                <td style="width:10vw">{{ stock.symbol }}</td>
-                <td style="width:10vw">{{ stock.currency }}</td>
-                <td style="width:10vw">{{ stock.price }}</td>
-                <td style="width:10vw">{{ stock.quantity }}</td>
-                <td style="width:10vw">{{ stock.amount }}</td>
-                <td style="width:10vw">
+                <td colspan="3">{{ stock.name|truncatechars:15 }}</td>
+                <td colspan="2">{{ stock.symbol }}</td>
+                <td colspan="2">{{ stock.currency }}</td>
+                <td colspan="2">{{ stock.price }}</td>
+                <td colspan="2">{{ stock.quantity }}</td>
+                <td colspan="2">{{ stock.amount }}</td>
+                <td colspan="2">
                   <button class="btn btn-outline-secondary btn-sm" name="btn2_pressed"
-                          value="{{ stock.quantity }}" onclick="return Validate()">Change</button>
+                          value="{{ stock.symbol }}"
+                          onclick="return ChangeQuantity('{{ stock.name }}', '{{ stock.quantity }}')">Change</button>
                 </td>
-                <td style="width:10vw">
+                <td colspan="2">
                   <button class="btn btn-outline-secondary btn-sm" name="btn2_pressed"
-                          value="{{ stock.symbol }}" onclick="return Validate()">Delete</button>
+                          value="{{ stock.symbol }}" onclick="return ConfirmDelete('{{ stock.name }}' )">Delete</button>
                 </td>
               </tr>
             {% endfor %}
           </tbody>
         </table>
-        <!-- </div> -->
     </div>
   </form>
   <br><br><br><br>
@@ -103,6 +108,7 @@ var form = document.getElementById('id_portfolio');
 
 function AskNewName() {
   var newPortfolio = prompt('Please enter name of new portfolio', '');
+  var button = document.getElementById('id_btn2');
 
   if (newPortfolio != null && newPortfolio != '') {
     form.new_portfolio.value = newPortfolio;
@@ -113,8 +119,21 @@ function AskNewName() {
   }
 }
 
-function Validate() {
-  confirmed = confirm('Do you really want to delete ' + form.portfolio_name.value + '?');
+function ChangeQuantity(name, qty) {
+
+  var newQuantity = prompt('Change quantity for ' + name, qty);
+
+  if (newQuantity != null && newQuantity != qty) {
+    form.quantity.value = newQuantity;
+    return true;
+  }
+  else {
+    return false;
+  }
+}
+
+function ConfirmDelete(value) {
+  confirmed = confirm('Do you really want to delete ' + value + '?');
   if (confirmed) {
     return true;
   }
@@ -122,5 +141,6 @@ function Validate() {
     return false;
   }
 }
+
 </script>
 {% endblock %}

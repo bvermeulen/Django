@@ -10,6 +10,7 @@ from .stock_lists import stock_lists
 from howdimain.utils.plogger import Logger
 from howdimain.utils.min_max import get_min, get_max
 from decouple import config
+from decimal import Decimal as d
 
 logger = Logger.getlogger()
 
@@ -66,25 +67,25 @@ class PopulateStock:
     def create_default_portfolios(cls,):
         default = User.objects.get(username='default_user')
 
-        portfolio = Portfolio.objects.create(portfolio_name='Techno', user=default)
-        for stock_symbol in stock_lists.get('TECH'):
-            stock = Stock.objects.get(symbol=stock_symbol)
-            stock_selection = StockSelection.objects.create(stock=stock,
-                quantity=1, portfolio=portfolio)
+        # portfolio = Portfolio.objects.create(portfolio_name='Techno', user=default)
+        # for stock_symbol in stock_lists.get('TECH'):
+        #     stock = Stock.objects.get(symbol=stock_symbol)
+        #     stock_selection = StockSelection.objects.create(stock=stock,
+        #         quantity=1, portfolio=portfolio)
 
         portfolio = Portfolio.objects.create(portfolio_name='AEX',
-            user=default_user)
+            user=default)
         for stock_symbol in stock_lists.get('AEX'):
             stock = Stock.objects.get(symbol=stock_symbol)
             stock_selection = StockSelection.objects.create(stock=stock,
                 quantity=1, portfolio=portfolio)
 
-        portfolio = Portfolio.objects.create(portfolio_name='Dow Jones', user=default)
-        for stock_symbol in stock_lists.get('DOW'):
-            print(stock_symbol)
-            stock = Stock.objects.get(symbol=stock_symbol)
-            stock_selection = StockSelection.objects.create(stock=stock,
-                quantity=1, portfolio=portfolio)
+        # portfolio = Portfolio.objects.create(portfolio_name='Dow Jones', user=default)
+        # for stock_symbol in stock_lists.get('DOW'):
+        #     print(stock_symbol)
+        #     stock = Stock.objects.get(symbol=stock_symbol)
+        #     stock_selection = StockSelection.objects.create(stock=stock,
+        #         quantity=1, portfolio=portfolio)
 
 
 class WorldTradingData:
@@ -101,6 +102,7 @@ class WorldTradingData:
         cls.stock_url = 'https://api.worldtradingdata.com/api/v1/stock'
         cls.intraday_url = 'https://intraday.worldtradingdata.com/api/v1/intraday'
         cls.history_url = 'https://api.worldtradingdata.com/api/v1/history'
+        cls.max_symbols_allowed = 20
 
     @staticmethod
     def get_schema(format):
@@ -135,6 +137,9 @@ class WorldTradingData:
                        )
         res = requests.get(url)
         orig_stock_info = json.loads(res.content).get('data', {})
+
+        if len(stock_symbols) > cls.max_symbols_allowed:
+            logger.info(f'warning - number of symbols exceed maximum of {cls.max_symbols_allowed}')
 
         # if there is stock info, convert date string to datetime object
         # and add display attributes
@@ -311,15 +316,23 @@ class WorldTradingData:
 
     @classmethod
     def get_portfolio_stock_info(cls, portfolio):
-        symbols_quantities = [(stock.stock.symbol, stock.quantity) for stock in portfolio.stocks.all()]
-        _symbols = [val[0] for val in symbols_quantities]
-        stock_trade_info = cls.get_stock_trade_info(_symbols[0:20])
-        stock_trade_info += cls.get_stock_trade_info(_symbols[20:40])
+        symbols_quantities = {stock.stock.symbol: stock.quantity \
+            for stock in portfolio.stocks.all()}
+        list_symbols = list(symbols_quantities.keys())
+        stock_trade_info = cls.get_stock_trade_info(
+            list_symbols[0:cls.max_symbols_allowed])
+        stock_trade_info += cls.get_stock_trade_info(
+            list_symbols[cls.max_symbols_allowed:2*cls.max_symbols_allowed])
 
         stock_info = []
         for stock in stock_trade_info:
-            stock['quantity'] = [val[1] for val in symbols_quantities
-                                 if val[0] == stock['symbol']][0]
+            stock['quantity'] = symbols_quantities[stock['symbol']]
+
+            try:
+                stock['amount'] = f'{d(stock["quantity"]) * d(stock["price"]):,.2f}'
+            except NameError:
+                stock['amount'] = 'n/a'
+
             stock_info.append(stock)
 
-        return stock_info
+        return sorted(stock_info, key = lambda i: i['name'])

@@ -35,127 +35,160 @@ class PortfolioView(View):
         return render(request, self.template_name, context)
 
     def post(self, request):
-        user = request.user
-        form = self.form_class(request.POST, user=user)
+        self.request = request
+        self.user = self.request.user
+
+        form = self.form_class(self.request.POST, user=self.user)
         if form.is_valid():
             form_data = form.cleaned_data
-            selected_portfolio = form_data.get('portfolios')
-            portfolio_name = form_data.get('portfolio_name')
-            new_portfolio = form_data.get('new_portfolio')
-            symbol = form_data.get('symbol')
-            currency = form_data.get('currency')
-            btn1_pressed = form_data.get('btn1_pressed')
-            btn2_pressed = form_data.get('btn2_pressed')
-            quantity = form_data.get('quantity')
-            previous_selected = request.session.get('selected')
+            self.selected_portfolio = form_data.get('portfolios')
+            self.portfolio_name = form_data.get('portfolio_name')
+            self.new_portfolio = form_data.get('new_portfolio')
+            self.symbol = form_data.get('symbol')
+            self.currency = form_data.get('currency')
+            self.btn1_pressed = form_data.get('btn1_pressed')
+            self.btn2_pressed = form_data.get('btn2_pressed')
+            self.previous_selected = request.session.get('selected portfolio')
 
-            # TODO check input names for portfolio name, symbol and new_portfolio
             try:
-                portfolio = Portfolio.objects.get(
-                    user=user, portfolio_name=selected_portfolio)
+                self.portfolio = Portfolio.objects.get(
+                    user=self.user, portfolio_name=self.selected_portfolio)
 
             except Portfolio.DoesNotExist:
-                portfolio = None
-                get_stock = 'empty'
+                self.portfolio = None
+                self.get_stock = 'empty'
 
-            if previous_selected != selected_portfolio:
-                get_stock = 'yes'
+            if self.previous_selected != self.selected_portfolio:
+                self.get_stock = 'yes'
             else:
-                get_stock = 'no'
+                self.get_stock = 'no'
 
-            # create new portfolio
-            if new_portfolio != '':
-                try:
-                    portfolio = Portfolio.objects.create(
-                        user=user, portfolio_name=new_portfolio)
-                    selected_portfolio = new_portfolio
-                    get_stock = 'empty'
+            self.create_new_portfolio()
+            self.rename_or_delete_portfololio_or_add_stock()
+            self.change_quantity_or_delete_symbol()
+            self.get_stock_info()
 
-                except IntegrityError:
-                    print('cannot create portfolio')
-                    get_stock = 'no'
-
-            # rename or delete portfolio
-            if (portfolio and btn1_pressed == 'rename_portfolio'
-                and portfolio_name != selected_portfolio):
-
-                get_stock = 'no'
-                try:
-                    portfolio.portfolio_name = portfolio_name
-                    portfolio.save()
-                    selected_portfolio = portfolio_name
-
-                except IntegrityError:
-                    pass
-
-            if portfolio and btn1_pressed == 'delete_portfolio':
-                portfolio.delete()
-                selected_portfolio = ''
-                get_stock = 'empty'
-
-            # add stock to portfolio
-            if portfolio and btn1_pressed == 'add_new_symbol':
-                try:
-                    StockSelection.objects.create(
-                        stock=Stock.objects.get(symbol=symbol),
-                        quantity=0,
-                        portfolio=portfolio)
-                    symbol = ''
-                    get_stock = 'yes'
-
-                except (Stock.DoesNotExist, IntegrityError):
-                    get_stock = 'no'
-
-            # change quantity or delete stock in portfolio
-            if portfolio and btn2_pressed and quantity:
-                try:
-                    stock = portfolio.stocks.get(stock__symbol=btn2_pressed)
-                    stock.quantity = float(quantity)
-                    stock.save()
-                    get_stock = 'yes'
-
-                except (TypeError, ValueError):
-                    get_stock = 'no'
-
-            elif portfolio and btn2_pressed and not quantity:
-                portfolio.stocks.get(stock__symbol=btn2_pressed).delete()
-                get_stock = 'yes'
-
-            else:
-                pass
-
-            # get stock info
-            if get_stock == 'yes':
-                print('get stock')
-                stocks = self.wtd.get_portfolio_stock_info(portfolio)
-
-            elif get_stock == 'no':
-                stocks = json.loads(request.session.get('stock_info'))
-
-            elif get_stock == 'empty':
-                stocks = []
-
-            else:
-                assert False, f'invalid selection for get_stock: {get_stock}'
-
-            request.session['stock_info'] = json.dumps(stocks, cls=DjangoJSONEncoder)
-            request.session['selected'] = selected_portfolio
+            request.session['stock_info'] = json.dumps(self.stocks, cls=DjangoJSONEncoder)
+            request.session['selected portfolio'] = self.selected_portfolio
             form = self.form_class(
-                user=request.user,
-                initial={'portfolio_name': selected_portfolio,
-                         'portfolios': selected_portfolio,
-                         'symbol': symbol,
-                         'currency': currency})
+                user=self.user,
+                initial={'portfolio_name': self.selected_portfolio,
+                         'portfolios': self.selected_portfolio,
+                         'symbol': self.symbol,
+                         'currency': self.currency})
 
         else:
             form = self.form_class(
-                user=request.user,
+                user=self.user,
                 initial={'portfolio_name': '',
                          'symbol': '',
                          'currency': 'EUR'})
 
-            stocks = []
+            self.stocks = []
 
         context = {'form': form,
-                   'stocks': stocks}
-        return render(request, self.template_name, context)
+                   'stocks': self.stocks}
+        return render(self.request, self.template_name, context)
+
+    def create_new_portfolio(self):
+
+        if self.new_portfolio != '':
+            try:
+                self.portfolio = Portfolio.objects.create(
+                    user=self.user, portfolio_name=self.new_portfolio)
+                self.selected_portfolio = self.new_portfolio
+                self.get_stock = 'empty'
+
+            except IntegrityError:
+                print('cannot create portfolio')
+                pass
+
+    def rename_or_delete_portfololio_or_add_stock(self):
+
+        if self.btn1_pressed:
+
+            if self.portfolio and self.btn1_pressed == 'rename_portfolio':
+                self.get_stock = 'no'
+                if self.portfolio_name != self.selected_portfolio:
+
+                    try:
+                        self.portfolio.portfolio_name = self.portfolio_name
+                        self.portfolio.save()
+                        self.selected_portfolio = self.portfolio_name
+
+                    except IntegrityError:
+                        pass
+                else:
+                    pass
+
+            elif self.portfolio and self.btn1_pressed == 'delete_portfolio':
+                self.portfolio.delete()
+                self.selected_portfolio = ''
+                self.get_stock = 'empty'
+
+            elif self.portfolio and self.btn1_pressed == 'add_new_symbol':
+                try:
+                    StockSelection.objects.create(
+                        stock=Stock.objects.get(symbol=self.symbol),
+                        quantity=0,
+                        portfolio=self.portfolio)
+                    self.symbol = ''
+                    self.get_stock = 'yes'
+
+                except (Stock.DoesNotExist, IntegrityError):
+                    self.get_stock = 'no'
+
+            else:
+                assert False, f'check value btn1_pressed: {self.btn1_pressed}'
+
+        else:
+            pass
+
+    def change_quantity_or_delete_symbol(self):
+
+        if self.btn2_pressed:
+            try:
+                symbol, quantity = self.btn2_pressed.split(',')
+                symbol = symbol.strip()
+                quantity = quantity.strip()
+
+            except ValueError:
+                self.get_stock = 'no'
+                return
+
+            print(f'button two: {self.btn2_pressed, symbol, quantity}')
+
+            if self.portfolio and quantity != 'delete':
+                stock = self.portfolio.stocks.get(stock__symbol=symbol)
+                stock.quantity = quantity
+                stock.save()
+                self.get_stock = 'yes'
+
+            elif self.portfolio and quantity == 'delete':
+                self.portfolio.stocks.get(stock__symbol=symbol).delete()
+                self.get_stock = 'yes'
+
+            else:
+                assert False, f'check value of btn2_pressed: {self.btn2_pressed}'
+
+        else:
+            pass
+
+    def get_stock_info(self):
+
+        if self.portfolio:
+            if self.get_stock == 'yes':
+                print('get stock')
+                self.stocks = self.wtd.get_portfolio_stock_info(self.portfolio)
+
+            elif self.get_stock == 'no':
+                self.stocks = json.loads(self.request.session.get('stock_info'))
+
+            elif self.get_stock == 'empty':
+                self.stocks = []
+
+            else:
+                assert False, f'invalid selection for get_stock: {self.get_stock}'
+
+        else:
+            self.stocks = []

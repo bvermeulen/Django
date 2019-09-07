@@ -86,12 +86,14 @@
                 <td colspan="2">{{ stock.amount }}</td>
                 <td colspan="2">
                   <button class="btn btn-outline-secondary btn-sm" name="btn2_pressed"
-                          value="{{ stock.symbol }}"
-                          onclick="return ChangeQuantity('{{ stock.name }}', '{{ stock.quantity }}')">Change</button>
+                          value="{{ stock.symbol }}, "
+                          onclick="return ChangeQuantity('{{ stock.name }}',
+                                                         '{{ stock.quantity }}',
+                                                         '{{ forloop.counter0 }}')">Change</button>
                 </td>
                 <td colspan="2">
                   <button class="btn btn-outline-secondary btn-sm" name="btn2_pressed"
-                          value="{{ stock.symbol }}" onclick="return ConfirmDelete('{{ stock.name }}' )">Delete</button>
+                          value="{{ stock.symbol }}, delete" onclick="return ConfirmDelete('{{ stock.name }}' )">Delete</button>
                 </td>
               </tr>
             {% endfor %}
@@ -108,7 +110,6 @@ var form = document.getElementById('id_portfolio');
 
 function AskNewName() {
   var newPortfolio = prompt('Please enter name of new portfolio', '');
-  var button = document.getElementById('id_btn2');
 
   if (newPortfolio != null && newPortfolio != '') {
     form.new_portfolio.value = newPortfolio;
@@ -119,12 +120,15 @@ function AskNewName() {
   }
 }
 
-function ChangeQuantity(name, qty) {
-
+function ChangeQuantity(name, qty, counter) {
   var newQuantity = prompt('Change quantity for ' + name, qty);
 
-  if (newQuantity != null && newQuantity != qty) {
-    form.quantity.value = newQuantity;
+  newQuantity = parseFloat(newQuantity);
+  qty = parseFloat(qty);
+  counter = parseFloat(counter);
+
+  if (newQuantity >= 0 && newQuantity != qty) {
+    form.btn2_pressed[2*counter].value +=  newQuantity;
     return true;
   }
   else {

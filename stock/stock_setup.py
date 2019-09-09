@@ -9,6 +9,8 @@ apple = Stock.objects.get(symbol='AAPL')
 slb = Stock.objects.get(symbol='SLB')
 portfolio = Portfolio.objects.get(portfolio_name='Techno', user=default)
 f = PortfolioForm(user=default, initial={'selected_portfolio':'Techno'})
+p = f['portfolios']
+s = p[0]
 
 from django.contrib.auth.models import User
 from stock.models import Stock, Portfolio, StockSelection

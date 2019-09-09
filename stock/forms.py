@@ -36,9 +36,9 @@ class PortfolioForm(forms.Form):
         self.fields['btn1_pressed'] = forms.CharField(required=False)
         self.fields['btn2_pressed'] = forms.CharField(required=False)
 
-        portfolios = [(item.portfolio_name, item.portfolio_name) \
-                      for item in Portfolio.objects.\
-                      filter(user=user).order_by('portfolio_name')]
+        portfolios = [(item.portfolio_name, item.portfolio_name)
+            for item in Portfolio.objects.
+            filter(user=user).order_by('portfolio_name')]
 
         self.fields['portfolios'] = forms.ChoiceField(
                     widget=forms.RadioSelect(),

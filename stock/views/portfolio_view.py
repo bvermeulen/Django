@@ -63,11 +63,17 @@ class PortfolioView(View):
             else:
                 self.get_stock = 'no'
 
-            self.create_new_portfolio()
-            self.rename_or_delete_portfololio_or_add_stock()
-            self.change_quantity_or_delete_symbol()
-            self.get_stock_info()
+            if self.new_portfolio != '':
+                self.create_new_portfolio()
 
+            if self.portfolio:
+                if self.btn1_pressed:
+                    self.rename_or_delete_portfololio_or_add_stock()
+
+                elif self.btn2_pressed:
+                    self.change_quantity_or_delete_symbol()
+
+            self.get_stock_info(self.get_stock)
             request.session['stock_info'] = json.dumps(self.stocks, cls=DjangoJSONEncoder)
             request.session['selected portfolio'] = self.selected_portfolio
             form = self.form_class(
@@ -104,91 +110,85 @@ class PortfolioView(View):
                 pass
 
     def rename_or_delete_portfololio_or_add_stock(self):
+        ''' actions when btn1 is pressed '''
+        assert self.portfolio, "check existance of portfolio"
 
-        if self.btn1_pressed:
+        if self.btn1_pressed == 'rename_portfolio':
+            self.get_stock = 'no'
+            if self.portfolio_name != self.selected_portfolio:
 
-            if self.portfolio and self.btn1_pressed == 'rename_portfolio':
-                self.get_stock = 'no'
-                if self.portfolio_name != self.selected_portfolio:
-
-                    try:
-                        self.portfolio.portfolio_name = self.portfolio_name
-                        self.portfolio.save()
-                        self.selected_portfolio = self.portfolio_name
-
-                    except IntegrityError:
-                        pass
-                else:
-                    pass
-
-            elif self.portfolio and self.btn1_pressed == 'delete_portfolio':
-                self.portfolio.delete()
-                self.selected_portfolio = ''
-                self.get_stock = 'empty'
-
-            elif self.portfolio and self.btn1_pressed == 'add_new_symbol':
                 try:
-                    StockSelection.objects.create(
-                        stock=Stock.objects.get(symbol=self.symbol),
-                        quantity=0,
-                        portfolio=self.portfolio)
-                    self.symbol = ''
-                    self.get_stock = 'yes'
+                    self.portfolio.portfolio_name = self.portfolio_name
+                    self.portfolio.save()
+                    self.selected_portfolio = self.portfolio_name
 
-                except (Stock.DoesNotExist, IntegrityError):
-                    self.get_stock = 'no'
-
+                except IntegrityError:
+                    pass
             else:
-                assert False, f'check value btn1_pressed: {self.btn1_pressed}'
+                pass
+
+        elif self.btn1_pressed == 'delete_portfolio':
+            self.portfolio.delete()
+            self.selected_portfolio = ''
+            self.get_stock = 'empty'
+
+        elif self.btn1_pressed == 'add_new_symbol':
+            try:
+                StockSelection.objects.create(
+                    stock=Stock.objects.get(symbol=self.symbol),
+                    quantity=0,
+                    portfolio=self.portfolio)
+                self.symbol = ''
+                self.get_stock = 'yes'
+
+            except (Stock.DoesNotExist, IntegrityError):
+                self.get_stock = 'no'
 
         else:
-            pass
+            assert False, f'check value btn1_pressed: {self.btn1_pressed}'
 
     def change_quantity_or_delete_symbol(self):
+        ''' actions when btn 2 is pressed '''
+        assert self.portfolio, "check existance of portfolio"
 
-        if self.btn2_pressed:
-            try:
-                symbol, quantity = self.btn2_pressed.split(',')
-                symbol = symbol.strip()
-                quantity = quantity.strip()
+        try:
+            symbol, quantity = self.btn2_pressed.split(',')
+            symbol = symbol.strip()
+            quantity = quantity.strip()
 
-            except ValueError:
-                self.get_stock = 'no'
-                return
+        except ValueError:
+            self.get_stock = 'no'
+            return
 
-            print(f'button two: {self.btn2_pressed, symbol, quantity}')
+        if quantity != 'delete':
+            stock = self.portfolio.stocks.get(stock__symbol=symbol)
+            stock.quantity = quantity
+            stock.save()
+            self.get_stock = 'yes'
 
-            if self.portfolio and quantity != 'delete':
-                stock = self.portfolio.stocks.get(stock__symbol=symbol)
-                stock.quantity = quantity
-                stock.save()
-                self.get_stock = 'yes'
+        elif quantity == 'delete':
+            self.portfolio.stocks.get(stock__symbol=symbol).delete()
+            self.get_stock = 'yes'
 
-            elif self.portfolio and quantity == 'delete':
-                self.portfolio.stocks.get(stock__symbol=symbol).delete()
-                self.get_stock = 'yes'
+        else:
+            assert False, f'check value of btn2_pressed: {self.btn2_pressed}'
+
+    def get_stock_info(self, get_stock):
+        ''' get stock info depending of get_stock status'''
+        self.stocks = []
+        if self.portfolio:
+
+            if get_stock == 'yes':
+                self.stocks = self.wtd.get_portfolio_stock_info(self.portfolio)
+
+            elif get_stock == 'no':
+                self.stocks = json.loads(self.request.session.get('stock_info'))
+
+            elif get_stock == 'empty':
+                pass
 
             else:
-                assert False, f'check value of btn2_pressed: {self.btn2_pressed}'
+                assert False, f'invalid selection for get_stock: {get_stock}'
 
         else:
             pass
-
-    def get_stock_info(self):
-
-        if self.portfolio:
-            if self.get_stock == 'yes':
-                print('get stock')
-                self.stocks = self.wtd.get_portfolio_stock_info(self.portfolio)
-
-            elif self.get_stock == 'no':
-                self.stocks = json.loads(self.request.session.get('stock_info'))
-
-            elif self.get_stock == 'empty':
-                self.stocks = []
-
-            else:
-                assert False, f'invalid selection for get_stock: {self.get_stock}'
-
-        else:
-            self.stocks = []

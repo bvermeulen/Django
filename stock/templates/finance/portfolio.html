@@ -20,7 +20,7 @@
   {% now "Y-m-d" as current_date %}
 
   <form id="id_portfolio" method="post">
-    <a style="visibility: hidden">{{ form.new_portfolio }} {{ form.quantity }}</a>
+    <a style="visibility: hidden">{{ form.new_portfolio }} {{ form.quantity }} {{ form.portfolios }}</a>
     {% csrf_token %}
     <div class="flex-container" style="min-height:10vh">
       <div class="left" style="min-height:50%;">
@@ -47,18 +47,22 @@
 
     <div class="flex-container" style="min-height:70vh">
       <div class="left" style="min-height:50%;">
-        {% for portfolio in form.portfolios %}
-          <p>
-          {% if portfolio.data.selected %}
-              <button type="button" class="btn btn-primary btn-sm"
-                value={{ portfolio }}</button>
 
-          {% else %}
-            <button type="submit" class="btn btn-light btn-sm"
-                value={{ portfolio }}</button>
-          {% endif %}
-          </p>
-        {% endfor %}
+      {% for portfolio in form.portfolios %}
+        <p>
+        {% if portfolio.data.selected %}
+          <button type="button" class="btn btn-primary btn-sm">
+            {{ portfolio.choice_label }}</button>
+
+        {% else %}
+          <button type="submit" class="btn btn-light btn-sm"
+            value="{{ portfolio.data.value }}" name="{{ portfolio.data.name }}">
+              {{ portfolio.choice_label }}</button>
+
+        {% endif %}
+        </p>
+      {% endfor %}
+
       </div>
 
       <div class="right" style="min-height:100%">
@@ -109,7 +113,7 @@
 var form = document.getElementById('id_portfolio');
 
 function AskNewName() {
-  var newPortfolio = prompt('Please enter name of new portfolio', '');
+  var newPortfolio = prompt('What is the name of the new portfolio', '');
 
   if (newPortfolio != null && newPortfolio != '') {
     form.new_portfolio.value = newPortfolio;

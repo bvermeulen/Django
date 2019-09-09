@@ -135,8 +135,11 @@ class WorldTradingData:
                        '&sort_by=name',
                        '&api_token=' + cls.api_token],
                        )
-        res = requests.get(url)
-        orig_stock_info = json.loads(res.content).get('data', {})
+        if stock_symbols:
+            res = requests.get(url)
+            orig_stock_info = json.loads(res.content).get('data', {})
+        else:
+            orig_stock_info = {}
 
         if len(stock_symbols) > cls.max_symbols_allowed:
             logger.info(f'warning - number of symbols exceed maximum of {cls.max_symbols_allowed}')

@@ -13,10 +13,13 @@
   width: 90%;
 }
 
+.scroll {
+  overflow-y: scroll;
+}
+
 .table-fixed tbody {
   display: block;
   height: 50vh;
-  overflow-y: scroll;
 }
 
 .table-fixed thead tr {

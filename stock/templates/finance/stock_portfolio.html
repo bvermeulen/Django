@@ -46,7 +46,7 @@
     </div>
 
     <div class="flex-container" style="min-height:70vh">
-      <div class="left" style="min-height:50%;">
+      <div class="left scroll mr-1" style="height:40vh">
 
       {% for portfolio in form.portfolios %}
         <p>
@@ -62,7 +62,6 @@
         {% endif %}
         </p>
       {% endfor %}
-
       </div>
 
       <div class="right" style="min-height:100%">
@@ -79,7 +78,7 @@
               <th colspan="2"></th>
             </tr>
           </thead>
-          <tbody>
+          <tbody class="scroll">
             {% for stock in stocks %}
               <tr>
                 <td colspan="3">{{ stock.name|truncatechars:15 }}</td>

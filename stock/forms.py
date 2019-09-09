@@ -41,7 +41,7 @@ class PortfolioForm(forms.Form):
             filter(user=user).order_by('portfolio_name')]
 
         self.fields['portfolios'] = forms.ChoiceField(
-                    widget=forms.RadioSelect(),
+                    widget=forms.Select(),
                     choices=portfolios,
                     required=False,
-                    )
+        )

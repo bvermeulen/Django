@@ -19,7 +19,7 @@ from pprint import pprint
 class PortfolioView(View):
 
     form_class = PortfolioForm
-    template_name = 'finance/portfolio.html'
+    template_name = 'finance/stock_portfolio.html'
     wtd = WorldTradingData()
 
     def get(self, request):

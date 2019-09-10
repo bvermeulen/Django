@@ -1,6 +1,9 @@
+import threading
 import datetime
+import time
 from collections import namedtuple
 import requests
+from requests.exceptions import ConnectionError
 import csv
 import json
 from django.contrib.auth.models import User
@@ -102,6 +105,7 @@ class WorldTradingData:
         cls.stock_url = 'https://api.worldtradingdata.com/api/v1/stock'
         cls.intraday_url = 'https://intraday.worldtradingdata.com/api/v1/intraday'
         cls.history_url = 'https://api.worldtradingdata.com/api/v1/history'
+        cls.forex_url = 'https://api.worldtradingdata.com/api/v1/forex'
         cls.max_symbols_allowed = 20
 
     @staticmethod
@@ -136,8 +140,15 @@ class WorldTradingData:
                        '&api_token=' + cls.api_token],
                        )
         if stock_symbols:
-            res = requests.get(url)
-            orig_stock_info = json.loads(res.content).get('data', {})
+            try:
+                res = requests.get(url)
+                orig_stock_info = json.loads(res.content).get('data', {})
+
+            except ConnectionError:
+                orig_stock_info = {}
+                print(f'connection error: {url}')
+                logger.info(f'connection error: {url}')
+
         else:
             orig_stock_info = {}
 
@@ -187,8 +198,15 @@ class WorldTradingData:
                        '&sort=asc'
                        '&api_token=' + cls.api_token ],
                        )
-        res = requests.get(url)
-        intraday_info = json.loads(res.content).get('intraday', {})
+
+        try:
+           res = requests.get(url)
+           intraday_info = json.loads(res.content).get('intraday', {})
+
+        except ConnectionError:
+            intraday_info = {}
+            print(f'connection error: {url}')
+            logger.info(f'connection error: {url}')
 
         # if there is intraday info, convert date string and provide time and
         # create list of trade_info tuples
@@ -239,8 +257,14 @@ class WorldTradingData:
                        '&api_token=' + cls.api_token],
                        )
 
-        res = requests.get(url)
-        history_info = json.loads(res.content).get('history', {})
+        try:
+            res = requests.get(url)
+            history_info = json.loads(res.content).get('history', {})
+
+        except ConnectionError:
+            history_info = {}
+            print(f'connection error: {url}')
+            logger.info(f'connection error: {url}')
 
         # if there is intraday info, convert date string and provide date and
         # create list of trade_info tuples
@@ -332,10 +356,67 @@ class WorldTradingData:
             stock['quantity'] = symbols_quantities[stock['symbol']]
 
             try:
-                stock['amount'] = f'{d(stock["quantity"]) * d(stock["price"]):,.2f}'
+                usd_exchange_rate = Currency.objects.filter(
+                    currency=stock['currency']).first().usd_exchange_rate
+                amount = d(stock['quantity']) * d(stock['price']) * d(usd_exchange_rate)
+                stock['amount'] = f'{amount:,.2f}'
+
             except NameError:
                 stock['amount'] = 'n/a'
 
             stock_info.append(stock)
 
         return sorted(stock_info, key = lambda i: i['name'])
+
+    @classmethod
+    def update_currencies(cls):
+        base_currency = 'USD'
+        url = ''.join([cls.forex_url,
+                       '?base=' + base_currency,
+                       '&api_token=' + cls.api_token ],
+        )
+        try:
+            res = requests.get(url)
+            forex_dict = json.loads(res.content).get('data', {})
+
+        except ConnectionError:
+            forex_dict = {}
+            print(f'connection error: {url}')
+            logger.info(f'connection error: {url}')
+
+        for cur in Currency.objects.all().order_by('currency'):
+            currency_key = cur.currency
+            currency_object = Currency.objects.get(currency=currency_key)
+            usd_exchange_rate = forex_dict.get(currency_key, '')
+
+            if usd_exchange_rate:
+                currency_object.usd_exchange_rate = str(usd_exchange_rate)
+                currency_object.save()
+
+
+def update_currencies_at_interval(interval=21600):
+    '''  update the currency depending on interval in seconds
+         default value is 6 hours (21600 seconds
+    '''
+    assert isinstance(interval, int), f'check interval setting {interval} must be an integer'
+
+    wtd = WorldTradingData()
+    wtd.setup()
+    start_time = time.time()
+    current_time = start_time
+    elapsed_time = int(current_time - start_time)
+
+    while True:
+        if elapsed_time % interval == 0:
+            wtd.update_currencies()
+            time_str = datetime.datetime.fromtimestamp(current_time).strftime('%d-%m-%Y %H:%M:%S')
+            print(f'update currencies at {time_str}')
+            logger.info(f'update currencies at {time_str}')
+
+        current_time = time.time()
+        elapsed_time = int(current_time - start_time)
+
+
+thread_update_currencies = threading.Thread(
+    target=update_currencies_at_interval, kwargs={'interval':21600})
+thread_update_currencies.start()

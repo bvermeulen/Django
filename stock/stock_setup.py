@@ -13,14 +13,12 @@ p = f['portfolios']
 s = p[0]
 
 from django.contrib.auth.models import User
-from stock.models import Stock, Portfolio, StockSelection
+from stock.models import Stock, Portfolio, StockSelection, Currency
 from stock import module_stock as ms
 from pprint import pprint
 wtd = ms.WorldTradingData()
 wtd.setup()
-default = User.objects.get(username='default_user')
-portfolio = Portfolio.objects.get(user=default, portfolio_name='Dow Jones')
-stock_info = wtd.get_portfolio_stock_info(portfolio)
+a = wtd.update_currencies()
 
 
 import requests

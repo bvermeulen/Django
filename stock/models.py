@@ -13,11 +13,12 @@ class Exchange(models.Model):
 
 
 class Currency(models.Model):
-     currency = models.CharField(max_length=3, unique=True)
-     usd_exchange_rate = models.FloatField(default=1.0)
+    currency = models.CharField(max_length=3, unique=True)
+    usd_exchange_rate = models.CharField(max_length=20, default='1.0')
 
-     def __str__(self):
-         return self.currency
+    def __str__(self):
+        return self.currency
+
 
 
 class Stock(models.Model):
@@ -45,7 +46,7 @@ class Portfolio(models.Model):
 
 class StockSelection(models.Model):
     stock = models.ForeignKey(Stock, on_delete=models.CASCADE)
-    quantity = models.FloatField(default=1.0)
+    quantity = models.CharField(max_length=20, default=1.0)
     portfolio = models.ForeignKey(Portfolio, on_delete=models.CASCADE,
                                   related_name='stocks')
 

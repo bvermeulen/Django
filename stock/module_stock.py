@@ -356,10 +356,7 @@ class WorldTradingData:
             stock['quantity'] = symbols_quantities[stock['symbol']]
 
             try:
-                usd_exchange_rate = Currency.objects.filter(
-                    currency=stock['currency']).first().usd_exchange_rate
-                amount = d(stock['quantity']) * d(stock['price']) * d(usd_exchange_rate)
-                stock['amount'] = f'{amount:,.2f}'
+                stock['amount'] = f'{d(stock["quantity"]) * d(stock["price"]):,.2f}'
 
             except NameError:
                 stock['amount'] = 'n/a'
@@ -390,7 +387,7 @@ class WorldTradingData:
             usd_exchange_rate = forex_dict.get(currency_key, '')
 
             if usd_exchange_rate:
-                currency_object.usd_exchange_rate = str(usd_exchange_rate)
+                currency_object.usd_exchange_rate = usd_exchange_rate
                 currency_object.save()
 
 

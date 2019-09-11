@@ -31,3 +31,35 @@
   color: #fff;
   background-color: #888;
 }
+
+.item_select{
+  color: black;
+  font-weight: normal;
+  font-size: 1.1em;
+}
+
+.item_select:hover {
+  color: black;
+  font-weight: bold;
+  font-size: 1.1em;
+  background-color: darkgrey;
+}
+
+.dropdown {
+  position: relative;
+  display: inline-block;
+}
+
+.dropdown-content {
+  display: none;
+  position: absolute;
+  background-color: #f9f9f9;
+  min-width: 80px;
+  box-shadow: 0px 8px 10px 0px rgba(0,0,0,0.2);
+  padding: 8px 10px;
+  z-index: 1;
+}
+
+.dropdown:hover .dropdown-content {
+  display: block;
+}

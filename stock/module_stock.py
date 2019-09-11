@@ -12,6 +12,7 @@ from .models import Exchange, Currency, Stock, Portfolio, StockSelection
 from .stock_lists import stock_lists
 from howdimain.utils.plogger import Logger
 from howdimain.utils.min_max import get_min, get_max
+from howdimain.howdimain_vars import MAX_SYMBOLS_ALLOWED, UPDATE_INTERVAL
 from decouple import config
 from decimal import Decimal as d
 
@@ -106,7 +107,6 @@ class WorldTradingData:
         cls.intraday_url = 'https://intraday.worldtradingdata.com/api/v1/intraday'
         cls.history_url = 'https://api.worldtradingdata.com/api/v1/history'
         cls.forex_url = 'https://api.worldtradingdata.com/api/v1/forex'
-        cls.max_symbols_allowed = 20
 
     @staticmethod
     def get_schema(format):
@@ -152,8 +152,8 @@ class WorldTradingData:
         else:
             orig_stock_info = {}
 
-        if len(stock_symbols) > cls.max_symbols_allowed:
-            logger.info(f'warning - number of symbols exceed maximum of {cls.max_symbols_allowed}')
+        if len(stock_symbols) > MAX_SYMBOLS_ALLOWED:
+            logger.info(f'warning - number of symbols exceed maximum of {MAX_SYMBOLS_ALLOWED}')
 
         # if there is stock info, convert date string to datetime object
         # and add display attributes
@@ -347,9 +347,9 @@ class WorldTradingData:
             for stock in portfolio.stocks.all()}
         list_symbols = list(symbols_quantities.keys())
         stock_trade_info = cls.get_stock_trade_info(
-            list_symbols[0:cls.max_symbols_allowed])
+            list_symbols[0:MAX_SYMBOLS_ALLOWED])
         stock_trade_info += cls.get_stock_trade_info(
-            list_symbols[cls.max_symbols_allowed:2*cls.max_symbols_allowed])
+            list_symbols[MAX_SYMBOLS_ALLOWED:2*MAX_SYMBOLS_ALLOWED])
 
         stock_info = []
         for stock in stock_trade_info:
@@ -364,6 +364,33 @@ class WorldTradingData:
             stock_info.append(stock)
 
         return sorted(stock_info, key = lambda i: i['name'])
+
+    @classmethod
+    def calculate_stocks_value(cls, stocks, currency):
+        total_value = d('0')
+        if not stocks:
+            return total_value
+
+        for stock in stocks:
+            base_value = d(stock['quantity']) * d(stock['price'])
+            exchange_rate = Currency.objects.get(
+                currency=stock['currency']).usd_exchange_rate
+            usd_value = d(base_value) * d(exchange_rate)
+            print(usd_value)
+            total_value += usd_value
+
+        if currency == 'USD':
+            pass
+
+        elif currency == 'EUR':
+            exchange_rate_euro = Currency.objects.get(
+                currency='EUR').usd_exchange_rate
+            total_value *= d(exchange_rate_euro)
+
+        else:
+            assert False, f'incorrect currency used: {currency}'
+
+        return total_value
 
     @classmethod
     def update_currencies(cls):
@@ -391,7 +418,7 @@ class WorldTradingData:
                 currency_object.save()
 
 
-def update_currencies_at_interval(interval=21600):
+def update_currencies_at_interval(interval=UPDATE_INTERVAL):
     '''  update the currency depending on interval in seconds
          default value is 6 hours (21600 seconds
     '''
@@ -414,6 +441,8 @@ def update_currencies_at_interval(interval=21600):
         elapsed_time = int(current_time - start_time)
 
 
+
+
 thread_update_currencies = threading.Thread(
-    target=update_currencies_at_interval, kwargs={'interval':21600})
+    target=update_currencies_at_interval, kwargs={'interval': UPDATE_INTERVAL})
 thread_update_currencies.start()

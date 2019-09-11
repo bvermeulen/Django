@@ -1,6 +1,7 @@
-from stock.models import Stock, Portfolio, StockSelection
+from stock.models import Stock, Portfolio, StockSelection, Currency
 from stock.forms import PortfolioForm
 from django.contrib.auth.models import User
+from stock import module_stock as ms
 from pprint import pprint
 bruno = User.objects.get(username='bvermeulen')
 john = User.objects.get(username='johndean121')
@@ -9,17 +10,10 @@ apple = Stock.objects.get(symbol='AAPL')
 slb = Stock.objects.get(symbol='SLB')
 portfolio = Portfolio.objects.get(portfolio_name='Techno', user=default)
 f = PortfolioForm(user=default, initial={'selected_portfolio':'Techno'})
-p = f['portfolios']
-s = p[0]
-
-from django.contrib.auth.models import User
-from stock.models import Stock, Portfolio, StockSelection, Currency
-from stock import module_stock as ms
-from pprint import pprint
 wtd = ms.WorldTradingData()
 wtd.setup()
-a = wtd.update_currencies()
-
+stocks = wtd.get_portfolio_stock_info(portfolio)
+wtd.calculate_stocks_value(stocks, 'EUR')
 
 import requests
 from howdimain.utils.fusioncharts import FusionCharts, FusionTable, TimeSeries

@@ -6,4 +6,4 @@ function Validate() {
   else {
     return false;
   }
-};
+}

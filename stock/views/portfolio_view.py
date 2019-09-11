@@ -6,12 +6,14 @@ from django.views.generic import View
 from django.utils.decorators import method_decorator
 from django.db.utils import IntegrityError
 from stock.forms import PortfolioForm
-from stock.models import Exchange, Stock, Portfolio, StockSelection
+from stock.models import Currency, Exchange, Stock, Portfolio, StockSelection
 from stock.module_stock import WorldTradingData
 from howdimain.utils.plogger import Logger
 import json
+from decimal import Decimal
 
 logger = Logger.getlogger()
+d = Decimal
 
 from pprint import pprint
 
@@ -23,13 +25,12 @@ class PortfolioView(View):
     wtd = WorldTradingData()
 
     def get(self, request):
-        symbol = ''
         currency = request.session.get('currency', 'EUR')
 
         form = self.form_class(
             user=request.user,
-            initial={'symbol': symbol,
-                     'currency': currency})
+            initial={'symbol': '',
+                     'currencies': currency})
 
         context = {'form': form, }
         return render(request, self.template_name, context)
@@ -37,6 +38,7 @@ class PortfolioView(View):
     def post(self, request):
         self.request = request
         self.user = self.request.user
+        self.currency = request.session.get('currency', 'EUR')
 
         form = self.form_class(self.request.POST, user=self.user)
         if form.is_valid():
@@ -45,7 +47,7 @@ class PortfolioView(View):
             self.portfolio_name = form_data.get('portfolio_name')
             self.new_portfolio = form_data.get('new_portfolio')
             self.symbol = form_data.get('symbol')
-            self.currency = form_data.get('currency')
+            self.currency = form_data.get('currencies')
             self.btn1_pressed = form_data.get('btn1_pressed')
             self.btn2_pressed = form_data.get('btn2_pressed')
             self.previous_selected = request.session.get('selected portfolio')
@@ -76,19 +78,21 @@ class PortfolioView(View):
             self.get_stock_info(self.get_stock)
             request.session['stock_info'] = json.dumps(self.stocks, cls=DjangoJSONEncoder)
             request.session['selected portfolio'] = self.selected_portfolio
+            request.session['currency'] = self.currency
+
             form = self.form_class(
                 user=self.user,
                 initial={'portfolio_name': self.selected_portfolio,
                          'portfolios': self.selected_portfolio,
                          'symbol': self.symbol,
-                         'currency': self.currency})
+                         'currencies': self.currency})
 
         else:
             form = self.form_class(
                 user=self.user,
                 initial={'portfolio_name': '',
                          'symbol': '',
-                         'currency': 'EUR'})
+                         'currencies': 'EUR'})
 
             self.stocks = []
 

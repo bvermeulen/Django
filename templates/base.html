@@ -95,9 +95,9 @@
   <script src="{% static 'martor/js/martor.min.js' %}"></script>
 
   <script>
-  $('pre').each(function(i, block){
-    hljs.highlightBlock(block);
-  });
+    $('pre').each(function(i, block){
+      hljs.highlightBlock(block);
+    })
   </script>
 
   {% block javascript %}{% endblock %}

@@ -17,53 +17,65 @@
 {% endblock %}
 
 {% block content %}
-
   <form id="id_portfolio" method="post">
-    <a style="visibility: hidden">{{ form.new_portfolio }} {{ form.quantity }} {{ form.portfolios }}</a>
     {% csrf_token %}
-    <div class="flex-container" style="min-height:10vh">
-      <div style="width:10%; min-height:50%;">
-        <strong>Portfolios</strong><br>
-        <button class="btn btn-outline-secondary btn-sm"
-        onclick="return AskNewName()">New</button>
+    <a style="display: none">{{ form.new_portfolio }} {{ form.quantity }} {{ form.portfolios }} {{ form.currencies }}</a>
+    <div class="flex-container">
+      <div style="width:12%">
+        <button class="btn btn-primary btn-sm"
+        onclick="return AskNewName()">New portfolio</button>
       </div>
 
-      <div style="width:90%; min-height:50%">
+      <div style="width:44%">
         {{ form.portfolio_name }}
-        <button class="btn btn-outline-secondary btn-sm" name="btn1_pressed"
+        <button class="btn btn-outline-primary btn-sm" name="btn1_pressed"
           value="rename_portfolio">Rename</button>
-        <button class="btn btn-outline-secondary btn-sm" name="btn1_pressed"
+        <button class="btn btn-primary btn-sm mr-5" name="btn1_pressed"
           value="delete_portfolio"
           onclick="return ConfirmDelete('{{ form.portfolio_name.value }}')">Delete</button>
-        {{ form.currency }}
-        <br>
-
         {{ form.symbol }}
-        <button class="btn btn-outline-secondary btn-sm" name="btn1_pressed"
-          value="add_new_symbol">Add</button>
+        <button class="btn btn-outline-primary btn-sm" name="btn1_pressed"
+            value="add_new_symbol">Add symbol</button>
+      </div>
+
+      <div style="width:44%">
+        <div class="dropdown">
+          <button class="btn btn-outline-primary btn-sm">{{ form.currencies.value }}</button>
+          <div class="dropdown-content">
+            {% for currency in form.currencies %}
+                {% if not currency.data.selected %}
+                  <p>
+                  <button class="btn btn-link" value="{{ currency.data.value}}"
+                    name="{{ currency.data.name }}"><a>{{ currency.choice_label }}</a>
+                  </button>
+                  </p>
+                {% endif %}
+            {% endfor %}
+          </div>
+        </div>
       </div>
     </div>
 
     <div class="flex-container" style="min-height:70vh">
-      <div class="scroll mr-1" style="width:10%; height:40vh">
+      <div class="scroll mt-5 mr-1" style="width:12%; height:40vh">
 
-      {% for portfolio in form.portfolios %}
-        <p>
-        {% if portfolio.data.selected %}
-          <button type="button" class="btn btn-primary btn-sm">
-            {{ portfolio.choice_label }}</button>
-
-        {% else %}
-          <button type="submit" class="btn btn-light btn-sm"
-            value="{{ portfolio.data.value }}" name="{{ portfolio.data.name }}">
+        {% for portfolio in form.portfolios %}
+          <p>
+          {% if portfolio.data.selected %}
+            <button type="button" class="btn btn-primary btn-sm">
               {{ portfolio.choice_label }}</button>
 
-        {% endif %}
-        </p>
-      {% endfor %}
+          {% else %}
+            <button type="submit" class="btn btn-light btn-sm"
+              value="{{ portfolio.data.value }}" name="{{ portfolio.data.name }}">
+                {{ portfolio.choice_label }}</button>
+
+          {% endif %}
+          </p>
+        {% endfor %}
       </div>
 
-      <div style="width:90%; min-height:100%">
+      <div style="width:88%; min-height:100%">
         <table class="table table-fixed table-striped mb-2 mt-1 table-sm">
           <thead class="col-sm-8 custom-thead-grey">
             <tr>
@@ -101,7 +113,7 @@
             {% endfor %}
           </tbody>
         </table>
-    </div>
+      </div>
   </form>
   <br><br><br><br>
 {% endblock content %}
@@ -147,6 +159,5 @@ function ConfirmDelete(value) {
     return false;
   }
 }
-
 </script>
 {% endblock %}

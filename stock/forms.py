@@ -1,4 +1,5 @@
 from django import forms
+from howdimain.howdimain_vars import BASE_CURRENCIES
 from .models import Exchange, Portfolio
 
 class StockQuoteForm(forms.Form):
@@ -32,7 +33,6 @@ class PortfolioForm(forms.Form):
         self.fields['new_portfolio'] = forms.CharField(required=False)
         self.fields['symbol'] = forms.CharField(max_length = 10,
             widget=forms.TextInput(attrs={'size':'10vw'}), required=False)
-        self.fields['currency'] = forms.CharField(required=False)
         self.fields['btn1_pressed'] = forms.CharField(required=False)
         self.fields['btn2_pressed'] = forms.CharField(required=False)
 
@@ -44,4 +44,10 @@ class PortfolioForm(forms.Form):
                     widget=forms.Select(),
                     choices=portfolios,
                     required=False,
+        )
+
+        self.fields['currencies'] = forms.ChoiceField(
+                    widget=forms.Select(),
+                    choices=BASE_CURRENCIES,
+                    required=True,
         )

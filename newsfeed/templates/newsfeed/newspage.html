@@ -1,18 +1,9 @@
 {% extends 'base.html' %}
 
+{% load static %}
+
 {% block stylesheet %}
-<style>
-  .item_select
-      { color: black;
-        font-weight: normal;
-        font-size: 1.1em;
-      }
-  .item_select:hover { color: black;
-                       font-weight: bold;
-                       font-size: 1.2em;
-                       background-color: darkgrey;
-      }
-</style>
+  <link rel="stylesheet" type="text/css" href="{% static 'css/container-styles.css' %}">
 {% endblock %}
 
 {% block content %}

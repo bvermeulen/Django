@@ -1,20 +1,19 @@
+from decimal import Decimal as d
 import threading
 import datetime
 import time
-from collections import namedtuple
-import requests
-from requests.exceptions import ConnectionError
 import csv
 import json
+from collections import namedtuple
+from decouple import config
+import requests
 from django.contrib.auth.models import User
 from django.db.utils import IntegrityError
-from .models import Exchange, Currency, Stock, Portfolio, StockSelection
-from .stock_lists import stock_lists
 from howdimain.utils.plogger import Logger
 from howdimain.utils.min_max import get_min, get_max
 from howdimain.howdimain_vars import MAX_SYMBOLS_ALLOWED, UPDATE_INTERVAL
-from decouple import config
-from decimal import Decimal as d
+from .models import Exchange, Currency, Stock, Portfolio, StockSelection
+from .stock_lists import stock_lists
 
 logger = Logger.getlogger()
 
@@ -54,12 +53,12 @@ class PopulateStock:
     def symbols(cls,):
         for i, row in enumerate(cls.stock_data):
             try:
-                stock = Stock.objects.create(
-                            symbol=row[0],
-                            company=row[1][0:75],
-                            currency=Currency.objects.get(currency=row[2]),
-                            exchange=Exchange.objects.get(exchange_short=row[4]),
-                            )
+                _ = Stock.objects.create(
+                    symbol=row[0],
+                    company=row[1][0:75],
+                    currency=Currency.objects.get(currency=row[2]),
+                    exchange=Exchange.objects.get(exchange_short=row[4]),
+                )
                 print(f'processing row {i}, stock {row[1]}')
                 logger.info(f'processing row {i}, stock {row[1]}')
 
@@ -77,12 +76,12 @@ class PopulateStock:
         #     stock_selection = StockSelection.objects.create(stock=stock,
         #         quantity=1, portfolio=portfolio)
 
-        portfolio = Portfolio.objects.create(portfolio_name='AEX',
-            user=default)
+        portfolio = Portfolio.objects.create(
+            portfolio_name='AEX', user=default)
         for stock_symbol in stock_lists.get('AEX'):
             stock = Stock.objects.get(symbol=stock_symbol)
-            stock_selection = StockSelection.objects.create(stock=stock,
-                quantity=1, portfolio=portfolio)
+            _ = StockSelection.objects.create(
+                stock=stock, quantity=1, portfolio=portfolio)
 
         # portfolio = Portfolio.objects.create(portfolio_name='Dow Jones', user=default)
         # for stock_symbol in stock_lists.get('DOW'):
@@ -109,10 +108,10 @@ class WorldTradingData:
         cls.forex_url = 'https://api.worldtradingdata.com/api/v1/forex'
 
     @staticmethod
-    def get_schema(format):
+    def get_schema(_format):
         return [{'name': 'Date',
                  'type': 'date',
-                 'format': format,
+                 'format': _format,
                 },
                 {'name': 'open',
                  'type': 'number',
@@ -138,13 +137,13 @@ class WorldTradingData:
                        '?symbol=' + ','.join(stock_symbols).upper(),
                        '&sort_by=name',
                        '&api_token=' + cls.api_token],
-                       )
+                     )
         if stock_symbols:
             try:
                 res = requests.get(url)
                 orig_stock_info = json.loads(res.content).get('data', {})
 
-            except ConnectionError:
+            except requests.exceptions.ConnectionError:
                 orig_stock_info = {}
                 print(f'connection error: {url}')
                 logger.info(f'connection error: {url}')
@@ -153,7 +152,8 @@ class WorldTradingData:
             orig_stock_info = {}
 
         if len(stock_symbols) > MAX_SYMBOLS_ALLOWED:
-            logger.info(f'warning - number of symbols exceed maximum of {MAX_SYMBOLS_ALLOWED}')
+            logger.info(f'warning - number of symbols exceed '
+                        f'maximum of {MAX_SYMBOLS_ALLOWED}')
 
         # if there is stock info, convert date string to datetime object
         # and add display attributes
@@ -189,21 +189,21 @@ class WorldTradingData:
     def get_stock_intraday_info(cls, stock_symbol):
         '''  return stock intraday info as a dict retrieved from url json, key 'data'
         '''
-        range = '1'     #  number of days (1-30)
+        _range = '1'     #  number of days (1-30)
         interval = '5'  #  interval in minutes
         url = ''.join([cls.intraday_url,
                        '?symbol=' + stock_symbol.upper(),
-                       '&range=' + range,
+                       '&range=' + _range,
                        '&interval=' + interval,
                        '&sort=asc'
-                       '&api_token=' + cls.api_token ],
-                       )
+                       '&api_token=' + cls.api_token],
+                      )
 
         try:
-           res = requests.get(url)
-           intraday_info = json.loads(res.content).get('intraday', {})
+            res = requests.get(url)
+            intraday_info = json.loads(res.content).get('intraday', {})
 
-        except ConnectionError:
+        except requests.exceptions.ConnectionError:
             intraday_info = {}
             print(f'connection error: {url}')
             logger.info(f'connection error: {url}')
@@ -212,11 +212,13 @@ class WorldTradingData:
         # create list of trade_info tuples
         trade = namedtuple('trade', 'date open close low high volume')
         intraday_trades = []
-        min_low = None; max_high = None
+        min_low = None
+        max_high = None
         if intraday_info:
             for time_stamp, trade_info in intraday_info.items():
                 intraday_trades.append(
-                    trade(date=datetime.datetime.strptime(time_stamp, "%Y-%m-%d %H:%M:%S"),
+                    trade(date=datetime.datetime.strptime(
+                        time_stamp, "%Y-%m-%d %H:%M:%S"),
                           open=trade_info.get('open'),
                           close=trade_info.get('close'),
                           low=trade_info.get('low'),
@@ -233,15 +235,16 @@ class WorldTradingData:
 
             # add start and end time
             start_time = intraday_trades[0].date.strftime("%Y-%m-%d") + ' 08:00:00'
-            intraday_trades.insert(0,
-                    trade(date=datetime.datetime.strptime(start_time, "%Y-%m-%d %H:%M:%S"),
-                          open=None, close=None, low=None, high=None, volume=None)
-                    )
+            intraday_trades.insert(
+                0, trade(date=datetime.datetime.strptime(start_time, "%Y-%m-%d %H:%M:%S"),
+                         open=None, close=None, low=None, high=None, volume=None
+                        ))
             end_time = intraday_trades[-1].date.strftime("%Y-%m-%d") + ' 18:00:00'
             intraday_trades.append(
-                    trade(date=datetime.datetime.strptime(end_time, "%Y-%m-%d %H:%M:%S"),
-                          open=initial_open, close=last_close, low=min_low, high=max_high, volume=None)
-                    )
+                trade(date=datetime.datetime.strptime(end_time, "%Y-%m-%d %H:%M:%S"),
+                      open=initial_open, close=last_close, low=min_low,
+                      high=max_high, volume=None,
+                     ))
         else:
             logger.info(f'unable to get stock intraday data for {url}')
 
@@ -254,14 +257,14 @@ class WorldTradingData:
         url = ''.join([cls.history_url,
                        '?symbol=' + stock_symbol.upper(),
                        '&sort=newest',
-                       '&api_token=' + cls.api_token],
-                       )
+                       '&api_token=' + cls.api_token,
+                      ])
 
         try:
             res = requests.get(url)
             history_info = json.loads(res.content).get('history', {})
 
-        except ConnectionError:
+        except requests.exceptions.ConnectionError:
             history_info = {}
             print(f'connection error: {url}')
             logger.info(f'connection error: {url}')
@@ -363,7 +366,7 @@ class WorldTradingData:
 
             stock_info.append(stock)
 
-        return sorted(stock_info, key = lambda i: i['name'])
+        return sorted(stock_info, key=lambda i: i['name'])
 
     @classmethod
     def calculate_stocks_value(cls, stocks, currency):
@@ -397,13 +400,13 @@ class WorldTradingData:
         base_currency = 'USD'
         url = ''.join([cls.forex_url,
                        '?base=' + base_currency,
-                       '&api_token=' + cls.api_token ],
-        )
+                       '&api_token=' + cls.api_token,
+                       ])
         try:
             res = requests.get(url)
             forex_dict = json.loads(res.content).get('data', {})
 
-        except ConnectionError:
+        except requests.exceptions.ConnectionError:
             forex_dict = {}
             print(f'connection error: {url}')
             logger.info(f'connection error: {url}')
@@ -422,7 +425,8 @@ def update_currencies_at_interval(interval=UPDATE_INTERVAL):
     '''  update the currency depending on interval in seconds
          default value is 6 hours (21600 seconds
     '''
-    assert isinstance(interval, int), f'check interval setting {interval} must be an integer'
+    assert isinstance(interval, int), \
+           f'check interval setting {interval} must be an integer'
 
     wtd = WorldTradingData()
     wtd.setup()
@@ -433,7 +437,8 @@ def update_currencies_at_interval(interval=UPDATE_INTERVAL):
     while True:
         if elapsed_time % interval == 0:
             wtd.update_currencies()
-            time_str = datetime.datetime.fromtimestamp(current_time).strftime('%d-%m-%Y %H:%M:%S')
+            time_str = datetime.datetime.fromtimestamp(
+                current_time).strftime('%d-%m-%Y %H:%M:%S')
             print(f'update currencies at {time_str}')
             logger.info(f'update currencies at {time_str}')
 

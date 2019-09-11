@@ -16,9 +16,9 @@ from howdimain.utils.plogger import Logger
 logformat = '%(asctime)s:%(levelname)s:%(message)s'
 Logger.set_logger(config('LOG_FILE'), logformat, 'INFO')
 logger = Logger.getlogger()
-HOWDIMAIN_VERSION='1.0'
-HOWDIMAIN_DATE='6 JULY 2019'
-HOWDIMAIN_AUTHOR='bruno.vermeulen@hotmail.com'
+HOWDIMAIN_VERSION ='1.0'
+HOWDIMAIN_DATE ='6 JULY 2019'
+HOWDIMAIN_AUTHOR ='bruno.vermeulen@hotmail.com'
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -87,7 +87,7 @@ WSGI_APPLICATION = 'howdimain.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'ENGINE': 'django.db.backends.postgresql',
         'NAME': config('DB_NAME'),
         'USER': config('DB_USER'),
         'PASSWORD': config('DB_PASSWORD'),

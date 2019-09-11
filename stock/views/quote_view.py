@@ -4,7 +4,7 @@ from django.contrib.auth.models import User
 from django.shortcuts import render, redirect, reverse
 from django.views.generic import View
 from stock.forms import StockQuoteForm
-from stock.models import Exchange, Stock, Portfolio
+from stock.models import Stock, Portfolio
 from stock.module_stock import WorldTradingData
 from howdimain.utils.fusioncharts import FusionCharts, FusionTable, TimeSeries
 from howdimain.utils.plogger import Logger
@@ -147,34 +147,44 @@ class IntraDayView(View):
             txt_color = 'txt_normal'
 
         caption = ''.join([Stock.objects.get(symbol=symbol).company,
-                           ' (', symbol, ')' ])
+                           ' (', symbol, ')'])
 
         schema = json.dumps(self.wtd.get_schema(date_format))
         chart_data = json.dumps(chart_data)
         time_series = TimeSeries(FusionTable(schema, chart_data))
 
-        time_series.AddAttribute('styleDefinition',
-            {'txt_red': {'fill': font_red, 'font-weight': font_weight, 'font-size': font_size},
-             'txt_green': {'fill': font_green, 'font-weight': font_weight, 'font-size': font_size},
-             'txt_normal': {'fill': font_white, 'font-weight': font_weight, 'font-size': font_size},
-        })
-        time_series.AddAttribute('chart', {'multicanvas': '0', 'theme': chart_theme, 'showlegend': '0',})
+        time_series.AddAttribute(
+            'styleDefinition',
+            {'txt_red': {
+                'fill': font_red, 'font-weight': font_weight, 'font-size': font_size},
+             'txt_green': {
+                 'fill': font_green, 'font-weight': font_weight, 'font-size': font_size},
+             'txt_normal': {
+                 'fill': font_white, 'font-weight': font_weight, 'font-size': font_size},
+            })
+        time_series.AddAttribute(
+            'chart', {'multicanvas': '0', 'theme': chart_theme, 'showlegend': '0',})
         time_series.AddAttribute('caption', {'text': caption, })
-        time_series.AddAttribute('subcaption', {'text': subcaption, 'style': {'text': txt_color}, })
+        time_series.AddAttribute(
+            'subcaption', {'text': subcaption, 'style': {'text': txt_color}, })
         time_series.AddAttribute('navigator', {'enabled': '0'})
-        time_series.AddAttribute('extensions', {'customrangeselector': {'enabled': '0'}})
-        time_series.AddAttribute('yaxis', [
-            {'plot': [{'value':{'open':'open','high':'high','low':'low','close':'close'},
-                       'type':'candlestick'}],
-                     'title':'Stock Value',
-                     'min': min_price*0.99,
-                     'max': max_price*1.01,
-            },
-            {'plot': [{'value': 'volume', 'type': 'column'}],
-                     'title': 'Volume',
-                     'max': max_volume * 3,
-            },
-        ])
+        time_series.AddAttribute(
+            'extensions', {'customrangeselector': {'enabled': '0'}})
+        time_series.AddAttribute(
+            'yaxis', [
+                {'plot': [
+                    {'value': {
+                        'open':'open', 'high': 'high', 'low':'low', 'close':'close'},
+                     'type':'candlestick'}],
+                 'title':'Stock Value',
+                 'min': min_price*0.99,
+                 'max': max_price*1.01,
+                },
+                {'plot': [{'value': 'volume', 'type': 'column'}],
+                 'title': 'Volume',
+                 'max': max_volume * 3,
+                },
+            ])
 
         trade_series = FusionCharts('timeseries',
                                     'trades',
@@ -182,12 +192,12 @@ class IntraDayView(View):
                                     'chart-container',
                                     'json',
                                     time_series,
-        )
+                                   )
 
         context = {'chart_js': trade_series.render(),
                    'data_provider_url': self.data_provider_url,
                    'stock_symbol': symbol,
-        }
+                  }
 
         logger.info(f'user {request.user} is looking intraday trades for {symbol}')
         return render(request, self.template_name, context)
@@ -219,7 +229,7 @@ class HistoryView(View):
                            datetime.timedelta(days=int(period) * 365)
 
         chart_data = []
-        min_price,  max_price, max_volume = None, None, None
+        min_price, max_price, max_volume = None, None, None
         date_format = '%d-%m-%Y'
         for trade in history_trades:
             if trade.date > start_period:
@@ -243,27 +253,31 @@ class HistoryView(View):
 
         subcaption = ''
         caption = ''.join([Stock.objects.get(symbol=symbol).company,
-                           ' (', symbol, ')' ])
+                           ' (', symbol, ')'])
 
         schema = json.dumps(self.wtd.get_schema(date_format))
         chart_data = json.dumps(chart_data)
         time_series = TimeSeries(FusionTable(schema, chart_data))
-        time_series.AddAttribute('chart', {'multicanvas': '0', 'theme': chart_theme, 'showlegend': '0',})
+        time_series.AddAttribute('chart', {
+            'multicanvas': '0', 'theme': chart_theme, 'showlegend': '0',})
         time_series.AddAttribute('caption', {'text': caption, })
         time_series.AddAttribute('subcaption', {'text': subcaption,})
         time_series.AddAttribute('navigator', {'enabled': '1'}, )
         time_series.AddAttribute('extensions', {'customrangeselector': {'enabled': '1'}})
-        time_series.AddAttribute('xaxis', {'initialinterval': {'from': start_date, 'to': end_date}})
+        time_series.AddAttribute('xaxis', {
+            'initialinterval': {'from': start_date, 'to': end_date}})
         time_series.AddAttribute('yaxis', [
-            {'plot': [{'value':{'open':'open','high':'high','low':'low','close':'close'},
-                       'type':'candlestick'}],
-                     'title':'Stock Value (' + Stock.objects.get(symbol=symbol).currency.currency + ')',
-                     'min': min_price*0.99,
-                     'max': max_price*1.01,
+            {'plot': [{'value':{
+                'open':'open', 'high':'high', 'low': 'low', 'close': 'close'},
+                       'type': 'candlestick'}],
+             'title': 'Stock Value (' + Stock.objects.get(symbol=symbol).
+                      currency.currency + ')',
+             'min': min_price*0.99,
+             'max': max_price*1.01,
             },
             {'plot': [{'value': 'volume', 'type': 'column'}],
-                     'title': 'Volume',
-                     'max': max_volume * 3,
+             'title': 'Volume',
+             'max': max_volume * 3,
             },
         ])
 
@@ -273,12 +287,12 @@ class HistoryView(View):
                                     'chart-container',
                                     'json',
                                     time_series,
-        )
+                                   )
 
         context = {'chart_js': trade_series.render(),
                    'data_provider_url': self.data_provider_url,
                    'stock_symbol': symbol,
-        }
+                  }
 
         logger.info(f'user {request.user} is looking historic trades for {symbol}')
         return render(request, self.template_name, context)

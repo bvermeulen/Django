@@ -16,9 +16,9 @@ from howdimain.utils.plogger import Logger
 logformat = '%(asctime)s:%(levelname)s:%(message)s'
 Logger.set_logger(config('LOG_FILE'), logformat, 'INFO')
 logger = Logger.getlogger()
-HOWDIMAIN_VERSION ='1.0'
-HOWDIMAIN_DATE ='6 JULY 2019'
-HOWDIMAIN_AUTHOR ='bruno.vermeulen@hotmail.com'
+HOWDIMAIN_VERSION = '1.0'
+HOWDIMAIN_DATE = '6 JULY 2019'
+HOWDIMAIN_AUTHOR = 'bruno.vermeulen@hotmail.com'
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -65,19 +65,18 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'howdimain.urls'
 
-TEMPLATES = [
-        {'BACKEND': 'django.template.backends.django.DjangoTemplates',
-         'DIRS': [os.path.join(BASE_DIR, 'templates'),],
-         'APP_DIRS': True,
-         'OPTIONS':
-                  {'context_processors': [
-                   'django.template.context_processors.debug',
-                   'django.template.context_processors.request',
-                   'django.contrib.auth.context_processors.auth',
-                   'django.contrib.messages.context_processors.messages',
-                   ],
-                  },
-        }]
+TEMPLATES = [{
+    'BACKEND': 'django.template.backends.django.DjangoTemplates',
+    'DIRS': [os.path.join(BASE_DIR, 'templates'),],
+    'APP_DIRS': True,
+    'OPTIONS': {'context_processors': [
+                'django.template.context_processors.debug',
+                'django.template.context_processors.request',
+                'django.contrib.auth.context_processors.auth',
+                'django.contrib.messages.context_processors.messages',
+                ],
+               },
+        },]
 
 
 WSGI_APPLICATION = 'howdimain.wsgi.application'
@@ -93,8 +92,8 @@ DATABASES = {
         'PASSWORD': config('DB_PASSWORD'),
         'HOST': 'localhost',
         'PORT': '5432',
-                }
-            }
+                },
+        }
 
 # DATABASES = {            ### USE THIS FOR TESTING
 #     'default': {
@@ -118,7 +117,7 @@ MARTOR_ENABLE_LABEL = False
 
 # Imgur API Keys
 MARTOR_IMGUR_CLIENT_ID = config('IMGUR_CLIENT_ID')
-MARTOR_IMGUR_API_KEY   = config('IMGUR_SECRET_KEY')
+MARTOR_IMGUR_API_KEY = config('IMGUR_SECRET_KEY')
 
 # Safe Mode
 MARTOR_MARKDOWN_SAFE_MODE = True # default
@@ -150,9 +149,9 @@ MARTOR_UPLOAD_URL = '/martor/uploader/' # default
 MARTOR_SEARCH_USERS_URL = '/martor/search-user/' # default
 
 # Markdown Extensions
-# MARTOR_MARKDOWN_BASE_EMOJI_URL = 'https://www.webfx.com/tools/emoji-cheat-sheet/graphics/emojis/'     # from webfx
-MARTOR_MARKDOWN_BASE_EMOJI_URL = 'https://github.githubassets.com/images/icons/emoji/'                  # default from github
-# MARTOR_MARKDOWN_BASE_MENTION_URL = 'https://python.web.id/author/'                                      # please change this to your domain
+# MARTOR_MARKDOWN_BASE_EMOJI_URL = 'https://www.webfx.com/tools/emoji-cheat-sheet/graphics/emojis/'     # from webfx                          #pylint: disable=line-too-long
+MARTOR_MARKDOWN_BASE_EMOJI_URL = 'https://github.githubassets.com/images/icons/emoji/'                  # default from github                 #pylint: disable=line-too-long
+# MARTOR_MARKDOWN_BASE_MENTION_URL = 'https://python.web.id/author/'                                    # please change this to your domain   #pylint: disable=line-too-long
 
 
 # Password validation
@@ -186,7 +185,8 @@ LOGIN_URL = 'login'
 LOGOUT_REDIRECT_URL = 'home'
 LOGIN_REDIRECT_URL = 'home'
 
-EMAIL_BACKEND = config('EMAIL_BACKEND', default='django.core.mail.backends.console.EmailBackend')
+EMAIL_BACKEND = config(
+    'EMAIL_BACKEND', default='django.core.mail.backends.console.EmailBackend')
 EMAIL_HOST = config('EMAIL_HOST', default='')
 EMAIL_PORT = config('EMAIL_PORT', default=587, cast=int)
 EMAIL_HOST_USER = config('EMAIL_HOST_USER', default='')

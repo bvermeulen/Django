@@ -11,10 +11,11 @@ from howdimain.utils.plogger import Logger
 from howdimain.utils.get_ip import get_client_ip
 from stock.forms import PortfolioForm
 from stock.models import Currency, Exchange, Stock, Portfolio, StockSelection
-from stock.module_stock import WorldTradingData
+from stock.module_stock import WorldTradingData, start_currency_update
 
 logger = Logger.getlogger()
 d = Decimal
+start_currency_update()
 
 @method_decorator(login_required, name='dispatch')
 class PortfolioView(View):

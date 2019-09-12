@@ -232,7 +232,8 @@ class IntraDayView(View):
                    'stock_symbol': symbol,
                   }
 
-        logger.info(f'user {request.user} is looking intraday trades for {symbol}')
+        logger.info(f'user {request.user} [ip: {get_client_ip(request)}] is looking '
+                    f'intraday trades for {symbol}')
         return render(request, self.template_name, context)
 
     def post(self, request, symbol):
@@ -327,7 +328,8 @@ class HistoryView(View):
                    'stock_symbol': symbol,
                   }
 
-        logger.info(f'user {request.user} is looking historic trades for {symbol}')
+        logger.info(f'user {request.user} [ip: {get_client_ip(request)}] is looking '
+                    f'historic trades for {symbol}')
         return render(request, self.template_name, context)
 
     def post(self, request, symbol, period):

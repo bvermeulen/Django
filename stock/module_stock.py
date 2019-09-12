@@ -421,8 +421,8 @@ class WorldTradingData:
 
 
 def update_currencies_at_interval(interval=UPDATE_INTERVAL):
-    '''  update the currency depending on interval in seconds
-         default value is 6 hours (21600 seconds
+    '''  update the currencies depending on interval in seconds
+         default value is 6 hours (21600 seconds)
     '''
     assert isinstance(interval, int), \
            f'check interval setting {interval} must be an integer'
@@ -436,6 +436,7 @@ def update_currencies_at_interval(interval=UPDATE_INTERVAL):
     while True:
         if elapsed_time % interval == 0:
             wtd.update_currencies()
+
             time_str = datetime.datetime.fromtimestamp(
                 current_time).strftime('%d-%m-%Y %H:%M:%S')
             print(f'update currencies at {time_str}')
@@ -445,8 +446,8 @@ def update_currencies_at_interval(interval=UPDATE_INTERVAL):
         elapsed_time = int(current_time - start_time)
 
 
-
-
-thread_update_currencies = threading.Thread(
-    target=update_currencies_at_interval, kwargs={'interval': UPDATE_INTERVAL})
-thread_update_currencies.start()
+def start_currency_update():
+    thread_update_currencies = threading.Thread(
+        target=update_currencies_at_interval, kwargs={'interval': UPDATE_INTERVAL})
+    thread_update_currencies.start()
+    logger.info(f'currency update thread {start_currency_update.__name__} has started ...')

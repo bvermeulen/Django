@@ -8,14 +8,13 @@ from django.views.generic import View
 from django.utils.decorators import method_decorator
 from django.db.utils import IntegrityError
 from howdimain.utils.plogger import Logger
+from howdimain.utils.get_ip import get_client_ip
 from stock.forms import PortfolioForm
 from stock.models import Currency, Exchange, Stock, Portfolio, StockSelection
 from stock.module_stock import WorldTradingData
 
 logger = Logger.getlogger()
 d = Decimal
-
-from pprint import pprint
 
 @method_decorator(login_required, name='dispatch')
 class PortfolioView(View):
@@ -95,6 +94,8 @@ class PortfolioView(View):
                          'symbol': self.symbol,
                          'currencies': currency})
 
+            logger.info(f'user {self.user} [ip: {get_client_ip(self.request)}] '
+                        f'views {self.selected_portfolio}')
         else:
             form = self.form_class(
                 user=self.user,

@@ -8,6 +8,7 @@ from stock.models import Stock, Portfolio
 from stock.module_stock import WorldTradingData
 from howdimain.utils.fusioncharts import FusionCharts, FusionTable, TimeSeries
 from howdimain.utils.plogger import Logger
+from howdimain.utils.get_ip import get_client_ip
 from howdimain.utils.min_max import get_min, get_max
 
 
@@ -100,7 +101,8 @@ class QuoteView(View):
 
             request.session['quote_string'] = quote_string
             request.session['markets'] = markets
-            logger.info(f'user {request.user} looking up: {quote_string}')
+            logger.info(f'user {request.user} [ip: {get_client_ip(request)}] looking '
+                        f'up: {quote_string}  / {selected_portfolio}')
 
         else:
             stock_info = []

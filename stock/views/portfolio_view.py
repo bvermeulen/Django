@@ -1,3 +1,5 @@
+import json
+from decimal import Decimal
 from django.core.serializers.json import DjangoJSONEncoder
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
@@ -5,12 +7,10 @@ from django.shortcuts import render, redirect, reverse
 from django.views.generic import View
 from django.utils.decorators import method_decorator
 from django.db.utils import IntegrityError
+from howdimain.utils.plogger import Logger
 from stock.forms import PortfolioForm
 from stock.models import Currency, Exchange, Stock, Portfolio, StockSelection
 from stock.module_stock import WorldTradingData
-from howdimain.utils.plogger import Logger
-import json
-from decimal import Decimal
 
 logger = Logger.getlogger()
 d = Decimal
@@ -26,31 +26,38 @@ class PortfolioView(View):
 
     def get(self, request):
         currency = request.session.get('currency', 'EUR')
+        request.session['selected_portfolio'] = None
 
         form = self.form_class(
             user=request.user,
-            initial={'symbol': '',
+            initial={'symbol': None,
+                     'portfolios': None,
                      'currencies': currency})
 
-        context = {'form': form, }
+        stocks_value = d(0)
+        context = {'form': form,
+                   'stocks': [],
+                   'stocks_value': f'{stocks_value:,.2f}',
+                  }
+
         return render(request, self.template_name, context)
 
     def post(self, request):
         self.request = request
         self.user = self.request.user
-        self.currency = request.session.get('currency', 'EUR')
+        currency = request.session.get('currency', 'EUR')
 
         form = self.form_class(self.request.POST, user=self.user)
         if form.is_valid():
             form_data = form.cleaned_data
+            currency = form_data.get('currencies')
             self.selected_portfolio = form_data.get('portfolios')
             self.portfolio_name = form_data.get('portfolio_name')
             self.new_portfolio = form_data.get('new_portfolio')
             self.symbol = form_data.get('symbol')
-            self.currency = form_data.get('currencies')
             self.btn1_pressed = form_data.get('btn1_pressed')
             self.btn2_pressed = form_data.get('btn2_pressed')
-            self.previous_selected = request.session.get('selected portfolio')
+            self.previous_selected = request.session.get('selected_portfolio')
 
             try:
                 self.portfolio = Portfolio.objects.get(
@@ -76,28 +83,32 @@ class PortfolioView(View):
                     self.change_quantity_or_delete_symbol()
 
             self.get_stock_info(self.get_stock)
+            stocks_value = self.wtd.calculate_stocks_value(self.stocks, currency)
             request.session['stock_info'] = json.dumps(self.stocks, cls=DjangoJSONEncoder)
-            request.session['selected portfolio'] = self.selected_portfolio
-            request.session['currency'] = self.currency
+            request.session['selected_portfolio'] = self.selected_portfolio
+            request.session['currency'] = currency
 
             form = self.form_class(
                 user=self.user,
                 initial={'portfolio_name': self.selected_portfolio,
                          'portfolios': self.selected_portfolio,
                          'symbol': self.symbol,
-                         'currencies': self.currency})
+                         'currencies': currency})
 
         else:
             form = self.form_class(
                 user=self.user,
                 initial={'portfolio_name': '',
                          'symbol': '',
-                         'currencies': 'EUR'})
+                         'currencies': currency})
 
+            stocks_value = d(0)
             self.stocks = []
 
         context = {'form': form,
-                   'stocks': self.stocks}
+                   'stocks': self.stocks,
+                   'stocks_value': f'{stocks_value:,.2f}'}
+
         return render(self.request, self.template_name, context)
 
     def create_new_portfolio(self):

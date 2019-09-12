@@ -34,6 +34,7 @@ class QuoteView(View):
     default_user = User.objects.get(username='default_user')
 
     def get(self, request):
+        user = request.user
         quote_string = request.session.get('quote_string', '')
         markets = request.session.get('markets', self.markets)
         form = self.form_class(initial={'quote_string': quote_string,
@@ -41,6 +42,11 @@ class QuoteView(View):
 
         portfolios = [item.portfolio_name for item in Portfolio.objects.filter(
             user=self.default_user)]
+
+        if user.is_authenticated:
+            portfolios += [item.portfolio_name for item in Portfolio.objects.filter(
+                user=user)]
+
         context = {'stock_info': [],
                    'form': form,
                    'portfolios': sorted(portfolios),
@@ -49,6 +55,7 @@ class QuoteView(View):
         return render(request, self.template_name, context)
 
     def post(self, request):
+        user = request.user
         quote_string = request.session.get('quote_string', '')
         markets = request.session.get('markets', self.markets)
 
@@ -58,22 +65,41 @@ class QuoteView(View):
             selected_portfolio = form.cleaned_data.get('selected_portfolio')
             markets = form.cleaned_data.get('markets')
 
-            try:
-                symbols = []
-                default_portfolio = Portfolio.objects.filter(
-                    user=self.default_user, portfolio_name=selected_portfolio)
-                for stock in default_portfolio.first().stocks.all():
-                    symbols.append(stock.stock.symbol)
-                stock_info = self.wtd.get_stock_trade_info(symbols[0:20])
-                stock_info += self.wtd.get_stock_trade_info(symbols[20:40])
+            symbols = []
+            stock_info = []
+            if selected_portfolio:
+                try:
+                    # try if user has selected a portfolio
+                    portfolio = Portfolio.objects.filter(
+                        user=user, portfolio_name=selected_portfolio)
 
-            except AttributeError:
+                    for stock in portfolio.first().stocks.all():
+                        symbols.append(stock.stock.symbol)
+
+                    stock_info = self.wtd.get_stock_trade_info(symbols[0:20])
+                    stock_info += self.wtd.get_stock_trade_info(symbols[20:40])
+
+                except (TypeError, AttributeError):
+                    # try if it is a default portfolio
+                    try:
+                        portfolio = Portfolio.objects.filter(
+                            user=self.default_user, portfolio_name=selected_portfolio)
+
+                        for stock in portfolio.first().stocks.all():
+                            symbols.append(stock.stock.symbol)
+
+                        stock_info = self.wtd.get_stock_trade_info(symbols[0:20])
+                        stock_info += self.wtd.get_stock_trade_info(symbols[20:40])
+
+                    except AttributeError:
+                        pass
+
+            else:
                 symbols = self.wtd.parse_stock_name(quote_string, markets=markets)
                 stock_info = self.wtd.get_stock_trade_info(symbols[0:20])
 
             request.session['quote_string'] = quote_string
             request.session['markets'] = markets
-
             logger.info(f'user {request.user} looking up: {quote_string}')
 
         else:
@@ -81,6 +107,11 @@ class QuoteView(View):
 
         portfolios = [item.portfolio_name for item in Portfolio.objects.filter(
             user=self.default_user)]
+
+        if user.is_authenticated:
+            portfolios += [item.portfolio_name for item in Portfolio.objects.filter(
+                user=user)]
+
         context = {'stock_info': stock_info,
                    'form': form,
                    'portfolios': sorted(portfolios),

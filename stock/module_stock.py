@@ -378,8 +378,7 @@ class WorldTradingData:
             base_value = d(stock['quantity']) * d(stock['price'])
             exchange_rate = Currency.objects.get(
                 currency=stock['currency']).usd_exchange_rate
-            usd_value = d(base_value) * d(exchange_rate)
-            print(usd_value)
+            usd_value = d(base_value) / d(exchange_rate)
             total_value += usd_value
 
         if currency == 'USD':

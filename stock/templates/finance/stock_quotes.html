@@ -28,7 +28,8 @@
         >Portfolio's<span class="caret"></span></button>
         <ul class="dropdown-menu" style="height:40%; overflow:hidden; overflow-y:scroll;">
      		 	 {% for portfolio in portfolios %}
-     			   <li><input type="submit" class="btn btn-sm item_select" name="selected_portfolio" value="{{ portfolio }}"></input></li>
+     			   <li><input type="submit" class="btn btn-sm item_select" name="selected_portfolio"
+               value="{{ portfolio }}"></input></li>
      			 {% endfor %}
      		</ul>
     </a>
@@ -40,6 +41,15 @@
         </ul>
     </a>
     <input type='submit' value='Quote' class="btn-sm btn-primary"></input>
+    {% if user.is_authenticated %}
+      <button type="button" class="ml-2 btn-sm btn-primary"
+        onclick="window.location.href='{% url 'portfolio' %}'">My portfolio</button>
+    {% endif %}
+
+    {% if form.selected_portfolio.value %}
+      <strong><a class="mx-2">Portfolio:</a><a>{{ form.selected_portfolio.value }}</a></strong>
+    {% endif %}
+
   </div>
   <table class="table table-fixed table-striped mb-2 mt-1 table-sm">
     <thead class="custom-thead-grey">

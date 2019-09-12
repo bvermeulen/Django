@@ -12,6 +12,7 @@
 {% block breadcrumb %}
 <ol class="breadcrumb my-4">
   <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a></li>
+  <li class="breadcrumb-item"><a href="{% url 'stock_quotes' %}">Stock Quotes</a></li>
   <li class="breadcrumb-item active">Portfolio</li>
 </ol>
 {% endblock %}
@@ -26,7 +27,7 @@
         onclick="return AskNewName()">New portfolio</button>
       </div>
 
-      <div style="width:44%">
+      <div style="width:50%">
         {{ form.portfolio_name }}
         <button class="btn btn-outline-primary btn-sm" name="btn1_pressed"
           value="rename_portfolio">Rename</button>
@@ -38,9 +39,11 @@
             value="add_new_symbol">Add symbol</button>
       </div>
 
-      <div style="width:44%">
+      <div style="width:38%">
+        <strong class="mr-2">Portfolio value:</strong>
+        <strong class="mr-2">{{ stocks_value }}</strong>
         <div class="dropdown">
-          <button class="btn btn-outline-primary btn-sm">{{ form.currencies.value }}</button>
+          <button type="button" class="btn dropdown-toggle btn-outline-primary btn-sm">{{ form.currencies.value }}</button>
           <div class="dropdown-content">
             {% for currency in form.currencies %}
                 {% if not currency.data.selected %}
@@ -56,7 +59,7 @@
       </div>
     </div>
 
-    <div class="flex-container" style="min-height:70vh">
+    <div class="flex-container" style="height:70vh">
       <div class="scroll mt-5 mr-1" style="width:12%; height:40vh">
 
         {% for portfolio in form.portfolios %}
@@ -75,7 +78,7 @@
         {% endfor %}
       </div>
 
-      <div style="width:88%; min-height:100%">
+      <div style="width:88%; height:100%">
         <table class="table table-fixed table-striped mb-2 mt-1 table-sm">
           <thead class="col-sm-8 custom-thead-grey">
             <tr>

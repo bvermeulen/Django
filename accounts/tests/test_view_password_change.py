@@ -1,15 +1,18 @@
-from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib.auth.models import User
+from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib.auth import views as auth_views
 from django.urls import reverse
 from django.urls import resolve
 from django.test import TestCase
+from ..models import Home
 
 
 class PasswordChangeTests(TestCase):
     def setUp(self):
         username = 'john'
         password = 'secret123'
+        _ = User.objects.create_user(username=username, password=password)
+
         url = reverse('password_change')
         self.client.login(username=username, password=password)
         self.response = self.client.get(url)
@@ -60,6 +63,8 @@ class PasswordChangeTestCase(TestCase):
         self.client.login(username='john', password='old_password')
         self.response = self.client.post(self.url, data)
 
+        _ = Home.objects.create(welcome_text='hello stranger', welcome_image='image.jpg',
+                                member_text='hello member', member_image='image.jpg')
 
 class SuccessfulPasswordChangeTests(PasswordChangeTestCase):
     def setUp(self):  #pylint: disable=arguments-differ

@@ -5,6 +5,7 @@ from django.urls import resolve
 from django.test import TestCase
 from ..views import signup
 from ..forms import SignUpForm
+from ..models import Home
 
 
 class SignUpTests(TestCase):
@@ -50,6 +51,9 @@ class SuccessfulSignUpTests(TestCase):
         self.response = self.client.post(url, data)
         self.email = mail.outbox[0]
         self.home_url = reverse('home')
+
+        _ = Home.objects.create(welcome_text='hello stranger', welcome_image='image.jpg',
+                                member_text='hello member', member_image='image.jpg')
 
     def test_redirection(self):
         '''

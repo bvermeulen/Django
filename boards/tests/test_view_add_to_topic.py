@@ -13,12 +13,12 @@ class AddToTopicTestCase(TestCase):
         self.board = Board.objects.create(name='Django', description='Django board.')
         self.username = 'john'
         self.password = '123'
-        user = User.objects.create_user(username=self.username, email='john@doe.com',
-                                        password=self.password)
-        self.topic = Topic.objects.create(subject='Hello, world',
-                                          board=self.board, starter=user)
-        Post.objects.create(message='Lorem ipsum dolor sit amet',
-                            topic=self.topic, created_by=user)
+        self.user = User.objects.create_user(
+            username=self.username, email='john@doe.com', password=self.password)
+        self.topic = Topic.objects.create(topic_subject='Hello, world',
+                                          board=self.board, starter=self.user)
+        Post.objects.create(post_subject='Lorem', message='Lorem ipsum dolor sit amet',
+                            topic=self.topic, created_by=self.user)
         self.url = reverse('add_to_topic', kwargs={
             'board_pk': self.board.pk, 'topic_pk': self.topic.pk})
 
@@ -27,8 +27,7 @@ class LoginRequiredNewTopicTests(AddToTopicTestCase):
     def test_redirection(self):
         login_url = reverse('login')
         self.response = self.client.get(self.url)
-        self.assertRedirects(self.response, '{login_url}?next={url}'.format(
-            login_url=login_url, url=self.url))
+        self.assertRedirects(self.response, f'{login_url}?next={self.url}')
 
 class AddToTopicTests(AddToTopicTestCase):
     def setUp(self):
@@ -52,9 +51,11 @@ class AddToTopicTests(AddToTopicTestCase):
 
     def test_form_inputs(self):
         '''
-        The view must contain two inputs: csrf, message textarea
+        The view must contain:
+        <input: csrf, allowed_editor, post_subject, markdown-image-upload
+        <textarea: messege
         '''
-        self.assertContains(self.response, '<input', 1)
+        self.assertContains(self.response, '<input', 4)
         self.assertContains(self.response, '<textarea', 1)
 
 
@@ -62,7 +63,10 @@ class SuccessfulAddToTopicTests(AddToTopicTestCase):
     def setUp(self):
         super().setUp()
         self.client.login(username=self.username, password=self.password)
-        self.response = self.client.post(self.url, {'message': 'hello, world!'})
+        context = {'post_subject':'quod totem',
+                   'message': 'imperfectum totibus'}
+
+        self.response = self.client.post(self.url, context)
 
     def test_redirection(self):
         '''

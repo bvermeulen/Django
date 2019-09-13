@@ -7,12 +7,17 @@ from ..views import PostListView
 
 class TopicPostsTests(TestCase):
     def setUp(self):
+        username = 'john'
+        email = 'john@doe.com'
+        password = '123'
+        user = User.objects.create_user(username=username,
+                                        email=email, password=password)
+        self.client.login(username=username, password=password)
+
         board = Board.objects.create(name='Django', description='Django board')
-        user = User.objects.create_user(username='john',
-                                        email='john@doe.com', password='123')
-        topic = Topic.objects.create(subject='Hello, world',
+        topic = Topic.objects.create(topic_subject='Hello, world',
                                      board=board, starter=user)
-        Post.objects.create(message='Lorem ipsum dolor sit amet',
+        Post.objects.create(post_subject='Quod io', message='Lorem ipsum dolor sit amet',
                             topic=topic, created_by=user)
         context = {'board_pk': board.pk, 'topic_pk': topic.pk}
         url = reverse('topic_posts', kwargs=context)

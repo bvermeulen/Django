@@ -5,7 +5,6 @@ from django.urls import resolve, reverse
 from ..models import Board, Post, Topic
 from ..views import PostUpdateView
 
-
 class PostUpdateViewTestCase(TestCase):
     '''
     Base test case to be used in all `PostUpdateView` view tests
@@ -16,9 +15,10 @@ class PostUpdateViewTestCase(TestCase):
         self.password = '123'
         user = User.objects.create_user(username=self.username,
                                         email='john@doe.com', password=self.password)
-        self.topic = Topic.objects.create(subject='Hello, world',
+        self.topic = Topic.objects.create(topic_subject='Hello, world',
                                           board=self.board, starter=user)
-        self.post = Post.objects.create(message='Lorem ipsum dolor sit amet',
+        self.post = Post.objects.create(post_subject='Quod',
+                                        message='Lorem ipsum dolor sit amet',
                                         topic=self.topic, created_by=user)
         self.url = reverse('edit_post', kwargs={'board_pk': self.board.pk,
                                                 'topic_pk': self.topic.pk,
@@ -42,14 +42,17 @@ class UnauthorizedPostUpdateViewTests(PostUpdateViewTestCase):
         _ = User.objects.create_user(username=username,
                                      email='jane@doe.com', password=password)
         self.client.login(username=username, password=password)
-        self.response = self.client.get(self.url)
+        data = {'post_subject': 'jane',
+                'message': '321'}
+        self.response = self.client.post(self.url, data)
 
     def test_status_code(self):
         '''
         A topic should be edited only by the owner.
-        Unauthorized users should get a 404 response (Page Not Found)
+        Unauthorized users should get a 302 response (redirect)
+        as nothing is changed
         '''
-        self.assertEqual(self.response.status_code, 404)
+        self.assertEqual(self.response.status_code, 302)
 
 
 class PostUpdateViewTests(PostUpdateViewTestCase):
@@ -74,9 +77,11 @@ class PostUpdateViewTests(PostUpdateViewTestCase):
 
     def test_form_inputs(self):
         '''
-        The view must contain two inputs: csrf, message textarea
+        The view must contain:
+            4 <inpu: csrf, allowed_editor, post_subject, markdown_image_upload
+            1 <textarea: message
         '''
-        self.assertContains(self.response, '<input', 1)
+        self.assertContains(self.response, '<input', 4)
         self.assertContains(self.response, '<textarea', 1)
 
 
@@ -84,7 +89,9 @@ class SuccessfulPostUpdateViewTests(PostUpdateViewTestCase):
     def setUp(self):
         super().setUp()
         self.client.login(username=self.username, password=self.password)
-        self.response = self.client.post(self.url, {'message': 'edited message'})
+        data = {'post_subject': 'my edit',
+                'message': 'edited message'}
+        self.response = self.client.post(self.url, data)
 
     def test_redirection(self):
         '''

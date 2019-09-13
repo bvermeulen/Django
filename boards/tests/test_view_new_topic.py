@@ -5,7 +5,6 @@ from ..views import new_topic
 from ..forms import NewTopicForm
 from ..models import Board, Topic, Post
 
-
 class LoginRequiredNewTopicTests(TestCase):
     def setUp(self):
         Board.objects.create(name='Django', description='Django board')
@@ -42,7 +41,7 @@ class NewTopicTests(TestCase):
         new_topic_url = reverse('new_topic', kwargs={'board_pk': 1})
         board_topics_url = reverse('board_topics', kwargs={'board_pk': 1})
         response = self.client.get(new_topic_url)
-        self.assertContains(response, 'href="{0}"'.format(board_topics_url))
+        self.assertContains(response, f'href="{board_topics_url}"')
 
     def test_csrf(self):
         url = reverse('new_topic', kwargs={'board_pk': 1})
@@ -52,15 +51,15 @@ class NewTopicTests(TestCase):
     def test_contains_form(self):
         url = reverse('new_topic', kwargs={'board_pk': 1})
         response = self.client.get(url)
-        form = response.context.get('form')
+        form = response.context.get('form1')
         self.assertIsInstance(form, NewTopicForm)
 
     def test_new_topic_valid_post_data(self):
         url = reverse('new_topic', kwargs={'board_pk': 1})
-        data = {
-            'subject': 'Test title',
-            'message': 'Lorem ipsum dolor sit amet'
-        }
+        data = {'topic_subject': 'New topic',
+                'post_subject': 'Qude vadem temple',
+                'message': 'Lorem ipsum dolor sit amet'
+               }
         self.client.post(url, data)
         self.assertTrue(Topic.objects.exists())
         self.assertTrue(Post.objects.exists())
@@ -72,7 +71,7 @@ class NewTopicTests(TestCase):
         '''
         url = reverse('new_topic', kwargs={'board_pk': 1})
         response = self.client.post(url, {})
-        form = response.context.get('form')
+        form = response.context.get('form1')
         self.assertEqual(response.status_code, 200)
         self.assertTrue(form.errors)
 

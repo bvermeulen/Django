@@ -1,15 +1,16 @@
+from recordtype import recordtype
 from django.core.exceptions import ObjectDoesNotExist
+from howdimain.utils.plogger import Logger
 from ..models import NewsSite, UserNewsSite, UserNewsItem
 from ..module_news import (feedparser_time_to_datetime,
-                          remove_feedburner_reference, remove_all_references,
-)
-from recordtype import recordtype
-from howdimain.utils.plogger import Logger
+                           remove_feedburner_reference, remove_all_references,
+                          )
 
 
 logger = Logger.getlogger()
-NewsStatus = recordtype('NewsStatus',
-             'current_news_site news_site updated item news_items banner error_message')
+NewsStatus = recordtype(
+    'NewsStatus',
+    'current_news_site news_site updated item news_items banner error_message')
 
 
 def set_session_newsstatus(request, newsstatus):
@@ -37,7 +38,7 @@ def store_news_item(user, ns, feed_items, ip):
         usernewsitem.delete()
         usernewsitem = None
 
-    if usernewsitem == None:
+    if usernewsitem is None:
         usernewsitem = UserNewsItem()
         usernewsitem.user = user
         usernewsitem.title = feed_items[ns.item].title
@@ -69,11 +70,13 @@ def create_news_context(ns, news_sites, feed_items):
 
     news_published = feedparser_time_to_datetime(feed_items[ns.item])
 
-    reference_text = ''.join([NewsSite.objects.get(
-        news_site=ns.current_news_site).news_url,
-        ', updated: ', news_published.strftime('%a, %d %B %Y %H:%M:%S GMT')])
-    status_text = ''.join(['News item: ', str(ns.item+1), ' from ',
-                  str(ns.news_items)])
+    reference_text = ''.join([
+        NewsSite.objects.get(news_site=ns.current_news_site).news_url,
+        ', updated: ',
+        news_published.strftime('%a, %d %B %Y %H:%M:%S GMT')
+    ])
+    status_text = ''.join([
+        'News item: ', str(ns.item+1), ' from ', str(ns.news_items)])
 
     news_title = feed_items[ns.item].title
     news_link = feed_items[ns.item].link
@@ -114,11 +117,11 @@ def create_news_context(ns, news_sites, feed_items):
 
 def obtain_news_sites_and_news_status_for_user(request, user):
     default_news_sites = [item.news_site for item in UserNewsSite.objects.get(
-                  user__username='default_user').news_sites.all()]
+        user__username='default_user').news_sites.all()]
 
     try:
         news_sites = [item.news_site for item in UserNewsSite.objects.get(
-                      user=user).news_sites.all()]
+            user=user).news_sites.all()]
 
     except (ObjectDoesNotExist, TypeError):
         news_sites = default_news_sites
@@ -134,7 +137,8 @@ def obtain_news_sites_and_news_status_for_user(request, user):
             # check if current news site is not deleted. If it is then select
             # the default site
             if ns.current_news_site not in [
-                site.news_site for site in NewsSite.objects.all()]:
+                    site.news_site for site in NewsSite.objects.all()]:
+
                 ns.current_news_site = default_news_sites[0]
 
         except (KeyError, AttributeError):

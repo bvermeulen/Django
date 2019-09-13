@@ -13,17 +13,22 @@ class AddToTopicTestCase(TestCase):
         self.board = Board.objects.create(name='Django', description='Django board.')
         self.username = 'john'
         self.password = '123'
-        user = User.objects.create_user(username=self.username, email='john@doe.com', password=self.password)
-        self.topic = Topic.objects.create(subject='Hello, world', board=self.board, starter=user)
-        Post.objects.create(message='Lorem ipsum dolor sit amet', topic=self.topic, created_by=user)
-        self.url = reverse('add_to_topic', kwargs={'board_pk': self.board.pk, 'topic_pk': self.topic.pk})
+        user = User.objects.create_user(username=self.username, email='john@doe.com',
+                                        password=self.password)
+        self.topic = Topic.objects.create(subject='Hello, world',
+                                          board=self.board, starter=user)
+        Post.objects.create(message='Lorem ipsum dolor sit amet',
+                            topic=self.topic, created_by=user)
+        self.url = reverse('add_to_topic', kwargs={
+            'board_pk': self.board.pk, 'topic_pk': self.topic.pk})
 
 class LoginRequiredNewTopicTests(AddToTopicTestCase):
 
     def test_redirection(self):
         login_url = reverse('login')
         self.response = self.client.get(self.url)
-        self.assertRedirects(self.response, '{login_url}?next={url}'.format(login_url=login_url, url=self.url))
+        self.assertRedirects(self.response, '{login_url}?next={url}'.format(
+            login_url=login_url, url=self.url))
 
 class AddToTopicTests(AddToTopicTestCase):
     def setUp(self):
@@ -32,11 +37,11 @@ class AddToTopicTests(AddToTopicTestCase):
         self.response = self.client.get(self.url)
 
     def test_status_code(self):
-        self.assertEquals(self.response.status_code, 200)
+        self.assertEqual(self.response.status_code, 200)
 
     def test_view_function(self):
         view = resolve('/boards/1/topics/1/add/')
-        self.assertEquals(view.func, add_to_topic)
+        self.assertEqual(view.func, add_to_topic)
 
     def test_csrf(self):
         self.assertContains(self.response, 'csrfmiddlewaretoken')
@@ -63,9 +68,8 @@ class SuccessfulAddToTopicTests(AddToTopicTestCase):
         '''
         A valid form submission should redirect the user
         '''
-        topic_posts_url = reverse('topic_posts', kwargs={
-                                  'board_pk': self.board.pk,
-                                  'topic_pk': self.topic.pk})
+        topic_posts_url = reverse('topic_posts', kwargs={'board_pk': self.board.pk,
+                                                         'topic_pk': self.topic.pk})
         topic_posts_url += '?page=1'
         self.assertRedirects(self.response, topic_posts_url)
 
@@ -75,7 +79,7 @@ class SuccessfulAddToTopicTests(AddToTopicTestCase):
         The one created in the `AddToTopicTestCase` setUp
         and another created by the post data in this class
         '''
-        self.assertEquals(Post.objects.count(), 2)
+        self.assertEqual(Post.objects.count(), 2)
 
 
 class InvalidAddToTopicTests(AddToTopicTestCase):
@@ -91,7 +95,7 @@ class InvalidAddToTopicTests(AddToTopicTestCase):
         '''
         An invalid form submission should return to the same page
         '''
-        self.assertEquals(self.response.status_code, 200)
+        self.assertEqual(self.response.status_code, 200)
 
     def test_form_errors(self):
         form = self.response.context.get('form')

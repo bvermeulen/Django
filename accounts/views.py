@@ -53,5 +53,5 @@ class UserUpdateView(UpdateView):
     template_name = 'accounts/my_account.html'
     success_url = reverse_lazy('home')
 
-    def get_object(self):
+    def get_object(self):  #pylint: disable=arguments-differ
         return self.request.user

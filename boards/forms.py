@@ -1,9 +1,7 @@
 from django.contrib.auth.models import User
 from django import forms
-from django.db.models import ManyToManyField
+from howdimain.howdimain_vars import EXCLUDE_USERS
 from .models import Topic, Post
-from martor.fields import MartorFormField
-from howdimain.howdimain_vars import MESSAGE_FIELD_SIZE, EXCLUDE_USERS
 
 class NewTopicForm(forms.ModelForm):
 
@@ -14,11 +12,13 @@ class NewTopicForm(forms.ModelForm):
 
 
 class PostForm(forms.ModelForm):
-    allowed_editor = forms.ModelMultipleChoiceField(widget=forms.CheckboxSelectMultiple(),
+    allowed_editor = forms.ModelMultipleChoiceField(
+        widget=forms.CheckboxSelectMultiple(),
         required=False,
         label='',
         help_text='Selection is not required',
-        queryset=User.objects.all().exclude(username__in=EXCLUDE_USERS).order_by('username'))
+        queryset=User.objects.all().exclude(
+            username__in=EXCLUDE_USERS).order_by('username'))
 
     class Meta:
         model = Post

@@ -1,6 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
-from django.core.mail import EmailMessage, send_mail
+from django.core.mail import EmailMessage
 from django.template.loader import render_to_string
 
 

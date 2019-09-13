@@ -11,9 +11,9 @@ class SelectedSitesForm(forms.Form):
          for site in NewsSite.objects.all().order_by('news_site')]
 
         self.fields['selected_sites'] = forms.MultipleChoiceField(
-                            choices=newssite_choices,
-                            widget=forms.CheckboxSelectMultiple(),
-                            )
+            choices=newssite_choices,
+            widget=forms.CheckboxSelectMultiple(),
+        )
 
 
 class NewSiteForm(forms.ModelForm):
@@ -21,7 +21,6 @@ class NewSiteForm(forms.ModelForm):
     class Meta:
         model = NewsSite
         fields = ['news_site', 'news_url']
-        widgets={
-            'news_site': forms.TextInput(attrs={'style': 'width:10%'}),
-            'news_url': forms.TextInput(attrs={'style': 'width:40%'})
-                }
+        widgets = {'news_site': forms.TextInput(attrs={'style': 'width:10%'}),
+                   'news_url': forms.TextInput(attrs={'style': 'width:40%'}),
+                  }

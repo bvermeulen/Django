@@ -22,20 +22,15 @@ DEL_RE = r"(\~\~)(.+?)(\~\~)"
 INS_RE = r"(\+\+)(.+?)(\+\+)"
 
 
-def makeExtension(*args, **kwargs):  # noqa: N802
-    '''Inform Markdown of the existence of the extension.'''
-    return Del_InsExtension(*args, **kwargs)
-
-
 class DelInsExtension(Extension):
     '''Extension:
        text between ~~ characters will be deleted;
        text between ++ characters will be underlined;
     '''
 
-    def extendMarkdown(self, md, md_globals):  # noqa: N802
+    def extendMarkdown(self, md, md_globals):  # noqa: N802  #pylint: disable=arguments-differ
         """Insert 'del' pattern before 'not_strong' pattern."""
-        md.inlinePatterns.add('del',SimpleTagPattern(DEL_RE, 'del'),
+        md.inlinePatterns.add('del', SimpleTagPattern(DEL_RE, 'del'),
                               '<not_strong')
 
         md.inlinePatterns.add('ins', SimpleTagPattern(INS_RE, 'ins'),

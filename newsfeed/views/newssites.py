@@ -1,11 +1,9 @@
 from django.shortcuts import render, redirect, reverse
 from django.contrib.auth.decorators import login_required
-from django.core.exceptions import ObjectDoesNotExist
-from django.db.utils import IntegrityError
+from howdimain.utils.plogger import Logger
 from ..module_news import update_news
 from ..models import NewsSite, UserNewsSite
 from ..forms import SelectedSitesForm, NewSiteForm
-from howdimain.utils.plogger import Logger
 
 
 logger = Logger.getlogger()
@@ -86,8 +84,8 @@ def newssites(request):
         form_select_sites = SelectedSitesForm()
         form_select_sites.initial['selected_sites'] = selected_sites_pk
 
-    context = { 'form_select_sites': form_select_sites,
-                'form_new_site': form_new_site,
-                'new_site_error_message': new_site_error_message, }
+    context = {'form_select_sites': form_select_sites,
+               'form_new_site': form_new_site,
+               'new_site_error_message': new_site_error_message, }
 
     return render(request, 'newsfeed/newssites.html', context)

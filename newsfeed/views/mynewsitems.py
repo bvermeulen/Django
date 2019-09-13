@@ -1,10 +1,9 @@
 from django.shortcuts import render, redirect, reverse, get_object_or_404
 from django.contrib.auth.decorators import login_required
-from ..models import UserNewsItem
-from ..forms import SelectedSitesForm, NewSiteForm
-from .views_utils import NewsStatus, set_session_newsstatus
 from howdimain.utils.plogger import Logger
 from howdimain.utils.get_ip import get_client_ip
+from .views_utils import NewsStatus, set_session_newsstatus
+from ..models import UserNewsItem
 
 
 logger = Logger.getlogger()

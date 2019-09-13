@@ -1,15 +1,14 @@
-from django.shortcuts import render, redirect, reverse, get_object_or_404
-from ..module_news import (update_news, restore_feedparserdict
-)
-from ..models import NewsSite, UserNewsSite
-from .views_utils import (set_session_newsstatus, get_session_newsstatus,
-                          store_news_item, create_news_context,
-                          obtain_news_sites_and_news_status_for_user,
-)
 import datetime
 from collections import namedtuple
+from django.shortcuts import render, redirect, reverse
 from howdimain.utils.plogger import Logger
 from howdimain.utils.get_ip import get_client_ip
+from ..module_news import update_news, restore_feedparserdict
+from ..models import NewsSite, UserNewsSite
+from .views_utils import (set_session_newsstatus,
+                          store_news_item, create_news_context,
+                          obtain_news_sites_and_news_status_for_user,
+                         )
 
 
 logger = Logger.getlogger()
@@ -55,7 +54,7 @@ def newspage(request):
                        (ns.updated != today)
     if update_news_true:
         feed_items = update_news(NewsSite.objects.get(
-               news_site=ns.current_news_site).news_url)
+            news_site=ns.current_news_site).news_url)
         request.session['feed'] = feed_items
         ns.news_site = ns.current_news_site
         ns.updated = today
@@ -71,7 +70,7 @@ def newspage(request):
     ns.news_items = len(feed_items)
     if ns.news_items == 0:
         default_site = str(UserNewsSite.objects.get(
-                           user__username='default_user').news_sites.first())
+            user__username='default_user').news_sites.first())
         ns.error_message = f'Newssite {ns.current_news_site} is not available, '\
                            f'revert to default site {default_site}'
         logger.info(f'{ns.current_news_site} is not available, revert to default site')

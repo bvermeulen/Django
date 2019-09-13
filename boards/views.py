@@ -6,17 +6,17 @@ from django.utils import timezone
 from django.utils.decorators import method_decorator
 from django.db.models import Count
 from django.core.exceptions import ObjectDoesNotExist
-from .forms import NewTopicForm, PostForm
-from .models import Board, Topic, Post
 from howdimain.howdimain_vars import POSTS_PER_PAGE, TOPICS_PER_PAGE
 from howdimain.utils.plogger import Logger
 from howdimain.utils.get_ip import get_client_ip
+from .forms import NewTopicForm, PostForm
+from .models import Board, Topic, Post
 
 logger = Logger.getlogger()
 
 
 def log_record(user, comment, subject, ip):
-        logger.info(f'user {user}, {comment}{subject}, ip: {ip}')
+    logger.info(f'user {user}, {comment}{subject}, ip: {ip}')
 
 
 @method_decorator(login_required, name='dispatch')
@@ -25,7 +25,7 @@ class BoardListView(ListView):
     context_object_name = 'boards'
     template_name = 'boards/boards.html'
 
-    def get_context_data(self, **kwargs):
+    def get_context_data(self, **kwargs):  #pylint: disable=arguments-differ
         log_record(self.request.user,
                    'showing boards',
                    '',
@@ -40,7 +40,7 @@ class TopicListView(ListView):
     template_name = 'boards/topics.html'
     paginate_by = TOPICS_PER_PAGE
 
-    def get_context_data(self, **kwargs):
+    def get_context_data(self, **kwargs):  #pylint: disable=arguments-differ
         kwargs['board'] = self.board
         return super().get_context_data(**kwargs)
 
@@ -76,8 +76,8 @@ def new_topic(request, board_pk):
             post.created_by = topic.starter
             post.created_at = topic.last_updated
             # first post for topic then updated is same as created
-            post.updated_by= post.created_by
-            post.updated_at= post.created_at
+            post.updated_by = post.created_by
+            post.updated_at = post.created_at
             post.save()
             # save the m2m field 'allowed user'
             form2.save_m2m()
@@ -88,10 +88,10 @@ def new_topic(request, board_pk):
         form1 = NewTopicForm()
         form2 = PostForm()
 
-    context = { 'board': board,
-                'form1': form1,
-                'form2': form2,
-    }
+    context = {'board': board,
+               'form1': form1,
+               'form2': form2,
+              }
     return render(request, 'boards/new_topic.html', context)
 
 
@@ -103,7 +103,7 @@ class PostListView(ListView):
     paginate_by = POSTS_PER_PAGE
 
 
-    def get_context_data(self, **kwargs):
+    def get_context_data(self, **kwargs):  #pylint: disable=arguments-differ
         session_key = f'viewed_topic_{self.topic.pk}'
         if not self.request.session.get(session_key, False):
             self.topic.views += 1
@@ -216,8 +216,10 @@ class PostUpdateView(UpdateView):
         _post = get_object_or_404(Post, pk=self.kwargs.get('post_pk'))
         try:
             moderator = User.objects.get(username='moderator')
+
         except ObjectDoesNotExist:
             moderator = ''
+
         self.allowed_to_edit = self.request.user == _post.created_by or \
                                self.request.user == moderator or \
                                self.request.user in _post.allowed_editor.all()
@@ -250,13 +252,15 @@ class PostUpdateView(UpdateView):
         return True
 
     def form_valid(self, form):
+
         # check against manual editing of html input in browser if  user is
         # allowed to edit this post
         if not self.allowed_to_edit:
             topic_url = reverse('topic_posts',
                                 kwargs={'board_pk': self.topic.board.pk,
                                         'topic_pk': self.topic.pk},)
-            topic_post_url = f'{topic_url}?page={self.topic.get_page_number(self.kwargs.get("post_pk"))}'
+            topic_post_url = (f'{topic_url}?page='
+                              f'{self.topic.get_page_number(self.kwargs.get("post_pk"))}')
             return redirect(topic_post_url)
 
         self.topic.last_updated = timezone.now()
@@ -268,12 +272,14 @@ class PostUpdateView(UpdateView):
                 topic_url = reverse('topic_posts',
                                     kwargs={'board_pk': self.topic.board.pk,
                                             'topic_pk': self.topic.pk,})
-                url_after_delete = f'{topic_url}?page={self.topic.get_page_number(self.new_post_pk)}'
+                url_after_delete = (f'{topic_url}?page='
+                                    f'{self.topic.get_page_number(self.new_post_pk)}')
             else:
                 # if no posts left for the topic then also delete the topic
                 # and redirect to the boards page
                 get_object_or_404(Topic, pk=self.topic.pk).delete()
-                url_after_delete = reverse('board_topics', kwargs={'board_pk': self.topic.board.pk})
+                url_after_delete = reverse(
+                    'board_topics', kwargs={'board_pk': self.topic.board.pk})
 
             return redirect(url_after_delete)
 
@@ -289,4 +295,5 @@ class PostUpdateView(UpdateView):
                                 kwargs={'board_pk': self.topic.board.pk,
                                         'topic_pk': self.topic.pk},)
             topic_post_url = f'{topic_url}?page={self.topic.get_page_number(post.pk)}'
+
             return redirect(topic_post_url)

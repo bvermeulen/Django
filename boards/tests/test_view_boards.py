@@ -11,11 +11,11 @@ class BoardsTests(TestCase):
         self.response = self.client.get(url)
 
     def test_boards_view_status_code(self):
-        self.assertEquals(self.response.status_code, 200)
+        self.assertEqual(self.response.status_code, 200)
 
     def test_boards_url_resolves_boards_view(self):
         view = resolve('/boards/')
-        self.assertEquals(view.func.view_class, BoardListView)
+        self.assertEqual(view.func.view_class, BoardListView)
 
     def test_boards_view_contains_link_to_topics_page(self):
         board_topics_url = reverse('board_topics', kwargs={'board_pk': self.board.pk})

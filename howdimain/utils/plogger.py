@@ -14,23 +14,23 @@ import time
 class Logger:
 
     @classmethod
-    def set_logger(self, log_file, logformat, level):
+    def set_logger(cls, log_file, logformat, level):
         ''' set the logger parameters
         '''
-        self.logger = logging.getLogger(__name__)
+        cls.logger = logging.getLogger(__name__)
         formatter = logging.Formatter(logformat)
-        self.logger.setLevel(logging.DEBUG)
+        cls.logger.setLevel(logging.DEBUG)
         file_handler = logging.FileHandler(log_file)
         file_handler.setLevel(level)
         file_handler.setFormatter(formatter)
-        self.logger.addHandler(file_handler)
+        cls.logger.addHandler(file_handler)
 
-        return self.logger
+        return cls.logger
 
 
     @classmethod
-    def getlogger(self):
-        return self.logger
+    def getlogger(cls):
+        return cls.logger
 
 
 # def timed(logger):
@@ -64,8 +64,7 @@ def timed(func, logger):
         start = time.time()
         result = func(*args, **kwargs)
         end = time.time()
-        logger.info('==> {} ran in {}s'.format(func.__name__,
-                    round(end - start, 3)))
+        logger.info(f'==> {func.__name__} ran in {round(end - start, 3)} s')
         return result
     return wrapper
 

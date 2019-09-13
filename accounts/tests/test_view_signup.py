@@ -5,7 +5,6 @@ from django.urls import resolve
 from django.test import TestCase
 from ..views import signup
 from ..forms import SignUpForm
-from pprint import pprint
 
 
 class SignUpTests(TestCase):
@@ -14,11 +13,11 @@ class SignUpTests(TestCase):
         self.response = self.client.get(url)
 
     def test_signup_status_code(self):
-        self.assertEquals(self.response.status_code, 200)
+        self.assertEqual(self.response.status_code, 200)
 
     def test_signup_url_resolves_signup_view(self):
         view = resolve('/signup/')
-        self.assertEquals(view.func, signup)
+        self.assertEqual(view.func, signup)
 
     def test_csrf(self):
         self.assertContains(self.response, 'csrfmiddlewaretoken')
@@ -88,7 +87,7 @@ class InvalidSignUpTests(TestCase):
         '''
         An invalid form submission should return to the same page
         '''
-        self.assertEquals(self.response.status_code, 200)
+        self.assertEqual(self.response.status_code, 200)
 
     def test_form_errors(self):
         form = self.response.context.get('form')
@@ -101,14 +100,14 @@ class InvalidSignUpTests(TestCase):
         '''
         A submission with a user with same email should return to the same page
         '''
-        exist_user = User.objects.create(username='joebiden', email='johndean@hotmail.com')
+        _ = User.objects.create(username='joebiden', email='johndean@hotmail.com')
         url = reverse('signup')
         data = {
-        'username': 'johndean',
-        'email': 'johndean@hotmail.com',
-        'password1': 'abcdef123456',
-        'password2': 'abcdef123456',
-        'first_name': 'john',
-        'last_name': 'dean',}
+            'username': 'johndean',
+            'email': 'johndean@hotmail.com',
+            'password1': 'abcdef123456',
+            'password2': 'abcdef123456',
+            'first_name': 'john',
+            'last_name': 'dean',}
         response = self.client.post(url, data)
-        self.assertEquals(response.status_code, 200)
+        self.assertEqual(response.status_code, 200)

@@ -1,15 +1,13 @@
+import math
 from django.db import models
 from django.contrib.auth.models import User
 from django.utils.text import Truncator
-from django import template
 from martor.models import MartorField
-from martor.utils import markdownify
 from howdimain.howdimain_vars import (MESSAGE_FIELD_SIZE, BOARD_NAME_SIZE,
                                       DESCRIPTION_SIZE, TOPIC_SUBJECT_SIZE,
                                       HAS_MANY_PAGES_LIMIT, POST_SUBJECT_SIZE,
                                       POSTS_PER_PAGE,
-)
-import math
+                                     )
 
 
 class Board(models.Model):
@@ -50,7 +48,7 @@ class Topic(models.Model):
     def get_page_range(self):
         count = self.get_page_count()
         if self.has_many_pages():
-            return range(1,HAS_MANY_PAGES_LIMIT+1)
+            return range(1, HAS_MANY_PAGES_LIMIT+1)
         else:
             return range(1, count+1)
 
@@ -83,4 +81,4 @@ class Post(models.Model):
         return self.message
 
     def __str__(self):
-            return Truncator(self.post_subject).chars(30)
+        return Truncator(self.post_subject).chars(30)

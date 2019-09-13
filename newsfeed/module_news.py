@@ -1,9 +1,9 @@
-import feedparser
+import re
 from datetime import datetime, timezone
 from django.contrib.auth.models import User
-from .models import NewsSite, UserNewsSite
 from django.db.utils import IntegrityError
-import re
+import feedparser
+from .models import NewsSite, UserNewsSite
 
 news_list = {'CNN World News':
              'http://rss.cnn.com/rss/edition_world.rss',
@@ -39,9 +39,10 @@ def update_news(news_url):
 
 
 def restore_feedparserdict(feed_items):
-    for i in range(len(feed_items)):
-        feed_items[i] = feedparser.FeedParserDict(feed_items[i])
-    return feed_items
+    new_feed_items = {}
+    for i, feed_item in enumerate(feed_items):
+        new_feed_items[i] = feedparser.FeedParserDict(feed_item)
+    return new_feed_items
 
 def feedparser_time_to_datetime(feed_item):
     ''' Converts the feedparser parsed time (published_parsed or
@@ -75,14 +76,15 @@ def remove_all_references(summary):
 def add_news_site_to_model():
     ''' Function to add news_site to the NewsSite model
     '''
-    existing_newssites = [entry['news_site'] for entry in NewsSite.objects.values('news_site')]
+    existing_newssites = [entry['news_site'] for entry in
+                          NewsSite.objects.values('news_site')]
     print(existing_newssites)
 
     for news_site, url in news_list.items():
         print(news_site, url)
         try:
             NewsSite.objects.create(news_site=news_site,
-                                     news_url=url)
+                                    news_url=url)
         except IntegrityError:
             print(f'news site {news_site} already exists')
 

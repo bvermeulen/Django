@@ -102,7 +102,6 @@ DATABASES = {
 #     }
 # }
 
-
 # Global martor settings
 # Input: string boolean, `true/false`
 MARTOR_ENABLE_CONFIGS = {

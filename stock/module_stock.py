@@ -450,4 +450,5 @@ def start_currency_update():
     thread_update_currencies = threading.Thread(
         target=update_currencies_at_interval, kwargs={'interval': UPDATE_INTERVAL})
     thread_update_currencies.start()
-    logger.info(f'currency update thread {start_currency_update.__name__} has started ...')
+    logger.info(f'currency update thread '
+                f'{start_currency_update.__name__} has started ...')

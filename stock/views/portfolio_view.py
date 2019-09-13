@@ -1,16 +1,15 @@
 import json
 from decimal import Decimal
 from django.core.serializers.json import DjangoJSONEncoder
-from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import render, redirect, reverse
+from django.shortcuts import render
 from django.views.generic import View
 from django.utils.decorators import method_decorator
 from django.db.utils import IntegrityError
 from howdimain.utils.plogger import Logger
 from howdimain.utils.get_ip import get_client_ip
 from stock.forms import PortfolioForm
-from stock.models import Currency, Exchange, Stock, Portfolio, StockSelection
+from stock.models import Stock, Portfolio, StockSelection
 from stock.module_stock import WorldTradingData, start_currency_update
 
 logger = Logger.getlogger()
@@ -123,7 +122,6 @@ class PortfolioView(View):
                 self.get_stock = 'empty'
 
             except IntegrityError:
-                print('cannot create portfolio')
                 pass
 
     def rename_or_delete_portfololio_or_add_stock(self):

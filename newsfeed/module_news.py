@@ -2,7 +2,7 @@ import re
 from datetime import datetime, timezone
 from django.contrib.auth.models import User
 from django.db.utils import IntegrityError
-import feedparser
+from howdimain.utils import feedparser
 from .models import NewsSite, UserNewsSite
 
 news_list = {'CNN World News':

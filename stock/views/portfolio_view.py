@@ -14,7 +14,7 @@ from stock.module_stock import WorldTradingData, start_currency_update
 
 logger = Logger.getlogger()
 d = Decimal
-start_currency_update()
+# start_currency_update()
 
 @method_decorator(login_required, name='dispatch')
 class PortfolioView(View):

@@ -32,7 +32,11 @@ class QuoteView(View):
     wtd.setup()
     markets = ['NASDAQ', 'NYSE', 'AEX']
     data_provider_url = 'www.worldtradingdata.com'
-    default_user = User.objects.get(username='default_user')
+    try:
+        default_user = User.objects.get(username='default_user')
+
+    except User.DoesNotExist:
+        default_user = None
 
     def get(self, request):
         user = request.user

@@ -30,9 +30,7 @@ class LoginRequiredPostUpdateViewTests(PostUpdateViewTestCase):
     def test_redirection(self):
         login_url = reverse('login')
         response = self.client.get(self.url)
-        self.assertRedirects(response, '{login_url}?next={url}'.format(
-            login_url=login_url, url=self.url))
-
+        self.assertRedirects(response, f'{login_url}?next={self.url}')
 
 class UnauthorizedPostUpdateViewTests(PostUpdateViewTestCase):
     def setUp(self):

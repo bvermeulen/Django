@@ -171,14 +171,12 @@ class SuccessfulPostUpdateViewTests(PostUpdateViewTestCase):
 
 class InvalidPostUpdateViewTests(PostUpdateViewTestCase):
     def setUp(self):
-        '''
-        Submit an empty dictionary to the `add_to_topic` view
-        '''
         super().setUp()
         self.client.login(username=self.owner, password=self.owner_pw)
 
     def test_status_code(self):
         '''
+        Submit an empty dictionary to the `add_to_topic` view
         An invalid form submission should return to the same page
         '''
         response = self.client.post(self.url, {})
@@ -190,6 +188,7 @@ class InvalidPostUpdateViewTests(PostUpdateViewTestCase):
         self.assertTrue(form.errors)
 
     def test_not_any_user_can_edit(self):
+        self.client.logout()
         self.client.login(username='jane', password='jane_123')
         data = {'post_subject': 'jane edit',
                 'message': 'jane has edited'}

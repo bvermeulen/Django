@@ -24,7 +24,7 @@ class PostUpdateViewTestCase(TestCase):
                                  email='moderator@howdiweb.com',
                                  password='moderator_123')
 
-        user_jane = User.objects.create_user(username='jane',
+        User.objects.create_user(username='jane',
                                  email='jane@google.com',
                                  password='jane_123')
 
@@ -35,7 +35,7 @@ class PostUpdateViewTestCase(TestCase):
                                         topic=self.topic,
                                         created_by=user,)
 
-        self.post.allowed_editor.add(user_jane)
+        self.post.allowed_editor.add(user_joe)
         self.post.save()
 
         self.url = reverse('edit_post', kwargs={'board_pk': self.board.pk,

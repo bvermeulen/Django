@@ -96,3 +96,12 @@ class QuestesTests(TestCase):
         url = reverse('stock_quotes')
         response = self.client.post(url, data)
         self.assertEqual('AAPL', response.context['stock_info'][0]['symbol'])
+
+    def test_valid_quote_string_has_a_to_intraday_view(self):
+        data = {'quote_string': 'Apple'}
+        url = reverse('stock_quotes')
+        response = self.client.post(url, data)
+        pprint(response.content)
+
+    def test_(self):
+        pass

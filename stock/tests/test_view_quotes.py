@@ -91,5 +91,8 @@ class QuestesTests(TestCase):
         response = self.client.get(reverse('stock_quotes'))
         self.assertContains(response, '<input', 5)
 
-    def test_valid_quote_string_returns_stock_table(self):
-        pass
+    def test_valid_quote_string_returns_stock_info(self):
+        data = {'quote_string': 'Apple'}
+        url = reverse('stock_quotes')
+        response = self.client.post(url, data)
+        self.assertEqual('AAPL', response.context['stock_info'][0]['symbol'])

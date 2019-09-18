@@ -32,21 +32,21 @@ class QuoteView(View):
     wtd.setup()
     markets = ['NASDAQ', 'NYSE', 'AEX']
     data_provider_url = 'www.worldtradingdata.com'
-    try:
-        default_user = User.objects.get(username='default_user')
-
-    except User.DoesNotExist:
-        default_user = None
 
     def get(self, request):
         user = request.user
+        try:
+            default_user = User.objects.get(username='default_user')
+        except User.DoesNotExist:
+            default_user = None
+
         quote_string = request.session.get('quote_string', '')
         markets = request.session.get('markets', self.markets)
         form = self.form_class(initial={'quote_string': quote_string,
                                         'markets': markets, })
 
         portfolios = [item.portfolio_name for item in Portfolio.objects.filter(
-            user=self.default_user)]
+            user=default_user)]
 
         if user.is_authenticated:
             portfolios += [item.portfolio_name for item in Portfolio.objects.filter(
@@ -61,6 +61,11 @@ class QuoteView(View):
 
     def post(self, request):
         user = request.user
+        try:
+            default_user = User.objects.get(username='default_user')
+        except User.DoesNotExist:
+            default_user = None
+
         quote_string = request.session.get('quote_string', '')
         markets = request.session.get('markets', self.markets)
 
@@ -69,9 +74,9 @@ class QuoteView(View):
             quote_string = form.cleaned_data.get('quote_string')
             selected_portfolio = form.cleaned_data.get('selected_portfolio')
             markets = form.cleaned_data.get('markets')
-
             symbols = []
             stock_info = []
+
             if selected_portfolio:
                 try:
                     # try if user has selected a portfolio
@@ -88,7 +93,7 @@ class QuoteView(View):
                     # try if it is a default portfolio
                     try:
                         portfolio = Portfolio.objects.filter(
-                            user=self.default_user, portfolio_name=selected_portfolio)
+                            user=default_user, portfolio_name=selected_portfolio)
 
                         for stock in portfolio.first().stocks.all():
                             symbols.append(stock.stock.symbol)
@@ -112,7 +117,7 @@ class QuoteView(View):
             stock_info = []
 
         portfolios = [item.portfolio_name for item in Portfolio.objects.filter(
-            user=self.default_user)]
+            user=default_user)]
 
         if user.is_authenticated:
             portfolios += [item.portfolio_name for item in Portfolio.objects.filter(

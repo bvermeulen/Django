@@ -1,3 +1,4 @@
+from django.contrib.auth.models import User
 from stock.models import Stock, Portfolio, StockSelection, Currency
 from stock.forms import PortfolioForm
 from django.contrib.auth.models import User

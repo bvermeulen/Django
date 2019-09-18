@@ -22,7 +22,7 @@ class PostUpdateViewTestCase(TestCase):
 
         User.objects.create_user(username='moderator',
                                  email='moderator@howdiweb.com',
-                                 password='moderator_123')
+                                 password='moderato_123')
 
         User.objects.create_user(username='jane',
                                  email='jane@google.com',
@@ -102,34 +102,31 @@ class UnauthorizedPostUpdateViewTests(PostUpdateViewTestCase):
 
 class SuccessfulPostUpdateViewTests(PostUpdateViewTestCase):
 
+    def setUp(self):
+        super().setUp()
+        self.client.login(username=self.owner, password=self.owner_pw)
+
+        data = {'post_subject': 'my edit',
+                'message': 'edited message',
+               }
+        self.response = self.client.post(self.url, data)
+
     def test_redirection(self):
         '''
         A valid form submission should redirect the user
         '''
-        self.client.login(username=self.owner, password=self.owner_pw)
-        data = {'post_subject': 'my edit',
-                'message': 'edited message',
-               }
-        response = self.client.post(self.url, data)
-
         topic_posts_url = reverse('topic_posts', kwargs={'board_pk': self.board.pk,
                                                          'topic_pk': self.topic.pk})
         topic_posts_url += '?page=1'
 
-        self.assertRedirects(response, topic_posts_url)
+        self.assertRedirects(self.response, topic_posts_url)
 
     def test_post_changed(self):
-        self.client.login(username=self.owner, password=self.owner_pw)
-        data = {'post_subject': 'my edit',
-                'message': 'edited message',
-               }
-        self.client.post(self.url, data)
-
         self.post.refresh_from_db()
         self.assertEqual(self.post.message, 'edited message')
 
     def test_post_changed_by_moderator_redirection(self):
-        self.client.login(username='moderator', password='moderator_123')
+        self.client.login(username='moderator', password='123')
         data = {'post_subject': 'moderator edit',
                 'message': 'moderator has edited'}
 
@@ -140,7 +137,7 @@ class SuccessfulPostUpdateViewTests(PostUpdateViewTestCase):
         self.assertRedirects(response, topic_posts_url)
 
     def test_post_changed_by_moderator(self):
-        self.client.login(username='moderator', password='moderator_123')
+        self.client.login(username='moderator', password='123')
         data = {'post_subject': 'moderator edit',
                 'message': 'moderator has edited'}
 
@@ -149,7 +146,7 @@ class SuccessfulPostUpdateViewTests(PostUpdateViewTestCase):
         self.assertEqual(self.post.message, 'moderator has edited')
 
     def test_post_changed_by_allowed_editor_redirection(self):
-        self.client.login(username='joe', password='joe_123')
+        self.client.login(username='joe', password='123')
         data = {'post_subject': 'joe edit',
                 'message': 'joe has edited'}
 
@@ -160,7 +157,7 @@ class SuccessfulPostUpdateViewTests(PostUpdateViewTestCase):
         self.assertRedirects(response, topic_posts_url)
 
     def test_post_changed_by_allowed_editor(self):
-        self.client.login(username='joe', password='joe_123')
+        self.client.login(username='joe', password='123')
         data = {'post_subject': 'joe edit',
                 'message': 'joe has edited'}
 

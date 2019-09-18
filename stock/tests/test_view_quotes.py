@@ -58,12 +58,6 @@ class QuestesTests(TestCase):
                                       quantity=1,
                                       portfolio=self.default_aex)
 
-    def test_output_html(self):
-        file_name = 'stock/tests/quotes.html'
-        response = self.client.get(reverse('stock_quotes'))
-        with open(file_name, 'wt') as f:
-            f.write(response.content.decode())
-
     def test_quotes_view_status_code(self):
         response = self.client.get(reverse('stock_quotes'))
         self.assertEqual(response.status_code, 200)

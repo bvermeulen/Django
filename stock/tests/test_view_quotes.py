@@ -138,7 +138,7 @@ class QuotesViewTestCase(QuotesTestCase):
                          response.context['data_provider_url'])
 
         file_name = 'stock/tests/quotes.html'
-        with open(file_name, 'wt') as f:
+        with open(file_name, 'wt', encoding='utf-8') as f:
             f.write(response.content.decode())
 
 
@@ -190,9 +190,8 @@ class IntraDayTests(QuotesTestCase):
                          self.response.context['data_provider_url'])
 
         file_name = 'stock/tests/intraday.html'
-        with open(file_name, 'wt') as f:
+        with open(file_name, 'wt', encoding='utf-8') as f:
             f.write(self.response.content.decode())
-
 
 class HistoryTests(QuotesTestCase):
     def setUp(self):
@@ -250,5 +249,5 @@ class HistoryTests(QuotesTestCase):
                          self.response.context['data_provider_url'])
 
         file_name = 'stock/tests/history.html'
-        with open(file_name, 'wt') as f:
+        with open(file_name, 'wt', encoding='utf-8') as f:
             f.write(self.response.content.decode())

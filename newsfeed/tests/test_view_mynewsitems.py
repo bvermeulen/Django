@@ -107,6 +107,6 @@ class MyNewsSitesPostTests(TestCase):
         self.assertRedirects(response, reverse('newspage'))
 
     def test_create_html(self):
-        file_name = 'newsfeed/tests/mynewsitems.html'
+        file_name = 'newsfeed/tests/test_mynewsitems.html'
         with open(file_name, 'wt', encoding='utf-8') as f:
             f.write(self.response.content.decode())

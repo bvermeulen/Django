@@ -116,8 +116,12 @@ def create_news_context(ns, news_sites, feed_items):
 
 
 def obtain_news_sites_and_news_status_for_user(request, user):
-    default_news_sites = [item.news_site for item in UserNewsSite.objects.get(
-        user__username='default_user').news_sites.all()]
+    try:
+        default_news_sites = [item.news_site for item in UserNewsSite.objects.get(
+            user__username='default_user').news_sites.all()]
+
+    except (ObjectDoesNotExist, TypeError):
+        default_news_sites = []
 
     try:
         news_sites = [item.news_site for item in UserNewsSite.objects.get(
@@ -138,8 +142,11 @@ def obtain_news_sites_and_news_status_for_user(request, user):
             # the default site
             if ns.current_news_site not in [
                     site.news_site for site in NewsSite.objects.all()]:
+                try:
+                    ns.current_news_site = default_news_sites[0]
 
-                ns.current_news_site = default_news_sites[0]
+                except KeyError:
+                    ns.current_news_site = ''
 
         except (KeyError, AttributeError):
             ns = NewsStatus(current_news_site=news_sites[0],

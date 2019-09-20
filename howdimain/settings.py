@@ -95,6 +95,13 @@ DATABASES = {
         },
 }
 
+# DATABASES = {            ### USE THIS FOR TESTING
+#     'default': {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+#     }
+# }
+
 # Global martor settings
 # Input: string boolean, `true/false`
 MARTOR_ENABLE_CONFIGS = {

@@ -3,6 +3,7 @@ from collections import namedtuple
 from django.shortcuts import render, redirect, reverse
 from howdimain.utils.plogger import Logger
 from howdimain.utils.get_ip import get_client_ip
+from howdimain.howdimain_vars import LEFT_ARROW, RIGHT_ARROW
 from ..module_news import update_news, restore_feedparserdict
 from ..models import NewsSite, UserNewsSite
 from .views_utils import (set_session_newsstatus,
@@ -16,8 +17,7 @@ Controls = namedtuple('Controls', 'banner store next previous')
 
 # these controls determine what is shown on the template buttons and links
 cntr = Controls('Banner', 'store this news item',
-                '\u25B6', # left arrow unicode
-                '\u25C0') # right arrow unicode
+                RIGHT_ARROW, LEFT_ARROW)
 
 def newspage(request):
     ''' views function to render newspage.html

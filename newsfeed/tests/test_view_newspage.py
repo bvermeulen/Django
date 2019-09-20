@@ -1,7 +1,7 @@
-from pprint import pprint
 from django.contrib.auth.models import User
 from django.urls import reverse, resolve
 from django.test import TestCase
+from howdimain.howdimain_vars import LEFT_ARROW, RIGHT_ARROW
 from ..views.newspage import newspage
 from ..models import NewsSite, UserNewsSite
 
@@ -47,16 +47,22 @@ class NewsPageView(NewsPageTests):
         self.assertContains(self.response, f'href="{home_url}"')
 
     def test_newspage_view_banner(self):
-        pass
+        self.assertContains(self.response, 'name="control_btn" value="Banner"')
 
     def test_newspage_view_next_previous_buttons(self):
-        pass
+        data = {'control_btn': RIGHT_ARROW}
+        response = self.client.post(reverse('newspage'), data)
+        self.assertEqual('2', response.context['status'][11:12])
 
-    def test_newspage_view_has_no_link_to_select_site(self):
-        pass
+        data = {'control_btn': LEFT_ARROW}
+        response = self.client.post(reverse('newspage'), data)
+        self.assertEqual('1', response.context['status'][11:12])
 
-    def test_newspage_view_has_no_link_to_mysites(self):
-        pass
+    def test_newspage_view_has_no_link_to_select_sites(self):
+        self.assertNotContains(self.response, "window.location.href='/news/mynewsitems/'")
+
+    def test_newspage_view_has_no_link_to_mynewsitems(self):
+        self.assertNotContains(self.response, "window.location.href='/news/mynewsitems/'")
 
     def test_newspage_returns_default_newssite(self):
         self.assertEqual('BBC', self.response.context['news_sites'][0])
@@ -67,17 +73,21 @@ class NewsPageViewUser(NewsPageTests):
         self.client.login(username=self.testuser, password=self.testuser_pw)
 
     def test_newspage_view_contains_link_to_select_sites(self):
-        pass
+        response = self.client.post(reverse('newspage'))
+        self.assertContains(response, "window.location.href='/news/sites/'")
 
-    def test_newspage_view_contains_link_to_mysites(self):
-        pass
+    def test_newspage_view_contains_link_to_mynewsitems(self):
+        response = self.client.post(reverse('newspage'))
+        self.assertContains(response, "window.location.href='/news/mynewsitems/'")
 
     def test_newspage_returns_user_newssite(self):
         response = self.client.post(reverse('newspage'))
         self.assertEqual('CNN', response.context['news_sites'][1])
 
     def test_newspage_site_button(self):
-        pass
+        data = {'site_btn': 'CNN'}
+        response = self.client.post(reverse('newspage'), data)
+        self.assertEqual('CNN', response.context['news_site'])
 
     def test_create_html(self):
         response = self.client.post(reverse('newspage'))

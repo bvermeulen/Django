@@ -20,8 +20,8 @@
 {% block content %}
   <form id="id_portfolio" method="post">
     {% csrf_token %}
-    <a style="display: none">{{ form.new_portfolio }} {{ form.quantity }} 
-      {{ form.portfolios }} {{ form.currencies }}</a>
+    <a style="display: none">{{ form.new_portfolio }} {{ form.portfolios }}
+      {{ form.currencies }}</a>
     <div class="flex-container">
       <div style="width:12%">
         <button class="btn btn-primary btn-sm"

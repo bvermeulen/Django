@@ -83,7 +83,7 @@ class QuotesViewTestCase(QuotesTestCase):
         self.assertContains(response, 'csrfmiddlewaretoken')
 
     def test_correct_number_input_tags(self):
-        ''' 5 <input> tags to be found:
+        ''' 6 <input> tags to be found:
             csrf token
             quote_string
             selected_portfolio

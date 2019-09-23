@@ -137,7 +137,7 @@ class QuotesViewTestCase(QuotesTestCase):
         self.assertEqual('www.worldtradingdata.com',
                          response.context['data_provider_url'])
 
-        file_name = 'stock/tests/quotes.html'
+        file_name = 'stock/tests/test_quotes.html'
         with open(file_name, 'wt', encoding='utf-8') as f:
             f.write(response.content.decode())
 
@@ -189,7 +189,7 @@ class IntraDayTests(QuotesTestCase):
         self.assertEqual('www.worldtradingdata.com',
                          self.response.context['data_provider_url'])
 
-        file_name = 'stock/tests/intraday.html'
+        file_name = 'stock/tests/test_intraday.html'
         with open(file_name, 'wt', encoding='utf-8') as f:
             f.write(self.response.content.decode())
 
@@ -248,6 +248,6 @@ class HistoryTests(QuotesTestCase):
         self.assertEqual('www.worldtradingdata.com',
                          self.response.context['data_provider_url'])
 
-        file_name = 'stock/tests/history.html'
+        file_name = 'stock/tests/test_history.html'
         with open(file_name, 'wt', encoding='utf-8') as f:
             f.write(self.response.content.decode())

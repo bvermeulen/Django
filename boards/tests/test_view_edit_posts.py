@@ -36,7 +36,6 @@ class PostUpdateViewTestCase(TestCase):
                                         created_by=user,)
 
         self.post.allowed_editor.add(user_joe)
-        self.post.save()
 
         self.url = reverse('edit_post', kwargs={'board_pk': self.board.pk,
                                                 'topic_pk': self.topic.pk,

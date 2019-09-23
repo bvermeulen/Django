@@ -1,21 +1,25 @@
+from pprint import pprint
+from decimal import Decimal
 from django.contrib.auth.models import User
 from django.urls import reverse, resolve
 from django.test import TestCase
 from ..views.portfolios import PortfolioView
 from ..models import Currency, Exchange, Stock, StockSelection, Portfolio
 
+d = Decimal
+
 class PortfolioTestCase(TestCase):
 
     @classmethod
     def setUpTestData(cls):
 
-        cls.test_user = 'test_user'
+        cls.test_user_name = 'test_user'
         cls.test_user_pw = '123'
         default_user = 'default_user'
 
-        test_user = User.objects.create_user(username=cls.test_user,
-                                             email='test@howdiweb.nl',
-                                             password=cls.test_user_pw)
+        cls.test_user = User.objects.create_user(username=cls.test_user_name,
+                                                 email='test@howdiweb.nl',
+                                                 password=cls.test_user_pw)
 
         default_user = User.objects.create_user(username='default_user',
                                                 email='default@howdiweb.nl',
@@ -24,8 +28,8 @@ class PortfolioTestCase(TestCase):
         usd = Currency.objects.create(currency='USD',
                                       usd_exchange_rate='1.0')
 
-        eur = Currency.objects.create(currency='EUR',
-                                      usd_exchange_rate='0.9')
+        cls.eur = Currency.objects.create(currency='EUR',
+                                          usd_exchange_rate='0.9')
 
         nyse = Exchange.objects.create(exchange_short='NYSE',
                                        exchange_long='New York Stock Exchange',
@@ -35,41 +39,40 @@ class PortfolioTestCase(TestCase):
                                       exchange_long='Amsterdam AEX',
                                       time_zone_name='ECT',)
 
-        apple = Stock.objects.create(symbol='AAPL',
-                                     company='Apple',
-                                     currency=usd,
-                                     exchange=nyse,)
+        cls.apple = Stock.objects.create(symbol='AAPL',
+                                         company='Apple',
+                                         currency=usd,
+                                         exchange=nyse,)
 
-        rds = Stock.objects.create(symbol='RDSA.AS',
-                                   company='Royal Dutch Shell',
-                                   currency=eur,
-                                   exchange=aex)
+        cls.rds = Stock.objects.create(symbol='RDSA.AS',
+                                       company='Royal Dutch Shell',
+                                       currency=cls.eur,
+                                       exchange=aex)
 
         Stock.objects.create(symbol='WKL.AS',
                              company='Wolters Kluwer',
-                             currency=eur,
+                             currency=cls.eur,
                              exchange=aex)
 
-        test_portfolio = Portfolio.objects.create(portfolio_name='test_portfolio',
-                                                  user=test_user)
+        cls.test_portfolio = Portfolio.objects.create(portfolio_name='test_portfolio',
+                                                      user=cls.test_user)
 
-        StockSelection.objects.create(stock=apple,
+        StockSelection.objects.create(stock=cls.apple,
                                       quantity=10,
-                                      portfolio=test_portfolio)
+                                      portfolio=cls.test_portfolio)
 
         default_aex = Portfolio.objects.create(portfolio_name='AEX_index',
                                                user=default_user,)
 
-        StockSelection.objects.create(stock=rds,
+        StockSelection.objects.create(stock=cls.rds,
                                       quantity=1,
                                       portfolio=default_aex)
-
 
 
 class TestPortfolioView(PortfolioTestCase):
 
     def setUp(self):
-        self.client.login(username=self.test_user, password=self.test_user_pw)
+        self.client.login(username=self.test_user_name, password=self.test_user_pw)
 
     def test_portfolio_view_status_code(self):
         response = self.client.get(reverse('portfolio'))
@@ -103,7 +106,8 @@ class TestPortfolioView(PortfolioTestCase):
 class TestPortfolioPost(PortfolioTestCase):
 
     def setUp(self):
-        self.client.login(username=self.test_user, password=self.test_user_pw)
+        self.client.login(username=self.test_user_name, password=self.test_user_pw)
+        self.data = {'currencies': 'EUR'}
 
     def test_correct_number_input_tags(self):
         ''' 4 <input> tags to be found:
@@ -116,15 +120,101 @@ class TestPortfolioPost(PortfolioTestCase):
         self.assertContains(response, '<input', 4)
 
     def test_select_portfolio(self):
-        data = {'currencies': 'EUR',
-                'portfolios': 'test_portfolio'}
-        response = self.client.post(reverse('portfolio'), data)
+        self.data['portfolios'] = 'test_portfolio'
+        response = self.client.post(reverse('portfolio'), self.data)
         self.assertEqual('AAPL', response.context['stocks'][0]['symbol'])
 
+    def test_new_portfolio(self):
+        self.data['new_portfolio'] = 'my_new_portfolio'
+        self.client.post(reverse('portfolio'), self.data)
+        self.assertEqual(2, len(Portfolio.objects.filter(user=self.test_user)))
+
+    def test_delete_portfolio(self):
+        Portfolio.objects.create(user=self.test_user,
+                                 portfolio_name='my_new_portfolio')
+        self.data['btn1_pressed'] = 'delete_portfolio'
+        self.data['portfolios'] = 'my_new_portfolio'
+        self.data['portfolio_name'] = 'my_new_portfolio'
+        self.client.post(reverse('portfolio'), self.data)
+        self.assertEqual(1, len(Portfolio.objects.filter(user=self.test_user)))
+
+    def test_rename_portfolio(self):
+        Portfolio.objects.create(user=self.test_user,
+                                 portfolio_name='my_new_portfolio')
+        self.data['btn1_pressed'] = 'rename_portfolio'
+        self.data['portfolios'] = 'my_new_portfolio'
+        self.data['portfolio_name'] = 'HAHA MAIN'
+        response = self.client.post(reverse('portfolio'), self.data)
+        self.assertEqual(1, len(Portfolio.objects.filter(user=self.test_user,
+                                                         portfolio_name='HAHA MAIN')))
+        self.assertEqual('HAHA MAIN', response.context['form']['portfolio_name'].value())
+        self.assertEqual('HAHA MAIN', response.context['form']['portfolios'].value())
+
+    def test_add_symbol(self):
+        self.data['portfolios'] = 'test_portfolio'
+        self.data['btn1_pressed'] = 'add_new_symbol'
+        self.data['symbol'] = 'RDSA.AS'
+        response = self.client.post(reverse('portfolio'), self.data)
+        stocks_portfolio_db = Portfolio.objects.filter(
+            user=self.test_user, portfolio_name='test_portfolio').first().stocks.all()
+        self.assertEqual(2, len(stocks_portfolio_db))
+        self.assertEqual('RDSA.AS', stocks_portfolio_db[1].stock.symbol)
+        self.assertEqual('RDSA.AS', response.context['stocks'][1]['symbol'])
+
+    def test_add_invalid_symbol(self):
+        self.data['portfolios'] = 'test_portfolio'
+        self.data['btn1_pressed'] = 'add_new_symbol'
+        self.data['symbol'] = 'HAHAHA'
+        response = self.client.post(reverse('portfolio'), self.data)
+        self.assertEqual(1, len(response.context['stocks']))
+
+    def test_change_quantity(self):
+        self.data['portfolios'] = 'test_portfolio'
+        self.data['btn2_pressed'] = 'AAPL, 5'
+        response = self.client.post(reverse('portfolio'), self.data)
+        aapl = StockSelection.objects.filter(stock=self.apple,
+                                             portfolio=self.test_portfolio)
+        self.assertEqual('5', aapl.first().quantity)
+        self.assertEqual('5', response.context['stocks'][0]['quantity'])
+
+    def test_delete_stock(self):
+        # first add a new symbol to the portfolio
+        StockSelection.objects.create(
+            stock=self.rds, quantity=0, portfolio=self.test_portfolio)
+
+        self.data['portfolios'] = 'test_portfolio'
+        self.data['btn2_pressed'] = 'RDSA.AS, delete'
+        response = self.client.post(reverse('portfolio'), self.data)
+        stocks_portfolio_db = Portfolio.objects.filter(
+            user=self.test_user, portfolio_name='test_portfolio').first().stocks.all()
+        self.assertEqual(1, len(stocks_portfolio_db))
+        self.assertEqual('AAPL', stocks_portfolio_db[0].stock.symbol)
+        self.assertEqual('AAPL', response.context['stocks'][0]['symbol'])
+
+    def test_portfolio_euro_value(self):
+        self.data['portfolios'] = 'test_portfolio'
+        response = self.client.post(reverse('portfolio'), self.data)
+
+        stocks_value = d(response.context['stocks_value'].replace(',', ''))
+        stock = response.context['stocks'][0]
+        value_eur = ((d(stock['quantity']) * d(stock['price'].replace(',', ''))) *
+                     d(self.eur.usd_exchange_rate))
+        self.assertEqual(stocks_value.quantize(d('0.01')), value_eur.quantize(d('0.01')))
+
+    def test_portfolio_usd_value(self):
+        self.data['portfolios'] = 'test_portfolio'
+        self.data['currencies'] = 'USD'
+        response = self.client.post(reverse('portfolio'), self.data)
+
+        stocks_value = d(response.context['stocks_value'].replace(',', ''))
+        stock = response.context['stocks'][0]
+        value_usd = d(stock['quantity']) * d(stock['price'].replace(',', ''))
+        self.assertEqual(stocks_value.quantize(d('0.01')), value_usd.quantize(d('0.01')))
+
     def test_create_html(self):
-        data = {'currencies': 'EUR',
-                'portfolios': 'test_portfolio'}
-        response = self.client.post(reverse('portfolio'), data)
+        self.client.get(reverse('portfolio'))
+        self.data['portfolios'] = 'test_portfolio'
+        response = self.client.post(reverse('portfolio'), self.data)
 
         file_name = 'stock/tests/test_portfolio.html'
         with open(file_name, 'wt', encoding='utf-8') as f:

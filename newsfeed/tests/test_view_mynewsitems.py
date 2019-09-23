@@ -55,7 +55,6 @@ class MyNewsSitesPostTests(TestCase):
 
         testuser_news_sites = UserNewsSite.objects.create(user=cls.testuser)
         testuser_news_sites.news_sites.add(BBC)
-        testuser_news_sites.save()
 
         newssite = NewsSite.objects.filter(news_site='BBC')[0]
         feed_item = update_news(newssite.news_url)[0]

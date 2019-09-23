@@ -76,7 +76,7 @@ class PortfolioView(View):
 
             if self.portfolio:
                 if self.btn1_pressed:
-                    self.rename_or_delete_portfololio_or_add_stock()
+                    self.rename_or_delete_portfolio_or_add_stock()
 
                 elif self.btn2_pressed:
                     self.change_quantity_or_delete_symbol()
@@ -124,7 +124,7 @@ class PortfolioView(View):
             except IntegrityError:
                 pass
 
-    def rename_or_delete_portfololio_or_add_stock(self):
+    def rename_or_delete_portfolio_or_add_stock(self):
         ''' actions when btn1 is pressed '''
         assert self.portfolio, "check existance of portfolio"
 
@@ -197,7 +197,11 @@ class PortfolioView(View):
                 self.stocks = self.wtd.get_portfolio_stock_info(self.portfolio)
 
             elif get_stock == 'no':
-                self.stocks = json.loads(self.request.session.get('stock_info'))
+                try:
+                    self.stocks = json.loads(self.request.session.get('stock_info'))
+
+                except TypeError:
+                    self.stocks = self.wtd.get_portfolio_stock_info(self.portfolio)
 
             elif get_stock == 'empty':
                 pass

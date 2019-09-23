@@ -37,7 +37,6 @@ class NewsSitesTests(TestCase):
             news_site='BBC', news_url='http://feeds.bbci.co.uk/news/world/rss.xml')
         test_usernewssite = UserNewsSite.objects.create(user=self.test_user)
         test_usernewssite.news_sites.add(newssite)
-        test_usernewssite.save()
 
         self.client.login(username='testuser', password='123')
         data = {'selected_sites': [NewsSite.objects.first().pk]}
@@ -83,7 +82,6 @@ class NewsSitesTests(TestCase):
             news_site='BBC', news_url='http://feeds.bbci.co.uk/news/world/rss.xml')
         test_usernewssite = UserNewsSite.objects.create(user=self.test_user)
         test_usernewssite.news_sites.add(newssite)
-        test_usernewssite.save()
         self.client.login(username='testuser', password='123')
 
         data = {'news_site': 'BBC',

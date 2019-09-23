@@ -16,8 +16,8 @@ from howdimain.utils.plogger import Logger
 logformat = '%(asctime)s:%(levelname)s:%(message)s'
 Logger.set_logger(config('LOG_FILE'), logformat, 'INFO')
 logger = Logger.getlogger()
-HOWDIMAIN_VERSION = '1.0'
-HOWDIMAIN_DATE = '6 JULY 2019'
+HOWDIMAIN_VERSION = '1.1'
+HOWDIMAIN_DATE = '23 SEPTEMBER 2019'
 HOWDIMAIN_AUTHOR = 'bruno.vermeulen@hotmail.com'
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
@@ -95,11 +95,11 @@ DATABASES = {
         },
 }
 
-# DATABASES = {            ### USE THIS FOR TESTING
+# DATABASES = {            ### USE THIS AS AN ALTERNATIVE FOR TESTING
 #     'default': {
 #         'ENGINE': 'django.db.backends.sqlite3',
-#         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-#     }
+#          'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+#      }
 # }
 
 # Global martor settings

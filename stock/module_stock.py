@@ -3,7 +3,6 @@ import threading
 import datetime
 import time
 import csv
-import json
 from collections import namedtuple
 from decouple import config
 import requests
@@ -133,20 +132,21 @@ class WorldTradingData:
     def get_stock_trade_info(cls, stock_symbols):
         ''' return the stock trade info as a dict retrieved from url json, key 'data'
         '''
-        url = ''.join([cls.stock_url,
-                       '?symbol=' + ','.join(stock_symbols).upper(),
-                       '&sort_by=name',
-                       '&api_token=' + cls.api_token],
-                     )
+        params = {'symbol': ','.join(stock_symbols).upper(),
+                  'sort': 'name',
+                  'api_token': cls.api_token}
+
         if stock_symbols:
             try:
-                res = requests.get(url)
-                orig_stock_info = json.loads(res.content).get('data', {})
+                res = requests.get(cls.stock_url, params=params)
+                if res:
+                    orig_stock_info = res.json().get('data', {})
+                else:
+                    orig_stock_info = {}
 
             except requests.exceptions.ConnectionError:
                 orig_stock_info = {}
-                print(f'connection error: {url}')
-                logger.info(f'connection error: {url}')
+                logger.info(f'connection error: {cls.stock_url} {params}')
 
         else:
             orig_stock_info = {}
@@ -187,26 +187,26 @@ class WorldTradingData:
 
     @classmethod
     def get_stock_intraday_info(cls, stock_symbol):
-        '''  return stock intraday info as a dict retrieved from url json, key 'data'
+        '''  return stock intraday info as a dict retrieved from url json,
+             key 'intraday'
         '''
-        _range = '1'     #  number of days (1-30)
-        interval = '5'  #  interval in minutes
-        url = ''.join([cls.intraday_url,
-                       '?symbol=' + stock_symbol.upper(),
-                       '&range=' + _range,
-                       '&interval=' + interval,
-                       '&sort=asc'
-                       '&api_token=' + cls.api_token],
-                      )
+        # range: number of days (1-30), interval: in minutes
+        params = {'symbol': stock_symbol.upper(),
+                  'range': '1',
+                  'interval': '5',
+                  'sort': 'asc',
+                  'api_token': cls.api_token}
 
         try:
-            res = requests.get(url)
-            intraday_info = json.loads(res.content).get('intraday', {})
+            res = requests.get(cls.intraday_url, params=params)
+            if res:
+                intraday_info = res.json().get('intraday', {})
+            else:
+                intraday_info = {}
 
         except requests.exceptions.ConnectionError:
             intraday_info = {}
-            print(f'connection error: {url}')
-            logger.info(f'connection error: {url}')
+            logger.info(f'connection error: {cls.intraday_url} {params}')
 
         # if there is intraday info, convert date string and provide time and
         # create list of trade_info tuples
@@ -246,28 +246,30 @@ class WorldTradingData:
                       high=max_high, volume=None,
                      ))
         else:
-            logger.info(f'unable to get stock intraday data for {url}')
+            logger.info(f'unable to get stock intraday data for '
+                        f'{cls.intraday_url} {params}')
 
         return intraday_trades
 
     @classmethod
     def get_stock_history_info(cls, stock_symbol):
-        '''  return stock history info as a dict retrieved from url json, key 'data'
+        '''  return stock history info as a dict retrieved from url json,
+             key 'history'
         '''
-        url = ''.join([cls.history_url,
-                       '?symbol=' + stock_symbol.upper(),
-                       '&sort=newest',
-                       '&api_token=' + cls.api_token,
-                      ])
+        params = {'symbol': stock_symbol.upper(),
+                  'sort': 'newest',
+                  'api_token': cls.api_token}
 
         try:
-            res = requests.get(url)
-            history_info = json.loads(res.content).get('history', {})
+            res = requests.get(cls.history_url, params=params)
+            if res:
+                history_info = res.json().get('history', {})
+            else:
+                history_info = {}
 
         except requests.exceptions.ConnectionError:
             history_info = {}
-            print(f'connection error: {url}')
-            logger.info(f'connection error: {url}')
+            logger.info(f'connection error: {cls.history_url} {params}')
 
         # if there is intraday info, convert date string and provide date and
         # create list of trade_info tuples
@@ -286,7 +288,8 @@ class WorldTradingData:
                     )
 
         else:
-            logger.info(f'unable to get stock history data for {url}')
+            logger.info(f'unable to get stock history data for '
+                        f'{cls.history_url} {params}')
 
         return history_trades
 
@@ -396,28 +399,30 @@ class WorldTradingData:
 
     @classmethod
     def update_currencies(cls):
-        base_currency = 'USD'
-        url = ''.join([cls.forex_url,
-                       '?base=' + base_currency,
-                       '&api_token=' + cls.api_token,
-                       ])
+        params = {'base': 'USD',
+                  'api_token': cls.api_token}
         try:
-            res = requests.get(url)
-            forex_dict = json.loads(res.content).get('data', {})
+            res = requests.get(cls.forex_url, params=params)
+            if res:
+                forex_dict = res.json().get('data', {})
+            else:
+                forex_dict = {}
 
         except requests.exceptions.ConnectionError:
             forex_dict = {}
-            print(f'connection error: {url}')
-            logger.info(f'connection error: {url}')
+            logger.info(f'connection error: {cls.forex_url} {params}')
 
-        for cur in Currency.objects.all().order_by('currency'):
-            currency_key = cur.currency
-            currency_object = Currency.objects.get(currency=currency_key)
-            usd_exchange_rate = forex_dict.get(currency_key, '')
+        if forex_dict:
+            for cur in Currency.objects.all().order_by('currency'):
+                currency_key = cur.currency
+                currency_object = Currency.objects.get(currency=currency_key)
+                usd_exchange_rate = forex_dict.get(currency_key, '')
 
-            if usd_exchange_rate:
-                currency_object.usd_exchange_rate = usd_exchange_rate
-                currency_object.save()
+                if usd_exchange_rate:
+                    currency_object.usd_exchange_rate = usd_exchange_rate
+                    currency_object.save()
+        else:
+            logger.info(f'unable to get currency data for {cls.forex_url} {params}')
 
 
 def update_currencies_at_interval(interval=UPDATE_INTERVAL):
@@ -439,12 +444,13 @@ def update_currencies_at_interval(interval=UPDATE_INTERVAL):
 
             time_str = datetime.datetime.fromtimestamp(
                 current_time).strftime('%d-%m-%Y %H:%M:%S')
-            print(f'update currencies at {time_str}')
             logger.info(f'update currencies at {time_str}')
+
+            # sleep one second to make sure update is only done once in a second
+            time.sleep(1)
 
         current_time = time.time()
         elapsed_time = int(current_time - start_time)
-
 
 def start_currency_update():
     thread_update_currencies = threading.Thread(

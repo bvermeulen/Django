@@ -195,23 +195,23 @@ DEFAULT_FROM_EMAIL = '<noreply@howdiweb.nl>'
 EMAIL_SUBJECT_PREFIX = '[Howdiweb] '
 
 nl = '\n'
-logger.info(f'{nl}------------------------------------------------------------'\
-            f'{nl}        Howdimain version: {HOWDIMAIN_VERSION}'\
-            f'{nl}        Version date: {HOWDIMAIN_DATE}'\
-            f'{nl}        Author: {HOWDIMAIN_AUTHOR}'\
-            f"{nl}        Logfile: {config('LOG_FILE')}"\
-            f"{nl}        Debug: {config('DEBUG')}"\
-            f"{nl}        Alowed hosts: {ALLOWED_HOSTS}"\
+logger.info(f'{nl}------------------------------------------------------------'
+            f'{nl}        Howdimain version: {HOWDIMAIN_VERSION}'
+            f'{nl}        Version date: {HOWDIMAIN_DATE}'
+            f'{nl}        Author: {HOWDIMAIN_AUTHOR}'
+            f"{nl}        Logfile: {config('LOG_FILE')}"
+            f"{nl}        Debug: {config('DEBUG')}"
+            f"{nl}        Alowed hosts: {ALLOWED_HOSTS}"
             f'{nl}------------------------------------------------------------')
 
-logger.info(f"{nl}DB_NAME: {config('DB_NAME')}"\
-            f"{nl}DB_USER: {config('DB_USER')}"\
-            f"{nl}DB_PASSWORD: {'NOT SHOWN'}"\
-            f'{nl}EMAIL_BACKEND: {EMAIL_BACKEND}'\
-            f'{nl}EMAIL_HOST: {EMAIL_HOST}'\
-            f'{nl}EMAIL_PORT: {EMAIL_PORT}'\
-            f'{nl}EMAIL_HOST_USER: {EMAIL_HOST_USER}'\
-            f"{nl}EMAIL_HOST_PASSWORD: {'NOT SHOWN'}"\
-            f'{nl}EMAIL_USE_TLS: {EMAIL_USE_TLS}'\
-            f'{nl}IMGUR CLIENT ID: {MARTOR_IMGUR_CLIENT_ID}'\
+logger.info(f"{nl}DB_NAME: {config('DB_NAME')}"
+            f"{nl}DB_USER: {config('DB_USER')}"
+            f"{nl}DB_PASSWORD: {'NOT SHOWN'}"
+            f'{nl}EMAIL_BACKEND: {EMAIL_BACKEND}'
+            f'{nl}EMAIL_HOST: {EMAIL_HOST}'
+            f'{nl}EMAIL_PORT: {EMAIL_PORT}'
+            f'{nl}EMAIL_HOST_USER: {EMAIL_HOST_USER}'
+            f"{nl}EMAIL_HOST_PASSWORD: {'NOT SHOWN'}"
+            f'{nl}EMAIL_USE_TLS: {EMAIL_USE_TLS}'
+            f'{nl}IMGUR CLIENT ID: {MARTOR_IMGUR_CLIENT_ID}'
             f'{nl}------------------------------------------------------------')

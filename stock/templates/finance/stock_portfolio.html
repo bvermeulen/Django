@@ -28,36 +28,38 @@
         onclick="return AskNewName()">New portfolio</button>
       </div>
 
-      <div style="width:50%">
-        {{ form.portfolio_name }}
-        <button class="btn btn-outline-primary btn-sm" name="btn1_pressed"
-          value="rename_portfolio">Rename</button>
-        <button class="btn btn-primary btn-sm mr-5" name="btn1_pressed"
-          value="delete_portfolio"
-          onclick="return ConfirmDelete('{{ form.portfolio_name.value }}')">Delete</button>
-        {{ form.symbol }}
-        <button class="btn btn-outline-primary btn-sm" name="btn1_pressed"
-            value="add_new_symbol">Add symbol</button>
-      </div>
+      {% if form.portfolio_name.value is not None %}
+        <div style="width:50%">
+          {{ form.portfolio_name }}
+          <button class="btn btn-outline-primary btn-sm" name="btn1_pressed"
+            value="rename_portfolio">Rename</button>
+          <button class="btn btn-primary btn-sm mr-5" name="btn1_pressed"
+            value="delete_portfolio"
+            onclick="return ConfirmDelete('{{ form.portfolio_name.value }}')">Delete</button>
+          {{ form.symbol }}
+          <button class="btn btn-outline-primary btn-sm" name="btn1_pressed"
+              value="add_new_symbol">Add symbol</button>
+        </div>
 
-      <div style="width:38%">
-        <strong class="mr-2">Portfolio value:</strong>
-        <strong class="mr-2">{{ stocks_value }}</strong>
-        <div class="dropdown">
-          <button type="button" class="btn dropdown-toggle btn-outline-primary btn-sm">{{ form.currencies.value }}</button>
-          <div class="dropdown-content">
-            {% for currency in form.currencies %}
-                {% if not currency.data.selected %}
-                  <p>
-                  <button class="btn btn-link" value="{{ currency.data.value}}"
-                    name="{{ currency.data.name }}"><a>{{ currency.choice_label }}</a>
-                  </button>
-                  </p>
-                {% endif %}
-            {% endfor %}
+        <div style="width:38%">
+          <strong class="mr-2">Portfolio value:</strong>
+          <strong class="mr-2">{{ stocks_value }}</strong>
+          <div class="dropdown">
+            <button type="button" class="btn dropdown-toggle btn-outline-primary btn-sm">{{ form.currencies.value }}</button>
+            <div class="dropdown-content">
+              {% for currency in form.currencies %}
+                  {% if not currency.data.selected %}
+                    <p>
+                    <button class="btn btn-link" value="{{ currency.data.value}}"
+                      name="{{ currency.data.name }}"><a>{{ currency.choice_label }}</a>
+                    </button>
+                    </p>
+                  {% endif %}
+              {% endfor %}
+            </div>
           </div>
         </div>
-      </div>
+      {% endif %}
     </div>
 
     <div class="flex-container" style="height:70vh">

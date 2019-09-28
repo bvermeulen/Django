@@ -14,7 +14,7 @@ from stock.module_stock import WorldTradingData, start_currency_update
 
 logger = Logger.getlogger()
 d = Decimal
-start_currency_update()
+# start_currency_update()
 
 @method_decorator(login_required, name='dispatch')
 class PortfolioView(View):
@@ -25,17 +25,36 @@ class PortfolioView(View):
 
     def get(self, request):
         currency = request.session.get('currency', 'EUR')
-        request.session['selected_portfolio'] = None
+        portfolios = request.session.get('selected_portfolio', None)
+        user = request.user
+
+        portfolio_name = None
+        stocks_value = d(0)
+        stocks = []
+
+        if portfolios:
+            try:
+                self.portfolio = Portfolio.objects.get(
+                    user=user, portfolio_name=portfolios)
+                portfolio_name = self.portfolio.portfolio_name
+                stocks = self.get_stock_info('yes')
+                stocks_value = self.wtd.calculate_stocks_value(stocks, currency)
+
+            except Portfolio.DoesNotExist:
+                pass
+
+        else:
+            pass
 
         form = self.form_class(
             user=request.user,
             initial={'symbol': None,
-                     'portfolios': None,
+                     'portfolio_name': portfolio_name,
+                     'portfolios': portfolios,
                      'currencies': currency})
 
-        stocks_value = d(0)
         context = {'form': form,
-                   'stocks': [],
+                   'stocks': stocks,
                    'stocks_value': f'{stocks_value:,.2f}',
                   }
 
@@ -81,9 +100,9 @@ class PortfolioView(View):
                 elif self.btn2_pressed:
                     self.change_quantity_or_delete_symbol()
 
-            self.get_stock_info(self.get_stock)
-            stocks_value = self.wtd.calculate_stocks_value(self.stocks, currency)
-            request.session['stock_info'] = json.dumps(self.stocks, cls=DjangoJSONEncoder)
+            stocks = self.get_stock_info(self.get_stock)
+            stocks_value = self.wtd.calculate_stocks_value(stocks, currency)
+            request.session['stock_info'] = json.dumps(stocks, cls=DjangoJSONEncoder)
             request.session['selected_portfolio'] = self.selected_portfolio
             request.session['currency'] = currency
 
@@ -104,10 +123,10 @@ class PortfolioView(View):
                          'currencies': currency})
 
             stocks_value = d(0)
-            self.stocks = []
+            stocks = []
 
         context = {'form': form,
-                   'stocks': self.stocks,
+                   'stocks': stocks,
                    'stocks_value': f'{stocks_value:,.2f}'}
 
         return render(self.request, self.template_name, context)
@@ -127,6 +146,10 @@ class PortfolioView(View):
     def rename_or_delete_portfolio_or_add_stock(self):
         ''' actions when btn1 is pressed '''
         assert self.portfolio, "check existance of portfolio"
+
+        if not self.portfolio_name:
+            self.get_stock = 'no'
+            return
 
         if self.btn1_pressed == 'rename_portfolio':
             self.get_stock = 'no'
@@ -190,18 +213,18 @@ class PortfolioView(View):
 
     def get_stock_info(self, get_stock):
         ''' get stock info depending of get_stock status'''
-        self.stocks = []
+        stocks = []
         if self.portfolio:
 
             if get_stock == 'yes':
-                self.stocks = self.wtd.get_portfolio_stock_info(self.portfolio)
+                stocks = self.wtd.get_portfolio_stock_info(self.portfolio)
 
             elif get_stock == 'no':
                 try:
-                    self.stocks = json.loads(self.request.session.get('stock_info'))
+                    stocks = json.loads(self.request.session.get('stock_info'))
 
                 except TypeError:
-                    self.stocks = self.wtd.get_portfolio_stock_info(self.portfolio)
+                    stocks = self.wtd.get_portfolio_stock_info(self.portfolio)
 
             elif get_stock == 'empty':
                 pass
@@ -211,3 +234,5 @@ class PortfolioView(View):
 
         else:
             pass
+
+        return stocks

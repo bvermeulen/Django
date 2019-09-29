@@ -136,20 +136,20 @@ class WorldTradingData:
                   'sort': 'name',
                   'api_token': cls.api_token}
 
+        orig_stock_info = {}
         if stock_symbols:
             try:
                 res = requests.get(cls.stock_url, params=params)
                 if res:
                     orig_stock_info = res.json().get('data', {})
                 else:
-                    orig_stock_info = {}
+                    pass
 
             except requests.exceptions.ConnectionError:
-                orig_stock_info = {}
                 logger.info(f'connection error: {cls.stock_url} {params}')
 
         else:
-            orig_stock_info = {}
+            pass
 
         if len(stock_symbols) > MAX_SYMBOLS_ALLOWED:
             logger.info(f'warning - number of symbols exceed '
@@ -183,6 +183,8 @@ class WorldTradingData:
 
                 stock_info.append(stock)
 
+            stock_info = sorted(stock_info, key=lambda i: i['name'])
+
         return stock_info
 
     @classmethod
@@ -197,15 +199,15 @@ class WorldTradingData:
                   'sort': 'asc',
                   'api_token': cls.api_token}
 
+        intraday_info = {}
         try:
             res = requests.get(cls.intraday_url, params=params)
             if res:
                 intraday_info = res.json().get('intraday', {})
             else:
-                intraday_info = {}
+                pass
 
         except requests.exceptions.ConnectionError:
-            intraday_info = {}
             logger.info(f'connection error: {cls.intraday_url} {params}')
 
         # if there is intraday info, convert date string and provide time and
@@ -260,15 +262,15 @@ class WorldTradingData:
                   'sort': 'newest',
                   'api_token': cls.api_token}
 
+        history_info = {}
         try:
             res = requests.get(cls.history_url, params=params)
             if res:
                 history_info = res.json().get('history', {})
             else:
-                history_info = {}
+                pass
 
         except requests.exceptions.ConnectionError:
-            history_info = {}
             logger.info(f'connection error: {cls.history_url} {params}')
 
         # if there is intraday info, convert date string and provide date and
@@ -369,7 +371,10 @@ class WorldTradingData:
 
             stock_info.append(stock)
 
-        return sorted(stock_info, key=lambda i: i['name'])
+        if stock_info:
+            stock_info = sorted(stock_info, key=lambda i: i['name'])
+
+        return stock_info
 
     @classmethod
     def calculate_stocks_value(cls, stocks, currency):
@@ -401,15 +406,16 @@ class WorldTradingData:
     def update_currencies(cls):
         params = {'base': 'USD',
                   'api_token': cls.api_token}
+
+        forex_dict = {}
         try:
             res = requests.get(cls.forex_url, params=params)
             if res:
                 forex_dict = res.json().get('data', {})
             else:
-                forex_dict = {}
+                pass
 
         except requests.exceptions.ConnectionError:
-            forex_dict = {}
             logger.info(f'connection error: {cls.forex_url} {params}')
 
         if forex_dict:

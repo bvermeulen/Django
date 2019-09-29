@@ -41,7 +41,7 @@ class PortfolioView(View):
                 stocks_value = self.wtd.calculate_stocks_value(stocks, currency)
 
             except Portfolio.DoesNotExist:
-                pass
+                portfolios = None
 
         else:
             pass
@@ -87,10 +87,11 @@ class PortfolioView(View):
 
             if self.previous_selected != self.selected_portfolio:
                 self.get_stock = 'yes'
+
             else:
                 self.get_stock = 'no'
 
-            if self.new_portfolio != '':
+            if self.new_portfolio:
                 self.create_new_portfolio()
 
             if self.portfolio:
@@ -100,6 +101,11 @@ class PortfolioView(View):
                 elif self.btn2_pressed:
                     self.change_quantity_or_delete_symbol()
 
+                try:
+                    self.portfolio_name = self.portfolio.portfolio_name
+                except AttributeError:
+                    self.portfolio_name = None
+
             stocks = self.get_stock_info(self.get_stock)
             stocks_value = self.wtd.calculate_stocks_value(stocks, currency)
             request.session['stock_info'] = json.dumps(stocks, cls=DjangoJSONEncoder)
@@ -108,7 +114,7 @@ class PortfolioView(View):
 
             form = self.form_class(
                 user=self.user,
-                initial={'portfolio_name': self.selected_portfolio,
+                initial={'portfolio_name': self.portfolio_name,
                          'portfolios': self.selected_portfolio,
                          'symbol': self.symbol,
                          'currencies': currency})
@@ -118,8 +124,9 @@ class PortfolioView(View):
         else:
             form = self.form_class(
                 user=self.user,
-                initial={'portfolio_name': '',
-                         'symbol': '',
+                initial={'portfolios': None,
+                         'portfolio_name': None,
+                         'symbol': None,
                          'currencies': currency})
 
             stocks_value = d(0)
@@ -133,7 +140,7 @@ class PortfolioView(View):
 
     def create_new_portfolio(self):
 
-        if self.new_portfolio != '':
+        if self.new_portfolio:
             try:
                 self.portfolio = Portfolio.objects.create(
                     user=self.user, portfolio_name=self.new_portfolio)
@@ -167,7 +174,8 @@ class PortfolioView(View):
 
         elif self.btn1_pressed == 'delete_portfolio':
             self.portfolio.delete()
-            self.selected_portfolio = ''
+            self.portfolio = None
+            self.selected_portfolio = None
             self.get_stock = 'empty'
 
         elif self.btn1_pressed == 'add_new_symbol':

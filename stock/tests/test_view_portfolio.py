@@ -115,8 +115,22 @@ class TestPortfolioPost(PortfolioTestCase):
             portfolio_name
             symbol
         '''
+        session = self.client.session
+        session['selected_portfolio'] = 'test_portfolio'
+        session.save()
         response = self.client.get(reverse('portfolio'))
         self.assertContains(response, '<input', 4)
+
+    def test_correct_number_input_tags_non_exisistent_portfolio(self):
+        ''' 2 <input> tags to be found:
+            csrf token
+            new_portfolio
+        '''
+        session = self.client.session
+        session['selected_portfolio'] = 'i_do_not_exist'
+        session.save()
+        response = self.client.get(reverse('portfolio'))
+        self.assertContains(response, '<input', 2)
 
     def test_select_portfolio(self):
         self.data['portfolios'] = 'test_portfolio'
@@ -151,6 +165,7 @@ class TestPortfolioPost(PortfolioTestCase):
 
     def test_add_symbol(self):
         self.data['portfolios'] = 'test_portfolio'
+        self.data['portfolio_name'] = 'test_portfolio'
         self.data['btn1_pressed'] = 'add_new_symbol'
         self.data['symbol'] = 'RDSA.AS'
         response = self.client.post(reverse('portfolio'), self.data)

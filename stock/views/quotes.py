@@ -108,6 +108,9 @@ class QuoteView(View):
                 symbols = self.wtd.parse_stock_name(quote_string, markets=markets)
                 stock_info = self.wtd.get_stock_trade_info(symbols[0:20])
 
+            if stock_info:
+                stock_info = sorted(stock_info, key=lambda i: i['name'].lower())
+
             request.session['quote_string'] = quote_string
             request.session['markets'] = markets
             logger.info(f'user {request.user} [ip: {get_client_ip(request)}] looking '

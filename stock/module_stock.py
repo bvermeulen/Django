@@ -183,8 +183,6 @@ class WorldTradingData:
 
                 stock_info.append(stock)
 
-            stock_info = sorted(stock_info, key=lambda i: i['name'])
-
         return stock_info
 
     @classmethod
@@ -359,6 +357,10 @@ class WorldTradingData:
         stock_trade_info += cls.get_stock_trade_info(
             list_symbols[MAX_SYMBOLS_ALLOWED:2*MAX_SYMBOLS_ALLOWED])
 
+        if len(list_symbols) > 2 * MAX_SYMBOLS_ALLOWED:
+            logger.info(f'warning - number of symbols in portfolio exceed '
+                        f'maximum of {2 * MAX_SYMBOLS_ALLOWED}')
+
         stock_info = []
         for stock in stock_trade_info:
             stock['quantity'] = symbols_quantities[stock['symbol']]
@@ -372,7 +374,7 @@ class WorldTradingData:
             stock_info.append(stock)
 
         if stock_info:
-            stock_info = sorted(stock_info, key=lambda i: i['name'])
+            stock_info = sorted(stock_info, key=lambda i: i['name'].lower())
 
         return stock_info
 
@@ -453,7 +455,7 @@ def update_currencies_at_interval(interval=UPDATE_INTERVAL):
             logger.info(f'update currencies at {time_str}')
 
             # sleep one second to make sure update is only done once in a second
-            time.sleep(1)
+            time.sleep(5)
 
         current_time = time.time()
         elapsed_time = int(current_time - start_time)

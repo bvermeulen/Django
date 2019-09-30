@@ -1,10 +1,10 @@
 from django.contrib.auth.models import User
 from django.urls import reverse, resolve
 from django.test import TestCase
+from howdimain.html_utils import convert_string_to_html
 from ..views.mynewsitems import mynewsitems
 from ..models import NewsSite, UserNewsSite, UserNewsItem
 from ..module_news import update_news, feedparser_time_to_datetime
-
 
 class MyNewsSitesViewTests(TestCase):
 
@@ -93,7 +93,8 @@ class MyNewsSitesPostTests(TestCase):
         self.assertContains(self.response, f'href="{self.item_link}"')
 
     def test_display_of_item_title(self):
-        self.assertContains(self.response, self.item_title)
+        title = convert_string_to_html(self.item_title)
+        self.assertContains(self.response, title)
 
     def test_delete_news(self):
         data = {'deleted_item_pk': 1}

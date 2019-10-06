@@ -20,7 +20,6 @@ class Currency(models.Model):
         return self.currency
 
 
-
 class Stock(models.Model):
     symbol = models.CharField(max_length=20, unique=True)
     company = models.CharField(max_length=75, unique=False)

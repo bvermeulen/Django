@@ -160,8 +160,14 @@ class WorldTradingData:
         stock_info = []
         if orig_stock_info:
             for stock in orig_stock_info:
-                stock['last_trade_time'] = datetime.datetime.strptime(
-                    stock.get('last_trade_time'), "%Y-%m-%d %H:%M:%S")
+
+                # if there is no last_trade_time then skip this stock
+                try:
+                    stock['last_trade_time'] = datetime.datetime.strptime(
+                        stock.get('last_trade_time'), "%Y-%m-%d %H:%M:%S")
+
+                except ValueError:
+                    continue
 
                 try:
                     _ = float(stock.get('change_pct'))

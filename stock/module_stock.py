@@ -10,7 +10,7 @@ from django.contrib.auth.models import User
 from django.db.utils import IntegrityError
 from howdimain.utils.plogger import Logger
 from howdimain.utils.min_max import get_min, get_max
-from howdimain.howdimain_vars import MAX_SYMBOLS_ALLOWED, UPDATE_INTERVAL
+from howdimain.howdimain_vars import MAX_SYMBOLS_ALLOWED
 from .models import Exchange, Currency, Stock, Portfolio, StockSelection
 from .stock_lists import stock_lists
 
@@ -104,7 +104,6 @@ class WorldTradingData:
         cls.stock_url = 'https://api.worldtradingdata.com/api/v1/stock'
         cls.intraday_url = 'https://intraday.worldtradingdata.com/api/v1/intraday'
         cls.history_url = 'https://api.worldtradingdata.com/api/v1/history'
-        cls.forex_url = 'https://api.worldtradingdata.com/api/v1/forex'
 
     @staticmethod
     def get_schema(_format):
@@ -403,66 +402,3 @@ class WorldTradingData:
             assert False, f'incorrect currency used: {currency}'
 
         return total_value
-
-    @classmethod
-    def update_currencies(cls):
-        params = {'base': 'USD',
-                  'api_token': cls.api_token}
-
-        forex_dict = {}
-        try:
-            res = requests.get(cls.forex_url, params=params)
-            if res:
-                forex_dict = res.json().get('data', {})
-            else:
-                pass
-
-        except requests.exceptions.ConnectionError:
-            logger.info(f'connection error: {cls.forex_url} {params}')
-
-        if forex_dict:
-            for cur in Currency.objects.all().order_by('currency'):
-                currency_key = cur.currency
-                currency_object = Currency.objects.get(currency=currency_key)
-                usd_exchange_rate = forex_dict.get(currency_key, '')
-
-                if usd_exchange_rate:
-                    currency_object.usd_exchange_rate = usd_exchange_rate
-                    currency_object.save()
-        else:
-            logger.info(f'unable to get currency data for {cls.forex_url} {params}')
-
-
-def update_currencies_at_interval(interval=UPDATE_INTERVAL):
-    '''  update the currencies depending on interval in seconds
-         default value is 6 hours (21600 seconds)
-    '''
-    assert isinstance(interval, int), \
-           f'check interval setting {interval} must be an integer'
-
-    wtd = WorldTradingData()
-    wtd.setup()
-    start_time = time.time()
-    current_time = start_time
-    elapsed_time = int(current_time - start_time)
-
-    while True:
-        if elapsed_time % interval == 0:
-            wtd.update_currencies()
-
-            time_str = datetime.datetime.fromtimestamp(
-                current_time).strftime('%d-%m-%Y %H:%M:%S')
-            logger.info(f'update currencies at {time_str}')
-
-            # sleep one second to make sure update is only done once in a second
-            time.sleep(5)
-
-        current_time = time.time()
-        elapsed_time = int(current_time - start_time)
-
-def start_currency_update():
-    thread_update_currencies = threading.Thread(
-        target=update_currencies_at_interval, kwargs={'interval': UPDATE_INTERVAL})
-    thread_update_currencies.start()
-    logger.info(f'currency update thread '
-                f'{start_currency_update.__name__} has started ...')

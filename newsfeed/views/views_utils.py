@@ -1,3 +1,4 @@
+import re
 from recordtype import recordtype
 from django.core.exceptions import ObjectDoesNotExist
 from howdimain.utils.plogger import Logger
@@ -81,8 +82,21 @@ def create_news_context(ns, news_sites, feed_items):
     news_title = feed_items[ns.item].title
     news_link = feed_items[ns.item].link
     news_summary = feed_items[ns.item].summary
+
+    # fit images on the screen to have maximum width of 100%
+    if re.search(r'jpg&', news_summary):
+        pass
+
+    else:
+        if re.search(r'<img.*style="', news_summary):
+            news_summary = re.sub(r'style="', r'style="width:100%; ', news_summary)
+
+        else:
+            news_summary = news_summary.replace('<img ','<img style="width:100%" ')
+
     news_summary = remove_feedburner_reference(news_summary)
     news_summary_flat_text = remove_all_references(news_summary)
+
     if news_summary == news_title:
         news_summary = ''
         news_summary_flat_text = ''

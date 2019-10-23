@@ -55,6 +55,29 @@ def store_news_item(user, ns, feed_items, ip):
                     f'{usernewsitem.title[:15]}..., ip: {ip}')
 
 
+def add_width_to_img_tag(summary):
+    ''' to fit images on the screen they need a maximum width of 100%
+        there look for all img tags in the summary and insert width in the
+        style
+    '''
+    new_summary = summary
+    for img_tag_match in re.finditer(r'<img.*?>', summary):
+        img_tag = img_tag_match.group(0)
+
+        if re.search(r'jpg&', img_tag):
+            continue
+
+        if re.search(r'<img.*style="', img_tag):
+            new_img_tag = re.sub(r'style="', r'style="width:100%; ', img_tag)
+
+        else:
+            new_img_tag = re.sub(r'<img ', '<img style="width:100%" ', img_tag)
+
+        new_summary = re.sub(img_tag, new_img_tag, new_summary)
+
+    return new_summary
+
+
 def create_news_context(ns, news_sites, feed_items):
     ''' create news context to be rendered to newspage
         arguments:
@@ -82,18 +105,7 @@ def create_news_context(ns, news_sites, feed_items):
     news_title = feed_items[ns.item].title
     news_link = feed_items[ns.item].link
     news_summary = feed_items[ns.item].summary
-
-    # fit images on the screen to have maximum width of 100%
-    if re.search(r'jpg&', news_summary):
-        pass
-
-    else:
-        if re.search(r'<img.*style="', news_summary):
-            news_summary = re.sub(r'style="', r'style="width:100%; ', news_summary)
-
-        else:
-            news_summary = news_summary.replace('<img ','<img style="width:100%" ')
-
+    news_summary = add_width_to_img_tag(news_summary)
     news_summary = remove_feedburner_reference(news_summary)
     news_summary_flat_text = remove_all_references(news_summary)
 

@@ -1,7 +1,9 @@
+from pprint import pprint
 import re
 from recordtype import recordtype
 from django.core.exceptions import ObjectDoesNotExist
 from howdimain.utils.plogger import Logger
+from howdimain.howdimain_vars import IMG_WIDTH
 from ..models import NewsSite, UserNewsSite, UserNewsItem
 from ..module_news import (feedparser_time_to_datetime,
                            remove_feedburner_reference, remove_all_references,
@@ -60,6 +62,25 @@ def add_width_to_img_tag(summary):
         there look for all img tags in the summary and insert width in the
         style
     '''
+
+    # TODO check if there is already a width in the style
+    # and to check actual size of the picture
+    '''
+    from PIL import Image
+    import requests
+
+    url = 'https://a.thumbs.redditmedia.com/dt7igrh2wPL59urJlkoiNrSkyhKXEX4AfI13LfPxva8.jpg'
+
+    url = 'https://a.espncdn.com/photo/2019/0915/r598368_1296x729_16-9.jpg'
+
+    im = Image.open(requests.get(url, stream=True).raw)
+
+    width, height = im.size
+
+    print(f'width: {width}, height: {height}')
+')
+    '''
+
     new_summary = summary
     for img_tag_match in re.finditer(r'<img.*?>', summary):
         img_tag = img_tag_match.group(0)
@@ -68,10 +89,10 @@ def add_width_to_img_tag(summary):
             continue
 
         if re.search(r'<img.*style="', img_tag):
-            new_img_tag = re.sub(r'style="', r'style="width:100%; ', img_tag)
+            new_img_tag = re.sub(r'style="', f'style="width: {IMG_WIDTH}; ', img_tag)
 
         else:
-            new_img_tag = re.sub(r'<img ', '<img style="width:100%" ', img_tag)
+            new_img_tag = re.sub(r'<img ', f'<img style="width: {IMG_WIDTH}" ', img_tag)
 
         new_summary = re.sub(img_tag, new_img_tag, new_summary)
 
@@ -108,6 +129,8 @@ def create_news_context(ns, news_sites, feed_items):
     news_summary = add_width_to_img_tag(news_summary)
     news_summary = remove_feedburner_reference(news_summary)
     news_summary_flat_text = remove_all_references(news_summary)
+
+    pprint(news_summary)
 
     if news_summary == news_title:
         news_summary = ''

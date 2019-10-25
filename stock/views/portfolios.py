@@ -40,6 +40,8 @@ class PortfolioView(View):
                 stocks = self.get_stock_info('yes')
                 stocks_value = self.wtd.calculate_stocks_value(stocks, currency)
 
+                request.session['stock_info'] = json.dumps(stocks, cls=DjangoJSONEncoder)
+
             except Portfolio.DoesNotExist:
                 portfolios = None
 
@@ -51,7 +53,8 @@ class PortfolioView(View):
             initial={'symbol': None,
                      'portfolio_name': portfolio_name,
                      'portfolios': portfolios,
-                     'currencies': currency})
+                     'currencies': currency
+                    })
 
         context = {'form': form,
                    'stocks': stocks,
@@ -61,6 +64,8 @@ class PortfolioView(View):
         return render(request, self.template_name, context)
 
     def post(self, request):
+        # TODO add refresh button
+
         self.request = request
         self.user = self.request.user
         currency = request.session.get('currency', 'EUR')

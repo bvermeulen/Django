@@ -1,9 +1,14 @@
 from pprint import pprint
+import requests
 import re
 from recordtype import recordtype
+from PIL import Image
 from django.core.exceptions import ObjectDoesNotExist
 from howdimain.utils.plogger import Logger
-from howdimain.howdimain_vars import IMG_WIDTH
+from howdimain.howdimain_vars import (DELAY_FACTOR, MIN_CHARS, BANNER_LENGTH,
+                                      HELP_ARROWS, HELP_BANNER, IMG_WIDTH_PX,
+                                      IMG_WIDTH_PERC,
+                                     )
 from ..models import NewsSite, UserNewsSite, UserNewsItem
 from ..module_news import (feedparser_time_to_datetime,
                            remove_feedburner_reference, remove_all_references,
@@ -62,39 +67,32 @@ def add_width_to_img_tag(summary):
         there look for all img tags in the summary and insert width in the
         style
     '''
-
-    # TODO check if there is already a width in the style
-    # and to check actual size of the picture
-    '''
-    from PIL import Image
-    import requests
-
-    url = 'https://a.thumbs.redditmedia.com/dt7igrh2wPL59urJlkoiNrSkyhKXEX4AfI13LfPxva8.jpg'
-
-    url = 'https://a.espncdn.com/photo/2019/0915/r598368_1296x729_16-9.jpg'
-
-    im = Image.open(requests.get(url, stream=True).raw)
-
-    width, height = im.size
-
-    print(f'width: {width}, height: {height}')
-')
-    '''
-
     new_summary = summary
     for img_tag_match in re.finditer(r'<img.*?>', summary):
         img_tag = img_tag_match.group(0)
 
-        if re.search(r'jpg&', img_tag):
+        try:
+            source_file_url = re.match(r'^.*src="(.*?)".*$', img_tag).group(1)
+        except AttributeError:
             continue
 
-        if re.search(r'<img.*style="', img_tag):
-            new_img_tag = re.sub(r'style="', f'style="width: {IMG_WIDTH}; ', img_tag)
+        try:
+            im = Image.open(requests.get(source_file_url, stream=True).raw)
+            width, height = im.size
+        except:
+            continue
 
-        else:
-            new_img_tag = re.sub(r'<img ', f'<img style="width: {IMG_WIDTH}" ', img_tag)
+        if width > IMG_WIDTH_PX:
+            if re.search(r'jpg&', img_tag):
+                continue
 
-        new_summary = re.sub(img_tag, new_img_tag, new_summary)
+            if re.search(r'<img.*style="', img_tag):
+                new_img_tag = re.sub(r'style="', f'style="width: {IMG_WIDTH_PERC}; ', img_tag)
+
+            else:
+                new_img_tag = re.sub(r'<img ', f'<img style="width: {IMG_WIDTH_PERC}" ', img_tag)
+
+            new_summary = re.sub(img_tag, new_img_tag, new_summary)
 
     return new_summary
 
@@ -107,12 +105,6 @@ def create_news_context(ns, news_sites, feed_items):
         return:
         :context: dict with newspage items
     '''
-    DELAY_FACTOR = 35
-    MIN_CHARS = 350
-    BANNER_LENGTH = 150
-    HELP_ARROWS = 'Use left/ right arrow to toggle news items. '
-    HELP_BANNER = 'Press Banner to toggle banner on/ off. '
-
     news_published = feedparser_time_to_datetime(feed_items[ns.item])
 
     reference_text = ''.join([
@@ -129,8 +121,6 @@ def create_news_context(ns, news_sites, feed_items):
     news_summary = add_width_to_img_tag(news_summary)
     news_summary = remove_feedburner_reference(news_summary)
     news_summary_flat_text = remove_all_references(news_summary)
-
-    pprint(news_summary)
 
     if news_summary == news_title:
         news_summary = ''

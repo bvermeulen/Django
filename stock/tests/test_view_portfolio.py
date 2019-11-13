@@ -179,8 +179,12 @@ class TestPortfolioPost(PortfolioTestCase):
         self.data['portfolios'] = 'test_portfolio'
         self.data['btn1_pressed'] = 'add_new_symbol'
         self.data['symbol'] = 'HAHAHA'
+        stocks_portfolio_db = Portfolio.objects.filter(
+            user=self.test_user, portfolio_name='test_portfolio').first().stocks.all()
+        self.assertEqual(1, len(stocks_portfolio_db))
+        self.assertEqual('AAPL', stocks_portfolio_db[0].stock.symbol)
         response = self.client.post(reverse('portfolio'), self.data)
-        self.assertEqual(1, len(response.context['stocks']))
+        self.assertEqual(0, len(response.context['stocks']))
 
     def test_change_quantity(self):
         self.data['portfolios'] = 'test_portfolio'
@@ -210,9 +214,11 @@ class TestPortfolioPost(PortfolioTestCase):
         response = self.client.post(reverse('portfolio'), self.data)
 
         stocks_value = d(response.context['stocks_value'].replace(',', ''))
-        stock = response.context['stocks'][0]
-        value_eur = ((d(stock['quantity']) * d(stock['price'].replace(',', ''))) *
-                     d(self.eur.usd_exchange_rate))
+
+        value_eur = 0
+        for stock in response.context['stocks']:
+            value_eur += d(stock['amount'].replace(',', ''))
+
         self.assertEqual(stocks_value.quantize(d('0.01')), value_eur.quantize(d('0.01')))
 
     def test_portfolio_usd_value(self):
@@ -221,8 +227,17 @@ class TestPortfolioPost(PortfolioTestCase):
         response = self.client.post(reverse('portfolio'), self.data)
 
         stocks_value = d(response.context['stocks_value'].replace(',', ''))
-        stock = response.context['stocks'][0]
-        value_usd = d(stock['quantity']) * d(stock['price'].replace(',', ''))
+
+        value_usd = 0
+        for stock in response.context['stocks']:
+            value_usd += d(stock['quantity']) * d(stock['price'].replace(',', ''))
+
+        if value_usd > 1000:
+            value_usd = d(f'{value_usd:.0f}')
+
+        else:
+            value_usd = d(f'{value_usd:.2f}')
+
         self.assertEqual(stocks_value.quantize(d('0.01')), value_usd.quantize(d('0.01')))
 
     def test_create_html(self):

@@ -6,10 +6,12 @@ from django.views.generic import View
 from stock.forms import StockQuoteForm
 from stock.models import Stock, Portfolio
 from stock.module_stock import WorldTradingData
+from howdimain.howdimain_vars import CARET_UP, CARET_DOWN, CARET_NO_CHANGE
 from howdimain.utils.fusioncharts import FusionCharts, FusionTable, TimeSeries
 from howdimain.utils.plogger import Logger
 from howdimain.utils.get_ip import get_client_ip
 from howdimain.utils.min_max import get_min, get_max
+from howdimain.utils.tokens import add_display_tokens
 
 
 font_red = 'red'  #  '#FF3333'
@@ -109,6 +111,7 @@ class QuoteView(View):
                 stock_info = self.wtd.get_stock_trade_info(symbols[0:20])
 
             if stock_info:
+                stock_info = add_display_tokens(stock_info)
                 stock_info = sorted(stock_info, key=lambda i: i['name'].lower())
 
             request.session['quote_string'] = quote_string
@@ -176,13 +179,13 @@ class IntraDayView(View):
         if initial_open and latest_close and prc_change:
             if abs(float(prc_change)) < 0.01:
                 txt_color = 'txt_normal'
-                caret = self.wtd.rectangle
+                caret = CARET_NO_CHANGE
             elif float(prc_change) < 0:
                 txt_color = 'txt_red'
-                caret = self.wtd.down_triangle
+                caret = CARET_DOWN
             else:
                 txt_color = 'txt_green'
-                caret = self.wtd.up_triangle
+                caret = CARET_UP
 
             subcaption = ''.join([Stock.objects.get(symbol=symbol).currency.currency,
                                   f' {float(latest_close):.2f} ({prc_change:.1f}%)',

@@ -94,10 +94,6 @@ class WorldTradingData:
     ''' methods to handle trading data
         website: https://www.worldtradingdata.com
     '''
-    up_triangle = '\u25B2'    # black up triangle
-    down_triangle = '\u25BC'  # black down triangle
-    rectangle = '\u25AC'      # black rectangle
-
     @classmethod
     def setup(cls,):
         cls.api_token = config('API_token')
@@ -154,39 +150,18 @@ class WorldTradingData:
             logger.info(f'warning - number of symbols exceed '
                         f'maximum of {MAX_SYMBOLS_ALLOWED}')
 
-        # if there is stock info, convert date string to datetime object
-        # and add display attributes
+        # convert date string to datetime object
+        # if there is no last_trade_time then skip this stock
         stock_info = []
-        if orig_stock_info:
-            for stock in orig_stock_info:
-
-                # if there is no last_trade_time then skip this stock
-                try:
-                    stock['last_trade_time'] = datetime.datetime.strptime(
-                        stock.get('last_trade_time'), "%Y-%m-%d %H:%M:%S")
-
-                except ValueError:
-                    continue
-
-                try:
-                    _ = float(stock.get('change_pct'))
-
-                except ValueError:
-                    stock['change_pct'] = '0'
-
-                if abs(float(stock.get('change_pct'))) < 0.001:
-                    stock['font_color'] = 'black'
-                    stock['caret_up_down'] = cls.rectangle
-
-                elif float(stock.get('change_pct')) < 0:
-                    stock['font_color'] = 'red'
-                    stock['caret_up_down'] = cls.down_triangle
-
-                else:
-                    stock['font_color'] = 'green'
-                    stock['caret_up_down'] = cls.up_triangle
+        for stock in orig_stock_info:
+            try:
+                stock['last_trade_time'] = datetime.datetime.strptime(
+                    stock.get('last_trade_time'), "%Y-%m-%d %H:%M:%S")
 
                 stock_info.append(stock)
+
+            except ValueError:
+                continue
 
         return stock_info
 
@@ -353,8 +328,8 @@ class WorldTradingData:
         return list(stock_symbols)
 
     @classmethod
-    def get_portfolio_stock_info(cls, portfolio):
-        symbols_quantities = {stock.stock.symbol: stock.quantity \
+    def get_portfolio_stock_info(cls, portfolio, base_currency):
+        symbols_quantities = {stock.stock.symbol: stock.quantity
             for stock in portfolio.stocks.all()}
         list_symbols = list(symbols_quantities.keys())
         stock_trade_info = cls.get_stock_trade_info(
@@ -366,15 +341,36 @@ class WorldTradingData:
             logger.info(f'warning - number of symbols in portfolio exceed '
                         f'maximum of {2 * MAX_SYMBOLS_ALLOWED}')
 
+        exchange_rate_euro = Currency.objects.get(
+            currency='EUR').usd_exchange_rate
+
         stock_info = []
         for stock in stock_trade_info:
             stock['quantity'] = symbols_quantities[stock['symbol']]
 
+            exchange_rate = Currency.objects.get(
+                currency=stock['currency']).usd_exchange_rate
+
             try:
-                stock['amount'] = f'{d(stock["quantity"]) * d(stock["price"]):,.2f}'
+                amount = d(stock["quantity"]) * d(stock["price"]) / d(exchange_rate)
 
             except NameError:
-                stock['amount'] = 'n/a'
+                amount = 'n/a'
+
+            if base_currency == 'USD' or amount == 'n/a':
+                pass
+
+            elif base_currency == 'EUR':
+                amount *= d(exchange_rate_euro)
+
+            else:
+                logger.warn(f'Invalid base currency {base_currency}')
+
+            if d(amount) > 1000:
+                stock['amount'] = f'{amount:,.0f}'
+
+            else:
+                stock['amount'] = f'{amount:,.2f}'
 
             stock_info.append(stock)
 
@@ -384,7 +380,7 @@ class WorldTradingData:
         return stock_info
 
     @classmethod
-    def calculate_stocks_value(cls, stocks, currency):
+    def calculate_stocks_value(cls, stocks, base_currency):
         total_value = d('0')
         if not stocks:
             return total_value
@@ -396,15 +392,21 @@ class WorldTradingData:
             usd_value = d(base_value) / d(exchange_rate)
             total_value += usd_value
 
-        if currency == 'USD':
+        if base_currency == 'USD':
             pass
 
-        elif currency == 'EUR':
+        elif base_currency == 'EUR':
             exchange_rate_euro = Currency.objects.get(
                 currency='EUR').usd_exchange_rate
             total_value *= d(exchange_rate_euro)
 
         else:
-            assert False, f'incorrect currency used: {currency}'
+            logger.warn(f'incorrect currency used: {base_currency}')
+
+        if d(total_value) > 1000:
+            total_value = f'{total_value:,.0f}'
+
+        else:
+            total_value = f'{total_value:,.2f}'
 
         return total_value

@@ -16,6 +16,7 @@ from stock.module_stock import WorldTradingData
 
 logger = Logger.getlogger()
 d = Decimal
+source = 'portfolio'
 
 
 class GetStock(Enum):
@@ -70,6 +71,7 @@ class PortfolioView(View):
         context = {'form': form,
                    'stocks': stocks,
                    'stocks_value': stocks_value,
+                   'source': source,
                   }
 
         return render(request, self.template_name, context)
@@ -163,7 +165,8 @@ class PortfolioView(View):
         stocks = format_amount_stocks(stocks)
         context = {'form': form,
                    'stocks': stocks,
-                   'stocks_value': stocks_value,}
+                   'stocks_value': stocks_value,
+                   'source': source,}
 
         return render(self.request, self.template_name, context)
 

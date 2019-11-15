@@ -71,7 +71,7 @@
     <tbody class="scroll">
     {% for stock in stock_info %}
       <tr>
-        <td colspan="2"><a href="{% url 'stock_intraday' stock.symbol %}">{{ stock.name|truncatechars:18 }}</a></td>
+        <td colspan="2"><a href="{% url 'stock_intraday' source stock.symbol %}">{{ stock.name|truncatechars:18 }}</a></td>
         <td colspan="1">{{ stock.symbol }}</td>
         <td colspan="1">{{ stock.stock_exchange_short }}</td>
         <td colspan="1">{{ stock.currency }}</td>

@@ -109,7 +109,7 @@ class PortfolioView(View):
 
             except Portfolio.DoesNotExist:
                 self.portfolio = None
-                selected_portfolio = ''
+                self.selected_portfolio = ''
                 self.btn1_pressed = ''
                 self.btn2_pressed = ''
                 get_stock = GetStock.EMPTY
@@ -193,7 +193,7 @@ class PortfolioView(View):
 
     def rename_or_delete_portfolio_or_add_stock(self):
         ''' actions when btn1 is pressed '''
-        logger.warn(f'{self.portfolio}: check existance of portfolio')
+        logger.warning(f'{self.portfolio}: check existance of portfolio')
 
         if not self.portfolio_name:
             return GetStock.NO
@@ -232,13 +232,13 @@ class PortfolioView(View):
                 get_stock = GetStock.NO
 
         else:
-            logger.warn(f'Invalid value btn1_pressed: {self.btn1_pressed}')
+            logger.warning(f'Invalid value btn1_pressed: {self.btn1_pressed}')
 
         return get_stock
 
     def change_quantity_or_delete_symbol(self):
         ''' actions when btn 2 is pressed '''
-        logger.warn(f'{self.portfolio}: check existance of portfolio')
+        logger.warning(f'{self.portfolio}: check existance of portfolio')
 
         try:
             symbol, quantity = self.btn2_pressed.split(',')
@@ -259,7 +259,7 @@ class PortfolioView(View):
             get_stock = GetStock.YES
 
         else:
-            logger.warn(f'Invalid value of btn2_pressed: {self.btn2_pressed}')
+            logger.warning(f'Invalid value of btn2_pressed: {self.btn2_pressed}')
 
         return get_stock
 
@@ -283,7 +283,7 @@ class PortfolioView(View):
                 pass
 
             else:
-                logger.warn(f'invalid selection for get_stock: {get_stock}')
+                logger.warning(f'invalid selection for get_stock: {get_stock}')
 
         else:
             # stocks is empty list already fullfilled

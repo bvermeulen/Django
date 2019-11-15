@@ -3,7 +3,7 @@ from django.contrib.auth.models import User
 from django.shortcuts import render
 from django.views.generic import View
 from stock.forms import StockQuoteForm
-from stock.models import Stock, Portfolio
+from stock.models import Portfolio
 from stock.module_stock import WorldTradingData
 from howdimain.utils.get_ip import get_client_ip
 from howdimain.utils.format_and_tokens import add_display_tokens

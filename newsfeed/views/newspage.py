@@ -38,7 +38,7 @@ def newspage(request):
     elif button_cntr == cntr.store:
         pass
     else:
-        assert False, 'button value incorrect: check template'
+        logger.warn(f'ValueError {button_cntr}: check template')
 
     if ns.news_items != 0:
         ns.item = ns.item % ns.news_items

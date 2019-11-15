@@ -28,7 +28,7 @@
         onclick="return AskNewName()">New portfolio</button>
       </div>
 
-      {% if form.portfolio_name.value is not None %}
+      {% if form.portfolio_name.value != '' %}
         <div style="width:50%">
           {{ form.portfolio_name }}
           <button class="btn btn-outline-primary btn-sm" name="btn1_pressed"

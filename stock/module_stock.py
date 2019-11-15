@@ -366,11 +366,7 @@ class WorldTradingData:
             else:
                 logger.warn(f'Invalid base currency {base_currency}')
 
-            if d(amount) > 1000:
-                stock['amount'] = f'{amount:,.0f}'
-
-            else:
-                stock['amount'] = f'{amount:,.2f}'
+            stock['amount'] = str(amount)
 
             stock_info.append(stock)
 
@@ -381,10 +377,10 @@ class WorldTradingData:
 
     @classmethod
     def calculate_stocks_value(cls, stocks, base_currency):
-        total_value = d('0')
         if not stocks:
-            return total_value
+            return '0.00'
 
+        total_value = d('0')
         for stock in stocks:
             base_value = d(stock['quantity']) * d(stock['price'])
             exchange_rate = Currency.objects.get(
@@ -403,10 +399,4 @@ class WorldTradingData:
         else:
             logger.warn(f'incorrect currency used: {base_currency}')
 
-        if d(total_value) > 1000:
-            total_value = f'{total_value:,.0f}'
-
-        else:
-            total_value = f'{total_value:,.2f}'
-
-        return total_value
+        return str(total_value)

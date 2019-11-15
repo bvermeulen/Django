@@ -11,7 +11,7 @@ from howdimain.utils.fusioncharts import FusionCharts, FusionTable, TimeSeries
 from howdimain.utils.plogger import Logger
 from howdimain.utils.get_ip import get_client_ip
 from howdimain.utils.min_max import get_min, get_max
-from howdimain.utils.tokens import add_display_tokens
+from howdimain.utils.format_and_tokens import add_display_tokens
 
 
 font_red = 'red'  #  '#FF3333'

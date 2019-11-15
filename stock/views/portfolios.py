@@ -1,4 +1,5 @@
 import json
+from enum import Enum
 from decimal import Decimal
 from django.core.serializers.json import DjangoJSONEncoder
 from django.contrib.auth.decorators import login_required
@@ -8,12 +9,20 @@ from django.utils.decorators import method_decorator
 from django.db.utils import IntegrityError
 from howdimain.utils.plogger import Logger
 from howdimain.utils.get_ip import get_client_ip
+from howdimain.utils.format_and_tokens import format_decimal_number, format_amount_stocks
 from stock.forms import PortfolioForm
 from stock.models import Stock, Portfolio, StockSelection
 from stock.module_stock import WorldTradingData
 
 logger = Logger.getlogger()
 d = Decimal
+
+
+class GetStock(Enum):
+    NO = 0
+    YES = 1
+    EMPTY = 3
+
 
 @method_decorator(login_required, name='dispatch')
 class PortfolioView(View):
@@ -25,11 +34,11 @@ class PortfolioView(View):
 
     def get(self, request):
         currency = request.session.get('currency', 'EUR')
-        portfolios = request.session.get('selected_portfolio', None)
+        portfolios = request.session.get('selected_portfolio', '')
         user = request.user
 
-        portfolio_name = None
-        stocks_value = d(0)
+        portfolio_name = ''
+        stocks_value = '0'
         stocks = []
 
         if portfolios:
@@ -37,25 +46,27 @@ class PortfolioView(View):
                 self.portfolio = Portfolio.objects.get(
                     user=user, portfolio_name=portfolios)
                 portfolio_name = self.portfolio.portfolio_name
-                stocks = self.get_stock_info('yes', currency)
+                stocks = self.get_stock_info(GetStock.YES, currency)
                 stocks_value = self.wtd.calculate_stocks_value(stocks, currency)
 
                 request.session['stock_info'] = json.dumps(stocks, cls=DjangoJSONEncoder)
 
             except Portfolio.DoesNotExist:
-                portfolios = None
+                portfolios = ''
 
         else:
             pass
 
         form = self.form_class(
             user=request.user,
-            initial={'symbol': None,
+            initial={'symbol': '',
                      'portfolio_name': portfolio_name,
                      'portfolios': portfolios,
                      'currencies': currency
                     })
 
+        stocks_value = format_decimal_number(stocks_value)
+        stocks = format_amount_stocks(stocks)
         context = {'form': form,
                    'stocks': stocks,
                    'stocks_value': stocks_value,
@@ -68,7 +79,7 @@ class PortfolioView(View):
 
         self.request = request
         self.user = self.request.user
-        previous_currency = request.session.get('currency', 'EUR')
+        currency = request.session.get('currency', 'EUR')
 
         form = self.form_class(self.request.POST, user=self.user)
         if form.is_valid():
@@ -77,10 +88,18 @@ class PortfolioView(View):
             self.selected_portfolio = form_data.get('portfolios')
             self.portfolio_name = form_data.get('portfolio_name')
             self.new_portfolio = form_data.get('new_portfolio')
-            self.symbol = form_data.get('symbol')
+            self.symbol = form_data.get('symbol').upper()
             self.btn1_pressed = form_data.get('btn1_pressed')
             self.btn2_pressed = form_data.get('btn2_pressed')
             self.previous_selected = request.session.get('selected_portfolio')
+            previous_currency = request.session.get('currency')
+
+            if (self.previous_selected != self.selected_portfolio or
+                    previous_currency != currency):
+                get_stock = GetStock.YES
+
+            else:
+                get_stock = GetStock.NO
 
             try:
                 self.portfolio = Portfolio.objects.get(
@@ -88,29 +107,30 @@ class PortfolioView(View):
 
             except Portfolio.DoesNotExist:
                 self.portfolio = None
-                self.get_stock = 'empty'
-
-            if (self.previous_selected != self.selected_portfolio or
-                    previous_currency != currency):
-                get_stock = 'yes'
-
-            else:
-                get_stock = 'no'
+                selected_portfolio = ''
+                self.btn1_pressed = ''
+                self.btn2_pressed = ''
+                get_stock = GetStock.EMPTY
 
             if self.new_portfolio:
                 get_stock = self.create_new_portfolio()
 
-            if self.portfolio:
-                if self.btn1_pressed:
-                    get_stock = self.rename_or_delete_portfolio_or_add_stock()
+            elif self.btn1_pressed:
+                get_stock = self.rename_or_delete_portfolio_or_add_stock()
 
-                elif self.btn2_pressed:
-                    get_stock = self.change_quantity_or_delete_symbol()
+            elif self.btn2_pressed:
+                get_stock = self.change_quantity_or_delete_symbol()
 
-                try:
-                    self.portfolio_name = self.portfolio.portfolio_name
-                except AttributeError:
-                    self.portfolio_name = None
+            else:
+                pass
+
+            # set portfolio name except if the portfolio has been deleted or
+            # does not exist
+            try:
+                self.portfolio_name = self.portfolio.portfolio_name
+
+            except AttributeError:
+                self.portfolio_name = ''
 
             stocks = self.get_stock_info(get_stock, currency)
             stocks_value = self.wtd.calculate_stocks_value(stocks, currency)
@@ -131,14 +151,16 @@ class PortfolioView(View):
         else:
             form = self.form_class(
                 user=self.user,
-                initial={'portfolios': None,
-                         'portfolio_name': None,
-                         'symbol': None,
+                initial={'portfolios': '',
+                         'portfolio_name': '',
+                         'symbol': '',
                          'currencies': currency})
 
-            stocks_value = d(0)
+            stocks_value = '0'
             stocks = []
 
+        stocks_value = format_decimal_number(stocks_value)
+        stocks = format_amount_stocks(stocks)
         context = {'form': form,
                    'stocks': stocks,
                    'stocks_value': stocks_value,}
@@ -146,30 +168,35 @@ class PortfolioView(View):
         return render(self.request, self.template_name, context)
 
     def create_new_portfolio(self):
+        try:
+            self.portfolio = Portfolio.objects.create(
+                user=self.user, portfolio_name=self.new_portfolio)
+            self.selected_portfolio = self.new_portfolio
+            get_stock = GetStock.EMPTY
 
-        if self.new_portfolio:
-            try:
-                self.portfolio = Portfolio.objects.create(
-                    user=self.user, portfolio_name=self.new_portfolio)
-                self.selected_portfolio = self.new_portfolio
-                get_stock = 'empty'
+        except IntegrityError:
+            # patch in case initial choice portfolios is None then for some reason
+            # choicefield will return the first option. In that case reset all
+            if not self.previous_selected:
+                self.portfolio = None
+                self.selected_portfolio = self.previous_selected
+                get_stock = GetStock.EMPTY
 
-            except IntegrityError:
-                get_stock = 'no'
-                pass
+            else:
+                self.new_portfolio = ''
+                get_stock = GetStock.NO
 
         return get_stock
 
     def rename_or_delete_portfolio_or_add_stock(self):
         ''' actions when btn1 is pressed '''
-        assert self.portfolio, "check existance of portfolio"
+        logger.warn(f'{self.portfolio}: check existance of portfolio')
 
         if not self.portfolio_name:
-            get_stock = 'no'
-            return
+            return GetStock.NO
 
         if self.btn1_pressed == 'rename_portfolio':
-            get_stock = 'no'
+            get_stock = GetStock.NO
             if self.portfolio_name != self.selected_portfolio:
 
                 try:
@@ -185,8 +212,9 @@ class PortfolioView(View):
         elif self.btn1_pressed == 'delete_portfolio':
             self.portfolio.delete()
             self.portfolio = None
-            self.selected_portfolio = None
-            get_stock = 'empty'
+            self.selected_portfolio = ''
+            self.portfolio_name = ''
+            get_stock = GetStock.EMPTY
 
         elif self.btn1_pressed == 'add_new_symbol':
             try:
@@ -195,10 +223,10 @@ class PortfolioView(View):
                     quantity=0,
                     portfolio=self.portfolio)
                 self.symbol = ''
-                get_stock = 'yes'
+                get_stock = GetStock.YES
 
             except (Stock.DoesNotExist, IntegrityError):
-                get_stock = 'no'
+                get_stock = GetStock.NO
 
         else:
             logger.warn(f'Invalid value btn1_pressed: {self.btn1_pressed}')
@@ -207,7 +235,7 @@ class PortfolioView(View):
 
     def change_quantity_or_delete_symbol(self):
         ''' actions when btn 2 is pressed '''
-        assert self.portfolio, "check existance of portfolio"
+        logger.warn(f'{self.portfolio}: check existance of portfolio')
 
         try:
             symbol, quantity = self.btn2_pressed.split(',')
@@ -215,18 +243,17 @@ class PortfolioView(View):
             quantity = quantity.strip()
 
         except ValueError:
-            get_stock = 'no'
-            return
+            return GetStock.NO
 
         if quantity != 'delete':
             stock = self.portfolio.stocks.get(stock__symbol=symbol)
             stock.quantity = quantity
             stock.save()
-            get_stock = 'yes'
+            get_stock = GetStock.YES
 
         elif quantity == 'delete':
             self.portfolio.stocks.get(stock__symbol=symbol).delete()
-            get_stock = 'yes'
+            get_stock = GetStock.YES
 
         else:
             logger.warn(f'Invalid value of btn2_pressed: {self.btn2_pressed}')
@@ -238,23 +265,25 @@ class PortfolioView(View):
         stocks = []
         if self.portfolio:
 
-            if get_stock == 'yes':
+            if get_stock == GetStock.YES:
                 stocks = self.wtd.get_portfolio_stock_info(self.portfolio, currency)
 
-            elif get_stock == 'no':
+            elif get_stock == GetStock.NO:
                 try:
                     stocks = json.loads(self.request.session.get('stock_info'))
 
                 except TypeError:
                     stocks = self.wtd.get_portfolio_stock_info(self.portfolio, currency)
 
-            elif get_stock == 'empty':
+            elif get_stock == GetStock.EMPTY:
+                # stocks is empty list already fullfilled
                 pass
 
             else:
                 logger.warn(f'invalid selection for get_stock: {get_stock}')
 
         else:
+            # stocks is empty list already fullfilled
             pass
 
         return stocks

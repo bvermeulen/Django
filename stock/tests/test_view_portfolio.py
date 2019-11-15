@@ -1,3 +1,4 @@
+from pprint import pprint
 from decimal import Decimal
 from django.contrib.auth.models import User
 from django.urls import reverse, resolve
@@ -184,7 +185,7 @@ class TestPortfolioPost(PortfolioTestCase):
         self.assertEqual(1, len(stocks_portfolio_db))
         self.assertEqual('AAPL', stocks_portfolio_db[0].stock.symbol)
         response = self.client.post(reverse('portfolio'), self.data)
-        self.assertEqual(0, len(response.context['stocks']))
+        self.assertEqual(1, len(response.context['stocks']))
 
     def test_change_quantity(self):
         self.data['portfolios'] = 'test_portfolio'

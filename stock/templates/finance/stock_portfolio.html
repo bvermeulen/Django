@@ -88,6 +88,7 @@
               <th colspan="3">Company</th>
               <th colspan="2">Symbol</th>
               <th colspan="2">Currency</th>
+              <th style="width:2vw"></th>
               <th colspan="2">Price</th>
               <th colspan="2">Qty</th>
               <th colspan="2">Amount ({{form.currencies.value}})</th>
@@ -98,12 +99,13 @@
           <tbody class="scroll">
             {% for stock in stocks %}
               <tr>
-                <td colspan="3">{{ stock.name|truncatechars:15 }}</td>
+                <td colspan="3"><a href="{% url 'stock_intraday' source stock.symbol %}">{{ stock.name|truncatechars:15 }}</a></td>
                 <td colspan="2">{{ stock.symbol }}</td>
                 <td colspan="2">{{ stock.currency }}</td>
-                <td colspan="2">{{ stock.price }}</td>
-                <td colspan="2">{{ stock.quantity }}</td>
-                <td colspan="2">{{ stock.amount }}</td>
+                <td style="width:2vw; color:{{ stock.font_color }}">{{ stock.caret_up_down }}</td>
+                <td colspan="2" style="color:{{ stock.font_color }}">{{ stock.price }}</td>
+                <td colspan="2" style="color:{{ stock.font_color }}">{{ stock.quantity }}</td>
+                <td colspan="2" style="color:{{ stock.font_color }}">{{ stock.amount }}</td>
                 <td colspan="2">
                   <button class="btn btn-outline-secondary btn-sm" name="btn2_pressed"
                           value="{{ stock.symbol }}, "

@@ -175,6 +175,12 @@ class TestPortfolioPost(PortfolioTestCase):
         self.assertEqual('RDSA.AS', stocks_portfolio_db[1].stock.symbol)
         self.assertEqual('RDSA.AS', response.context['stocks'][1]['symbol'])
 
+    def test_link_to_intraday_view(self):
+        self.data['portfolios'] = 'test_portfolio'
+        self.data['portfolio_name'] = 'test_portfolio'
+        response = self.client.post(reverse('portfolio'), self.data)
+        self.assertContains(response, 'href="/finance/stock_intraday/portfolio/AAPL/"')
+
     def test_add_invalid_symbol(self):
         self.data['portfolios'] = 'test_portfolio'
         self.data['btn1_pressed'] = 'add_new_symbol'

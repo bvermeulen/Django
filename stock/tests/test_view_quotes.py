@@ -100,7 +100,7 @@ class QuotesViewTestCase(QuotesTestCase):
         response = self.client.post(url, data)
         self.assertEqual('WKL.AS', response.context['stock_info'][0]['symbol'])
 
-    def test_valid_quote_string_has_a_to_intraday_view(self):
+    def test_valid_quote_string_has_a_link_to_intraday_view(self):
         data = {'markets': ['AEX'],
                 'quote_string': 'kluwer'}
         url = reverse('stock_quotes')

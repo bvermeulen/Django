@@ -1,7 +1,6 @@
+import decimal
 from decimal import Decimal as d
-import threading
 import datetime
-import time
 import csv
 from collections import namedtuple
 from decouple import config
@@ -330,7 +329,7 @@ class WorldTradingData:
     @classmethod
     def get_portfolio_stock_info(cls, portfolio, base_currency):
         symbols_quantities = {stock.stock.symbol: stock.quantity
-            for stock in portfolio.stocks.all()}
+                              for stock in portfolio.stocks.all()}
         list_symbols = list(symbols_quantities.keys())
         stock_trade_info = cls.get_stock_trade_info(
             list_symbols[0:MAX_SYMBOLS_ALLOWED])
@@ -354,7 +353,7 @@ class WorldTradingData:
             try:
                 amount = d(stock["quantity"]) * d(stock["price"]) / d(exchange_rate)
 
-            except NameError:
+            except (NameError, decimal.InvalidOperation):
                 amount = 'n/a'
 
             if base_currency == 'USD' or amount == 'n/a':
@@ -364,7 +363,7 @@ class WorldTradingData:
                 amount *= d(exchange_rate_euro)
 
             else:
-                logger.warn(f'Invalid base currency {base_currency}')
+                logger.warning(f'Invalid base currency {base_currency}')
 
             stock['amount'] = str(amount)
 
@@ -382,7 +381,12 @@ class WorldTradingData:
 
         total_value = d('0')
         for stock in stocks:
-            base_value = d(stock['quantity']) * d(stock['price'])
+            try:
+                base_value = d(stock['quantity']) * d(stock['price'])
+
+            except decimal.InvalidOperation:
+                base_value = d('0')
+
             exchange_rate = Currency.objects.get(
                 currency=stock['currency']).usd_exchange_rate
             usd_value = d(base_value) / d(exchange_rate)
@@ -397,6 +401,6 @@ class WorldTradingData:
             total_value *= d(exchange_rate_euro)
 
         else:
-            logger.warn(f'incorrect currency used: {base_currency}')
+            logger.warning(f'incorrect currency used: {base_currency}')
 
         return str(total_value)

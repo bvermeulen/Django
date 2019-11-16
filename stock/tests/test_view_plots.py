@@ -1,3 +1,4 @@
+from django.contrib.auth.models import User
 from django.urls import reverse, resolve
 from django.test import TestCase
 from ..views.plots import IntraDayView, HistoryView
@@ -6,6 +7,13 @@ from ..models import Currency, Exchange, Stock
 class PlotsTestCase(TestCase):
 
     def setUp(self):
+        self.test_user_name = 'test_user'
+        self.test_user_pw = '123'
+
+        _ = User.objects.create_user(username=self.test_user_name,
+                                     email='test@howdiweb.nl',
+                                     password=self.test_user_pw)
+
         usd = Currency.objects.create(currency='USD',
                                       usd_exchange_rate='1.0')
 
@@ -21,9 +29,8 @@ class PlotsTestCase(TestCase):
 class IntraDayTests(PlotsTestCase):
     def setUp(self):
         super().setUp()
-        self.url = reverse(
-            'stock_intraday', kwargs={
-                'source': 'quotes', 'symbol':'AAPL'})
+        self.url = reverse('stock_intraday', kwargs={
+            'source': 'quotes', 'symbol':'AAPL'})
         self.response = self.client.get(self.url)
 
     def test_intraday_view_status_code(self):
@@ -46,6 +53,13 @@ class IntraDayTests(PlotsTestCase):
     def test_intraday_view_contains_link_to_quotes(self):
         quotes_url = reverse('stock_quotes')
         self.assertContains(self.response, f'href="{quotes_url}"')
+
+    def test_intraday_view_contains_link_to_portfolio(self):
+        url = reverse('stock_intraday', kwargs={
+            'source': 'portfolio', 'symbol':'AAPL'})
+        local_response = self.client.get(url)
+        portfolio_url = reverse('portfolio')
+        self.assertContains(local_response, f'href="{portfolio_url}"')
 
     def test_intraday_view_contains_link_to_history_1(self):
         history_url = reverse('stock_history', kwargs={
@@ -125,6 +139,13 @@ class HistoryTests(PlotsTestCase):
     def test_history_view_contains_link_to_quotes(self):
         url = reverse('stock_quotes')
         self.assertContains(self.response, f'href="{url}"')
+
+    def test_history_view_contains_link_to_portfolio(self):
+        url = reverse('stock_history', kwargs={
+            'source': 'portfolio', 'symbol':'AAPL', 'period': '1'})
+        local_response = self.client.get(url)
+        portfolio_url = reverse('portfolio')
+        self.assertContains(local_response, f'href="{portfolio_url}"')
 
     def test_history_view_contains_link_to_intraday(self):
         symbol = self.response.context['stock_symbol']

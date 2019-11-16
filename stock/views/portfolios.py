@@ -9,7 +9,8 @@ from django.utils.decorators import method_decorator
 from django.db.utils import IntegrityError
 from howdimain.utils.plogger import Logger
 from howdimain.utils.get_ip import get_client_ip
-from howdimain.utils.format_and_tokens import format_decimal_number, format_amount_stocks
+from howdimain.utils.format_and_tokens import (
+    add_display_tokens, format_decimal_number, format_amount_stocks)
 from stock.forms import PortfolioForm
 from stock.models import Stock, Portfolio, StockSelection
 from stock.module_stock import WorldTradingData
@@ -67,6 +68,7 @@ class PortfolioView(View):
                     })
 
         stocks_value = format_decimal_number(stocks_value)
+        stocks = add_display_tokens(stocks)
         stocks = format_amount_stocks(stocks)
         context = {'form': form,
                    'stocks': stocks,
@@ -162,6 +164,7 @@ class PortfolioView(View):
             stocks = []
 
         stocks_value = format_decimal_number(stocks_value)
+        stocks = add_display_tokens(stocks)
         stocks = format_amount_stocks(stocks)
         context = {'form': form,
                    'stocks': stocks,

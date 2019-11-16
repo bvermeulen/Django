@@ -196,7 +196,9 @@ class PortfolioView(View):
 
     def rename_or_delete_portfolio_or_add_stock(self):
         ''' actions when btn1 is pressed '''
-        logger.warning(f'{self.portfolio}: check existance of portfolio')
+        if not self.portfolio:
+            logger.warning(f'{self.portfolio}: check existance of portfolio')
+            return GetStock.NO
 
         if not self.portfolio_name:
             return GetStock.NO
@@ -241,7 +243,9 @@ class PortfolioView(View):
 
     def change_quantity_or_delete_symbol(self):
         ''' actions when btn 2 is pressed '''
-        logger.warning(f'{self.portfolio}: check existance of portfolio')
+        if not self.portfolio:
+            logger.warning(f'{self.portfolio}: check existance of portfolio')
+            return GetStock.NO
 
         try:
             symbol, quantity = self.btn2_pressed.split(',')

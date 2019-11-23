@@ -180,7 +180,7 @@ class WorldTradingData:
             pass
 
         if len(stock_symbols) > MAX_SYMBOLS_ALLOWED:
-            logger.info(f'warning - number of symbols exceed '
+            logger.warning(f'number of symbols exceed '
                         f'maximum of {MAX_SYMBOLS_ALLOWED}')
 
         # convert date string to datetime object
@@ -371,7 +371,7 @@ class WorldTradingData:
             list_symbols[MAX_SYMBOLS_ALLOWED:2*MAX_SYMBOLS_ALLOWED])
 
         if len(list_symbols) > 2 * MAX_SYMBOLS_ALLOWED:
-            logger.info(f'warning - number of symbols in portfolio exceed '
+            logger.warning(f'number of symbols in portfolio exceed '
                         f'maximum of {2 * MAX_SYMBOLS_ALLOWED}')
 
         exchange_rate_euro = Currency.objects.get(

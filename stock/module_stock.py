@@ -181,7 +181,7 @@ class WorldTradingData:
 
         if len(stock_symbols) > MAX_SYMBOLS_ALLOWED:
             logger.warning(f'number of symbols exceed '
-                        f'maximum of {MAX_SYMBOLS_ALLOWED}')
+                           f'maximum of {MAX_SYMBOLS_ALLOWED}')
 
         # convert date string to datetime object
         # if there is no last_trade_time then skip this stock
@@ -372,7 +372,7 @@ class WorldTradingData:
 
         if len(list_symbols) > 2 * MAX_SYMBOLS_ALLOWED:
             logger.warning(f'number of symbols in portfolio exceed '
-                        f'maximum of {2 * MAX_SYMBOLS_ALLOWED}')
+                           f'maximum of {2 * MAX_SYMBOLS_ALLOWED}')
 
         exchange_rate_euro = Currency.objects.get(
             currency='EUR').usd_exchange_rate

@@ -28,3 +28,8 @@ timeSeries.AddAttribute('chart', '{"exportenabled":1,"multicanvas":false,"theme"
 timeSeries.AddAttribute('yaxis', '[{"plot":[{"value":{"open":"Open","high":"High","low":"Low","close":"Close"},"type":"candlestick"}],"format":{"prefix":"$"},"title":"Stock Price"},{"plot":[{"value":"Volume","type":"column"}],"max":"900000000"}]')
 timeSeries.AddAttribute('navigator', '{"enabled":0}')
 fcChart = FusionCharts("timeseries", "ex1", 700, 450, "chart-1", "json", timeSeries)
+
+import stock.module_stock as ms
+ps = ms.PopulateStock()
+ps.read_csv('stock/stock info/worldtradingdata-stocklist.csv')
+ps.symbols()

@@ -194,7 +194,7 @@ class TestPortfolioPost(PortfolioTestCase):
 
     def test_change_quantity(self):
         self.data['portfolios'] = 'test_portfolio'
-        self.data['btn2_pressed'] = 'AAPL, 5'
+        self.data['change_qty_btn_pressed'] = 'AAPL, 5'
         response = self.client.post(reverse('portfolio'), self.data)
         aapl = StockSelection.objects.filter(stock=self.apple,
                                              portfolio=self.test_portfolio)
@@ -207,7 +207,7 @@ class TestPortfolioPost(PortfolioTestCase):
             stock=self.rds, quantity=0, portfolio=self.test_portfolio)
 
         self.data['portfolios'] = 'test_portfolio'
-        self.data['btn2_pressed'] = 'RDSA.AS, delete'
+        self.data['delete_symbol_btn_pressed'] = 'RDSA.AS'
         response = self.client.post(reverse('portfolio'), self.data)
         stocks_portfolio_db = Portfolio.objects.filter(
             user=self.test_user, portfolio_name='test_portfolio').first().stocks.all()
@@ -223,7 +223,7 @@ class TestPortfolioPost(PortfolioTestCase):
 
         value_eur = 0
         for stock in response.context['stocks']:
-            value_eur += d(stock['amount'].replace(',', ''))
+            value_eur += d(stock['value'].replace(',', ''))
 
         self.assertEqual(stocks_value.quantize(d('0.01')), value_eur.quantize(d('0.01')))
 

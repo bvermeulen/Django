@@ -6,7 +6,7 @@ from stock.forms import StockQuoteForm
 from stock.models import Portfolio
 from stock.module_stock import WorldTradingData
 from howdimain.utils.get_ip import get_client_ip
-from howdimain.utils.format_and_tokens import add_display_tokens
+from howdimain.utils.format_and_tokens import add_display_tokens, format_and_sort_stocks
 from howdimain.utils.plogger import Logger
 
 
@@ -118,6 +118,8 @@ class QuoteView(View):
             portfolios += [item.portfolio_name for item in Portfolio.objects.filter(
                 user=user)]
 
+        stock_info = add_display_tokens(stock_info)
+        stock_info = format_and_sort_stocks(stock_info)
         context = {'source': source,
                    'stock_info': stock_info,
                    'form': form,

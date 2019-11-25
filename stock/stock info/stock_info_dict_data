@@ -14,10 +14,9 @@
   'volume': '455486',
   'volume_avg': '687522',
   'shares': '279716860',
-  'stock_exchange_long':
-  'Euronext Amsterdam',
+  'stock_exchange_long': 'Euronext Amsterdam',
   'stock_exchange_short': 'AEX',
   'timezone': 'NST',
-  'timezone_name': 'Europe/Amsterdam', 
+  'timezone_name': 'Europe/Amsterdam',
   'gmt_offset': '4772',
   'last_trade_time': '2019-08-02 16:52:40'}]

@@ -53,10 +53,65 @@ def format_decimal_number(number):
     return number
 
 
-def format_amount_stocks(stocks):
+def format_and_sort_stocks(stocks):
+    ''' format keys: value, value_change, price, day_low, day_high, close_yesterday
+        sort stock on name with index stocks first
+    '''
     _stocks = []
+    _stocks_index = []
     for stock in stocks:
-        stock['amount'] = format_decimal_number(stock['amount'])
-        _stocks.append(stock)
+        try:
+            stock['value'] = format_decimal_number(stock['value'])
 
-    return _stocks
+        except KeyError:
+            pass
+
+        try:
+            stock['value_change'] = format_decimal_number(stock['value_change'])
+
+        except KeyError:
+            pass
+
+        try:
+            stock['price'] = format_decimal_number(stock['price'])
+
+        except KeyError:
+            pass
+
+        try:
+            stock['price'] = format_decimal_number(stock['price'])
+
+        except KeyError:
+            pass
+
+        try:
+            stock['day_low'] = format_decimal_number(stock['day_low'])
+
+        except KeyError:
+            pass
+
+        try:
+            stock['day_high'] = format_decimal_number(stock['day_high'])
+
+        except KeyError:
+            pass
+
+        try:
+            stock['close_yesterday'] = format_decimal_number(stock['close_yesterday'])
+
+        except KeyError:
+            pass
+
+        if stock['symbol'][0] == '^' or stock['currency'] == 'N/A':
+            _stocks_index.append(stock)
+
+        else:
+            _stocks.append(stock)
+
+    if _stocks_index:
+        _stocks_index = sorted(_stocks_index, key=lambda x: x['name'].lower())
+
+    if _stocks:
+        _stocks = sorted(_stocks, key=lambda x: x['name'].lower())
+
+    return _stocks_index + _stocks

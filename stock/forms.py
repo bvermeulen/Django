@@ -37,7 +37,8 @@ class PortfolioForm(forms.Form):
             max_length=10, widget=forms.TextInput(attrs={'size':'10vw'}),
             required=False)
         self.fields['btn1_pressed'] = forms.CharField(required=False)
-        self.fields['btn2_pressed'] = forms.CharField(required=False)
+        self.fields['change_qty_btn_pressed'] = forms.CharField(required=False)
+        self.fields['delete_symbol_btn_pressed'] = forms.CharField(required=False)
 
         portfolios = [(item.portfolio_name, item.portfolio_name)
                       for item in Portfolio.objects.

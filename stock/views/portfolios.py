@@ -10,7 +10,7 @@ from django.db.utils import IntegrityError
 from howdimain.utils.plogger import Logger
 from howdimain.utils.get_ip import get_client_ip
 from howdimain.utils.format_and_tokens import (
-    add_display_tokens, format_decimal_number, format_amount_stocks)
+    add_display_tokens, format_decimal_number, format_and_sort_stocks)
 from stock.forms import PortfolioForm
 from stock.models import Stock, Portfolio, StockSelection
 from stock.module_stock import WorldTradingData
@@ -69,7 +69,7 @@ class PortfolioView(View):
 
         stocks_value = format_decimal_number(stocks_value)
         stocks = add_display_tokens(stocks)
-        stocks = format_amount_stocks(stocks)
+        stocks = format_and_sort_stocks(stocks)
         context = {'form': form,
                    'stocks': stocks,
                    'stocks_value': stocks_value,
@@ -94,7 +94,8 @@ class PortfolioView(View):
             self.new_portfolio = form_data.get('new_portfolio')
             self.symbol = form_data.get('symbol').upper()
             self.btn1_pressed = form_data.get('btn1_pressed')
-            self.btn2_pressed = form_data.get('btn2_pressed')
+            self.change_qty_btn_pressed = form_data.get('change_qty_btn_pressed')
+            self.delete_symbol_btn_pressed = form_data.get('delete_symbol_btn_pressed')
             self.previous_selected = request.session.get('selected_portfolio')
             previous_currency = request.session.get('currency')
 
@@ -122,8 +123,11 @@ class PortfolioView(View):
             elif self.btn1_pressed:
                 get_stock = self.rename_or_delete_portfolio_or_add_stock()
 
-            elif self.btn2_pressed:
-                get_stock = self.change_quantity_or_delete_symbol()
+            elif self.change_qty_btn_pressed:
+                get_stock = self.change_quantity_symbol()
+
+            elif self.delete_symbol_btn_pressed:
+                get_stock = self.delete_symbol()
 
             else:
                 pass
@@ -165,7 +169,7 @@ class PortfolioView(View):
 
         stocks_value = format_decimal_number(stocks_value)
         stocks = add_display_tokens(stocks)
-        stocks = format_amount_stocks(stocks)
+        stocks = format_and_sort_stocks(stocks)
         context = {'form': form,
                    'stocks': stocks,
                    'stocks_value': stocks_value,
@@ -230,10 +234,11 @@ class PortfolioView(View):
                     stock=Stock.objects.get(symbol=self.symbol),
                     quantity=0,
                     portfolio=self.portfolio)
+
                 self.symbol = ''
                 get_stock = GetStock.YES
 
-            except (Stock.DoesNotExist, IntegrityError):
+            except (Stock.DoesNotExist, IntegrityError, ValueError):
                 get_stock = GetStock.NO
 
         else:
@@ -241,34 +246,41 @@ class PortfolioView(View):
 
         return get_stock
 
-    def change_quantity_or_delete_symbol(self):
-        ''' actions when btn 2 is pressed '''
+    def change_quantity_symbol(self):
+        ''' change quantiy of symbol when change_quantity_btn is pressed '''
         if not self.portfolio:
             logger.warning(f'{self.portfolio}: check existance of portfolio')
             return GetStock.NO
 
         try:
-            symbol, quantity = self.btn2_pressed.split(',')
+            symbol, quantity = self.change_qty_btn_pressed.split(',')
             symbol = symbol.strip()
             quantity = quantity.strip()
 
         except ValueError:
             return GetStock.NO
 
-        if quantity != 'delete':
-            stock = self.portfolio.stocks.get(stock__symbol=symbol)
-            stock.quantity = quantity
-            stock.save()
-            get_stock = GetStock.YES
+        portfolio_selected_stock = self.portfolio.stocks.get(stock__symbol=symbol)
 
-        elif quantity == 'delete':
-            self.portfolio.stocks.get(stock__symbol=symbol).delete()
+        if  portfolio_selected_stock.stock.currency.currency != 'N/A':
+            portfolio_selected_stock.quantity = quantity
+            portfolio_selected_stock.save()
             get_stock = GetStock.YES
 
         else:
-            logger.warning(f'Invalid value of btn2_pressed: {self.btn2_pressed}')
+            get_stock = GetStock.NO
 
         return get_stock
+
+    def delete_symbol(self):
+        ''' delete symbol from portfolio when delete symbol btn is pressed '''
+        if not self.portfolio:
+            logger.warning(f'{self.portfolio}: check existance of portfolio')
+            return GetStock.NO
+
+        self.portfolio.stocks.get(stock__symbol=self.delete_symbol_btn_pressed).delete()
+
+        return GetStock.YES
 
     def get_stock_info(self, get_stock, currency):
         ''' get stock info depending of get_stock status'''

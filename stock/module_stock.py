@@ -10,8 +10,8 @@ from django.db.utils import IntegrityError
 from howdimain.utils.plogger import Logger
 from howdimain.utils.min_max import get_min, get_max
 from howdimain.howdimain_vars import MAX_SYMBOLS_ALLOWED
-from .models import Exchange, Currency, Stock, Portfolio, StockSelection
-from .stock_lists import stock_lists
+from stock.models import Exchange, Currency, Stock, Portfolio, StockSelection
+from stock.stock_lists import stock_lists
 
 logger = Logger.getlogger()
 
@@ -33,7 +33,13 @@ class PopulateStock:
         db_currencies = [currency.currency for currency in Currency.objects.all()]
 
         for row in cls.stock_data:
-            if row[4] == '' or row[4] in db_exchanges:
+            if row[2] == '':
+                currency = 'N/A'
+
+            else:
+                currency = row[2]
+
+            if row[4] in db_exchanges:
                 pass
 
             else:
@@ -49,22 +55,20 @@ class PopulateStock:
                         exchange_short=row[4],
                         time_zone_name=row[5]
                     )
-                    db_exchanges.append(row[4])
+                    db_exchanges.append(exchange_long)
                     print(f'adding exchange: {exchange_long}')
 
                 except IntegrityError:
                     pass
 
-            if row[2] == '' or row[2] in db_currencies:
+            if row[2] in db_currencies:
                 continue
 
             else:
                 try:
-                    Currency.objects.create(
-                        currency=row[2]
-                    )
-                    db_currencies.append(row[2])
-                    print(f'adding currency: {row[2]}')
+                    Currency.objects.create(currency=currency)
+                    db_currencies.append(currency)
+                    print(f'adding currency: {currency}')
 
                 except IntegrityError:
                     pass
@@ -72,21 +76,27 @@ class PopulateStock:
     @classmethod
     def symbols(cls,):
         for i, row in enumerate(cls.stock_data):
-            try:
-                if row[2] and row[4]:
+            if row[2] == '':
+                currency = 'N/A'
+
+            else:
+                currency = row[2]
+
+            if row[0]:
+                try:
                     _ = Stock.objects.create(
                         symbol=row[0],
                         company=row[1][0:75],
-                        currency=Currency.objects.get(currency=row[2]),
+                        currency=Currency.objects.get(currency=currency),
                         exchange=Exchange.objects.get(exchange_short=row[4]),
-                    )
-                    print(f'processing row {i}, stock {row[1]}')
-                    logger.info(f'processing row {i}, stock {row[1]}')
+                        )
+                    print(f'processing row {i}, stock {row[0]} - {row[1]}')
+                    logger.info(f'processing row {i}, stock {row[0]} - {row[1]}')
 
-            except IntegrityError:
-                pass
-                # print(f'already in database, stock: {row[1]}')
-                # logger.info(f'already in database, stock: {row[1]}')
+                except IntegrityError:
+                    pass
+                    # print(f'already in database, stock: {row[1]}')
+                    # logger.info(f'already in database, stock: {row[1]}')
 
     @classmethod
     def create_default_portfolios(cls,):
@@ -385,26 +395,28 @@ class WorldTradingData:
                 currency=stock['currency']).usd_exchange_rate
 
             try:
-                amount = d(stock["quantity"]) * d(stock["price"]) / d(exchange_rate)
+                value = d(stock["quantity"]) * d(stock["price"]) / d(exchange_rate)
+                value_change = (
+                    d(stock["quantity"]) * d(stock["day_change"]) / d(exchange_rate))
 
             except (NameError, decimal.InvalidOperation):
-                amount = 'n/a'
+                value = 'n/a'
+                value_change = 'n/a'
 
-            if base_currency == 'USD' or amount == 'n/a':
+            if base_currency == 'USD' or value == 'n/a':
                 pass
 
             elif base_currency == 'EUR':
-                amount *= d(exchange_rate_euro)
+                value *= d(exchange_rate_euro)
+                value_change *= d(exchange_rate_euro)
 
             else:
                 logger.warning(f'Invalid base currency {base_currency}')
 
-            stock['amount'] = str(amount)
+            stock['value'] = str(value)
+            stock['value_change'] = str(value_change)
 
             stock_info.append(stock)
-
-        if stock_info:
-            stock_info = sorted(stock_info, key=lambda i: i['name'].lower())
 
         return stock_info
 

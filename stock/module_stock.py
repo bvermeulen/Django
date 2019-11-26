@@ -123,15 +123,48 @@ class PopulateStock:
                 stock=stock, quantity=1, portfolio=portfolio)
 
     @classmethod
-    def remove_stocks(cls,):
-        # TODO test this module
-        database_symbols = [stock.symbol for stock in Stock.objects.all()]
-        master_symbols = [stock[0] for stock in cls.stock_data]
+    def compare_and_clean_database_with_wtd(cls, dummy=True):
+        ''' cleans database by comparing to wrd stock listing
+            to affect database dummy must be set to False
+        '''
 
+        database_symbols = [
+            stock.symbol for stock in Stock.objects.all()]
+        database_exchanges = [
+            exchange.exchange_short for exchange in Exchange.objects.all()]
+        database_currencies = [
+            currency.currency for currency in Currency.objects.all()]
+
+        wtd_symbols = {stock[0] for stock in cls.stock_data}
+        wtd_exchanges = {stock[4] for stock in cls.stock_data}
+        wtd_currencies = {stock[2] for stock in cls.stock_data}
+
+        print('clearing stocks')
+        logger.info('clearing stocks')
         for symbol in database_symbols:
-            if symbol not in master_symbols:
+            if symbol not in wtd_symbols:
                 print(f'delete stock {symbol}')
-                Stock.objects.get(symbol=symbol).delete()
+                logger.info(f'delete stock {symbol}')
+                if not dummy:
+                    Stock.objects.get(symbol=symbol).delete()
+
+        print('clearing exchanges')
+        logger.info('clearing exchanges')
+        for exchange in database_exchanges:
+            if exchange not in wtd_exchanges:
+                print(f'delete exchange {exchange}')
+                logger.info(f'delete exchange {exchange}')
+                if not dummy:
+                    Exchange.objects.get(exchange_short=exchange).delete()
+
+        print('clearing currencies')
+        logger.info('clearing currencies')
+        for currency in database_currencies:
+            if currency not in wtd_currencies and currency != 'N/A':
+                print(f'delete currency {currency}')
+                logger.info(f'delete currency {currency}')
+                if not dummy:
+                    Currency.objects.get(currency=currency).delete()
 
 class WorldTradingData:
     ''' methods to handle trading data
@@ -421,32 +454,20 @@ class WorldTradingData:
         return stock_info
 
     @classmethod
-    def calculate_stocks_value(cls, stocks, base_currency):
-        if not stocks:
-            return '0.00'
-
+    def calculate_stocks_value(cls, stocks):
         total_value = d('0')
+        total_value_change = d('0')
         for stock in stocks:
             try:
-                base_value = d(stock['quantity']) * d(stock['price'])
+                total_value += d(stock['value'])
 
             except decimal.InvalidOperation:
-                base_value = d('0')
+                pass
 
-            exchange_rate = Currency.objects.get(
-                currency=stock['currency']).usd_exchange_rate
-            usd_value = d(base_value) / d(exchange_rate)
-            total_value += usd_value
+            try:
+                total_value_change += d(stock['value_change'])
 
-        if base_currency == 'USD':
-            pass
+            except decimal.InvalidOperation:
+                pass
 
-        elif base_currency == 'EUR':
-            exchange_rate_euro = Currency.objects.get(
-                currency='EUR').usd_exchange_rate
-            total_value *= d(exchange_rate_euro)
-
-        else:
-            logger.warning(f'incorrect currency used: {base_currency}')
-
-        return str(total_value)
+        return str(total_value), str(total_value_change)

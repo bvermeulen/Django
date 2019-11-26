@@ -43,8 +43,10 @@
         </div>
 
         <div style="width:38%">
-          <strong class="mr-2">Portfolio value:</strong>
-          <strong class="mr-2">{{ stocks_value }}</strong>
+          <strong class="mr-0">Portfolio value:</strong>
+          <strong class="mr-2">{{ totals.value }}</strong>
+          <strong class="mr-0">Change:</strong>
+          <strong class="mr-2" style="color:{{totals.color }}">{{ totals.caret}} {{ totals.value_change }}</strong>
           <div class="dropdown">
             <button type="button" class="btn dropdown-toggle btn-outline-primary btn-sm">{{ form.currencies.value }}</button>
             <div class="dropdown-content">

@@ -10,7 +10,7 @@ from django.db.utils import IntegrityError
 from howdimain.utils.plogger import Logger
 from howdimain.utils.get_ip import get_client_ip
 from howdimain.utils.format_and_tokens import (
-    add_display_tokens, format_decimal_number, format_and_sort_stocks)
+    add_display_tokens, format_totals_values, format_and_sort_stocks)
 from stock.forms import PortfolioForm
 from stock.models import Stock, Portfolio, StockSelection
 from stock.module_stock import WorldTradingData
@@ -40,7 +40,6 @@ class PortfolioView(View):
         user = request.user
 
         portfolio_name = ''
-        stocks_value = '0'
         stocks = []
 
         if portfolios:
@@ -49,8 +48,6 @@ class PortfolioView(View):
                     user=user, portfolio_name=portfolios)
                 portfolio_name = self.portfolio.portfolio_name
                 stocks = self.get_stock_info(GetStock.YES, currency)
-                stocks_value = self.wtd.calculate_stocks_value(stocks, currency)
-
                 request.session['stock_info'] = json.dumps(stocks, cls=DjangoJSONEncoder)
 
             except Portfolio.DoesNotExist:
@@ -67,15 +64,14 @@ class PortfolioView(View):
                      'currencies': currency
                     })
 
-        stocks_value = format_decimal_number(stocks_value)
+        totals_values = format_totals_values(*self.wtd.calculate_stocks_value(stocks))
         stocks = add_display_tokens(stocks)
         stocks = format_and_sort_stocks(stocks)
         context = {'form': form,
                    'stocks': stocks,
-                   'stocks_value': stocks_value,
+                   'totals': totals_values,
                    'source': source,
                   }
-
         return render(request, self.template_name, context)
 
     def post(self, request):
@@ -141,7 +137,6 @@ class PortfolioView(View):
                 self.portfolio_name = ''
 
             stocks = self.get_stock_info(get_stock, currency)
-            stocks_value = self.wtd.calculate_stocks_value(stocks, currency)
             request.session['stock_info'] = json.dumps(stocks, cls=DjangoJSONEncoder)
             request.session['selected_portfolio'] = self.selected_portfolio
             request.session['currency'] = currency
@@ -164,15 +159,14 @@ class PortfolioView(View):
                          'symbol': '',
                          'currencies': currency})
 
-            stocks_value = '0'
             stocks = []
 
-        stocks_value = format_decimal_number(stocks_value)
+        totals_values = format_totals_values(*self.wtd.calculate_stocks_value(stocks))
         stocks = add_display_tokens(stocks)
         stocks = format_and_sort_stocks(stocks)
         context = {'form': form,
                    'stocks': stocks,
-                   'stocks_value': stocks_value,
+                   'totals': totals_values,
                    'source': source,}
 
         return render(self.request, self.template_name, context)

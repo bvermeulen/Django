@@ -219,7 +219,7 @@ class TestPortfolioPost(PortfolioTestCase):
         self.data['portfolios'] = 'test_portfolio'
         response = self.client.post(reverse('portfolio'), self.data)
 
-        stocks_value = d(response.context['stocks_value'].replace(',', ''))
+        stocks_value = d(response.context['totals']['value'].replace(',', ''))
 
         value_eur = 0
         for stock in response.context['stocks']:
@@ -232,7 +232,7 @@ class TestPortfolioPost(PortfolioTestCase):
         self.data['currencies'] = 'USD'
         response = self.client.post(reverse('portfolio'), self.data)
 
-        stocks_value = d(response.context['stocks_value'].replace(',', ''))
+        stocks_value = d(response.context['totals']['value'].replace(',', ''))
 
         value_usd = 0
         for stock in response.context['stocks']:
@@ -245,6 +245,18 @@ class TestPortfolioPost(PortfolioTestCase):
             value_usd = d(f'{value_usd:.2f}')
 
         self.assertEqual(stocks_value.quantize(d('0.01')), value_usd.quantize(d('0.01')))
+
+    def test_portfolio_value_change(self):
+        self.data['portfolios'] = 'test_portfolio'
+        response = self.client.post(reverse('portfolio'), self.data)
+
+        stocks_value = d(response.context['totals']['value_change'].replace(',', ''))
+
+        value = 0
+        for stock in response.context['stocks']:
+            value += d(stock['value_change'].replace(',', ''))
+
+        self.assertEqual(stocks_value.quantize(d('0.01')), value.quantize(d('0.01')))
 
     def test_create_html(self):
         self.client.get(reverse('portfolio'))

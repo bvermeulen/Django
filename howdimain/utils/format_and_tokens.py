@@ -115,3 +115,29 @@ def format_and_sort_stocks(stocks):
         _stocks = sorted(_stocks, key=lambda x: x['name'].lower())
 
     return _stocks_index + _stocks
+
+
+def format_totals_values(total_value, total_value_change):
+    ''' returns a dict for totals for context display'''
+    try:
+        if abs(float(d(total_value_change))) < 0.1:
+            color = 'black'
+            caret = CARET_NO_CHANGE
+
+        elif float(d(total_value_change)) < 0:
+            color = 'red'
+            caret = CARET_DOWN
+
+        else:
+            color = 'green'
+            caret = CARET_UP
+
+    except decimal.InvalidOperation:
+        color = 'black'
+        caret = CARET_NO_CHANGE
+
+    total_value = format_decimal_number(total_value)
+    total_value_change = format_decimal_number(total_value_change)
+
+    return {'value': total_value, 'value_change': total_value_change,
+            'caret': caret, 'color': color}

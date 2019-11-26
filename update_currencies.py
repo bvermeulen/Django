@@ -2,10 +2,10 @@
     used in howdimain for table stock_currency. It is not using the Django ORM
     but directly with sql.
 '''
-import psycopg2
-from howdimain.utils.plogger import Logger
 from decouple import config
 import requests
+import psycopg2
+from howdimain.utils.plogger import Logger
 
 logformat = '%(asctime)s:%(levelname)s:%(message)s'
 Logger.set_logger(config('LOG_FILE'), logformat, 'INFO')

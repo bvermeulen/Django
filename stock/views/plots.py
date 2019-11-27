@@ -52,8 +52,11 @@ class IntraDayView(View):
             max_price = get_max(trade.high, max_price)
             max_volume = get_max(trade.volume, max_volume)
 
-        if not min_price or not max_price or not max_volume:
-            min_price, max_price, max_volume = 0, 0, 0
+        if not min_price or not max_price:
+            min_price, max_price = 0, 0
+
+        if not max_volume:
+            max_volume = 0
 
         try:
             initial_open = intraday_trades[1].open
@@ -180,14 +183,18 @@ class HistoryView(View):
                 max_price = get_max(trade.high, max_price)
                 max_volume = get_max(trade.volume, max_volume)
 
-        if not min_price or not max_price or not max_volume:
-            min_price, max_price, max_volume = 0, 0, 0
+        if not min_price or not max_price:
+            min_price, max_price = 0, 0
             start_date, end_date = '01-01-1900', '01-01-1900'
+
         else:
             end_date = history_trades[0].date
             start_date = end_date - datetime.timedelta(days=365)
             start_date = start_date.strftime(date_format)
             end_date = end_date.strftime(date_format)
+
+        if not max_volume:
+            max_volume = 0
 
         subcaption = ''
         caption = ''.join([Stock.objects.get(symbol=symbol).company,

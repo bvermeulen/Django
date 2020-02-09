@@ -9,7 +9,7 @@ django-widget-tweaks==1.4.5
 django-xforwardedfor-middleware==2.0
 gunicorn==20.0.4
 idna==2.8
-Markdown==3.1.1
+Markdown>=3.5
 martor==1.4.0
 Pillow==6.2.1
 psycopg2-binary==2.8.4

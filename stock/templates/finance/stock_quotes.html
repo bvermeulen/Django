@@ -19,10 +19,12 @@
 {% block content %}
 {% now "Y-m-d" as current_date %}
 
-<form id="stockquote" method="post">
+<form id="id_stockquote" method="post">
 {% csrf_token %}
+<a style="display: none">{{ form.quote_string }} </a>
   <div>
-    {{ form.quote_string }}
+    <button class="btn btn-primary btn-sm" onclick="return SubmitQuoteString('{{ form.quote_string.value }}')">Quote</button>
+
     <a>
       <button class="btn dropdown-toggle btn-primary btn-sm" data-toggle="dropdown"
         >Portfolio's<span class="caret"></span></button>
@@ -33,6 +35,7 @@
      			 {% endfor %}
      		</ul>
     </a>
+
     <a>
       <button class="btn dropdown-toggle btn-primary btn-sm" data-toggle="dropdown"
         >Markets<span class="caret"></span></button>
@@ -40,9 +43,9 @@
           {{ form.markets|as_crispy_field }}
         </ul>
     </a>
-    <input type='submit' value='Quote' class="btn-sm btn-primary"></input>
+
     {% if user.is_authenticated %}
-      <button type="button" class="ml-2 btn-sm btn-primary"
+      <button type="button" class="btn-sm btn-primary"
         onclick="window.location.href='{% url 'portfolio' %}'">My portfolio</button>
     {% endif %}
 
@@ -96,4 +99,19 @@
 {% endblock content %}
 
 {% block javascript %}
+<script>
+var form = document.getElementById('id_stockquote');
+
+function SubmitQuoteString(QuoteString) {
+  var EnteredStockString = prompt('Give symbols or company names', QuoteString);
+  if (EnteredStockString != null && EnteredStockString != "''" && EnteredStockString != '') {
+    form.quote_string.value = EnteredStockString;
+    return true;
+  }
+  else {
+    return false;
+  }
+}
+</script>
+
 {% endblock %}

@@ -16,7 +16,7 @@ from howdimain.utils.plogger import Logger
 logformat = '%(asctime)s:%(levelname)s:%(message)s'
 Logger.set_logger(config('LOG_FILE'), logformat, 'INFO')
 logger = Logger.getlogger()
-HOWDIMAIN_VERSION = '1.4'
+HOWDIMAIN_VERSION = 'https://github.com/bvermeulen/Django/tree/howdimain-digitalocean_v6'
 HOWDIMAIN_DATE = '9 February 2020'
 HOWDIMAIN_AUTHOR = 'bruno.vermeulen@hotmail.com'
 

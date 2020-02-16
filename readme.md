@@ -6,8 +6,8 @@
 >![](howdiweb_screenshot.png)
 
 ## Frameworks used
-- Python 3.6.8
-- Django 2.2.3
+- Python 3.8
+- Django 3.03
 - Database PostgreSQL
 - Email Imgur
 - Markdown editor Martor
@@ -52,4 +52,4 @@ etc
 ## Author
 Name: Bruno Vermeulen  
 For any question please contact me at bruno.vermeulen@hotmail.com  
-Last update: 7 July 2019  
+Last update: 15 February 2020  

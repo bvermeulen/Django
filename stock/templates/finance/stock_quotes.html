@@ -22,11 +22,15 @@
 <form id="id_stockquote" method="post">
 {% csrf_token %}
 <a style="display: none">{{ form.quote_string }} </a>
-  <div>
-    <button class="btn btn-primary btn-sm" onclick="return SubmitQuoteString('{{ form.quote_string.value }}')">Quote</button>
 
-    <a>
-      <button class="btn dropdown-toggle btn-primary btn-sm" data-toggle="dropdown"
+  <div class="d-flex">
+    <div>
+      <button class="btn btn-primary btn-sm"
+        onclick="return SubmitQuoteString('{{ form.quote_string.value }}')">Quote</button>
+    </div>
+
+    <div>
+      <button class="btn dropdown-toggle btn-primary btn-sm ml-1" data-toggle="dropdown"
         >Portfolio's<span class="caret"></span></button>
         <ul class="dropdown-menu scroll" style="height:40%;">
      		 	 {% for portfolio in portfolios %}
@@ -34,26 +38,30 @@
                value="{{ portfolio }}"></input></li>
      			 {% endfor %}
      		</ul>
-    </a>
+    </div>
 
-    <a>
-      <button class="btn dropdown-toggle btn-primary btn-sm" data-toggle="dropdown"
+    <div>
+      <button class="btn dropdown-toggle btn-primary btn-sm ml-1" data-toggle="dropdown"
         >Markets<span class="caret"></span></button>
         <ul class="dropdown-menu scroll" style="height:40%;">
           {{ form.markets|as_crispy_field }}
         </ul>
-    </a>
+    </div>
 
     {% if user.is_authenticated %}
-      <button type="button" class="btn-sm btn-primary"
-        onclick="window.location.href='{% url 'portfolio' %}'">My portfolio</button>
+      <div>
+        <button type="button" class="btn btn-primary btn-sm ml-1"
+          onclick="window.location.href='{% url 'portfolio' %}'">My portfolio</button>
+      </div>
     {% endif %}
 
     {% if form.selected_portfolio.value %}
-      <strong><a class="mx-2">Portfolio:</a><a>{{ form.selected_portfolio.value }}</a></strong>
+      <div>
+        <strong><a class="ml-4">Portfolio:</a><a class="ml-1">{{ form.selected_portfolio.value }}</a></strong>
+      </div>
     {% endif %}
-
   </div>
+
   <table class="table table-fixed table-striped mb-2 mt-1 table-sm">
     <thead class="custom-thead-grey">
       <tr>

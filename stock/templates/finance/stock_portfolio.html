@@ -21,28 +21,55 @@
 {% block content %}
   <form id="id_portfolio" method="post">
     {% csrf_token %}
-    <a style="display: none">{{ form.new_portfolio }} {{ form.portfolios }} {{ form.currencies }}</a>
-    <div class="flex-container">
-      <div style="width:12%">
-        <button class="btn btn-primary btn-sm"
-        onclick="return AskNewName()">New portfolio</button>
+    <a style="display: none">{{ form.new_portfolio }} {{ form.portfolio_name }}
+                             {{ form.portfolios }} {{ form.currencies }}
+                             {{ form.symbol }}</a>
+
+    <div class="d-flex">
+      <div class="dropdown">
+        <button type="button" class="dropdown-toggle btn btn-outline-primary btn-sm">
+          {% if form.portfolio_name.value == '' %}
+            Portfolio
+          {% else %}
+            {{ form.portfolios.value }}
+          {% endif %}
+        </button>
+        <div class="dropdown-content">
+          <button class="btn btn-primary btn-sm my-1" onclick="return PromptNewPortfolioName()">New</button>
+
+          {% if form.portfolio_name.value != '' %}
+            <button class="btn btn-primary btn-sm my-1" name="btn1_pressed"
+              value="rename_portfolio"
+              onclick="return RenamePortfolio('{{ form.portfolio_name.value }}')">
+              Rename</button>
+
+            <button class="btn btn-primary btn-sm my-1" name="btn1_pressed"
+              value="delete_portfolio"
+              onclick="return ConfirmDeletePortfolio('{{ form.portfolio_name.value }}')">
+              Delete</button>
+          {% endif %}
+
+          <div class="dropdown-divider"></div>
+          {% for portfolio in form.portfolios %}
+            {% if not portfolio.data.selected %}
+              <button class="btn btn-link my-0" value="{{ portfolio.data.value}}"
+                name="{{ portfolio.data.name }}">
+                <a>{{ portfolio.choice_label }}</a></button>
+            {% endif %}
+          {% endfor %}
+        </div>
       </div>
 
       {% if form.portfolio_name.value != '' %}
-        <div style="width:50%">
-          {{ form.portfolio_name }}
-          <button class="btn btn-outline-primary btn-sm" name="btn1_pressed"
-            value="rename_portfolio">Rename</button>
-          <button class="btn btn-primary btn-sm mr-5" name="btn1_pressed"
-            value="delete_portfolio"
-            onclick="return ConfirmDelete('{{ form.portfolio_name.value }}')">Delete</button>
-          {{ form.symbol }}
-          <button class="btn btn-outline-primary btn-sm" name="btn1_pressed"
-              value="add_new_symbol">Add symbol</button>
+        <div>
+          <button class="btn btn-outline-primary btn-sm mx-1" name="btn1_pressed"
+            value="add_new_symbol"
+            onclick="return AddSymbol('{{ form.symbol.value }}')">
+            Add symbol</button>
         </div>
 
-        <div style="width:38%">
-          <strong class="mr-0">Portfolio value:</strong>
+        <div class="ml-auto">
+          <strong>Value:</strong>
           <strong class="mr-2">{{ totals.value }}</strong>
           <strong class="mr-0">Change:</strong>
           <strong class="mr-2" style="color:{{totals.color }}">{{ totals.caret}} {{ totals.value_change }}</strong>
@@ -50,13 +77,10 @@
             <button type="button" class="btn dropdown-toggle btn-outline-primary btn-sm">{{ form.currencies.value }}</button>
             <div class="dropdown-content">
               {% for currency in form.currencies %}
-                  {% if not currency.data.selected %}
-                    <p>
-                    <button class="btn btn-link" value="{{ currency.data.value}}"
-                      name="{{ currency.data.name }}"><a>{{ currency.choice_label }}</a>
-                    </button>
-                    </p>
-                  {% endif %}
+                {% if not currency.data.selected %}
+                  <button class="btn btn-link" value="{{ currency.data.value}}"
+                    name="{{ currency.data.name }}">{{ currency.choice_label }}</button>
+                {% endif %}
               {% endfor %}
             </div>
           </div>
@@ -64,81 +88,62 @@
       {% endif %}
     </div>
 
-    <div class="flex-container" style="height:70vh">
-      <div class="scroll mt-5 mr-1" style="width:12%; height:40vh">
-
-        {% for portfolio in form.portfolios %}
-          <p>
-          {% if portfolio.data.selected %}
-            <button type="button" class="btn btn-primary btn-sm">
-              {{ portfolio.choice_label }}</button>
-
-          {% else %}
-            <button type="submit" class="btn btn-light btn-sm"
-              value="{{ portfolio.data.value }}" name="{{ portfolio.data.name }}">
-                {{ portfolio.choice_label }}</button>
-
-          {% endif %}
-          </p>
-        {% endfor %}
-      </div>
-
-      <div style="width:88%; height:100%">
-        <table class="table table-fixed table-striped mb-2 mt-1 table-sm">
-          <thead class="col-sm-8 custom-thead-grey">
+    <div class="d-flex" style="height:70vh">
+      <table class="table table-fixed table-striped mb-2 mt-1 table-sm">
+        <thead class="col-sm-8 custom-thead-grey">
+          <tr>
+            <th colspan="3">Company</th>
+            <th colspan="2">Symbol</th>
+            <th colspan="2">Currency</th>
+            <th colspan="2">Price</th>
+            <th colspan="2">Qty</th>
+            <th colspan="2">Value<br>({{form.currencies.value}})</th>
+            <th style="width:2vw"></th>
+            <th colspan="2">Change<br>({{form.currencies.value}})</th>
+            <th colspan="2"></th>
+            <th colspan="2"></th>
+          </tr>
+        </thead>
+        <tbody class="scroll">
+          {% increment -1 as change_btn_counter %}
+          {% for stock in stocks %}
             <tr>
-              <th colspan="3">Company</th>
-              <th colspan="2">Symbol</th>
-              <th colspan="2">Currency</th>
-              <th colspan="2">Price</th>
-              <th colspan="2">Qty</th>
-              <th colspan="2">Value<br>({{form.currencies.value}})</th>
-              <th style="width:2vw"></th>
-              <th colspan="2">Change<br>({{form.currencies.value}})</th>
-              <th colspan="2"></th>
-              <th colspan="2"></th>
-            </tr>
-          </thead>
-          <tbody class="scroll">
-            {% increment -1 as change_btn_counter %}
-            {% for stock in stocks %}
-              <tr>
-                <td colspan="3"><a href="{% url 'stock_intraday' source stock.symbol %}">{{ stock.name|truncatechars:15 }}</a></td>
-                <td colspan="2">{{ stock.symbol }}</td>
-                <td colspan="2">{{ stock.currency }}</td>
-                <td colspan="2">{{ stock.price }}</td>
+              <td colspan="3"><a href="{% url 'stock_intraday' source stock.symbol %}">{{ stock.name|truncatechars:15 }}</a></td>
+              <td colspan="2">{{ stock.symbol }}</td>
+              <td colspan="2">{{ stock.currency }}</td>
+              <td colspan="2">{{ stock.price }}</td>
 
-                {% if stock.currency != 'N/A' %}
-                  <td colspan="2">{{ stock.quantity }}</td>
-                  <td colspan="2">{{ stock.value }}</td>
-                  <td style="width:2vw; color:{{ stock.font_color }}">{{ stock.caret_up_down }}</td>
-                  <td colspan="2" style="color:{{ stock.font_color }}">{{ stock.value_change }}</td>
-                  <td colspan="2">
-                    <button class="btn btn-outline-secondary btn-sm" name="change_qty_btn_pressed"
-                            value="{{ stock.symbol }}, "
-                            onclick="return ChangeQuantity('{{ stock.name }}',
-                                                           '{{ stock.quantity }}',
-                                                           '{{ change_btn_counter }}')">Change</button>
-                  </td>
-                  {% increment change_btn_counter as change_btn_counter %}
-
-                  {% else %}
-                  <td colspan="2"></td>
-                  <td colspan="2"></td>
-                  <td style="width:2vw"></td>
-                  <td colspan="2"></td>
-                  <td colspan="2"></td>
-                {% endif %}
-
+              {% if stock.currency != 'N/A' %}
+                <td colspan="2">{{ stock.quantity }}</td>
+                <td colspan="2">{{ stock.value }}</td>
+                <td style="width:2vw; color:{{ stock.font_color }}">{{ stock.caret_up_down }}</td>
+                <td colspan="2" style="color:{{ stock.font_color }}">{{ stock.value_change }}</td>
                 <td colspan="2">
-                  <button class="btn btn-outline-secondary btn-sm" name="delete_symbol_btn_pressed"
-                          value="{{ stock.symbol }}" onclick="return ConfirmDelete('{{ stock.name }}' )">Delete</button>
+                  <button class="btn btn-outline-secondary btn-sm" name="change_qty_btn_pressed"
+                          value="{{ stock.symbol }}, "
+                          onclick="return ChangeQuantity('{{ stock.name }}',
+                                                         '{{ stock.quantity }}',
+                                                         '{{ change_btn_counter }}')">Change</button>
                 </td>
-              </tr>
-            {% endfor %}
-          </tbody>
-        </table>
-      </div>
+                {% increment change_btn_counter as change_btn_counter %}
+
+              {% else %}
+                <td colspan="2"></td>
+                <td colspan="2"></td>
+                <td style="width:2vw"></td>
+                <td colspan="2"></td>
+                <td colspan="2"></td>
+              {% endif %}
+
+              <td colspan="2">
+                <button class="btn btn-outline-secondary btn-sm" name="delete_symbol_btn_pressed"
+                        value="{{ stock.symbol }}" onclick="return ConfirmDeleteSymbol('{{ stock.name }}' )">Delete</button>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
   </form>
   <br><br><br><br>
 {% endblock content %}
@@ -148,11 +153,45 @@
 
 var form = document.getElementById('id_portfolio');
 
-function AskNewName() {
+function PromptNewPortfolioName() {
   var newPortfolio = prompt('What is the name of the new portfolio', '');
 
-  if (newPortfolio != null && newPortfolio != '') {
+  if (newPortfolio != null && newPortfolio != '' && newPortfolio != "''") {
     form.new_portfolio.value = newPortfolio;
+    return true;
+  }
+  else {
+    return false;
+  }
+}
+
+function RenamePortfolio(name) {
+  var newName = prompt('Give a new name for portfolio: ' + name);
+
+  if (newName != null && newName != '' && newName != "''") {
+    form.portfolio_name.value = newName;
+    return true;
+  }
+  else {
+    return false;
+  }
+}
+
+function ConfirmDeletePortfolio(portfolio) {
+  confirmed = confirm('Do you really want to delete portfolio: ' + portfolio + '?');
+  if (confirmed) {
+    return true;
+  }
+  else {
+    return false;
+  }
+}
+
+function AddSymbol(symbol) {
+  var newSymbol = prompt('Add a stock symbol', symbol);
+
+  if (newSymbol != null && newSymbol != '' && newSymbol != "''") {
+    form.symbol.value = newSymbol;
     return true;
   }
   else {
@@ -181,8 +220,8 @@ function ChangeQuantity(name, qty, counter) {
   }
 }
 
-function ConfirmDelete(value) {
-  confirmed = confirm('Do you really want to delete ' + value + '?');
+function ConfirmDeleteSymbol(companyName) {
+  confirmed = confirm('Do you really want to delete ' + companyName + '?');
   if (confirmed) {
     return true;
   }
@@ -190,5 +229,6 @@ function ConfirmDelete(value) {
     return false;
   }
 }
+
 </script>
 {% endblock %}

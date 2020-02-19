@@ -31,7 +31,7 @@
 
     <div>
       <button class="btn dropdown-toggle btn-primary btn-sm ml-1" data-toggle="dropdown"
-        >Portfolio's<span class="caret"></span></button>
+        >Portfolio's</button>
         <ul class="dropdown-menu scroll" style="height:40%;">
      		 	 {% for portfolio in portfolios %}
      			   <li><input type="submit" class="btn btn-sm item_select" name="selected_portfolio"
@@ -42,7 +42,7 @@
 
     <div>
       <button class="btn dropdown-toggle btn-primary btn-sm ml-1" data-toggle="dropdown"
-        >Markets<span class="caret"></span></button>
+        >Markets</button>
         <ul class="dropdown-menu scroll" style="height:40%;">
           {{ form.markets|as_crispy_field }}
         </ul>

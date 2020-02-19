@@ -1,30 +1,10 @@
-/* contain stylesheet */
-
-.flex-container {
-  display: flex;
-  flex-direction: row;
-}
-
+/* container stylesheet */
 .scroll {
   overflow-y: auto;
 }
 
-.table-fixed tbody {
-  display: block;
-  height: 50vh;
-}
-
-.table-fixed thead tr {
-  display: table;
-  width: 99%;
-  table-layout: fixed;
-
-}
-
-.table-fixed tbody tr {
-  display: table;
-  width: 100%;
-  table-layout: fixed;
+#dtHorizontalVerticalScroll th, td {
+white-space: nowrap;
 }
 
 .custom-thead-grey th {

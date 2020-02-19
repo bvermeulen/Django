@@ -33,6 +33,7 @@ class PortfolioView(View):
     template_name = 'finance/stock_portfolio.html'
     wtd = WorldTradingData()
     wtd.setup()
+    data_provider_url = 'www.worldtradingdata.com'
 
     def get(self, request):
         currency = request.session.get('currency', 'EUR')
@@ -71,6 +72,7 @@ class PortfolioView(View):
                    'stocks': stocks,
                    'totals': totals_values,
                    'source': source,
+                   'data_provider_url': self.data_provider_url,
                   }
         return render(request, self.template_name, context)
 
@@ -167,7 +169,9 @@ class PortfolioView(View):
         context = {'form': form,
                    'stocks': stocks,
                    'totals': totals_values,
-                   'source': source,}
+                   'source': source,
+                   'data_provider_url': self.data_provider_url,
+                  }
 
         return render(self.request, self.template_name, context)
 

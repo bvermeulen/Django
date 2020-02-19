@@ -87,11 +87,11 @@ class QuotesViewTestCase(QuotesTestCase):
             csrf token
             quote_string
             selected_portfolio
-            markets (AEX, NYSE)
-            Quote submit
+            markets AEX
+            markets NYSE
         '''
         response = self.client.get(reverse('stock_quotes'))
-        self.assertContains(response, '<input', 6)
+        self.assertContains(response, '<input', 5)
 
     def test_valid_quote_string_returns_stock_info(self):
         data = {'markets': ['AEX'],

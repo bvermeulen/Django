@@ -122,15 +122,17 @@ class TestPortfolioPost(PortfolioTestCase):
         self.assertContains(response, '<input', 4)
 
     def test_correct_number_input_tags_non_exisistent_portfolio(self):
-        ''' 2 <input> tags to be found:
+        ''' 4 <input> tags to be found:
             csrf token
             new_portfolio
+            portfolio_name
+            symbol
         '''
         session = self.client.session
         session['selected_portfolio'] = 'i_do_not_exist'
         session.save()
         response = self.client.get(reverse('portfolio'))
-        self.assertContains(response, '<input', 2)
+        self.assertContains(response, '<input', 4)
 
     def test_select_portfolio(self):
         self.data['portfolios'] = 'test_portfolio'

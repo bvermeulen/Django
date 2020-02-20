@@ -97,10 +97,16 @@ class TestPortfolioView(PortfolioTestCase):
 
     def test_not_logged_in_redirects_to_login_page(self):
         self.client.logout()
-        response = self.client.post(reverse('portfolio'))
+        response = self.client.get(reverse('portfolio'))
         login_url = reverse('login') + f'?next={reverse("portfolio")}'
         self.assertRedirects(response, login_url, fetch_redirect_response=False)
         self.assertEqual(response.status_code, 302)
+
+    def test_response_contains_ref_to_worldtradingdata(self):
+        response = self.client.get(reverse('portfolio'))
+        self.assertEqual('www.worldtradingdata.com',
+                         response.context['data_provider_url'])
+
 
 class TestPortfolioPost(PortfolioTestCase):
 

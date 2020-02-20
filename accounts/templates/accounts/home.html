@@ -7,21 +7,9 @@
 </ol>
 {% endblock %}
 
+{% block navbutton %}<a style="color: white">Hello</a>{% endblock %}
+
 {% block content %}
-<div class="mb-4">
-  {% if user.is_authenticated %}
-    <a href="{% url 'boards' %}" class="btn btn-primary">Boards</a>
-  {% else %}
-    <a href="{% url 'login' %}" class="btn btn-primary">Log in</a>
-    <a href="{% url 'signup' %}" class="btn btn-primary">Sign up</a>
-  {% endif %}
-  <a href="{% url 'newspage' %}" class="btn btn-primary">News</a>
-  {% if user.is_authenticated %}
-    <a href="{% url 'mynewsitems' %}" class="btn btn-primary">My News</a>
-    <a href="{% url 'portfolio' %}" class="btn btn-primary">My Portfolio</a>
-  {% endif %}
-  <a href="{% url 'stock_quotes' %}" class="btn btn-primary">Stock quote</a>
-</div>
 
 {% if user.is_authenticated %}
   <img src="{{member_image.url}}" width="80%"</img>

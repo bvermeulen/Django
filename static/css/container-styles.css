@@ -43,3 +43,20 @@ white-space: nowrap;
 .dropdown:hover .dropdown-content {
   display: block;
 }
+
+.footer {
+  position: fixed;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  background-color: lightgrey;
+  color: black;
+  text-align: left;
+}
+
+@media (max-width: 600px) {
+  body {
+    font-size: 20px;
+    background-color: lightblue;
+    }
+}

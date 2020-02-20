@@ -93,6 +93,11 @@ class QuotesViewTestCase(QuotesTestCase):
         response = self.client.get(reverse('stock_quotes'))
         self.assertContains(response, '<input', 5)
 
+    def test_not_logged_does_not_give_my_portfolio(self):
+        response = self.client.get(reverse('stock_quotes'))
+        self.assertEqual(response.status_code, 200)
+        self.assertNotContains(response, 'My Portfolio')
+
     def test_valid_quote_string_returns_stock_info(self):
         data = {'markets': ['AEX'],
                 'quote_string': 'wolters'}

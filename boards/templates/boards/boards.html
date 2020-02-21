@@ -2,11 +2,18 @@
 
 {% load humanize %}
 
-{% block breadcrumb %}
-<ol class="breadcrumb my-4">
-  <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a></li>
-  <li class="breadcrumb-item active">Boards</li>
-</ol>
+{% block navbutton %}
+<ul class="navbar-nav mr-auto">
+  <li class="nav-item dropdown">
+    <a class="nav-link navbar-toggler-icon mr-1" href="#" data-toggle="dropdown"
+       aria-haspopup="true" aria-expanded="false">
+    </a>
+    <div class="dropdown-menu dropdown-menu-left" aria-labelledby="mainMenu">
+      <a class="dropdown-item active">Boards</a>
+      <a class="dropdown-item" href="{% url 'home' %}">Home</a>
+    </div>
+  </li>
+</ul>
 {% endblock %}
 
 {% block content %}

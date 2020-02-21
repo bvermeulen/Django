@@ -5,14 +5,21 @@
 
 {% block title %}Edit post{% endblock %}
 
-{% block breadcrumb %}
-<ol class="breadcrumb my-4">
-  <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a></li>
-  <li class="breadcrumb-item"><a href="{% url 'boards' %}">Boards</a></li>
-  <li class="breadcrumb-item"><a href="{% url 'board_topics' post.topic.board.pk %}">{{ post.topic.board.name }}</a></li>
-  <li class="breadcrumb-item"><a href="{% url 'topic_posts' post.topic.board.pk post.topic.pk %}">{{ post.topic.topic_subject }}</a></li>
-  <li class="breadcrumb-item active">Edit contribution</li>
-</ol>
+{% block navbutton %}
+<ul class="navbar-nav mr-auto">
+  <li class="nav-item dropdown">
+    <a class="nav-link navbar-toggler-icon mr-1" href="#" data-toggle="dropdown"
+       aria-haspopup="true" aria-expanded="false">
+    </a>
+    <div class="dropdown-menu dropdown-menu-left" aria-labelledby="mainMenu">
+      <a class="dropdown-item active">Edit contribution</a>
+      <a class="dropdown-item" href="{% url 'topic_posts' post.topic.board.pk post.topic.pk %}">{{ post.topic.topic_subject }}</a>
+      <a class="dropdown-item" href="{% url 'board_topics' post.topic.board.pk %}">{{ post.topic.board.name }}</a>
+      <a class="dropdown-item" href="{% url 'boards' %}">Boards</a>
+      <a class="dropdown-item" href="{% url 'home' %}">Home</a>
+    </div>
+  </li>
+</ul>
 {% endblock %}
 
 {% block content %}

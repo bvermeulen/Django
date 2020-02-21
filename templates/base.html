@@ -24,7 +24,7 @@
 
   <body>
   {% block body %}
-  <nav class="navbar navbar-expand-md navbar-dark bg-dark">
+  <nav class="navbar fixed-top navbar-expand-md navbar-dark bg-dark">
     <div class="container">
       <a class="navbar-brand" href="{% url 'home' %}">Howdiweb</a>
       <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#mainMenu" aria-controls="mainMenu" aria-expanded="false" aria-label="Toggle navigation">
@@ -33,15 +33,10 @@
       <div class="collapse navbar-collapse" id="mainMenu">
         <form class="form-inline mr-auto mb-1">
           {% block navbutton %}{% endblock %}
-          <a class="btn btn-link" style="color: white" href="{% url 'home' %}">Home</a>
           {% if user.is_authenticated %}
             <a class="btn btn-link" style="color: white" href="{% url 'boards' %}">Boards</a>
           {% endif %}
           <a class="btn btn-link" style="color: white" href="{% url 'newspage' %}">News</a>
-          {% if user.is_authenticated %}
-            <a class="btn btn-link" style="color: white" href="{% url 'mynewsitems' %}">My News</a>
-            <a class="btn btn-link" style="color: white" href="{% url 'portfolio' %}">My Portfolio</a>
-          {% endif %}
           <a class="btn btn-link" style="color: white" href="{% url 'stock_quotes' %}">Stock quote</a>
         </form>
         {% if user.is_authenticated %}
@@ -51,6 +46,8 @@
                 {{ user.username }}
               </a>
               <div class="dropdown-menu dropdown-menu-left" aria-labelledby="mainMenu">
+                <a class="dropdown-item" href="{% url 'mynewsitems' %}">My News</a>
+                <a class="dropdown-item" href="{% url 'portfolio' %}">My Portfolio</a>
                 <a class="dropdown-item" href="{% url 'my_account' %}">My account</a>
                 <a class="dropdown-item" href="{% url 'password_change' %}">Change password</a>
                 {% if user.is_staff %}
@@ -71,7 +68,7 @@
     </div>
   </nav>
 
-  <div class="container">
+  <div class="container" style="padding-top: 85px">
     {% block breadcrumb %}{% endblock %}
     {% block content %}{% endblock %}
     <div class="footer">

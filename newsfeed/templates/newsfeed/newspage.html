@@ -6,6 +6,20 @@
   <link rel="stylesheet" type="text/css" href="{% static 'css/container-styles.css' %}">
 {% endblock %}
 
+{% block navbutton %}
+<ul class="navbar-nav mr-auto">
+  <li class="nav-item dropdown">
+    <a class="nav-link navbar-toggler-icon mr-1" href="#" data-toggle="dropdown"
+       aria-haspopup="true" aria-expanded="false">
+    </a>
+    <div class="dropdown-menu dropdown-menu-left" aria-labelledby="mainMenu">
+      <a class="dropdown-item active">News</a>
+      <a class="dropdown-item" href="{% url 'home' %}">Home</a>
+    </div>
+  </li>
+</ul>
+{% endblock %}
+
 {% block content %}
 	 <div class="container">
 	  	<h2 class="item1" style=" font-weight: bold; text-align: left;">News from: {{ news_site }}</h2>

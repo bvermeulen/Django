@@ -68,8 +68,7 @@
     {% endif %}
   </div>
 
-  <div class="container justify-left table-responsive text-nowrap">
-
+  <div class="table-responsive text-nowrap" style="overflow: hidden">
   <table id="dtHorizontalVerticalScroll" class="table table-striped mb-2 mt-1 table-sm" cellspacing="0" width="100%">
     <thead class="custom-thead-grey">
       <tr>
@@ -117,7 +116,6 @@
 {% endblock content %}
 
 {% block javascript %}
-<script src="{% static 'js/mdbtools.js' %}"></script>
 <script>
 var form = document.getElementById('id_stockquote');
 
@@ -133,5 +131,4 @@ function SubmitQuoteString(QuoteString) {
 }
 
 </script>
-
 {% endblock %}

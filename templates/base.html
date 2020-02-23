@@ -100,11 +100,7 @@
   <script src="{% static 'plugins/js/emojis.min.js' %}"></script>
   <script src="{% static 'martor/js/martor.min.js' %}"></script>
 
-  <script>
-    $('pre').each(function(i, block){
-      hljs.highlightBlock(block);
-    })
-  </script>
+  <script src="{% static 'js/mdbtools.js' %}"></script>
 
   {% block javascript %}{% endblock %}
   </body>

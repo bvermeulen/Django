@@ -53,3 +53,10 @@ white-space: nowrap;
   color: black;
   text-align: left;
 }
+
+.content {
+  .content {
+   img.size-full {
+      .img-responsive();
+   }
+}

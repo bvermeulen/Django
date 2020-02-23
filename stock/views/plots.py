@@ -17,8 +17,9 @@ font_white = 'white'
 font_weight = 'bolder'
 font_size = '14'
 chart_theme = 'candy'  #  other selection is fusion see www.fusioncharts.com
-height = 400
-width = 700
+# todo: small sreen below values large screen reduce
+height = "60%"
+width = "100%"
 periods = ['max', '5', '3', '1']
 
 logger = Logger.getlogger()

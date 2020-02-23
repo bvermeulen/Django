@@ -9,11 +9,10 @@
 {% block navbutton %}
 <ul class="navbar-nav mr-auto">
   <li class="nav-item dropdown">
-    <a class="nav-link navbar-toggler-icon mr-1" href="#" data-toggle="dropdown"
-       aria-haspopup="true" aria-expanded="false">
+    <a class="nav-link dropdown-toggle mr-1" href="#" data-toggle="dropdown">
+      News
     </a>
-    <div class="dropdown-menu dropdown-menu-left" aria-labelledby="mainMenu">
-      <a class="dropdown-item active">News</a>
+    <div class="dropdown-menu dropdown-menu-left">
       <a class="dropdown-item" href="{% url 'home' %}">Home</a>
     </div>
   </li>
@@ -31,7 +30,6 @@
 	 <form id="controlform" method="post">
 	 <div class="container">
      {% csrf_token %}
-		 <button type="button" class="btn btn-primary btn-sm" onclick="window.location.href='{% url 'home' %}'">home</button>
 		 <button type="button" class="btn btn-primary btn-sm" id="button_pause" onclick="Pause();">Pause</button>
 		 <input type="hidden" name="control_btn" id="keyinput"></input>
 		 <input type="submit" class="btn btn-primary btn-sm" name="control_btn" value="{{ controls.previous }}"></input>
@@ -46,8 +44,8 @@
 			 {% endfor %}
 		 </ul>
 		 {% if user.is_authenticated %}
-		 	 <button type="button" class="btn btn-primary btn-sm" onclick="window.location.href='{% url 'mynewsitems' %}'">my news</button>
-		   <button type="button" class="btn btn-primary btn-sm" onclick="window.location.href='{% url 'newssites' %}'">select sites</button>
+       <button type="button" class="btn btn-primary btn-sm" onclick="window.location.href='{% url 'newssites' %}'">select</button>
+		 	 <button type="button" class="btn btn-primary btn-sm" onclick="window.location.href='{% url 'mynewsitems' %}'">My news</button>
 		 {% endif %}
 	 </div>
 

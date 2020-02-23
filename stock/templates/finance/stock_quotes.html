@@ -12,11 +12,10 @@
 {% block navbutton %}
 <ul class="navbar-nav mr-auto">
   <li class="nav-item dropdown">
-    <a class="nav-link navbar-toggler-icon mr-1" href="#" data-toggle="dropdown"
-       aria-haspopup="true" aria-expanded="false">
+    <a class="nav-link dropdown-toggle mr-1" href="#" data-toggle="dropdown">
+      Stock quotes
     </a>
-    <div class="dropdown-menu dropdown-menu-left" aria-labelledby="mainMenu">
-      <a class="dropdown-item active">Stock Quotes</a>
+    <div class="dropdown-menu dropdown-menu-left">
       <a class="dropdown-item" href="{% url 'home' %}">Home</a>
     </div>
   </li>
@@ -69,7 +68,9 @@
     {% endif %}
   </div>
 
-  <table id="dtHorizontalVerticalScroll" class="table table-fixed table-striped mb-2 mt-1 table-sm" width="100%">
+  <div class="container justify-left table-responsive text-nowrap">
+
+  <table id="dtHorizontalVerticalScroll" class="table table-striped mb-2 mt-1 table-sm" cellspacing="0" width="100%">
     <thead class="custom-thead-grey">
       <tr>
         <th width="17%">Company</th>
@@ -108,6 +109,7 @@
       </tr>
     {% endfor %}
   </table>
+  </div>
   <small>Data provided by <a href="https://{{ data_provider_url }}">{{ data_provider_url }}</a></small>
 
 </form>

@@ -3,9 +3,9 @@
   overflow-y: auto;
 }
 
-#dtHorizontalVerticalScroll th, td {
+/* #dtHorizontalVerticalScroll th, td {
 white-space: nowrap;
-}
+} */
 
 .custom-thead-grey th {
   color: #fff;
@@ -52,11 +52,4 @@ white-space: nowrap;
   background-color: lightgrey;
   color: black;
   text-align: left;
-}
-
-@media (max-width: 600px) {
-  body {
-    font-size: 20px;
-    background-color: lightblue;
-    }
 }

@@ -9,11 +9,10 @@
 {% block navbutton %}
 <ul class="navbar-nav mr-auto">
   <li class="nav-item dropdown">
-    <a class="nav-link navbar-toggler-icon mr-1" href="#" data-toggle="dropdown"
-       aria-haspopup="true" aria-expanded="false">
+    <a class="nav-link dropdown-toggle mr-1" href="#" data-toggle="dropdown">
+      Post addition
     </a>
-    <div class="dropdown-menu dropdown-menu-left" aria-labelledby="mainMenu">
-      <a class="dropdown-item active">Post addition</a>
+    <div class="dropdown-menu dropdown-menu-left">
       <a class="dropdown-item" href="{% url 'topic_posts' topic.board.pk topic.pk %}">{{ topic.topic_subject }}</a>
       <a class="dropdown-item" href="{% url 'board_topics' topic.board.pk %}">{{ topic.board.name }}</a>
       <a class="dropdown-item" href="{% url 'boards' %}">Boards</a>
@@ -22,8 +21,8 @@
   </li>
 </ul>
 {% endblock %}
-{% block content %}
 
+{% block content %}
   <form method="post" class="mb-2">
     {% csrf_token %}
     <button type="submit" class="btn btn-primary btn-sm">Post contribution</button>

@@ -7,11 +7,10 @@
 {% block navbutton %}
 <ul class="navbar-nav mr-auto">
   <li class="nav-item dropdown">
-    <a class="nav-link navbar-toggler-icon mr-1" href="#" data-toggle="dropdown"
-       aria-haspopup="true" aria-expanded="false">
+    <a class="nav-link dropdown-toggle mr-1" href="#" data-toggle="dropdown">
+      Stock history
     </a>
-    <div class="dropdown-menu dropdown-menu-left" aria-labelledby="mainMenu">
-      <a class="dropdown-item active">Stock historty</a>
+    <div class="dropdown-menu dropdown-menu-left">
       <a class="dropdown-item" href="{% url 'stock_intraday' source stock_symbol %}">Latest stock trading</a>
       {% if source == 'quotes' %}
         <a class="dropdown-item" href="{% url 'stock_quotes' %}">Quotes</a>
@@ -23,7 +22,6 @@
   </li>
 </ul>
 {% endblock %}
-
 
 {% block content %}
 

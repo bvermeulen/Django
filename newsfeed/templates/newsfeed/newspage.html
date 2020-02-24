@@ -35,7 +35,7 @@
 		 <input type="submit" class="btn btn-primary btn-sm" name="control_btn" value="{{ controls.previous }}"></input>
 		 <input type="submit" class="btn btn-primary btn-sm" name="control_btn" value="{{ controls.next }}"></input>
 		 {% if show_banner_button %}
-		   <input type="submit" class="btn btn-primary btn-sm" name="control_btn" value="{{ controls.banner }}"></input>
+		   <input type="submit" class="hideOnMobile btn btn-primary btn-sm" name="control_btn" value="{{ controls.banner }}"></input>
 		 {% endif %}
 		 <button class="btn dropdown-toggle btn-primary btn-sm" type="button" data-toggle="dropdown">Sites<span class="caret"></span></button>
 		 <ul class="dropdown-menu" style="height:40%; overflow:hidden; overflow-y:scroll;">
@@ -71,7 +71,7 @@
 			 {% endif %}
 			 </div>
 		 </div>
-		 <small><p style="text-align:left;">{{ status }}<span style="float:right;">{{ help_arrows }}{{ help_banner }}</span></small>
+		 <small><p style="text-align:left;">{{ status }}<span class="hideOnMobile" style="float: right;">{{ help_arrows }}{{ help_banner }}</span></p></small>
 		 <br><br><br>
   </div>
   </form>

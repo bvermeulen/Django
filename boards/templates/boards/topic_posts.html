@@ -35,7 +35,7 @@
 
       <div class="card-body p-2">
         <div class="row">
-          <div class="col-2">
+          <div class="hideOnMobile col-2">
             <img src="{{ post.created_by|gravatar }}" alt="{{ post.created_by.username }}" class="w-100">
             <small>{{ post.created_by.username }}</small>
             <small> - posts: {{ post.created_by.posts.count }}</small>

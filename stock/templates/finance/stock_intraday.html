@@ -42,23 +42,4 @@
 	<script type="text/javascript" src="{% static "fusioncharts/themes/fusioncharts.theme.candy.js" %}"></script>
   <script type="text/javascript" src="{% static "fusioncharts/themes/fusioncharts.theme.fusion.js" %}"></script>
 	{{ chart_js|safe }}
-
-<script>
-/* set width of chart-container based on screen width
-   parent width if width < 600px
-   80% of parent width if width > 600px
-*/
-$(window).resize(function() {
-  $("#chart-container").each( function() {
-    $parentWindow = $(this).parent();
-    if ($parentWindow.width() < 600) {
-      $(this).width($parentWindow.width());
-    }
-    else {
-      $(this).width($parentWindow.width() * 0.8);
-    }
-  });
-}).resize();
-
-</script>
 {% endblock javascript %}

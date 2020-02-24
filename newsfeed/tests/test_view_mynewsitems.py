@@ -1,7 +1,7 @@
 from django.contrib.auth.models import User
 from django.urls import reverse, resolve
 from django.test import TestCase
-from howdimain.html_utils import convert_string_to_html
+from howdimain.utils.html_utils import convert_string_to_html
 from ..views.mynewsitems import mynewsitems
 from ..models import NewsSite, UserNewsSite, UserNewsItem
 from ..module_news import update_news, feedparser_time_to_datetime

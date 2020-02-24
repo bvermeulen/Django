@@ -54,9 +54,6 @@ white-space: nowrap;
   text-align: left;
 }
 
-.content {
-  .content {
-   img.size-full {
-      .img-responsive();
-   }
+.hideOnMobile {
+
 }

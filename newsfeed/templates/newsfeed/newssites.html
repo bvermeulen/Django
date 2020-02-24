@@ -17,7 +17,7 @@
 {% block content %}
     <form method="post">
       {% csrf_token %}
-      <div class="container">
+      <div class="d-flex">
         <ul style="width:100%; list-style-type:none">
         {% for item in form_select_sites.selected_sites %}
           <li style="float:left; width:20%;">

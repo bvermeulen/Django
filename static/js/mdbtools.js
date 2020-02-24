@@ -15,13 +15,13 @@ $(document).ready(function () {
   $('.dataTables_length').addClass('bs-select');
 });
 /* apply coding highlighting
+
 */
 $('pre').each(function(i, block){
   hljs.highlightBlock(block);
 })
-
-
 /* resize iframes
+
 */
 var $allVideos = $("iframe[src^='https://player.vimeo.com'], iframe[src^='http://player.vimeo.com'], iframe[src^='https://www.youtube.com'], iframe[src^='http://www.youtube.com'], object, embed")
 $allVideos.each(function() {

@@ -24,7 +24,7 @@
 
 {% block content %}
 
-	<div id="chart-container">FusionCharts()</div>
+	<div class="flex-d" id="chart-container">FusionCharts()</div>
 	<div>
     <button class="btn btn-primary btn-sm" onclick="window.location.href='{% url 'stock_history' source stock_symbol 'max' %}'">History (max)</button>
     <button class="btn btn-primary btn-sm" onclick="window.location.href='{% url 'stock_history' source stock_symbol '5' %}'">5 years</button>
@@ -42,4 +42,23 @@
 	<script type="text/javascript" src="{% static "fusioncharts/themes/fusioncharts.theme.candy.js" %}"></script>
   <script type="text/javascript" src="{% static "fusioncharts/themes/fusioncharts.theme.fusion.js" %}"></script>
 	{{ chart_js|safe }}
+
+<script>
+/* set width of chart-container based on screen width
+   parent width if width < 600px
+   80% of parent width if width > 600px
+*/
+$(window).resize(function() {
+  $("#chart-container").each( function() {
+    $parentWindow = $(this).parent();
+    if ($parentWindow.width() < 600) {
+      $(this).width($parentWindow.width());
+    }
+    else {
+      $(this).width($parentWindow.width() * 0.8);
+    }
+  });
+}).resize();
+
+</script>
 {% endblock javascript %}

@@ -17,23 +17,18 @@
 {% block content %}
     <form method="post">
       {% csrf_token %}
-      <div class="d-flex">
-        <ul style="width:100%; list-style-type:none">
+      <div class="row">
         {% for item in form_select_sites.selected_sites %}
-          <li style="float:left; width:20%;">
+          <div class="col-sm-6 col-md-4 col-lg-3 col-xl-2" style="list-style-type: none;">
             {{ item }}
-          </li>
+          </div>
         {% endfor %}
-        </ul>
-`     </div>
+      </div>
     ` <div style="clear:left">
         <input type='submit' value='submit' class="btn btn-primary"></input>
         <a href="{% url 'newspage' %}" class="btn btn-primary">Cancel</a>
       </div>
-    </form>
 
-    <form method="post">
-      {% csrf_token %}
       <div style="clear:left">
         <br><br>
         <p>Enter a new site ...</p>

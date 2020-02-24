@@ -36,7 +36,7 @@
         <div class="mb-1">
           {% block navbutton %}{% endblock %}
         </div>
-        <div class="mr-auto mb-1">
+        <div class="mb-1">
           {% if user.is_authenticated %}
             <a class="btn btn-link" style="color: white" href="{% url 'boards' %}">Boards</a>
           {% endif %}

@@ -59,6 +59,8 @@ def newspage(request):
         ns.news_site = ns.current_news_site
         ns.updated = today
         ns.item = 0
+        ns.banner = False
+
     else:
         feed_items = request.session['feed']
         # restore feed items to FeedParserDict - for some reason Django sessions

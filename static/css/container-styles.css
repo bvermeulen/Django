@@ -57,3 +57,7 @@ white-space: nowrap;
 .hideOnMobile {
 
 }
+
+img {
+  max-width: 100%
+}

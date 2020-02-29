@@ -1,7 +1,7 @@
 /**
- * Name         : Martor v1.4.0
+ * Name         : Martor v1.4.7
  * Created by   : Agus Makmun (Summon Agus)
- * Release date : 02-Mar-2019
+ * Release date : 17-Feb-2020
  * License      : GNU GENERAL PUBLIC LICENSE Version 3, 29 June 2007
  * Repository   : https://github.com/agusmakmun/django-markdown-editor
 **/
@@ -11,11 +11,7 @@
         $ = django.jQuery;
     }
     $.fn.martor = function() {
-
-        var martor         = $(this);
-        var mainMartor     = $('.main-martor');
-
-        martor.trigger('martor.init');
+        $('.martor').trigger('martor.init');
 
         // CSRF code
         var getCookie = function(name) {
@@ -33,11 +29,12 @@
                 }
             }
             return cookieValue;
-        }
+        };
 
         // Each multiple editor fields
-        mainMartor.each(function(i, obj) {
-            var field_name   = $(obj).data('field-name');
+        this.each(function(i, obj) {
+            var mainMartor   = $(obj);
+            var field_name   = mainMartor.data('field-name');
             var textareaId   = $('#id_'+field_name);
             var editorId     = 'martor-'+field_name;
             var editor       = ace.edit(editorId);
@@ -146,10 +143,11 @@
             var currentTab = $('.tab.segment[data-tab=preview-tab-'+field_name+']');
             var previewTabButton = $('.item[data-tab=preview-tab-'+field_name+']');
             var refreshPreview = function() {
-                var value = editor.getValue();
+                var value = textareaId.val();
                 var form = new FormData();
                 form.append('content', value);
                 form.append('csrfmiddlewaretoken', getCookie('csrftoken'));
+                currentTab.addClass('martor-preview-stale');
 
                 $.ajax({
                     url: textareaId.data('markdownfy-url'),
@@ -158,12 +156,17 @@
                     processData: false,
                     contentType: false,
                     success: function(response) {
-                        if(response){
-                          currentTab.html(response);
-                          $('pre').each(function(i, block){
-                              hljs.highlightBlock(block);
-                          });
-                        }else {currentTab.html('<p>Nothing to preview</p>');}
+                        if (response) {
+                            if (editorConfig.hljs == 'true') {
+                                $('pre').each(function (i, block) {
+                                    hljs.highlightBlock(block);
+                                });
+                            }
+                            currentTab.html(response).removeClass('martor-preview-stale');
+                            $(document).trigger('martor:preview', [currentTab]);
+                        } else {
+                            currentTab.html('<p>Nothing to preview</p>');
+                        }
                     },
                     error: function(response) {
                         console.log("error", response);
@@ -171,14 +174,17 @@
                 });
             };
 
-            if (editorConfig.living === 'true') {
-                editor.on('change', refreshPreview);
-            }else {
+            // Refresh the preview unconditionally on first load.
+            refreshPreview();
+
+            if (editorConfig.living !== 'true') {
               previewTabButton.click(function(){
                   // hide the `.martor-toolbar` for this current editor if under preview.
                   $(this).closest('.tab-martor-menu').find('.martor-toolbar').hide();
                   refreshPreview();
               });
+            }else {
+              editor.on('change', refreshPreview);
             }
 
             var editorTabButton = $('.item[data-tab=editor-tab-'+field_name+']');
@@ -187,6 +193,13 @@
                 $(this).closest('.tab-martor-menu').find('.martor-toolbar').show();
             });
 
+            if (editorConfig.spellcheck == 'true') {
+              try {
+                enable_spellcheck(editorId);
+              }catch (e) {
+                console.log("Spellcheck lib doesn't installed.");
+              }
+            }
 
             // win/linux: Ctrl+B, mac: Command+B
             var markdownToBold = function(editor) {
@@ -757,8 +770,11 @@
                 $('.modal-help-guide[data-field-name='+field_name+']').modal('show');
             });
 
+            // Handle tabs.
+            mainMartor.find('.ui.martor-toolbar .ui.dropdown').dropdown();
+            mainMartor.find('.ui.tab-martor-menu .item').tab();
+
             // Toggle editor, preview, maximize
-            var mainMartor        = $(obj);
             var martorField       = $('.martor-field-'+field_name);
             var btnToggleMaximize = $('.markdown-toggle-maximize[data-field-name='+field_name+']');
 
@@ -834,14 +850,22 @@
                 editor.setValue(textareaId.val(), -1);
             }
         });// end each `mainMartor`
-};
-$(function() {
-    $('.martor').martor();
-});
-})(jQuery);
+    };
 
-$( document ).ready(function(){
-    // Semantic UI
-    $('.ui.martor-toolbar .ui.dropdown').dropdown();
-    $('.ui.tab-martor-menu .item').tab();
-});
+    $(function() {
+        $('.main-martor').martor();
+    });
+
+    if ('django' in window && 'jQuery' in window.django)
+        django.jQuery(document).on('formset:added', function (event, $row) {
+            $row.find('.main-martor').each(function () {
+                var id = $row.attr('id');
+                id = id.substr(id.lastIndexOf('-') + 1);
+                // Notice here we are using our jQuery instead of Django's.
+                // This is because plugins are only loaded for ours.
+                var fixed = $(this.outerHTML.replace(/__prefix__/g, id));
+                $(this).replaceWith(fixed);
+                fixed.martor();
+            });
+        });
+})(jQuery);

@@ -77,8 +77,5 @@ class Post(models.Model):
     updated_at = models.DateTimeField(null=True)
     allowed_editor = models.ManyToManyField(User, blank=True)
 
-    def get_message_as_markdown(self):
-        return self.message
-
     def __str__(self):
         return Truncator(self.post_subject).chars(30)

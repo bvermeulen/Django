@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
 
 {% load static %}
+{% load martortags %}
 {% load crispy_forms_tags %}
 
 {% block title %}Edit post{% endblock %}
@@ -38,7 +39,7 @@
        role="button">Cancel</a>
     <br></br>
     {{ form.post_subject|as_crispy_field }}
-    {{ form.message|as_crispy_field }}
+    {{ form.message }}
   </form>
   <br>
   <br>

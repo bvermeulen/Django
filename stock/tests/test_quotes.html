@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+
+    <title>Stock quotes</title>
+
+    <link href="/static/plugins/css/ace.min.css" type="text/css" media="all" rel="stylesheet" />
+    <link href="/static/plugins/css/semantic.min.css" type="text/css" media="all" rel="stylesheet" />
+    <link href="/static/plugins/css/resizable.min.css" type="text/css" media="all" rel="stylesheet" />
+    <link href="/static/martor/css/martor.min.css" type="text/css" media="all" rel="stylesheet" />
+
+
+    <link href="https://fonts.googleapis.com/css?family=Peralta|Teko|Russo+One" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/static/css/app.css">
+    <link rel="stylesheet" href="/static/css/container-styles.css">
+    <link rel="stylesheet" href="/static/css/addons/datatables.min.css">
+    <link rel="icon" href="/static/img/favicon.ico">
+
+    
+  <link rel="stylesheet" type="text/css" href="/static/css/container-styles.css">
+
+
+  </head>
+
+  <body>
+  
+  <nav class="navbar fixed-top navbar-expand-md navbar-dark bg-dark">
+    <div class="container">
+      <a class="navbar-brand" href="/">Howdiweb</a>
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#mainMenu">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="mainMenu">
+        <div class="mb-1">
+          
+<ul class="navbar-nav mr-auto">
+  <li class="nav-item dropdown">
+    <a class="nav-link dropdown-toggle mr-1" href="#" data-toggle="dropdown">
+      Stock quotes
+    </a>
+    <div class="dropdown-menu dropdown-menu-left">
+      <a class="dropdown-item" href="/">Home</a>
+    </div>
+  </li>
+</ul>
+
+        </div>
+        <div class="mb-1">
+          
+          <a class="btn btn-link" style="color: white" href="/news/">News</a>
+          <a class="btn btn-link" style="color: white" href="/finance/stock_quote/">Stock quote</a>
+        </div>
+        
+          <form class="form-inline ml-auto">
+            <a href="/login/" class="btn btn-outline-secondary mr-1">Log in</a>
+            <a href="/signup/" class="btn btn-primary">Sign up</a>
+          </form>
+        
+      </div>
+    </div>
+  </nav>
+
+  <div class="container" style="padding-top: 85px">
+    
+    
+
+
+<form id="id_stockquote" method="post">
+<input type="hidden" name="csrfmiddlewaretoken" value="ncdBNNjPHhngD6k0aegGf4FWJILDrmBHUKQUlkvomnsmdwFjufU9CdSfauBzbkca">
+<a style="display: none"><input type="text" name="quote_string" size="40%" maxlength="150" id="id_quote_string"> </a>
+
+  <div class="d-flex">
+    <div>
+      <button class="btn btn-primary btn-sm"
+        onclick="return SubmitQuoteString('')">Quote</button>
+    </div>
+
+    <div>
+      <button class="btn dropdown-toggle btn-primary btn-sm ml-1" data-toggle="dropdown"
+        >Portfolio's</button>
+        <ul class="dropdown-menu scroll" style="height:40%;">
+     		 	 
+     			   <li><input type="submit" class="btn btn-sm item_select" name="selected_portfolio"
+               value="AEX_index"></input></li>
+     			 
+     		</ul>
+    </div>
+
+    <div>
+      <button class="btn dropdown-toggle btn-primary btn-sm ml-1" data-toggle="dropdown"
+        >Markets</button>
+        <ul class="dropdown-menu scroll" style="height:40%;">
+          
+
+
+    
+    <div id="div_id_markets" class="form-group">
+        
+
+        
+            
+
+
+<div class="">
+
+    
+    <div class="form-check">
+        <input type="checkbox" class="form-check-input" checked="checked" name="markets" id="id_markets_1" value="AEX" >
+        <label class="form-check-label" for="id_markets_1">
+            Amsterdam AEX
+        </label>
+        
+    </div>
+   
+    <div class="form-check">
+        <input type="checkbox" class="form-check-input" checked="checked" name="markets" id="id_markets_2" value="NYSE" >
+        <label class="form-check-label" for="id_markets_2">
+            New York Stock Exchange
+        </label>
+        
+    </div>
+   
+    
+
+    
+
+</div>
+        
+
+        
+
+        
+    </div>
+    
+
+
+        </ul>
+    </div>
+
+    
+
+    
+  </div>
+
+  <div class="table-responsive text-nowrap" style="overflow: hidden">
+  <table id="dtHorizontalVerticalScroll" class="table table-striped mb-2 mt-1 table-sm" cellspacing="0" width="100%">
+    <thead class="custom-thead-grey">
+      <tr>
+        <th width="17%">Company</th>
+        <th width="10%">Symbol</th>
+        <th width="10%">Market</th>
+        <th width="7%">Currency</th>
+        <th width="2%"></th>
+        <th width="7%">Price</th>
+        <th width="7%">+/-</th>
+        <th width="7%">Pct</th>
+        <th width="7%">Low</th>
+        <th width="7%">High</th>
+        <th width="7%">Previous</th>
+        <th width="12%">Last trade</th>
+      </tr>
+    </thead>
+    <tbody>
+    
+  </table>
+  </div>
+  <small>Data provided by <a href="https://www.worldtradingdata.com">www.worldtradingdata.com</a></small>
+
+</form>
+<br><br><br><br>
+
+    <div class="footer">
+      <div class="container">
+        <small>powered by DigitalOcean<a style="color:black" href="https://www.digitalocean.com/"></small>
+        <img src="/static/img/512px-DigitalOcean_logo.png" style="width:40px; height:30px; vertical-align:middle"></a>
+        <span style="float:right;"><small>&copy; 2020 Howdimain</small></span>
+      </div>
+    </div>
+  </div>
+  
+
+  <script src="/static/js/jquery-3.3.1.min.js"></script>
+  <script src="/static/js/popper.min.js"></script>
+  <script src="/static/js/bootstrap.min.js"></script>
+  <script src="/static/js/addons/datatables.min.js"></script>
+
+  <script src="/static/plugins/js/ace.js"></script>
+  <script src="/static/plugins/js/semantic.min.js"></script>
+  <script src="/static/plugins/js/mode-markdown.js"></script>
+  <script src="/static/plugins/js/ext-language_tools.js"></script>
+  <script src="/static/plugins/js/theme-github.js"></script>
+  <script src="/static/plugins/js/highlight.min.js"></script>
+  <script src="/static/plugins/js/resizable.min.js"></script>
+  <script src="/static/plugins/js/emojis.min.js"></script>
+  <script src="/static/martor/js/martor.min.js"></script>
+
+  <script src="/static/js/mdbtools.js"></script>
+
+  
+<script>
+var form = document.getElementById('id_stockquote');
+
+function SubmitQuoteString(QuoteString) {
+  var EnteredStockString = prompt('Give symbols or company names', QuoteString);
+  if (EnteredStockString != null && EnteredStockString != "''" && EnteredStockString != '') {
+    form.quote_string.value = EnteredStockString;
+    return true;
+  }
+  else {
+    return false;
+  }
+}
+
+</script>
+
+  </body>
+</html>

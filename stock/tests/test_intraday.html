@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+
+    <title>Latest stock trading</title>
+
+    <link href="/static/plugins/css/ace.min.css" type="text/css" media="all" rel="stylesheet" />
+    <link href="/static/plugins/css/semantic.min.css" type="text/css" media="all" rel="stylesheet" />
+    <link href="/static/plugins/css/resizable.min.css" type="text/css" media="all" rel="stylesheet" />
+    <link href="/static/martor/css/martor.min.css" type="text/css" media="all" rel="stylesheet" />
+
+
+    <link href="https://fonts.googleapis.com/css?family=Peralta|Teko|Russo+One" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/static/css/app.css">
+    <link rel="stylesheet" href="/static/css/container-styles.css">
+    <link rel="stylesheet" href="/static/css/addons/datatables.min.css">
+    <link rel="icon" href="/static/img/favicon.ico">
+
+    
+
+  </head>
+
+  <body>
+  
+  <nav class="navbar fixed-top navbar-expand-md navbar-dark bg-dark">
+    <div class="container">
+      <a class="navbar-brand" href="/">Howdiweb</a>
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#mainMenu">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="mainMenu">
+        <div class="mb-1">
+          
+<ul class="navbar-nav mr-auto">
+  <li class="nav-item dropdown">
+    <a class="nav-link dropdown-toggle mr-1" href="#" data-toggle="dropdown">
+      Latest stock trading
+    </a>
+    <div class="dropdown-menu dropdown-menu-left">
+      
+        <a class="dropdown-item" href="/finance/stock_quote/">Quotes</a>
+      
+      <a class="dropdown-item" href="/">Home</a>
+    </div>
+  </li>
+</ul>
+
+        </div>
+        <div class="mb-1">
+          
+          <a class="btn btn-link" style="color: white" href="/news/">News</a>
+          <a class="btn btn-link" style="color: white" href="/finance/stock_quote/">Stock quote</a>
+        </div>
+        
+          <form class="form-inline ml-auto">
+            <a href="/login/" class="btn btn-outline-secondary mr-1">Log in</a>
+            <a href="/signup/" class="btn btn-primary">Sign up</a>
+          </form>
+        
+      </div>
+    </div>
+  </nav>
+
+  <div class="container" style="padding-top: 85px">
+    
+    
+
+	<div class="flex-d" id="chart-container">FusionCharts()</div>
+	<div>
+    <button class="btn btn-primary btn-sm" onclick="window.location.href='/finance/stock_history/quotes/AAPL/max/'">History (max)</button>
+    <button class="btn btn-primary btn-sm" onclick="window.location.href='/finance/stock_history/quotes/AAPL/5/'">5 years</button>
+    <button class="btn btn-primary btn-sm" onclick="window.location.href='/finance/stock_history/quotes/AAPL/3/'">3 years</button>
+    <button class="btn btn-primary btn-sm" onclick="window.location.href='/finance/stock_history/quotes/AAPL/1/'">1 year</button>
+  </div>
+  <br>
+	<small>Data provided by <a href="https://www.worldtradingdata.com">www.worldtradingdata.com</a></small>
+	<br><br><br><br>
+
+
+    <div class="footer">
+      <div class="container">
+        <small>powered by DigitalOcean<a style="color:black" href="https://www.digitalocean.com/"></small>
+        <img src="/static/img/512px-DigitalOcean_logo.png" style="width:40px; height:30px; vertical-align:middle"></a>
+        <span style="float:right;"><small>&copy; 2020 Howdimain</small></span>
+      </div>
+    </div>
+  </div>
+  
+
+  <script src="/static/js/jquery-3.3.1.min.js"></script>
+  <script src="/static/js/popper.min.js"></script>
+  <script src="/static/js/bootstrap.min.js"></script>
+  <script src="/static/js/addons/datatables.min.js"></script>
+
+  <script src="/static/plugins/js/ace.js"></script>
+  <script src="/static/plugins/js/semantic.min.js"></script>
+  <script src="/static/plugins/js/mode-markdown.js"></script>
+  <script src="/static/plugins/js/ext-language_tools.js"></script>
+  <script src="/static/plugins/js/theme-github.js"></script>
+  <script src="/static/plugins/js/highlight.min.js"></script>
+  <script src="/static/plugins/js/resizable.min.js"></script>
+  <script src="/static/plugins/js/emojis.min.js"></script>
+  <script src="/static/martor/js/martor.min.js"></script>
+
+  <script src="/static/js/mdbtools.js"></script>
+
+  
+	<script type="text/javascript" src="/static/fusioncharts/types/fusioncharts.js"></script>
+	<script type="text/javascript" src="/static/fusioncharts/themes/fusioncharts.theme.candy.js"></script>
+  <script type="text/javascript" src="/static/fusioncharts/themes/fusioncharts.theme.fusion.js"></script>
+	
+        <script type="text/javascript">
+            FusionCharts.ready(function () {
+                let schema = [{"name": "Date", "type": "date", "format": "%d-%m-%Y %H:%M"}, {"name": "open", "type": "number"}, {"name": "close", "type": "number"}, {"name": "low", "type": "number"}, {"name": "high", "type": "number"}, {"name": "volume", "type": "number"}];
+let data = [["21-02-2020 08:00", null, null, null, null, null], ["21-02-2020 09:30", "318.62", "319.55", "318.35", "320.32", "2126066"], ["21-02-2020 09:35", "318.91", "317.76", "317.76", "319.11", "690577"], ["21-02-2020 09:40", "317.79", "318.11", "317.44", "318.11", "565457"], ["21-02-2020 09:45", "317.81", "316.41", "316.41", "317.81", "808222"], ["21-02-2020 09:50", "316.56", "317.42", "316.56", "317.42", "538828"], ["21-02-2020 09:55", "317.52", "317.27", "317.03", "317.94", "612267"], ["21-02-2020 10:00", "317.28", "317.19", "316.89", "317.78", "394727"], ["21-02-2020 10:05", "317.20", "317.39", "316.83", "317.57", "383697"], ["21-02-2020 10:10", "317.39", "316.60", "316.43", "317.59", "421076"], ["21-02-2020 10:15", "316.61", "316.99", "316.47", "317.38", "330219"], ["21-02-2020 10:20", "317.00", "317.51", "316.88", "317.74", "412229"], ["21-02-2020 10:25", "317.54", "317.49", "317.36", "317.68", "208848"], ["21-02-2020 10:30", "317.50", "317.02", "316.89", "317.68", "316621"], ["21-02-2020 10:35", "317.03", "316.61", "316.52", "317.19", "261697"], ["21-02-2020 10:40", "316.54", "316.03", "315.69", "316.74", "603889"], ["21-02-2020 10:45", "316.05", "316.13", "315.57", "316.43", "330224"], ["21-02-2020 10:50", "316.15", "316.54", "316.00", "316.62", "254673"], ["21-02-2020 10:55", "316.53", "316.29", "315.95", "316.65", "252727"], ["21-02-2020 11:00", "316.30", "316.51", "316.01", "316.51", "190370"], ["21-02-2020 11:05", "316.52", "316.08", "316.05", "316.55", "170351"], ["21-02-2020 11:10", "316.10", "316.23", "315.84", "316.28", "197261"], ["21-02-2020 11:15", "316.20", "315.82", "315.76", "316.45", "212476"], ["21-02-2020 11:20", "315.95", "316.43", "315.94", "316.60", "267443"], ["21-02-2020 11:25", "316.41", "316.88", "316.25", "316.96", "244558"], ["21-02-2020 11:30", "316.88", "317.10", "316.88", "317.28", "215896"], ["21-02-2020 11:35", "317.11", "316.91", "316.66", "317.19", "201272"], ["21-02-2020 11:40", "316.92", "317.14", "316.72", "317.18", "150081"], ["21-02-2020 11:45", "317.14", "316.60", "316.55", "317.20", "164084"], ["21-02-2020 11:50", "316.64", "316.95", "316.61", "316.97", "105581"], ["21-02-2020 11:55", "316.97", "316.96", "316.81", "317.17", "109219"], ["21-02-2020 12:00", "316.93", "317.08", "316.75", "317.19", "145596"], ["21-02-2020 12:05", "317.09", "316.85", "316.80", "317.42", "189509"], ["21-02-2020 12:10", "316.87", "316.77", "316.75", "317.00", "121699"], ["21-02-2020 12:15", "316.77", "316.69", "316.57", "316.90", "124288"], ["21-02-2020 12:20", "316.69", "316.20", "316.00", "316.92", "206032"], ["21-02-2020 12:25", "316.20", "316.08", "315.91", "316.38", "234818"], ["21-02-2020 12:30", "316.08", "315.53", "315.53", "316.20", "248529"], ["21-02-2020 12:35", "315.54", "315.96", "315.38", "316.03", "250971"], ["21-02-2020 12:40", "315.95", "315.79", "315.50", "315.97", "154520"], ["21-02-2020 12:45", "315.79", "315.43", "315.15", "315.79", "194910"], ["21-02-2020 12:50", "315.44", "314.81", "314.80", "315.47", "445743"], ["21-02-2020 12:55", "314.81", "315.10", "314.67", "315.20", "316589"], ["21-02-2020 13:00", "315.12", "315.25", "314.93", "315.41", "195603"], ["21-02-2020 13:05", "315.25", "315.06", "315.04", "315.47", "146337"], ["21-02-2020 13:10", "315.05", "314.46", "314.46", "315.11", "271895"], ["21-02-2020 13:15", "314.49", "314.64", "314.42", "314.94", "185564"], ["21-02-2020 13:20", "314.65", "314.82", "314.35", "314.89", "198253"], ["21-02-2020 13:25", "314.87", "314.56", "314.52", "315.22", "236161"], ["21-02-2020 13:30", "314.55", "314.02", "313.98", "314.56", "423080"], ["21-02-2020 13:35", "314.01", "313.74", "313.38", "314.19", "417347"], ["21-02-2020 13:40", "313.73", "313.06", "312.93", "313.92", "469877"], ["21-02-2020 13:45", "313.06", "312.10", "312.04", "313.06", "559307"], ["21-02-2020 13:50", "312.07", "311.27", "311.22", "312.24", "776629"], ["21-02-2020 13:55", "311.28", "312.11", "311.18", "312.54", "663913"], ["21-02-2020 14:00", "312.08", "312.26", "311.78", "312.62", "471150"], ["21-02-2020 14:05", "312.30", "311.20", "311.14", "312.46", "419349"], ["21-02-2020 14:10", "311.19", "311.32", "310.87", "311.81", "589528"], ["21-02-2020 14:15", "311.33", "310.91", "310.59", "311.49", "471870"], ["21-02-2020 14:20", "310.90", "310.61", "310.58", "311.58", "432417"], ["21-02-2020 14:25", "310.61", "311.58", "310.50", "311.93", "432639"], ["21-02-2020 14:30", "311.56", "311.75", "311.49", "312.17", "339784"], ["21-02-2020 14:35", "311.76", "311.98", "311.36", "312.06", "328024"], ["21-02-2020 14:40", "311.98", "312.40", "311.77", "312.58", "332588"], ["21-02-2020 14:45", "312.40", "311.88", "311.83", "312.43", "287624"], ["21-02-2020 14:50", "311.88", "311.98", "311.88", "312.60", "325721"], ["21-02-2020 14:55", "311.94", "312.13", "311.88", "312.48", "253581"], ["21-02-2020 15:00", "312.10", "311.74", "311.64", "312.29", "282234"], ["21-02-2020 15:05", "311.71", "311.36", "311.26", "311.73", "280130"], ["21-02-2020 15:10", "311.35", "311.72", "311.29", "311.93", "267978"], ["21-02-2020 15:15", "311.71", "311.33", "311.33", "311.85", "245856"], ["21-02-2020 15:20", "311.34", "311.54", "311.11", "311.70", "335140"], ["21-02-2020 15:25", "311.51", "311.33", "311.19", "311.62", "243831"], ["21-02-2020 15:30", "311.31", "311.14", "310.84", "311.77", "384313"], ["21-02-2020 15:35", "311.14", "311.55", "311.07", "311.63", "316207"], ["21-02-2020 15:40", "311.58", "311.75", "311.49", "312.12", "484917"], ["21-02-2020 15:45", "311.79", "312.40", "311.79", "312.47", "539617"], ["21-02-2020 15:50", "312.41", "313.24", "312.40", "313.56", "895173"], ["21-02-2020 15:55", "313.24", "313.03", "312.86", "313.54", "1114437"], ["21-02-2020 18:00", "318.62", "313.03", 310.5, 320.32, null]];
+let fusionDataStore = new FusionCharts.DataStore();
+let fusionTable = fusionDataStore.createDataTable(data, schema);
+
+                new FusionCharts({"type": "timeseries", "id": "trades", "width": "100%", "height": "400", "renderAt": "chart-container", "dataFormat": "json", "dataSource": {
+styleDefinition:{'txt_red': {'fill': 'red', 'font-weight': 'bolder', 'font-size': '14'}, 'txt_green': {'fill': 'green', 'font-weight': 'bolder', 'font-size': '14'}, 'txt_normal': {'fill': 'white', 'font-weight': 'bolder', 'font-size': '14'}},
+chart:{'multicanvas': '0', 'theme': 'candy', 'showlegend': '0'},
+caption:{'text': 'Apple (AAPL)'},
+subcaption:{'text': 'USD 313.03 (-1.8%) ▼', 'style': {'text': 'txt_red'}},
+navigator:{'enabled': '0'},
+extensions:{'customrangeselector': {'enabled': '0'}},
+yaxis:[{'plot': [{'value': {'open': 'open', 'high': 'high', 'low': 'low', 'close': 'close'}, 'type': 'candlestick'}], 'title': 'Stock Value', 'min': 307.395, 'max': 323.5232}, {'plot': [{'value': 'volume', 'type': 'column'}], 'title': 'Volume', 'max': 6378198.0}],
+data:fusionTable
+
+}});FusionCharts("trades").render();
+            });
+        </script>
+
+  </body>
+</html>

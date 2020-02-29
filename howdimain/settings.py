@@ -118,8 +118,8 @@ MARTOR_ENABLE_LABEL = False
 MARTOR_IMGUR_CLIENT_ID = config('IMGUR_CLIENT_ID')
 MARTOR_IMGUR_API_KEY = config('IMGUR_SECRET_KEY')
 
-# Safe Mode
-MARTOR_MARKDOWN_SAFE_MODE = True # default
+# # Safe Mode
+# MARTOR_MARKDOWN_SAFE_MODE = 'escape' # default
 
 # Markdownify
 MARTOR_MARKDOWNIFY_FUNCTION = 'martor.utils.markdownify' # default

@@ -12,8 +12,11 @@ from howdimain.utils.min_max import get_min, get_max
 from howdimain.howdimain_vars import MAX_SYMBOLS_ALLOWED
 from stock.models import Exchange, Currency, Stock, Portfolio, StockSelection
 from stock.stock_lists import stock_lists
+from stock.module_alpha_vantage import get_stock_alpha_vantage
 
 logger = Logger.getlogger()
+alpha_vantage_enabled = True
+
 
 class PopulateStock:
 
@@ -203,6 +206,10 @@ class WorldTradingData:
     def get_stock_trade_info(cls, stock_symbols):
         ''' return the stock trade info as a dict retrieved from url json, key 'data'
         '''
+
+        if alpha_vantage_enabled:
+            return get_stock_alpha_vantage(stock_symbols)
+
         params = {'symbol': ','.join(stock_symbols).upper(),
                   'sort': 'name',
                   'api_token': cls.api_token}

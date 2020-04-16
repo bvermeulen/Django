@@ -79,7 +79,13 @@ def format_and_sort_stocks(stocks):
             pass
 
         try:
-            stock['price'] = format_decimal_number(stock['price'])
+            stock['day_change'] = format_decimal_number(stock['day_change'])
+
+        except KeyError:
+            pass
+
+        try:
+            stock['change_pct'] = format_decimal_number(stock['change_pct'])
 
         except KeyError:
             pass

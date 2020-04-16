@@ -1,7 +1,10 @@
-import requests
+import time
 import datetime
+import requests
 from decouple import config
 from howdimain.utils.plogger import Logger
+from stock.models import Stock
+
 
 
 logger = Logger.getlogger()
@@ -11,52 +14,54 @@ stock_url = 'https://www.alphavantage.co/query'
 def get_stock_alpha_vantage(stock_symbols):
     ''' return the stock trade info as a dict
     '''
+    print(stock_symbols)
     stock_info = []
+    _time_now = ' ' + datetime.datetime.now().time().strftime('%H:%M:%S')
     for symbol in stock_symbols:
 
-        params = {'symbol': symbol.upper(),
-                  'function' : 'GLOBAL_QUOTE',
-                  'apikey': api_token
+        symbol = symbol.upper()
+        params = {
+            'symbol': symbol,
+            'function' : 'GLOBAL_QUOTE',
+            'apikey': api_token
         }
 
         try:
-            res_dict = requests.get(stock_url, params=params).json()
+            res = requests.get(stock_url, params=params)
+            quote_dict = res.json().get('Global Quote', {})
 
         except requests.exceptions.ConnectionError:
             logger.info(f'connection error: {stock_url} {params}')
+            quote_dict = {}
+
+        # get other stock info from the database if does not exist skip this quote
+        try:
+            stock_db = Stock.objects.get(symbol=symbol)
+
+        except Stock.DoesNotExist:
+            quote_dict = {}
 
         stock_dict = {}
-        if res_dict:
-            stock_dict['symbol'] = (
-                res_dict.get('Global Quote').get('01. symbol'))
-            stock_dict['open'] = (
-                res_dict.get('Global Quote').get('02. open'))
-            stock_dict['high'] = (
-                res_dict.get('Global Quote').get('03. high'))
-            stock_dict['low'] = (
-                res_dict.get('Global Quote').get('04. low'))
-            stock_dict['price'] = (
-                res_dict.get('Global Quote').get('05. price'))
-            stock_dict['volume'] = (
-                res_dict.get('Global Quote').get('06. volume'))
-            stock_dict['last_trade_time'] = (
-                res_dict.get('Global Quote').get('07. latest trading day'))
-            stock_dict['close yesterday'] = (
-                res_dict.get('Global Quote').get('08. previous close'))
-            stock_dict['day_change'] = (
-                res_dict.get('Global Quote').get('09. change'))
-            stock_dict['change_pct'] = (
-                res_dict.get('Global Quote').get('10. change percent'))
+        if quote_dict:
+            stock_dict['symbol'] = quote_dict.get('01. symbol')
+            stock_dict['open'] = quote_dict.get('02. open')
+            stock_dict['day_high'] = quote_dict.get('03. high')
+            stock_dict['day_low'] = quote_dict.get('04. low')
+            stock_dict['price'] = quote_dict.get('05. price')
+            stock_dict['volume'] = quote_dict.get('06. volume')
+            _date_time = quote_dict.get('07. latest trading day') + _time_now
+            stock_dict['close_yesterday'] = quote_dict.get('08. previous close')
+            stock_dict['day_change'] = quote_dict.get('09. change')
+            stock_dict['change_pct'] = quote_dict.get('10. change percent')[:-1]
 
-            )
+            stock_dict['name'] = stock_db.company
+            stock_dict['currency'] = stock_db.currency.currency
+            stock_dict['stock_exchange_short'] = stock_db.exchange.exchange_short
 
-            # convert date string to datetime object
-            # if there is no last_trade_time then skip this stock
-            for stock in orig_stock_info:
+            # convert date_time string to datetime object if not possible skip the quote
             try:
-                stock['last_trade_time'] = datetime.datetime.strptime(
-                    stock.get('last_trade_time'), "%Y-%m-%d %H:%M:%S")
-                stock_info.append(stock)
+                stock_dict['last_trade_time'] = datetime.datetime.strptime(
+                    _date_time, '%Y-%m-%d %H:%M:%S')
 
             except ValueError:
                 continue

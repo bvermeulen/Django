@@ -88,7 +88,7 @@
 
 	 <form id="controlform" method="post">
 	 <div class="container">
-     <input type="hidden" name="csrfmiddlewaretoken" value="G7Sdfy1sSItw2sZa9SXVXCuloYAdF7jqutrfyM97AeEl5gudQGBWdJ6rm08LA1tB">
+     <input type="hidden" name="csrfmiddlewaretoken" value="szCtdelJHq3Wdf4O3zFYWfbApE5ULNevgfxeKvi5NgWDCapnmvzqCraj7Z5mKfzo">
 		 <button type="button" class="btn btn-primary btn-sm" id="button_pause" onclick="Pause();">Pause</button>
 		 <input type="hidden" name="control_btn" id="keyinput"></input>
 		 <input type="submit" class="btn btn-primary btn-sm" name="control_btn" value="◀"></input>
@@ -111,21 +111,21 @@
 	 </div>
 
 	 <div class="container">
-	   <small>http://feeds.bbci.co.uk/news/world/rss.xml, updated: Mon, 24 February 2020 12:22:46 GMT</small>
+	   <small>http://feeds.bbci.co.uk/news/world/rss.xml, updated: Sat, 29 February 2020 15:31:02 GMT</small>
 		 <div class="card" style="border-width: 2px">
 		   <card class="card-body">
-			 <h2 class="card-title" style="background-color:lightgrey">Coronavirus: Rapid spread raises fears of global pandemic</h2>
-			 <a href='https://www.bbc.co.uk/news/world-51611422'>link</a>
+			 <h2 class="card-title" style="background-color:lightgrey">Afghan conflict: US and Taliban sign deal to end 18-year war</h2>
+			 <a href='https://www.bbc.co.uk/news/world-asia-51689443'>link</a>
 			 
 			   <input type="submit" class="btn btn-link" name="control_btn" value="store this news item"></input>
 			 
 			 <div class="card-text">
 			 
-			   <div class="textarea" contenteditable="false" style="background-color:lightgrey">More infections are reported around the world as governments struggle to contain outbreaks.</div>
+			   <div class="textarea" contenteditable="false" style="background-color:lightgrey">The US and its Nato allies have vowed to withdraw all troops if the Taliban uphold their commitments.</div>
 			 
 			 </div>
 		 </div>
-		 <small><p style="text-align:left;">News item: 1 from 27<span class="hideOnMobile" style="float: right;">Use left/ right arrow to toggle news items. Press Banner to toggle banner on/ off. </span></p></small>
+		 <small><p style="text-align:left;">News item: 1 from 34<span class="hideOnMobile" style="float: right;">Use left/ right arrow to toggle news items. Press Banner to toggle banner on/ off. </span></p></small>
 		 <br><br><br>
   </div>
   </form>
@@ -208,13 +208,13 @@
 		var xUp = event.touches[0].clientX;
 		var xDiff = xDown - xUp;
 
-		if (xDiff > 10) {
+		if (xDiff > 5) {
 			// swipe left
 			document.getElementById("keyinput").value = "▶";
 			form.submit();
 			}
 
-		if (xDiff < -10) {
+		if (xDiff < -5) {
 			// swipe right
 			document.getElementById("keyinput").value = "◀";
 			form.submit();

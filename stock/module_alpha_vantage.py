@@ -57,16 +57,18 @@ def get_stock_alpha_vantage(stock_symbols):
             stock_dict['currency'] = stock_db.currency.currency
             stock_dict['stock_exchange_short'] = stock_db.exchange.exchange_short
 
-            # convert date_time string to datetime object if not possible skip the quote
+            # check date of last trade. If not today's date then make 18:00
+            # otherwise take today's date and time
             try:
-                _time_stock = datetime.datetime.now(
+                _date_time = datetime.datetime.now(
                     pytz.timezone(stock_db.exchange.time_zone_name))
-                _date_trade = datetime.datetime.strptime(_date_trade), '%Y-%m-%d')
+                _date_trade = datetime.datetime.strptime(_date_trade, '%Y-%m-%d')
 
-                if _time_stock.date <> _date_trade.date:
-                    _time_stock = datetime,datetime.strftime('18:00:00', '%H:%M:%S')
+                if _date_time.date != _date_trade.date:
+                    _date_time = datetime.datetime.combine(
+                        _date_trade.date, datetime,datetime.strftime(
+                            '18:00:00', '%H:%M:%S').time)
 
-                _date_time = datetime.datetime.strptime(_date_time, '%Y-%m-%d %H:%M:%S')
                 stock_dict['last_trade_time'] = _date_time
 
             except ValueError:

@@ -15,7 +15,7 @@ from stock.stock_lists import stock_lists
 from stock.module_alpha_vantage import get_stock_alpha_vantage
 
 logger = Logger.getlogger()
-alpha_vantage_enabled = True
+alpha_vntage_enabled = True
 
 
 class PopulateStock:

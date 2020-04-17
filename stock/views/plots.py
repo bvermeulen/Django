@@ -2,7 +2,7 @@ import datetime
 import json
 from django.shortcuts import render, redirect, reverse
 from django.views.generic import View
-from stock.models import Stock, Portfolio
+from stock.models import Stock
 from stock.module_stock import WorldTradingData
 from howdimain.utils.min_max import get_min, get_max
 from howdimain.utils.get_ip import get_client_ip

@@ -12,10 +12,10 @@ from howdimain.utils.min_max import get_min, get_max
 from howdimain.howdimain_vars import MAX_SYMBOLS_ALLOWED
 from stock.models import Exchange, Currency, Stock, Portfolio, StockSelection
 from stock.stock_lists import stock_lists
-from stock.module_alpha_vantage import get_stock_alpha_vantage
+from stock.module_alpha_vantage import get_stock_alpha_vantage, get_intraday_alpha_vantage
 
 logger = Logger.getlogger()
-alpha_vntage_enabled = True
+alpha_vantage_enabled = True
 
 
 class PopulateStock:
@@ -253,6 +253,10 @@ class WorldTradingData:
         '''  return stock intraday info as a dict retrieved from url json,
              key 'intraday'
         '''
+        if alpha_vantage_enabled:
+            return get_intraday_alpha_vantage(stock_symbol)
+
+
         # range: number of days (1-30), interval: in minutes
         params = {'symbol': stock_symbol.upper(),
                   'range': '1',

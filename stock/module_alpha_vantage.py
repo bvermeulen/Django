@@ -1,5 +1,6 @@
 import datetime
 from collections import namedtuple
+from concurrent.futures import ThreadPoolExecutor
 import pytz
 import requests
 from decouple import config
@@ -10,37 +11,52 @@ from stock.models import Stock
 
 logger = Logger.getlogger()
 api_token = config('API_token_Alpha_Vantage')
-stock_url = 'https://www.alphavantage.co/query'
-intraday_url = 'https://www.alphavantage.co/query'
+alpha_vantage_api_url = 'https://www.alphavantage.co/query'
+
+
+def convert_timezone(timezone):
+    ''' concvert time from databse to pytz timezones
+    '''
+    if timezone == 'JST':
+        return 'Asia/Tokyo'
+
+    elif timezone == 'KST':
+        return 'Asia/Seoul'
+
+    else:
+        return timezone
+
+
+def get_url(symbol):
+    params = {
+        'symbol': symbol,
+        'function' : 'GLOBAL_QUOTE',
+        'apikey': api_token,
+    }
+
+    try:
+        res = requests.get(alpha_vantage_api_url, params=params)
+
+    except requests.exceptions.ConnectionError:
+        res = -1
+
+    return res
 
 def get_stock_alpha_vantage(stock_symbols):
     ''' return the stock trade info as a dict
     '''
     print(stock_symbols)
+
+    with ThreadPoolExecutor(max_workers=50) as pool:
+        res_list = pool.map(get_url, [symbol.upper() for symbol in stock_symbols])
+
     stock_info = []
-    for symbol in stock_symbols:
+    for res in res_list:
 
-        symbol = symbol.upper()
-        params = {
-            'symbol': symbol,
-            'function' : 'GLOBAL_QUOTE',
-            'apikey': api_token
-        }
+        if res == -1 or res.status_code != 200:
+            continue
 
-        try:
-            res = requests.get(stock_url, params=params)
-            quote_dict = res.json().get('Global Quote', {})
-
-        except requests.exceptions.ConnectionError:
-            logger.info(f'connection error: {stock_url} {params}')
-            quote_dict = {}
-
-        # get other stock info from the database if does not exist skip this quote
-        try:
-            stock_db = Stock.objects.get(symbol=symbol)
-
-        except Stock.DoesNotExist:
-            quote_dict = {}
+        quote_dict = res.json().get('Global Quote', {})
 
         stock_dict = {}
         if quote_dict:
@@ -55,6 +71,13 @@ def get_stock_alpha_vantage(stock_symbols):
             stock_dict['day_change'] = quote_dict.get('09. change')
             stock_dict['change_pct'] = quote_dict.get('10. change percent')[:-1]
 
+            # get other stock info from the database if does not exist skip this quote
+            try:
+                stock_db = Stock.objects.get(symbol=stock_dict['symbol'])
+
+            except Stock.DoesNotExist:
+                quote_dict = {}
+
             stock_dict['name'] = stock_db.company
             stock_dict['currency'] = stock_db.currency.currency
             stock_dict['stock_exchange_short'] = stock_db.exchange.exchange_short
@@ -62,16 +85,16 @@ def get_stock_alpha_vantage(stock_symbols):
             # check date of last trade. If not today's date then make 18:00
             # otherwise take today's date and time
             try:
-                timezone_stock = stock_db.exchange.time_zone_name.upper()
-                # Handle Japanese time zone
-                if timezone_stock == 'JST':
-                    timezone_stock = 'Asia/Tokyo'
+                timezone_stock = convert_timezone(
+                    stock_db.exchange.time_zone_name.upper())
 
                 _date_time = datetime.datetime.now(
                     pytz.timezone(timezone_stock)).replace(tzinfo=None)
                 _date_trade = datetime.datetime.strptime(_date_trade, '%Y-%m-%d')
 
-                if  datetime.time(9, 0, 0) < _date_time.time() < datetime.time(18, 0, 0):
+                trade_period = datetime.time(9, 0, 0) < _date_time.time() < datetime.time(18, 0, 0)  #pylint: disable=line-too-long
+                date_is_today = _date_trade.date() == _date_time.date()
+                if  date_is_today and trade_period:
                     pass
 
                 else:
@@ -85,7 +108,6 @@ def get_stock_alpha_vantage(stock_symbols):
                 continue
 
             stock_info.append(stock_dict)
-            print(stock_dict)
 
     return stock_info
 
@@ -101,13 +123,13 @@ def get_intraday_alpha_vantage(symbol):
     meta_data = {}
     time_series = {}
     try:
-        res = requests.get(intraday_url, params=params)
+        res = requests.get(alpha_vantage_api_url, params=params)
         if res:
             meta_data = res.json().get('Meta Data', {})
             time_series = res.json().get('Time Series (5min)', {})
 
     except requests.exceptions.ConnectionError:
-        logger.info(f'connection error: {intraday_url} {params}')
+        logger.info(f'connection error: {alpha_vantage_api_url} {params}')
 
     if not meta_data or not time_series:
         return []
@@ -118,11 +140,8 @@ def get_intraday_alpha_vantage(symbol):
     except Stock.DoesNotExist:
         return []
 
-    timezone_stock = stock_db.exchange.time_zone_name.upper()
+    timezone_stock = convert_timezone(stock_db.exchange.time_zone_name.upper())
     timezone_EST = 'EST'
-    # Handle Japanese time zone
-    if timezone_stock == 'JST':
-        timezone_stock = 'Asia/Tokyo'
 
     trade_tuple = namedtuple('trade', 'date open close low high volume')
     intraday_trades = []

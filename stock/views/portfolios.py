@@ -33,7 +33,7 @@ class PortfolioView(View):
     template_name = 'finance/stock_portfolio.html'
     wtd = WorldTradingData()
     wtd.setup()
-    data_provider_url = 'www.worldtradingdata.com'
+    data_provider_url = wtd.data_provider_url
 
     def get(self, request):
         currency = request.session.get('currency', 'EUR')

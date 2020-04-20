@@ -181,6 +181,12 @@ class WorldTradingData:
         cls.intraday_url = 'https://intraday.worldtradingdata.com/api/v1/intraday'
         cls.history_url = 'https://api.worldtradingdata.com/api/v1/history'
 
+        if alpha_vantage_enabled:
+            cls.data_provider_url = 'www.alphavantage.co'
+
+        else:
+            cls.data_provider_url = 'www.worldtradingdata.com'
+
     @staticmethod
     def get_schema(_format):
         return [{'name': 'Date',

@@ -27,25 +27,23 @@ def convert_timezone(timezone):
         return timezone
 
 
-def get_url(symbol):
-    params = {
-        'symbol': symbol,
-        'function' : 'GLOBAL_QUOTE',
-        'apikey': api_token,
-    }
-
-    try:
-        res = requests.get(alpha_vantage_api_url, params=params)
-
-    except requests.exceptions.ConnectionError:
-        res = -1
-
-    return res
-
 def get_stock_alpha_vantage(stock_symbols):
     ''' return the stock trade info as a dict
     '''
-    print(stock_symbols)
+    def get_url(symbol):
+        params = {
+            'symbol': symbol,
+            'function' : 'GLOBAL_QUOTE',
+            'apikey': api_token,
+        }
+
+        try:
+            res = requests.get(alpha_vantage_api_url, params=params)
+
+        except requests.exceptions.ConnectionError:
+            res = -1
+
+        return res
 
     with ThreadPoolExecutor(max_workers=50) as pool:
         res_list = pool.map(get_url, [symbol.upper() for symbol in stock_symbols])
@@ -76,14 +74,14 @@ def get_stock_alpha_vantage(stock_symbols):
                 stock_db = Stock.objects.get(symbol=stock_dict['symbol'])
 
             except Stock.DoesNotExist:
-                quote_dict = {}
+                continue
 
             stock_dict['name'] = stock_db.company
             stock_dict['currency'] = stock_db.currency.currency
             stock_dict['stock_exchange_short'] = stock_db.exchange.exchange_short
 
-            # check date of last trade. If not today's date then make 18:00
-            # otherwise take today's date and time
+            # check date of last trade. If it istrading time then take today's
+            # date and time, otherwise make it yersterday's close time at 6PM
             try:
                 timezone_stock = convert_timezone(
                     stock_db.exchange.time_zone_name.upper())
@@ -190,3 +188,47 @@ def get_intraday_alpha_vantage(symbol):
                    ))
 
     return intraday_trades
+
+def get_history_alpha_vantage(symbol):
+
+    symbol = symbol.upper()
+    params = {'symbol': symbol,
+              'function': 'TIME_SERIES_DAILY',
+              'outputsize': 'full',
+              'apikey': api_token}
+
+    history_series = {}
+    try:
+        res = requests.get(alpha_vantage_api_url, params=params)
+
+        if res:
+            history_series = res.json().get('Time Series (Daily)', {})
+
+    except requests.exceptions.ConnectionError:
+        logger.info(f'connection error: {alpha_vantage_api_url} {params}')
+
+    if not history_series:
+        return []
+
+    # if there is history info, convert date string and provide date and
+    # create list of trade_info tuples
+    trade = namedtuple('trade', 'date open close low high volume')
+    history_trades = []
+    for date_stamp, trade_info in history_series.items():
+        history_trades.append(
+            trade(date=datetime.datetime.strptime(date_stamp, "%Y-%m-%d"),
+                  open=trade_info.get('1. open'),
+                  close=trade_info.get('2. high'),
+                  low=trade_info.get('3. low'),
+                  high=trade_info.get('4. close'),
+                  volume=trade_info.get('5. volume'),
+                 )
+            )
+
+    else:
+        logger.info(f'unable to get stock history data for '
+                    f'{alpha_vantage_api_url} {params}')
+
+    # TODO: make sure to sure newest first
+
+    return history_trades

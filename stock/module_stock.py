@@ -12,7 +12,8 @@ from howdimain.utils.min_max import get_min, get_max
 from howdimain.howdimain_vars import MAX_SYMBOLS_ALLOWED
 from stock.models import Exchange, Currency, Stock, Portfolio, StockSelection
 from stock.stock_lists import stock_lists
-from stock.module_alpha_vantage import get_stock_alpha_vantage, get_intraday_alpha_vantage
+from stock.module_alpha_vantage import (
+    get_stock_alpha_vantage, get_intraday_alpha_vantage, get_history_alpha_vantage)
 
 logger = Logger.getlogger()
 alpha_vantage_enabled = True
@@ -180,6 +181,12 @@ class WorldTradingData:
         cls.intraday_url = 'https://intraday.worldtradingdata.com/api/v1/intraday'
         cls.history_url = 'https://api.worldtradingdata.com/api/v1/history'
 
+        if alpha_vantage_enabled:
+            cls.data_provider_url = 'www.alphavantage.co'
+
+        else:
+            cls.data_provider_url = 'www.worldtradingdata.com'
+
     @staticmethod
     def get_schema(_format):
         return [{'name': 'Date',
@@ -323,6 +330,9 @@ class WorldTradingData:
         '''  return stock history info as a dict retrieved from url json,
              key 'history'
         '''
+        if alpha_vantage_enabled:
+            return get_history_alpha_vantage(stock_symbol)
+
         params = {'symbol': stock_symbol.upper(),
                   'sort': 'newest',
                   'api_token': cls.api_token}
@@ -338,7 +348,7 @@ class WorldTradingData:
         except requests.exceptions.ConnectionError:
             logger.info(f'connection error: {cls.history_url} {params}')
 
-        # if there is intraday info, convert date string and provide date and
+        # if there is history info, convert date string and provide date and
         # create list of trade_info tuples
         trade = namedtuple('trade', 'date open close low high volume')
         history_trades = []

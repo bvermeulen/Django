@@ -3,11 +3,12 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.utils.text import Truncator
 from martor.models import MartorField
-from howdimain.howdimain_vars import (MESSAGE_FIELD_SIZE, BOARD_NAME_SIZE,
-                                      DESCRIPTION_SIZE, TOPIC_SUBJECT_SIZE,
-                                      HAS_MANY_PAGES_LIMIT, POST_SUBJECT_SIZE,
-                                      POSTS_PER_PAGE,
-                                     )
+from howdimain.howdimain_vars import (
+    MESSAGE_FIELD_SIZE, BOARD_NAME_SIZE,
+    DESCRIPTION_SIZE, TOPIC_SUBJECT_SIZE,
+    HAS_MANY_PAGES_LIMIT, POST_SUBJECT_SIZE,
+    POSTS_PER_PAGE,
+)
 
 
 class Board(models.Model):
@@ -76,6 +77,9 @@ class Post(models.Model):
                                    related_name='+', null=True)
     updated_at = models.DateTimeField(null=True)
     allowed_editor = models.ManyToManyField(User, blank=True)
+
+    def get_message_as_markdown(self):
+        return self.message
 
     def __str__(self):
         return Truncator(self.post_subject).chars(30)

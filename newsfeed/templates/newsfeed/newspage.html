@@ -21,7 +21,7 @@
 
 {% block content %}
 	 <div class="container">
-	  	<h2 class="item1" style=" font-weight: bold; text-align: left;">News from: {{ news_site }}</h2>
+	  	<h2 class="item1" style="font-weight: bold; text-align: left;">News from: {{ news_site }}</h2>
 	  	{% if error_message %}
 		    	<div> <font color="red" <strong>{{ error_message }}</strong></font> <br><br></div>
 		  {% endif %}
@@ -30,19 +30,35 @@
 	 <form id="controlform" method="post">
 	 <div class="container">
      {% csrf_token %}
-		 <button type="button" class="btn btn-primary btn-sm" id="button_pause" onclick="Pause();">Pause</button>
-		 <input type="hidden" name="control_btn" id="keyinput"></input>
+     <div style="float: left" class"">
+       <button class="btn btn-primary btn-sm dropdown-toggle" type="button" id="SiteButton" data-toggle="dropdown" onclick="Pause()">
+                Sites<span class="caret"></span></button>
+         <ul class="dropdown-menu" style="height:40%; overflow:hidden; overflow-y:scroll">
+		 	   {% for site in news_sites %}
+			     <li><input type="submit" class="btn btn-sm item_select" name="site_btn" value="{{ site }}"></input></li></li>
+			   {% endfor %}
+         </ul>
+     </div>
+
+     <div style="float: left" class="ml-1 mr-1">
+       <button class="btn dropdown-toggle btn-primary btn-sm" type="button" data-toggle="dropdown" onclick="Pause()">
+                Titles<span class="caret"></span>
+       </button>
+       <ul class="dropdown-menu" style="height:40%; overflow:hidden; overflow-y:scroll">
+         {% for title in news_titles %}
+  			   <li><input type="submit" class="btn btn-sm item_select" name="title_btn" value="{{ title|safe }}"></input></li>
+  			 {% endfor %}
+       </ul>
+     </div>
+
+     <input type="hidden" name="control_btn" id="keyinput"></input>
 		 <input type="submit" class="btn btn-primary btn-sm" name="control_btn" value="{{ controls.previous }}"></input>
 		 <input type="submit" class="btn btn-primary btn-sm" name="control_btn" value="{{ controls.next }}"></input>
+
 		 {% if show_banner_button %}
 		   <input type="submit" class="hideOnMobile btn btn-primary btn-sm" name="control_btn" value="{{ controls.banner }}"></input>
 		 {% endif %}
-		 <button class="btn dropdown-toggle btn-primary btn-sm" type="button" data-toggle="dropdown">Sites<span class="caret"></span></button>
-		 <ul class="dropdown-menu" style="height:40%; overflow:hidden; overflow-y:scroll;">
-		 	 {% for site in news_sites %}
-			   <li><input type="submit" class="btn btn-sm item_select" name="site_btn" value="{{ site }}"></input></li>
-			 {% endfor %}
-		 </ul>
+
 		 {% if user.is_authenticated %}
        <button type="button" class="btn btn-primary btn-sm" onclick="window.location.href='{% url 'newssites' %}'">select</button>
 		 	 <button type="button" class="btn btn-primary btn-sm" onclick="window.location.href='{% url 'mynewsitems' %}'">My news</button>
@@ -54,9 +70,10 @@
 		 <div class="card" style="border-width: 2px">
 		   <card class="card-body">
 			 <h2 class="card-title" style="background-color:lightgrey">{{ news_title|safe }}</h2>
-			 <a href='{{ news_link }}'>link</a>
+       <button style="padding:0; margin:0" type="button" class="btn btn-link" id="button_pause" onclick="Pause()">pause</button>
+			 <a style="padding:0; margin:2px" class="btn btn-link" href='{{ news_link }}'>link</a>
 			 {% if user.is_authenticated %}
-			   <input type="submit" class="btn btn-link" name="control_btn" value="{{ controls.store }}"></input>
+			   <input style="padding:0; margin:0" type="submit" class="btn btn-link" name="control_btn" value="{{ controls.store }}"></input>
 			 {% endif %}
 			 <div class="card-text">
 			 {% if banner and show_banner_button and news_summary_flat_text %}
@@ -80,20 +97,20 @@
 {% block javascript %}
 <script>
 	var timeout = setTimeout("window.location.href='{% url 'newspage' %}'",{{ delay }}*900 );
-	var pause_status = true;
+	var pause_status = false;
 	var button_pause = document.getElementById("button_pause");
+  var form = document.getElementById("controlform");
+
 	function Pause() {
-		if (pause_status == true) {
+		if (pause_status == false) {
 			clearTimeout(timeout);
-			button_pause.classList.remove("btn-primary");
-			button_pause.classList.add("btn-warning");
-			pause_status = false;
+			button_pause.style["color"] = "orange";
+      button_pause.style["font-weight"] = "bolder"
+			pause_status = true;
 			}
 		else {
-			timeout = setTimeout("window.location.href='{% url 'newspage' %}'",{{ delay }}*900);
-			button_pause.classList.remove("btn-warning");
-			button_pause.classList.add("btn-primary");
-			pause_status = true;
+      // submit form to get next item
+      form.submit();
 			}
 		};
 
@@ -101,7 +118,6 @@
 	function handleKeyDown(event) {
 		const keyName = event.key;
 		console.log(`Key pressed: ${keyName}`);
-		var form = document.getElementById("controlform");
 		if (keyName == 'ArrowRight') {
 			document.getElementById("keyinput").value = "{{ controls.next }}";
 			form.submit();
@@ -120,7 +136,6 @@
 		};
 
 	function handleTouchMove(event) {
-		var form = document.getElementById("controlform");
 		if ( ! xDown ) {
 			return;
 			}

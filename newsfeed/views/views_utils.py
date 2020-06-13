@@ -1,4 +1,3 @@
-from pprint import pprint
 import requests
 import re
 from recordtype import recordtype
@@ -115,9 +114,10 @@ def create_news_context(ns, news_sites, feed_items):
     status_text = ''.join([
         'News item: ', str(ns.item+1), ' from ', str(ns.news_items)])
 
-    news_title = feed_items[ns.item].title
-    news_link = feed_items[ns.item].link
-    news_summary = feed_items[ns.item].summary
+    news_titles = [item.get('title', '') for _, item in feed_items.items()]
+    news_title = feed_items[ns.item].get('title', '')
+    news_link = feed_items[ns.item].get('link', '')
+    news_summary = feed_items[ns.item].get('summary', '')
     news_summary = add_width_to_img_tag(news_summary)
     news_summary = remove_feedburner_reference(news_summary)
     news_summary_flat_text = remove_all_references(news_summary)
@@ -140,6 +140,7 @@ def create_news_context(ns, news_sites, feed_items):
                'reference': reference_text,
                'status': status_text,
                'news_link': news_link,
+               'news_titles': news_titles,
                'news_title': news_title,
                'news_summary': news_summary,
                'news_summary_flat_text': news_summary_flat_text,

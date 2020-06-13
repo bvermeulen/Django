@@ -29,6 +29,7 @@ def newspage(request):
 
     button_cntr = request.POST.get('control_btn')
     button_site = request.POST.get('site_btn')
+    button_title = request.POST.get('title_btn')
     if not button_cntr or button_cntr == cntr.next:
         ns.item += 1
     elif button_cntr == cntr.previous:
@@ -48,6 +49,9 @@ def newspage(request):
     if button_site:
         ns.current_news_site = button_site
 
+    if button_title:
+        print(f'selected title: {button_title}')
+
     today = datetime.date.today().strftime("%d-%m-%Y")
     update_news_true = (ns.current_news_site != ns.news_site) or \
                        (ns.item == 0 and not button_cntr) or \
@@ -63,9 +67,10 @@ def newspage(request):
 
     else:
         feed_items = request.session['feed']
-        # restore feed items to FeedParserDict - for some reason Django sessions
-        # converts them to Dict
-        feed_items = restore_feedparserdict(feed_items)
+
+    # restore feed items to FeedParserDict - for some reason Django sessions
+    # converts them to Dict
+    feed_items = restore_feedparserdict(feed_items)
 
     # test if newsfeed is not empty, if it is return to defauilt newssite
     # and reset session

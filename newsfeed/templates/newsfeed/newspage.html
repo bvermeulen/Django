@@ -30,6 +30,7 @@
 	 <form id="controlform" method="post">
 	 <div class="container">
      {% csrf_token %}
+
      <div style="float: left" class"">
        <button class="btn btn-primary btn-sm dropdown-toggle" type="button" id="SiteButton" data-toggle="dropdown" onclick="Pause()">
                 Sites<span class="caret"></span></button>
@@ -44,7 +45,7 @@
        <button class="btn dropdown-toggle btn-primary btn-sm" type="button" data-toggle="dropdown" onclick="Pause()">
                 Titles<span class="caret"></span>
        </button>
-       <ul class="dropdown-menu" style="height:40%; overflow:hidden; overflow-y:scroll">
+       <ul class="dropdown-menu container dropdown-container" style="height:40%; overflow:hidden; overflow-y:scroll; overflow-x:scroll">
          {% for item, title  in news_titles %}
   			   <li><button type="submit" class="btn btn-sm item_select" name="title_btn" value="{{ item }}">{{ title|safe }}</button></li>
   			 {% endfor %}

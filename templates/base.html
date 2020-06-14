@@ -33,16 +33,14 @@
         <span class="navbar-toggler-icon"></span>
       </button>
       <div class="collapse navbar-collapse" id="mainMenu">
-        <div class="mb-1">
-          {% block navbutton %}{% endblock %}
-        </div>
-        <div class="mb-1">
-          {% if user.is_authenticated %}
-            <a class="btn btn-link" style="color: white" href="{% url 'boards' %}">Boards</a>
-          {% endif %}
-          <a class="btn btn-link" style="color: white" href="{% url 'newspage' %}">News</a>
-          <a class="btn btn-link" style="color: white" href="{% url 'stock_quotes' %}">Stock quote</a>
-        </div>
+          <ul class="navbar-nav mr-auto">
+            {% block navbutton %}{% endblock %}
+            {% if user.is_authenticated %}
+              <li class="nav-item"><a class="nav-link" href="{% url 'boards' %}">Boards</a></li>
+            {% endif %}
+            <li class="nav-item"><a class="nav-link" href="{% url 'newspage' %}">News</a></li>
+            <li class="nav-item"><a class="nav-link" href="{% url 'stock_quotes' %}">Stock quote</a></li>
+          </ul>
         {% if user.is_authenticated %}
           <ul class="navbar-nav ml-auto">
             <li class="nav-item dropdown">

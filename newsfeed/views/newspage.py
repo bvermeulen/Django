@@ -9,15 +9,14 @@ from ..models import NewsSite, UserNewsSite
 from .views_utils import (set_session_newsstatus,
                           store_news_item, create_news_context,
                           obtain_news_sites_and_news_status_for_user,
-                         )
+)
 
 
 logger = Logger.getlogger()
 Controls = namedtuple('Controls', 'banner store next previous')
 
 # these controls determine what is shown on the template buttons and links
-cntr = Controls('Banner', 'store this news item',
-                RIGHT_ARROW, LEFT_ARROW)
+cntr = Controls('banner', 'store', RIGHT_ARROW, LEFT_ARROW)
 
 def newspage(request):
     ''' views function to render newspage.html
@@ -49,13 +48,14 @@ def newspage(request):
     if button_site:
         ns.current_news_site = button_site
 
-    if button_title:
-        print(f'selected title: {button_title}')
+    if button_title and button_title != 'refresh':
+        ns.item = int(button_title)
 
     today = datetime.date.today().strftime("%d-%m-%Y")
     update_news_true = (ns.current_news_site != ns.news_site) or \
-                       (ns.item == 0 and not button_cntr) or \
-                       (ns.updated != today)
+                       (ns.item == 0 and not (button_cntr or button_title)) or \
+                       (ns.updated != today) or \
+                       (button_title == 'refresh')
     if update_news_true:
         feed_items = update_news(NewsSite.objects.get(
             news_site=ns.current_news_site).news_url)

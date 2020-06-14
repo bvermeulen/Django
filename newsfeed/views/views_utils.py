@@ -6,7 +6,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from howdimain.utils.plogger import Logger
 from howdimain.howdimain_vars import (DELAY_FACTOR, MIN_CHARS, BANNER_LENGTH,
                                       HELP_ARROWS, HELP_BANNER, IMG_WIDTH_PX,
-                                      IMG_WIDTH_PERC,
+                                      IMG_WIDTH_PERC, WIDTH_TITLE,
                                      )
 from ..models import NewsSite, UserNewsSite, UserNewsItem
 from ..module_news import (feedparser_time_to_datetime,
@@ -114,7 +114,10 @@ def create_news_context(ns, news_sites, feed_items):
     status_text = ''.join([
         'News item: ', str(ns.item+1), ' from ', str(ns.news_items)])
 
-    news_titles = [item.get('title', '') for _, item in feed_items.items()]
+    news_titles = [
+        (i, item.get('title', '')[:WIDTH_TITLE]) for i, item in feed_items.items()
+    ]
+    news_titles.insert(0, ('refresh', 'Refresh ...'))
     news_title = feed_items[ns.item].get('title', '')
     news_link = feed_items[ns.item].get('link', '')
     news_summary = feed_items[ns.item].get('summary', '')

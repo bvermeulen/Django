@@ -45,8 +45,8 @@
                 Titles<span class="caret"></span>
        </button>
        <ul class="dropdown-menu" style="height:40%; overflow:hidden; overflow-y:scroll">
-         {% for title in news_titles %}
-  			   <li><input type="submit" class="btn btn-sm item_select" name="title_btn" value="{{ title|safe }}"></input></li>
+         {% for item, title  in news_titles %}
+  			   <li><button type="submit" class="btn btn-sm item_select" name="title_btn" value="{{ item }}">{{ title|safe }}</button></li>
   			 {% endfor %}
        </ul>
      </div>
@@ -55,9 +55,6 @@
 		 <input type="submit" class="btn btn-primary btn-sm" name="control_btn" value="{{ controls.previous }}"></input>
 		 <input type="submit" class="btn btn-primary btn-sm" name="control_btn" value="{{ controls.next }}"></input>
 
-		 {% if show_banner_button %}
-		   <input type="submit" class="hideOnMobile btn btn-primary btn-sm" name="control_btn" value="{{ controls.banner }}"></input>
-		 {% endif %}
 
 		 {% if user.is_authenticated %}
        <button type="button" class="btn btn-primary btn-sm" onclick="window.location.href='{% url 'newssites' %}'">select</button>
@@ -70,11 +67,18 @@
 		 <div class="card" style="border-width: 2px">
 		   <card class="card-body">
 			 <h2 class="card-title" style="background-color:lightgrey">{{ news_title|safe }}</h2>
+
        <button style="padding:0; margin:0" type="button" class="btn btn-link" id="button_pause" onclick="Pause()">pause</button>
 			 <a style="padding:0; margin:2px" class="btn btn-link" href='{{ news_link }}'>link</a>
+
+       {% if show_banner_button %}
+  		   <input style="padding:0; margin:0" type="submit" class="hideOnMobile btn btn-link" name="control_btn" value="{{ controls.banner }}"></input>
+  		 {% endif %}
+
 			 {% if user.is_authenticated %}
 			   <input style="padding:0; margin:0" type="submit" class="btn btn-link" name="control_btn" value="{{ controls.store }}"></input>
 			 {% endif %}
+
 			 <div class="card-text">
 			 {% if banner and show_banner_button and news_summary_flat_text %}
 				 <svg style="background-color:lightgrey;" viewBox="0, 0, 300, 30">

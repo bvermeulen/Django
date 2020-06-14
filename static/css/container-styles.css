@@ -3,10 +3,6 @@
   overflow-y: auto;
 }
 
-/* #dtHorizontalVerticalScroll th, td {
-white-space: nowrap;
-} */
-
 .custom-thead-grey th {
   color: #fff;
   background-color: #888;
@@ -55,7 +51,6 @@ white-space: nowrap;
 }
 
 .hideOnMobile {
-
 }
 
 img {

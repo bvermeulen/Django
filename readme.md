@@ -1,15 +1,15 @@
 # Howdiweb
->Website application with topic board and personal news feeds and financial stock information
+>Website application with topic board, personal news feeds and financial stock information
 >
 >The website is available at: https://www.howdiweb.nl  
 >
->![](howdiweb_screenshot.png)
->
-><img src="howdiweb_iphone.png" alt="drawing" width="200"/>
->
+![](howdiweb_screenshot.png)
+
+<img src="howdiweb_iphone.png" alt="drawing" width="300"/>
+
 ## Frameworks used
 - Python 3.8
-- Django 3.03
+- Django 3.07
 - Database PostgreSQL
 - Email Imgur
 - Markdown editor Martor

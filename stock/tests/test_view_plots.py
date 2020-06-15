@@ -3,6 +3,9 @@ from django.urls import reverse, resolve
 from django.test import TestCase
 from ..views.plots import IntraDayView, HistoryView
 from ..models import Currency, Exchange, Stock
+from howdimain.howdimain_vars import URL_ALPHAVANTAGE, URL_WORLDTRADE
+
+URL_PROVIDER = URL_ALPHAVANTAGE
 
 class PlotsTestCase(TestCase):
 
@@ -19,7 +22,7 @@ class PlotsTestCase(TestCase):
 
         nyse = Exchange.objects.create(exchange_short='NYSE',
                                        exchange_long='New York Stock Exchange',
-                                       time_zone_name='CET',)
+                                       time_zone_name='America/New_York',)
 
         _ = Stock.objects.create(symbol='AAPL',
                                  company='Apple',
@@ -81,9 +84,8 @@ class IntraDayTests(PlotsTestCase):
             'source': 'quotes', 'symbol': 'AAPL', 'period': 'max'})
         self.assertContains(self.response, f"href='{history_url}'")
 
-    def test_response_contains_ref_to_worldtradingdata(self):
-        self.assertEqual('www.worldtradingdata.com',
-                         self.response.context['data_provider_url'])
+    def test_response_contains_ref_to_url_provider(self):
+        self.assertEqual(URL_PROVIDER, self.response.context['data_provider_url'])
 
         file_name = 'stock/tests/test_intraday.html'
         with open(file_name, 'wt', encoding='utf-8') as f:
@@ -153,9 +155,8 @@ class HistoryTests(PlotsTestCase):
             'source': 'quotes', 'symbol': symbol})
         self.assertContains(self.response, f'href="{url}"')
 
-    def test_response_contains_ref_to_worldtradingdata(self):
-        self.assertEqual('www.worldtradingdata.com',
-                         self.response.context['data_provider_url'])
+    def test_response_contains_ref_to_url_provider(self):
+        self.assertEqual(URL_PROVIDER, self.response.context['data_provider_url'])
 
         file_name = 'stock/tests/test_history.html'
         with open(file_name, 'wt', encoding='utf-8') as f:

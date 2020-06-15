@@ -22,7 +22,6 @@ class QuoteView(View):
     wtd.setup()
     markets = ['NASDAQ', 'NYSE', 'AEX']
     data_provider_url = wtd.data_provider_url
-
     def get(self, request):
         user = request.user
         try:

@@ -47,7 +47,7 @@ class NewsPageView(NewsPageTests):
         self.assertContains(self.response, f'href="{home_url}"')
 
     def test_newspage_view_banner(self):
-        self.assertContains(self.response, 'name="control_btn" value="Banner"')
+        self.assertContains(self.response, 'name="control_btn" value="banner"')
 
     def test_newspage_view_next_previous_buttons(self):
         data = {'control_btn': RIGHT_ARROW}

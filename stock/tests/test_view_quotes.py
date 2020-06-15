@@ -3,6 +3,9 @@ from django.urls import reverse, resolve
 from django.test import TestCase
 from ..views.quotes import QuoteView
 from ..models import Currency, Exchange, Stock, StockSelection, Portfolio
+from howdimain.howdimain_vars import URL_ALPHAVANTAGE, URL_WORLDTRADE
+
+URL_PROVIDER = URL_ALPHAVANTAGE
 
 class QuotesTestCase(TestCase):
 
@@ -27,11 +30,11 @@ class QuotesTestCase(TestCase):
 
         nyse = Exchange.objects.create(exchange_short='NYSE',
                                        exchange_long='New York Stock Exchange',
-                                       time_zone_name='CET',)
+                                       time_zone_name='America/New_York',)
 
         aex = Exchange.objects.create(exchange_short='AEX',
                                       exchange_long='Amsterdam AEX',
-                                      time_zone_name='ECT',)
+                                      time_zone_name='Europe/Amsterdam',)
 
         apple = Stock.objects.create(symbol='AAPL',
                                      company='Apple',
@@ -137,10 +140,9 @@ class QuotesViewTestCase(QuotesTestCase):
         response = self.client.post(url, data)
         self.assertEqual('AAPL', response.context['stock_info'][0]['symbol'])
 
-    def test_response_contains_ref_to_worldtradingdata(self):
+    def test_response_contains_ref_to_url_provider(self):
         response = self.client.get(reverse('stock_quotes'))
-        self.assertEqual('www.worldtradingdata.com',
-                         response.context['data_provider_url'])
+        self.assertEqual(URL_PROVIDER, response.context['data_provider_url'])
 
         file_name = 'stock/tests/test_quotes.html'
         with open(file_name, 'wt', encoding='utf-8') as f:

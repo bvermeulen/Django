@@ -4,8 +4,11 @@ from django.urls import reverse, resolve
 from django.test import TestCase
 from ..views.portfolios import PortfolioView
 from ..models import Currency, Exchange, Stock, StockSelection, Portfolio
+from howdimain.howdimain_vars import URL_ALPHAVANTAGE, URL_WORLDTRADE
 
+URL_PROVIDER = URL_ALPHAVANTAGE
 d = Decimal
+
 
 class PortfolioTestCase(TestCase):
 
@@ -32,11 +35,11 @@ class PortfolioTestCase(TestCase):
 
         nyse = Exchange.objects.create(exchange_short='NYSE',
                                        exchange_long='New York Stock Exchange',
-                                       time_zone_name='CET',)
+                                       time_zone_name='America/New_York',)
 
         aex = Exchange.objects.create(exchange_short='AEX',
                                       exchange_long='Amsterdam AEX',
-                                      time_zone_name='ECT',)
+                                      time_zone_name='Europe/Amsterdam',)
 
         cls.apple = Stock.objects.create(symbol='AAPL',
                                          company='Apple',
@@ -102,10 +105,9 @@ class TestPortfolioView(PortfolioTestCase):
         self.assertRedirects(response, login_url, fetch_redirect_response=False)
         self.assertEqual(response.status_code, 302)
 
-    def test_response_contains_ref_to_worldtradingdata(self):
+    def test_response_contains_ref_to_url_provider(self):
         response = self.client.get(reverse('portfolio'))
-        self.assertEqual('www.worldtradingdata.com',
-                         response.context['data_provider_url'])
+        self.assertEqual(URL_PROVIDER, response.context['data_provider_url'])
 
 
 class TestPortfolioPost(PortfolioTestCase):

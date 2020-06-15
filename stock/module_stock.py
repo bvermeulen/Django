@@ -9,7 +9,7 @@ from django.contrib.auth.models import User
 from django.db.utils import IntegrityError
 from howdimain.utils.plogger import Logger
 from howdimain.utils.min_max import get_min, get_max
-from howdimain.howdimain_vars import MAX_SYMBOLS_ALLOWED
+from howdimain.howdimain_vars import MAX_SYMBOLS_ALLOWED, URL_ALPHAVANTAGE, URL_WORLDTRADE
 from stock.models import Exchange, Currency, Stock, Portfolio, StockSelection
 from stock.stock_lists import stock_lists
 from stock.module_alpha_vantage import (
@@ -182,10 +182,10 @@ class WorldTradingData:
         cls.history_url = 'https://api.worldtradingdata.com/api/v1/history'
 
         if alpha_vantage_enabled:
-            cls.data_provider_url = 'www.alphavantage.co'
+            cls.data_provider_url = URL_ALPHAVANTAGE
 
         else:
-            cls.data_provider_url = 'www.worldtradingdata.com'
+            cls.data_provider_url = URL_WORLDTRADE
 
     @staticmethod
     def get_schema(_format):

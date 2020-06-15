@@ -5,7 +5,7 @@
 >
 >![](howdiweb_screenshot.png)
 >
->![](howdiweb_iphone.png =200x)
+><img src="howdiweb_iphone.png" alt="drawing" width="200"/>
 >
 ## Frameworks used
 - Python 3.8

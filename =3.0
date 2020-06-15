@@ -1,9 +1,0 @@
-Collecting markdown
-  Using cached Markdown-3.2.1-py2.py3-none-any.whl (88 kB)
-Requirement already satisfied, skipping upgrade: setuptools>=36 in ./venv/lib/python3.8/site-packages (from markdown) (42.0.2)
-Installing collected packages: markdown
-  Attempting uninstall: markdown
-    Found existing installation: Markdown 2.1.0
-    Uninstalling Markdown-2.1.0:
-      Successfully uninstalled Markdown-2.1.0
-Successfully installed markdown-3.2.1

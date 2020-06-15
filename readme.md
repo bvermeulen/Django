@@ -5,7 +5,7 @@
 >
 >![](howdiweb_screenshot.png)
 >
->![](howdiweb_iphone.png)
+>![](howdiweb_iphone.png =200x)
 >
 ## Frameworks used
 - Python 3.8

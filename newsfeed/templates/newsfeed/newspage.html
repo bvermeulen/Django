@@ -69,12 +69,11 @@
 		   <card class="card-body">
 			 <h2 class="card-title" style="background-color:lightgrey">{{ news_title|safe }}</h2>
 
-       <button style="padding:0; margin:0" type="button" class="btn btn-link" id="button_pause" onclick="Pause()">pause</button>
-			 <a style="padding:0; margin:2px" class="btn btn-link" href='{{ news_link }}'>link</a>
-
-       {% if show_banner_button %}
-  		   <input style="padding:0; margin:0" type="submit" class="hideOnMobile btn btn-link" name="control_btn" value="{{ controls.banner }}"></input>
-  		 {% endif %}
+			 <a style="padding:0" class="btn btn-link" href='{{ news_link }}'>link</a>
+			 <button style="padding:0" type="button" class="btn btn-link" id="button_pause" onclick="Pause()">pause</button>
+			 {% if show_banner_button %}
+			   <input style="padding:0" type="submit" class="hideOnMobile btn btn-link" name="control_btn" value="{{ controls.banner }}"></input>
+  		 	 {% endif %}
 
 			 {% if user.is_authenticated %}
 			   <input style="padding:0; margin:0" type="submit" class="btn btn-link" name="control_btn" value="{{ controls.store }}"></input>

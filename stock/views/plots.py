@@ -3,7 +3,7 @@ import json
 from django.shortcuts import render, redirect, reverse
 from django.views.generic import View
 from stock.models import Stock
-from stock.module_stock import WorldTradingData
+from stock.module_stock import TradingData
 from howdimain.utils.min_max import get_min, get_max
 from howdimain.utils.get_ip import get_client_ip
 from howdimain.howdimain_vars import CARET_UP, CARET_DOWN, CARET_NO_CHANGE
@@ -29,16 +29,16 @@ source = None
 class IntraDayView(View):
     template_name = 'finance/stock_intraday.html'
 
-    wtd = WorldTradingData()
-    wtd.setup()
-    data_provider_url = wtd.data_provider_url
+    td = TradingData()
+    td.setup()
+    data_provider_url = td.data_provider_url
 
     def get(self, request, source, symbol):
 
         if not Stock.objects.filter(symbol=symbol):
             return redirect(reverse('stock_quotes'))
 
-        intraday_trades = self.wtd.get_stock_intraday_info(symbol)
+        intraday_trades = self.td.get_stock_intraday_info(symbol)
         chart_data = []
         min_price, max_price, max_volume = None, None, None
         date_format = '%d-%m-%Y %H:%M'
@@ -89,7 +89,7 @@ class IntraDayView(View):
         caption = ''.join([Stock.objects.get(symbol=symbol).company,
                            ' (', symbol, ')'])
 
-        schema = json.dumps(self.wtd.get_schema(date_format))
+        schema = json.dumps(self.td.get_schema(date_format))
         chart_data = json.dumps(chart_data)
         time_series = TimeSeries(FusionTable(schema, chart_data))
 
@@ -151,9 +151,9 @@ class IntraDayView(View):
 class HistoryView(View):
     template_name = 'finance/stock_history.html'
 
-    wtd = WorldTradingData()
-    wtd.setup()
-    data_provider_url = wtd.data_provider_url
+    td = TradingData()
+    td.setup()
+    data_provider_url = td.data_provider_url
 
     def get(self, request, source, symbol, period):
 
@@ -165,7 +165,7 @@ class HistoryView(View):
         if not Stock.objects.filter(symbol=symbol):
             return redirect(reverse('stock_quotes'))
 
-        history_trades = self.wtd.get_stock_history_info(symbol)
+        history_trades = self.td.get_stock_history_info(symbol)
         if history_trades:
             start_period = history_trades[0].date -\
                            datetime.timedelta(days=int(period) * 365)
@@ -201,7 +201,7 @@ class HistoryView(View):
         caption = ''.join([Stock.objects.get(symbol=symbol).company,
                            ' (', symbol, ')'])
 
-        schema = json.dumps(self.wtd.get_schema(date_format))
+        schema = json.dumps(self.td.get_schema(date_format))
         chart_data = json.dumps(chart_data)
         time_series = TimeSeries(FusionTable(schema, chart_data))
         time_series.AddAttribute('chart', {

@@ -23,8 +23,9 @@ RIGHT_ARROW = '\u25B6'
 LEFT_ARROW = '\u25C0'
 
 # common values for app stock
-URL_ALPHAVANTAGE = 'www.alphavantage.com'
-URL_WORLDTRADE = 'www.worldtradingdata.com'
+URL_ALPHAVANTAGE = 'www.alphavantage.co'
+URL_WORLDTRADE = 'www.worldtradedata.com'
+URL_FMP = 'financialmodelingprep.com'
 BASE_CURRENCIES = [('EUR', 'EUR'), ('USD', 'USD')]
 CARET_UP = '\u25B2'         # up triangle
 CARET_DOWN = '\u25BC'       # down triangle

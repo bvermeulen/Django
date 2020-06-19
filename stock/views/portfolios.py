@@ -13,7 +13,7 @@ from howdimain.utils.format_and_tokens import (
     add_display_tokens, format_totals_values, format_and_sort_stocks)
 from stock.forms import PortfolioForm
 from stock.models import Stock, Portfolio, StockSelection
-from stock.module_stock import WorldTradingData
+from stock.module_stock import TradingData
 
 logger = Logger.getlogger()
 d = Decimal
@@ -31,9 +31,9 @@ class PortfolioView(View):
 
     form_class = PortfolioForm
     template_name = 'finance/stock_portfolio.html'
-    wtd = WorldTradingData()
-    wtd.setup()
-    data_provider_url = wtd.data_provider_url
+    td = TradingData()
+    td.setup()
+    data_provider_url = td.data_provider_url
 
     def get(self, request):
         currency = request.session.get('currency', 'EUR')
@@ -65,7 +65,7 @@ class PortfolioView(View):
                      'currencies': currency
                     })
 
-        totals_values = format_totals_values(*self.wtd.calculate_stocks_value(stocks))
+        totals_values = format_totals_values(*self.td.calculate_stocks_value(stocks))
         stocks = add_display_tokens(stocks)
         stocks = format_and_sort_stocks(stocks)
         context = {'form': form,
@@ -163,7 +163,7 @@ class PortfolioView(View):
 
             stocks = []
 
-        totals_values = format_totals_values(*self.wtd.calculate_stocks_value(stocks))
+        totals_values = format_totals_values(*self.td.calculate_stocks_value(stocks))
         stocks = add_display_tokens(stocks)
         stocks = format_and_sort_stocks(stocks)
         context = {'form': form,
@@ -286,14 +286,14 @@ class PortfolioView(View):
         if self.portfolio:
 
             if get_stock == GetStock.YES:
-                stocks = self.wtd.get_portfolio_stock_info(self.portfolio, currency)
+                stocks = self.td.get_portfolio_stock_info(self.portfolio, currency)
 
             elif get_stock == GetStock.NO:
                 try:
                     stocks = json.loads(self.request.session.get('stock_info'))
 
                 except TypeError:
-                    stocks = self.wtd.get_portfolio_stock_info(self.portfolio, currency)
+                    stocks = self.td.get_portfolio_stock_info(self.portfolio, currency)
 
             elif get_stock == GetStock.EMPTY:
                 # stocks is empty list already fullfilled

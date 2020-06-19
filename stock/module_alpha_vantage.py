@@ -5,6 +5,7 @@ import pytz
 import requests
 from decouple import config
 from howdimain.utils.min_max import get_min, get_max
+from howdimain.utils.last_tradetime import last_trade_time, convert_timezone
 from howdimain.utils.plogger import Logger
 from stock.models import Stock
 
@@ -13,18 +14,6 @@ logger = Logger.getlogger()
 api_token = config('API_token_Alpha_Vantage')
 alpha_vantage_api_url = 'https://www.alphavantage.co/query'
 
-
-def convert_timezone(timezone):
-    ''' concvert time from databse to pytz timezones
-    '''
-    if timezone == 'JST':
-        return 'Asia/Tokyo'
-
-    elif timezone == 'KST':
-        return 'Asia/Seoul'
-
-    else:
-        return timezone
 
 
 def get_stock_alpha_vantage(stock_symbols):
@@ -79,31 +68,8 @@ def get_stock_alpha_vantage(stock_symbols):
             stock_dict['name'] = stock_db.company
             stock_dict['currency'] = stock_db.currency.currency
             stock_dict['stock_exchange_short'] = stock_db.exchange.exchange_short
-
-            # check date of last trade. If it istrading time then take today's
-            # date and time, otherwise make it yersterday's close time at 6PM
-            try:
-                timezone_stock = convert_timezone(
-                    stock_db.exchange.time_zone_name.upper())
-
-                _date_time = datetime.datetime.now(
-                    pytz.timezone(timezone_stock)).replace(tzinfo=None)
-                _date_trade = datetime.datetime.strptime(_date_trade, '%Y-%m-%d')
-
-                trade_period = datetime.time(9, 0, 0) < _date_time.time() < datetime.time(18, 0, 0)  #pylint: disable=line-too-long
-                date_is_today = _date_trade.date() == _date_time.date()
-                if  date_is_today and trade_period:
-                    pass
-
-                else:
-                    _date_time = datetime.datetime.combine(
-                        _date_trade.date(), datetime.datetime.strptime(
-                            '18:00:00', '%H:%M:%S').time())
-
-                stock_dict['last_trade_time'] = _date_time
-
-            except ValueError:
-                continue
+            stock_dict['last_trade_time'] = last_trade_time(
+                _date_trade, stock_dict['stock_exchange_short'])
 
             stock_info.append(stock_dict)
 

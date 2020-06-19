@@ -4,7 +4,7 @@ from django.shortcuts import render
 from django.views.generic import View
 from stock.forms import StockQuoteForm
 from stock.models import Portfolio
-from stock.module_stock import WorldTradingData
+from stock.module_stock import TradingData
 from howdimain.utils.get_ip import get_client_ip
 from howdimain.utils.format_and_tokens import add_display_tokens, format_and_sort_stocks
 from howdimain.utils.plogger import Logger
@@ -18,10 +18,10 @@ class QuoteView(View):
     form_class = StockQuoteForm
     template_name = 'finance/stock_quotes.html'
 
-    wtd = WorldTradingData()
-    wtd.setup()
+    td = TradingData()
+    td.setup()
     markets = ['NASDAQ', 'NYSE', 'AEX']
-    data_provider_url = wtd.data_provider_url
+    data_provider_url = td.data_provider_url
     def get(self, request):
         user = request.user
         try:
@@ -76,8 +76,8 @@ class QuoteView(View):
                     for stock in portfolio.first().stocks.all():
                         symbols.append(stock.stock.symbol)
 
-                    stock_info = self.wtd.get_stock_trade_info(symbols[0:20])
-                    stock_info += self.wtd.get_stock_trade_info(symbols[20:40])
+                    stock_info = self.td.get_stock_trade_info(symbols[0:20])
+                    stock_info += self.td.get_stock_trade_info(symbols[20:40])
 
                 except (TypeError, AttributeError):
                     # try if it is a default portfolio
@@ -88,15 +88,15 @@ class QuoteView(View):
                         for stock in portfolio.first().stocks.all():
                             symbols.append(stock.stock.symbol)
 
-                        stock_info = self.wtd.get_stock_trade_info(symbols[0:20])
-                        stock_info += self.wtd.get_stock_trade_info(symbols[20:40])
+                        stock_info = self.td.get_stock_trade_info(symbols[0:20])
+                        stock_info += self.td.get_stock_trade_info(symbols[20:40])
 
                     except AttributeError:
                         pass
 
             else:
-                symbols = self.wtd.parse_stock_name(quote_string, markets=markets)
-                stock_info = self.wtd.get_stock_trade_info(symbols[0:20])
+                symbols = self.td.parse_stock_name(quote_string, markets=markets)
+                stock_info = self.td.get_stock_trade_info(symbols[0:20])
 
             if stock_info:
                 stock_info = add_display_tokens(stock_info)

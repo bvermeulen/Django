@@ -8,16 +8,16 @@ import requests
 from django.contrib.auth.models import User
 from django.db.utils import IntegrityError
 from howdimain.utils.plogger import Logger
+from howdimain.utils.last_tradetime import last_trade_time
 from howdimain.utils.min_max import get_min, get_max
-from howdimain.howdimain_vars import MAX_SYMBOLS_ALLOWED, URL_ALPHAVANTAGE, URL_WORLDTRADE
+from howdimain.howdimain_vars import MAX_SYMBOLS_ALLOWED, URL_FMP
 from stock.models import Exchange, Currency, Stock, Portfolio, StockSelection
 from stock.stock_lists import stock_lists
 from stock.module_alpha_vantage import (
-    get_stock_alpha_vantage, get_intraday_alpha_vantage, get_history_alpha_vantage)
+    get_stock_alpha_vantage, get_intraday_alpha_vantage, get_history_alpha_vantage,
+)
 
 logger = Logger.getlogger()
-alpha_vantage_enabled = True
-
 
 class PopulateStock:
 
@@ -170,22 +170,18 @@ class PopulateStock:
                 if not dummy:
                     Currency.objects.get(currency=currency).delete()
 
-class WorldTradingData:
-    ''' methods to handle trading data
-        website: https://www.worldtradingdata.com
+class TradingData:
+    ''' methods to handle trading data from various sources
+        based on FMP and as fall back Alpha Vantage
     '''
     @classmethod
     def setup(cls,):
         cls.api_token = config('API_token')
-        cls.stock_url = 'https://api.worldtradingdata.com/api/v1/stock'
-        cls.intraday_url = 'https://intraday.worldtradingdata.com/api/v1/intraday'
-        cls.history_url = 'https://api.worldtradingdata.com/api/v1/history'
+        cls.stock_url = 'https://financialmodelingprep.com/api/v3/quote-symex-private-endpoint/'  #pylint: disable=line-too-long
+        cls.intraday_url = 'https://financialmodelingprep.com/api/v3/historical-chart/5min/'      #pylint: disable=line-too-long
+        cls.history_url = 'https://financialmodelingprep.com/api/v3/historical-price-full/'       #pylint: disable=line-too-long
 
-        if alpha_vantage_enabled:
-            cls.data_provider_url = URL_ALPHAVANTAGE
-
-        else:
-            cls.data_provider_url = URL_WORLDTRADE
+        cls.data_provider_url = URL_FMP
 
     @staticmethod
     def get_schema(_format):
@@ -213,25 +209,21 @@ class WorldTradingData:
     def get_stock_trade_info(cls, stock_symbols):
         ''' return the stock trade info as a dict retrieved from url json, key 'data'
         '''
+        symbols = ','.join(stock_symbols).upper()
+        stock_url = cls.stock_url + symbols
+        params = {'apikey': cls.api_token}
 
-        if alpha_vantage_enabled:
-            return get_stock_alpha_vantage(stock_symbols)
-
-        params = {'symbol': ','.join(stock_symbols).upper(),
-                  'sort': 'name',
-                  'api_token': cls.api_token}
-
-        orig_stock_info = {}
+        stock_list = []
         if stock_symbols:
             try:
-                res = requests.get(cls.stock_url, params=params)
-                if res:
-                    orig_stock_info = res.json().get('data', {})
+                res = requests.get(stock_url, params=params)
+                if res and res.status_code == 200:
+                    stock_list = res.json()
                 else:
                     pass
 
             except requests.exceptions.ConnectionError:
-                logger.info(f'connection error: {cls.stock_url} {params}')
+                logger.info(f'connection error: {cls.stock_url} {symbols} {params}')
 
         else:
             pass
@@ -239,20 +231,50 @@ class WorldTradingData:
         if len(stock_symbols) > MAX_SYMBOLS_ALLOWED:
             logger.warning(f'number of symbols exceed '
                            f'maximum of {MAX_SYMBOLS_ALLOWED}')
-
-        # convert date string to datetime object
-        # if there is no last_trade_time then skip this stock
         stock_info = []
-        for stock in orig_stock_info:
+        for quote in stock_list:
+
+            stock_dict = {}
+            # get currency and exchange info from the database if it does not exist
+            # skip this quote
             try:
-                stock['last_trade_time'] = datetime.datetime.strptime(
-                    stock.get('last_trade_time'), "%Y-%m-%d %H:%M:%S")
+                stock_db = Stock.objects.get(symbol=quote['symbol'])
 
-                stock_info.append(stock)
-
-            except ValueError:
+            except Stock.DoesNotExist:
                 continue
 
+            stock_dict['currency'] = stock_db.currency.currency
+            stock_dict['stock_exchange_short'] = stock_db.exchange.exchange_short
+
+            stock_dict['symbol'] = quote.get('symbol')
+            stock_dict['name'] = quote.get('name')
+            stock_dict['open'] = quote.get('open')
+            stock_dict['day_high'] = quote.get('dayHigh')
+            stock_dict['day_low'] = quote.get('dayLow')
+            stock_dict['price'] = quote.get('price')
+            stock_dict['volume'] = quote.get('volume')
+            stock_dict['close_yesterday'] = quote.get('previousClose')
+            stock_dict['day_change'] = quote.get('change')
+            stock_dict['change_pct'] = quote.get('changesPercentage')
+            stock_dict['last_trade_time'] = last_trade_time(
+                quote.get('lastTradeTimeStamp'), stock_dict['stock_exchange_short']
+            )
+
+            stock_info.append(stock_dict)
+
+        # try to get missing symbols through alpha_vantage
+        if stock_info:
+            captured_symbols = [s.get('symbol', '') for s in stock_info]
+        else:
+            captured_symbols = []
+
+        missing_symbols = [s for s in stock_symbols if s not in captured_symbols]
+
+        # TODO remove after DEBUGGING
+        if missing_symbols:
+            print(f'missing symbols: {missing_symbols}')
+
+        stock_info += get_stock_alpha_vantage(missing_symbols)
         return stock_info
 
     @classmethod
@@ -260,10 +282,6 @@ class WorldTradingData:
         '''  return stock intraday info as a dict retrieved from url json,
              key 'intraday'
         '''
-        if alpha_vantage_enabled:
-            return get_intraday_alpha_vantage(stock_symbol)
-
-
         # range: number of days (1-30), interval: in minutes
         params = {'symbol': stock_symbol.upper(),
                   'range': '1',
@@ -330,9 +348,6 @@ class WorldTradingData:
         '''  return stock history info as a dict retrieved from url json,
              key 'history'
         '''
-        if alpha_vantage_enabled:
-            return get_history_alpha_vantage(stock_symbol)
-
         params = {'symbol': stock_symbol.upper(),
                   'sort': 'newest',
                   'api_token': cls.api_token}

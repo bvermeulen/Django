@@ -17,24 +17,24 @@ class UpdateCurrencies:
     db_user_pw = config('DB_PASSWORD')
     database = config('DB_NAME')
 
-    api_token = config('API_token')
-    forex_url = 'https://api.worldtradingdata.com/api/v1/forex'
+    access_key = config('access_key_currency')
+    forex_url = 'http://api.currencylayer.com/live'
 
     @classmethod
     def update_currencies(cls):
-        logger.info('update currencies')
+        logger.info(f'update currencies using {cls.forex_url}')
 
         connect_string = f'host=\'{cls.host}\' dbname=\'{cls.database}\''\
                          f'user=\'{cls.db_user}\' password=\'{cls.db_user_pw}\''
         connection = psycopg2.connect(connect_string)
         cursor = connection.cursor()
 
-        params = {'base': 'USD', 'api_token': cls.api_token}
+        params = {'access_key': cls.access_key}
         forex_dict = {}
         try:
             res = requests.get(cls.forex_url, params=params)
             if res:
-                forex_dict = res.json().get('data', {})
+                forex_dict = res.json().get('quotes', {})
 
             else:
                 logger.info(f'connection error: {cls.forex_url} {params}')
@@ -45,12 +45,12 @@ class UpdateCurrencies:
             return
 
         if forex_dict:
-            sql_string = (f'SELECT currency, usd_exchange_rate FROM stock_currency '
-                          f' ORDER BY currency;')
+            sql_string = ('SELECT currency, usd_exchange_rate FROM stock_currency '
+                          ' ORDER BY currency;')
             cursor.execute(sql_string)
 
             for currency in cursor.fetchall():
-                usd_exchange_rate = forex_dict.get(currency[0], '')
+                usd_exchange_rate = forex_dict.get('USD' + currency[0], '')
                 if usd_exchange_rate:
                     sql_string = (f'UPDATE stock_currency SET '
                                   f'usd_exchange_rate=\'{usd_exchange_rate}\' WHERE '

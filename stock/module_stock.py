@@ -178,8 +178,9 @@ class TradingData:
     def setup(cls,):
         cls.api_token = config('API_token')
         cls.stock_url = 'https://financialmodelingprep.com/api/v3/quote-symex-private-endpoint/'  #pylint: disable=line-too-long
-        cls.intraday_url = 'https://financialmodelingprep.com/api/v3/historical-chart/5min/'      #pylint: disable=line-too-long
+        cls.intraday_url = 'https://financialmodelingprep.com/api/v3/historical-chart/'           #pylint: disable=line-too-long
         cls.history_url = 'https://financialmodelingprep.com/api/v3/historical-price-full/'       #pylint: disable=line-too-long
+        cls.time_interval = '5min'
 
         cls.data_provider_url = URL_FMP
 
@@ -206,7 +207,7 @@ class TradingData:
                 },]
 
     @classmethod
-    def get_stock_trade_info(cls, stock_symbols):
+    def get_stock_trade_info(cls, stock_symbols: list) -> list:
         ''' return the stock trade info as a dict retrieved from url json, key 'data'
         '''
         symbols = ','.join(stock_symbols).upper()
@@ -270,123 +271,155 @@ class TradingData:
 
         missing_symbols = [s for s in stock_symbols if s not in captured_symbols]
 
-        # TODO remove after DEBUGGING
         if missing_symbols:
+            # TODO remove print statement after DEBUGGING
             print(f'missing symbols: {missing_symbols}')
+            stock_info += get_stock_alpha_vantage(missing_symbols)
 
-        stock_info += get_stock_alpha_vantage(missing_symbols)
         return stock_info
 
     @classmethod
-    def get_stock_intraday_info(cls, stock_symbol):
+    def get_stock_intraday_info(cls, stock_symbol: str) -> list:
         '''  return stock intraday info as a dict retrieved from url json,
              key 'intraday'
         '''
-        # range: number of days (1-30), interval: in minutes
-        params = {'symbol': stock_symbol.upper(),
-                  'range': '1',
-                  'interval': '5',
-                  'sort': 'asc',
-                  'api_token': cls.api_token}
-
-        intraday_info = {}
+        intraday_url = cls.intraday_url + '/'.join([cls.time_interval, stock_symbol])
+        params = {'apikey': cls.api_token}
+        _intraday_trades = []
         try:
-            res = requests.get(cls.intraday_url, params=params)
+            res = requests.get(intraday_url, params=params)
             if res:
-                intraday_info = res.json().get('intraday', {})
+                _intraday_trades = res.json()
             else:
                 pass
 
         except requests.exceptions.ConnectionError:
-            logger.info(f'connection error: {cls.intraday_url} {params}')
+            logger.info(f'connection error: {intraday_url} {stock_symbol} {params}')
 
         # if there is intraday info, convert date string and provide time and
         # create list of trade_info tuples
-        trade = namedtuple('trade', 'date open close low high volume')
+        trade_tuple = namedtuple('trade_tuple', 'date open close low high volume')
         intraday_trades = []
         min_low = None
         max_high = None
-        if intraday_info:
-            for time_stamp, trade_info in intraday_info.items():
+        if _intraday_trades:
+            date_trade = datetime.datetime.strptime(
+                _intraday_trades[0].get('date'), "%Y-%m-%d %H:%M:%S").date()
+
+            for i, _trade in enumerate(_intraday_trades):
+                _tradetime = datetime.datetime.strptime(
+                    _trade.get('date'), "%Y-%m-%d %H:%M:%S")
+                if _tradetime.date() != date_trade:
+                    break
+
+                # adjust cumulative volumes
+                try:
+                    volume = _trade.get('volume') - _intraday_trades[i+1].get('volume')
+                    if volume < 0:
+                        volume = 0
+                except IndexError:
+                    volume = 0
+
                 intraday_trades.append(
-                    trade(date=datetime.datetime.strptime(
-                        time_stamp, "%Y-%m-%d %H:%M:%S"),
-                          open=trade_info.get('open'),
-                          close=trade_info.get('close'),
-                          low=trade_info.get('low'),
-                          high=trade_info.get('high'),
-                          volume=trade_info.get('volume'),
-                         )
+                    trade_tuple(
+                        date=_tradetime,
+                        open=_trade.get('open'),
+                        close=_trade.get('close'),
+                        low=_trade.get('low'),
+                        high=_trade.get('high'),
+                        volume=volume,
                     )
+                )
+                min_low = get_min(_trade.get('low'), min_low)
+                max_high = get_max(_trade.get('high'), max_high)
 
-                min_low = get_min(trade_info.get('low'), min_low)
-                max_high = get_max(trade_info.get('high'), max_high)
-
-            initial_open = intraday_trades[0].open
-            last_close = intraday_trades[-1].close
+            intraday_trades = sorted(intraday_trades, key=lambda k: k.date)
 
             # add start and end time
+            initial_open = intraday_trades[0].open
+            last_close = intraday_trades[-1].close
             start_time = intraday_trades[0].date.strftime("%Y-%m-%d") + ' 08:00:00'
             intraday_trades.insert(
-                0, trade(date=datetime.datetime.strptime(start_time, "%Y-%m-%d %H:%M:%S"),
-                         open=None, close=None, low=None, high=None, volume=None
-                        ))
+                0, trade_tuple(date=datetime.datetime.strptime(
+                    start_time, "%Y-%m-%d %H:%M:%S"),
+                               open=None,
+                               close=None,
+                               low=None,
+                               high=None,
+                               volume=None)
+            )
             end_time = intraday_trades[-1].date.strftime("%Y-%m-%d") + ' 18:00:00'
             intraday_trades.append(
-                trade(date=datetime.datetime.strptime(end_time, "%Y-%m-%d %H:%M:%S"),
-                      open=initial_open, close=last_close, low=min_low,
-                      high=max_high, volume=None,
-                     ))
+                trade_tuple(date=datetime.datetime.strptime(
+                    end_time, "%Y-%m-%d %H:%M:%S"),
+                            open=initial_open,
+                            close=last_close,
+                            low=min_low,
+                            high=max_high, volume=None,)
+            )
+
         else:
-            logger.info(f'unable to get stock intraday data for '
-                        f'{cls.intraday_url} {params}')
+            # if not succeeded try with fallback site on alpha vantage
+            intraday_trades = get_intraday_alpha_vantage(stock_symbol)
+            # TODO remove after debugging
+            print(f'going to Alpha Vantage to get intraday trade for {stock_symbol}')
+
+        if not intraday_trades:
+            logger.info(f'unable to get intraday stock data for '
+                        f'{cls.history_url} {stock_symbol} {params}')
 
         return intraday_trades
 
     @classmethod
-    def get_stock_history_info(cls, stock_symbol):
+    def get_stock_history_info(cls, stock_symbol: str) -> list:
         '''  return stock history info as a dict retrieved from url json,
              key 'history'
         '''
-        params = {'symbol': stock_symbol.upper(),
-                  'sort': 'newest',
-                  'api_token': cls.api_token}
+        history_url = cls.history_url + stock_symbol
+        params = {'apikey': cls.api_token}
 
-        history_info = {}
+        _daily_trades = []
         try:
-            res = requests.get(cls.history_url, params=params)
+            res = requests.get(history_url, params=params)
             if res:
-                history_info = res.json().get('history', {})
+                _daily_trades = res.json().get('history', [])
             else:
                 pass
 
         except requests.exceptions.ConnectionError:
-            logger.info(f'connection error: {cls.history_url} {params}')
+            logger.info(f'connection error: {history_url} {stock_symbol} {params}')
 
         # if there is history info, convert date string and provide date and
         # create list of trade_info tuples
-        trade = namedtuple('trade', 'date open close low high volume')
-        history_trades = []
-        if history_info:
-            for date_stamp, trade_info in history_info.items():
-                history_trades.append(
-                    trade(date=datetime.datetime.strptime(date_stamp, "%Y-%m-%d"),
-                          open=trade_info.get('open'),
-                          close=trade_info.get('close'),
-                          low=trade_info.get('low'),
-                          high=trade_info.get('high'),
-                          volume=trade_info.get('volume'),
-                         )
+        trade_tuple = namedtuple('trade_tuple', 'date open close low high volume')
+        daily_trades = []
+        if _daily_trades:
+            for trade in _daily_trades:
+                daily_trades.append(
+                    trade_tuple(
+                        date=datetime.datetime.strptime(trade.get('date'), "%Y-%m-%d"),
+                        open=trade.get('open'),
+                        close=trade.get('close'),
+                        low=trade.get('low'),
+                        high=trade.get('high'),
+                        volume=trade.get('volume'),
                     )
+                )
 
         else:
-            logger.info(f'unable to get stock history data for '
-                        f'{cls.history_url} {params}')
+            # if not succeeded try with fallback site on alpha vantage
+            daily_trades = get_history_alpha_vantage(stock_symbol)
+            # TODO remove after debugging
+            print(f'going to Alpha Vantage to get history trades for {stock_symbol}')
 
-        return history_trades
+        if not daily_trades:
+            logger.info(f'unable to get stock history data for '
+                        f'{cls.history_url} {stock_symbol} {params}')
+
+        return daily_trades
 
     @classmethod
-    def parse_stock_name(cls, stock_string, markets=None):
+    def parse_stock_name(cls, stock_string: str, markets=None):
         ''' parse stock names searching the worldtradingdata database in three
             passes: 1) is the stock name the actual ticker symbol,
             2) if not does it start with the stock_name or 3) does the company

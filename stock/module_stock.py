@@ -272,8 +272,7 @@ class TradingData:
         missing_symbols = [s for s in stock_symbols if s not in captured_symbols]
 
         if missing_symbols:
-            # TODO remove print statement after DEBUGGING
-            print(f'missing symbols: {missing_symbols}')
+            logger.info(f'missing symbols: {missing_symbols}')
             stock_info += get_stock_alpha_vantage(missing_symbols)
 
         return stock_info
@@ -361,8 +360,8 @@ class TradingData:
         else:
             # if not succeeded try with fallback site on alpha vantage
             intraday_trades = get_intraday_alpha_vantage(stock_symbol)
-            # TODO remove after debugging
-            print(f'going to Alpha Vantage to get intraday trade for {stock_symbol}')
+            logger.info(
+                f'going to Alpha Vantage to get intraday trade for {stock_symbol}')
 
         if not intraday_trades:
             logger.info(f'unable to get intraday stock data for '
@@ -409,8 +408,8 @@ class TradingData:
         else:
             # if not succeeded try with fallback site on alpha vantage
             daily_trades = get_history_alpha_vantage(stock_symbol)
-            # TODO remove after debugging
-            print(f'going to Alpha Vantage to get history trades for {stock_symbol}')
+            logger.info(
+                f'going to Alpha Vantage to get history trades for {stock_symbol}')
 
         if not daily_trades:
             logger.info(f'unable to get stock history data for '

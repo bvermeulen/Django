@@ -65,4 +65,3 @@ def last_trade_time(trade_time: str, exchange_short: str) -> datetime:
 
             return _date_time
 
-

@@ -43,27 +43,35 @@ class PopulateStock:
             else:
                 currency = row[2]
 
-            if row[4] in db_exchanges:
-                pass
+            # ignore if exchange is N/A or already exist
+            if not row[4] or row[4] in db_exchanges or row[4] == 'N/A':
+                continue
+
+            if row[0][0] == '^':
+                exchange_short = 'INDEX'
+                exchange_long = 'INDEX'
+                time_zone_name = 'EST'
 
             else:
-                try:
-                    if row[3] == '':
-                        exchange_long = row[4][5:] + ' INDEX'
+                exchange_long = row[3]
+                exchange_short = row[4]
+                if not row[5]:
+                    time_zone_name = 'EST'
 
-                    else:
-                        exchange_long = row[3]
+                else:
+                    time_zone_name = row[5]
 
-                    Exchange.objects.create(
-                        exchange_long=exchange_long,
-                        exchange_short=row[4],
-                        time_zone_name=row[5]
-                    )
-                    db_exchanges.append(exchange_long)
-                    print(f'adding exchange: {exchange_long}')
+            try:
+                Exchange.objects.create(
+                    exchange_long=exchange_long,
+                    exchange_short=exchange_short,
+                    time_zone_name=time_zone_name,
+                )
+                db_exchanges.append(exchange_long)
+                print(f'adding exchange: {exchange_long}')
 
-                except IntegrityError:
-                    pass
+            except IntegrityError:
+                pass
 
             if row[2] in db_currencies:
                 continue
@@ -80,6 +88,17 @@ class PopulateStock:
     @classmethod
     def symbols(cls,):
         for i, row in enumerate(cls.stock_data):
+
+            # ignore if exchange is N/A
+            if not row[4] or row[4] == 'N/A':
+                continue
+
+            if row[0][0] == '^':
+                exchange_short = 'INDEX'
+
+            else:
+                exchange_short = row[4]
+
             if row[2] == '':
                 currency = 'N/A'
 
@@ -92,14 +111,14 @@ class PopulateStock:
                         symbol=row[0],
                         company=row[1][0:75],
                         currency=Currency.objects.get(currency=currency),
-                        exchange=Exchange.objects.get(exchange_short=row[4]),
+                        exchange=Exchange.objects.get(exchange_short=exchange_short),
                         )
                     print(f'processing row {i}, stock {row[0]} - {row[1]}')
                     logger.info(f'processing row {i}, stock {row[0]} - {row[1]}')
 
                 except IntegrityError:
                     pass
-                    # print(f'already in database, stock: {row[1]}')
+                    print(f'already in database, stock: {row[1]}')
                     # logger.info(f'already in database, stock: {row[1]}')
 
     @classmethod

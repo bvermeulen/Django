@@ -40,6 +40,10 @@ def format_decimal_number(number):
         number: string - formatted
         If number is not a valid decimal then number is passed unchanged
     '''
+    # if may be number has value None
+    if number is None:
+        return 'N/A'
+
     try:
         if d(number) > 1000:
             number = f'{d(number):,.0f}'

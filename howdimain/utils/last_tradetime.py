@@ -47,11 +47,21 @@ def last_trade_time(trade_time: str, exchange_short: str) -> datetime:
 
             else:
                 _date_time = datetime.datetime.combine(
-                    _date_trade.date(),
-                    datetime.datetime.strptime('18:00:00', '%H:%M:%S').time()
+                    _date_trade.date(), datetime.datetime.strptime(
+                        '18:00:00', '%H:%M:%S').time()
                 )
 
             return _date_time
 
         except ValueError:
-            return datetime.datetime(1963, 10, 22)
+            # return best guess which is end of day of the previous weekday, note bank
+            # holidays are not dealt with
+            _date_time = _date_time - datetime.timedelta(
+                days=[3, 1, 1, 1, 1, 1, 2][_date_time.weekday()])
+            _date_time = datetime.datetime.combine(
+                _date_time.date(), datetime.datetime.strptime(
+                    '18:00:00', '%H:%M:%S').time()
+            )
+
+            return _date_time
+

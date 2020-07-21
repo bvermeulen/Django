@@ -2,11 +2,11 @@ from decimal import Decimal
 from django.contrib.auth.models import User
 from django.urls import reverse, resolve
 from django.test import TestCase
+from howdimain.howdimain_vars import URL_ALPHAVANTAGE, URL_WORLDTRADE, URL_FMP
 from ..views.portfolios import PortfolioView
 from ..models import Currency, Exchange, Stock, StockSelection, Portfolio
-from howdimain.howdimain_vars import URL_ALPHAVANTAGE, URL_WORLDTRADE
 
-URL_PROVIDER = URL_ALPHAVANTAGE
+URL_PROVIDER = URL_FMP
 d = Decimal
 
 

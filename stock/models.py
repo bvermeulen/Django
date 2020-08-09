@@ -9,7 +9,7 @@ class Exchange(models.Model):
     time_zone_name = models.CharField(max_length=30)
 
     def __str__(self):
-        return self.exchange_long
+        return str(self.exchange_long)
 
 
 class Currency(models.Model):
@@ -17,7 +17,7 @@ class Currency(models.Model):
     usd_exchange_rate = models.CharField(max_length=20, default='1.0')
 
     def __str__(self):
-        return self.currency
+        return str(self.currency)
 
 
 class Stock(models.Model):
@@ -41,7 +41,6 @@ class Portfolio(models.Model):
 
     def __str__(self):
         return f'{self.portfolio_name} for {self.user.username}'
-
 
 class StockSelection(models.Model):
     stock = models.ForeignKey(Stock, on_delete=models.CASCADE)

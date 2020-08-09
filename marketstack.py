@@ -6,7 +6,7 @@ from decouple import config
 
 
 base_url = 'https://api.marketstack.com/v1/'
-api_key = config('API_token_marketstack')
+api_key = config('access_key_marketstack')
 exchanges_filename = 'marketstack_exchanges.xlsx'
 stocks_filename = 'marketstack_stocks.xlsx'
 
@@ -51,14 +51,14 @@ exchanges_df.to_excel(exchanges_filename)
 stocks = {
     'name': [],
     'symbol': [],
+    'has_intraday': [],
+    'has_eod': [],
     'exchange_name': [],
     'exchange_acronym': [],
     'exchange_mic': [],
     'exchange_country': [],
     'exchange_city': [],
     'exchange_website': [],
-    'timezone': [],
-    'currency': [],
 }
 
 url = base_url + 'tickers'
@@ -80,14 +80,14 @@ for page in range(0, pages + 1):
     for stock in stocks_data:
         stocks['name'].append(stock.get('name'))
         stocks['symbol'].append(stock.get('symbol'))
+        stocks['has_intraday'].append(stock.get('has_intraday'))
+        stocks['has_eod'].append(stock.get('has_eod'))
         stocks['exchange_name'].append(stock.get('stock_exchange').get('name'))
         stocks['exchange_acronym'].append(stock.get('stock_exchange').get('acronym'))
         stocks['exchange_mic'].append(stock.get('stock_exchange').get('mic'))
         stocks['exchange_country'].append(stock.get('stock_exchange').get('country'))
         stocks['exchange_city'].append(stock.get('stock_exchange').get('city'))
         stocks['exchange_website'].append(stock.get('stock_exchange').get('website'))
-        stocks['timezone'].append(stock.get('stock_exchange').get('timezone').get('timezone'))
-        stocks['currency'].append(stock.get('stock_exchange').get('currency').get('code'))
 
     offset += 1000
     params = {

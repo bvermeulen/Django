@@ -1,5 +1,5 @@
-import requests
 import re
+import requests
 from recordtype import recordtype
 from PIL import Image
 from django.core.exceptions import ObjectDoesNotExist
@@ -63,12 +63,12 @@ def store_news_item(user, ns, feed_items, ip):
 
 def add_img_tag_adjust_width(summary, image_src):
     ''' - Add image tag if image_src is found
-        - Search for all images in new_summary and adjust width to IMG_WIDTH_PERC 
+        - Search for all images in new_summary and adjust width to IMG_WIDTH_PERC
         if width picture exceeds IMG_WIDTH_PX
     '''
     if image_src:
         new_summary = summary + f'<p><img src="{image_src}" /></p>'
-        
+
     else:
         new_summary = summary
 
@@ -91,10 +91,12 @@ def add_img_tag_adjust_width(summary, image_src):
                 continue
 
             if re.search(r'<img.*style="', img_tag):
-                new_img_tag = re.sub(r'style="', f'style="width: {IMG_WIDTH_PERC}; ', img_tag)
+                new_img_tag = re.sub(
+                    r'style="', f'style="width: {IMG_WIDTH_PERC}; ', img_tag)
 
             else:
-                new_img_tag = re.sub(r'<img ', f'<img style="width: {IMG_WIDTH_PERC}" ', img_tag)
+                new_img_tag = re.sub(
+                    r'<img ', f'<img style="width: {IMG_WIDTH_PERC}" ', img_tag)
 
             new_summary = re.sub(img_tag, new_img_tag, new_summary)
 
@@ -130,7 +132,7 @@ def create_news_context(ns, news_sites, feed_items):
 
     except AttributeError:
         image_src = None
-    
+
     if feed_items[ns.item].enclosures and not image_src:
         image_src = feed_items[ns.item].enclosures[0]['href']
 

@@ -20,7 +20,7 @@ class QuoteView(View):
 
     td = TradingData()
     td.setup()
-    markets = ['NASDAQ', 'NYSE', 'AEX']
+    markets = ['NASDAQ', 'NYSE', 'AEX', 'INDEX']
     data_provider_url = td.data_provider_url
     def get(self, request):
         user = request.user

@@ -1,4 +1,5 @@
 import re
+import requests
 from datetime import datetime, timezone
 from django.contrib.auth.models import User
 from django.db.utils import IntegrityError
@@ -35,7 +36,33 @@ news_list = {'CNN World News':
 def update_news(news_url):
     '''  Function to update the news and display the news site
     '''
-    return feedparser.parse(news_url).entries
+    raw = ''
+    try:
+        response = requests.get(news_url)
+
+        if response and response.status_code == 200:
+            raw = response.text
+
+        else:
+            pass
+
+    except (requests.exceptions.ConnectionError, requests.exceptions.MissingSchema):
+        pass
+
+    # if raw <item>'s have a '<image> ... </image>' pattern extract the image url and
+    # put this image url in an <enclosure /> tag which can be handled by feedparser
+    raw = re.sub(r'(<item>.*?)<image>.*?(http.*?jpg|png|gif).*?</image>(.*?</item>)',
+                 r'\1<enclosure url="\2" />\3', raw)
+
+    # some url give an empty raw string, in that case parse with the url instead of
+    # the raw string
+    if raw:
+        parser = feedparser.parse(raw)
+
+    else:
+        parser = feedparser.parse(news_url)
+
+    return parser.entries
 
 
 def restore_feedparserdict(feed_items):

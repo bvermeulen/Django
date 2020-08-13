@@ -61,12 +61,17 @@ def store_news_item(user, ns, feed_items, ip):
                     f'{usernewsitem.title[:15]}..., ip: {ip}')
 
 
-def add_width_to_img_tag(summary):
-    ''' to fit images on the screen they need a maximum width of 100%
-        there look for all img tags in the summary and insert width in the
-        style
+def add_img_tag_adjust_width(summary, image_src):
+    ''' - Add image tag if image_src is found
+        - Search for all images in new_summary and adjust width to IMG_WIDTH_PERC 
+        if width picture exceeds IMG_WIDTH_PX
     '''
-    new_summary = summary
+    if image_src:
+        new_summary = summary + f'<p><img src="{image_src}" /></p>'
+        
+    else:
+        new_summary = summary
+
     for img_tag_match in re.finditer(r'<img.*?>', summary):
         img_tag = img_tag_match.group(0)
 
@@ -77,7 +82,7 @@ def add_width_to_img_tag(summary):
 
         try:
             im = Image.open(requests.get(source_file_url, stream=True).raw)
-            width, height = im.size
+            width, _ = im.size
         except:
             continue
 
@@ -120,8 +125,20 @@ def create_news_context(ns, news_sites, feed_items):
     news_titles.insert(0, ('refresh', 'Refresh ...'))
     news_title = feed_items[ns.item].get('title', '')
     news_link = feed_items[ns.item].get('link', '')
+    try:
+        image_src = feed_items[ns.item].media_content[0]['url']
+
+    except AttributeError:
+        image_src = None
+    
+    if feed_items[ns.item].enclosures and not image_src:
+        image_src = feed_items[ns.item].enclosures[0]['href']
+
+    else:
+        pass
+
     news_summary = feed_items[ns.item].get('summary', '')
-    news_summary = add_width_to_img_tag(news_summary)
+    news_summary = add_img_tag_adjust_width(news_summary, image_src)
     news_summary = remove_feedburner_reference(news_summary)
     news_summary_flat_text = remove_all_references(news_summary)
 

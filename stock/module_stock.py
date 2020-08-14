@@ -3,6 +3,7 @@ from decimal import Decimal as d
 import datetime
 import csv
 from collections import namedtuple
+import pandas as pd
 from decouple import config
 import requests
 from django.contrib.auth.models import User
@@ -19,7 +20,7 @@ from stock.module_alpha_vantage import (
 
 logger = Logger.getlogger()
 
-class PopulateStock:
+class StockTools:
 
     @classmethod
     def read_csv(cls, filename):
@@ -150,7 +151,6 @@ class PopulateStock:
         ''' cleans database by comparing to wrd stock listing
             to affect database dummy must be set to False
         '''
-
         database_symbols = [
             stock.symbol for stock in Stock.objects.all()]
         database_exchanges = [
@@ -188,6 +188,42 @@ class PopulateStock:
                 logger.info(f'delete currency {currency}')
                 if not dummy:
                     Currency.objects.get(currency=currency).delete()
+
+
+    @classmethod
+    def extract_portfolios(cls):
+        user_portfolios_filename = './user_portfolios.xlsx'
+        users = User.objects.all()
+
+        portfolios_dict = {
+            'username': [],
+            'portfolio_name': [],
+            'symbol': [],
+            'company': [],
+            'quantity': [],
+        }
+
+        for user in users:
+            portfolios = Portfolio.objects.filter(user=user)
+            for portfolio in portfolios:
+                stocks = StockSelection.objects.filter(portfolio=portfolio)
+                for stock in stocks:
+                    print(
+                        f'user: {user.username}, '
+                        f'portfolio: {portfolio.portfolio_name}, '
+                        f'symbol: {stock.stock.symbol}, '
+                        f'company: {stock.stock.company}, '
+                        f'quantity: {stock.quantity}'
+                    )
+                    portfolios_dict['username'].append(user.username)
+                    portfolios_dict['portfolio_name'].append(portfolio.portfolio_name)
+                    portfolios_dict['symbol'].append(stock.stock.symbol)
+                    portfolios_dict['company'].append(stock.stock.company)
+                    portfolios_dict['quantity'].append(stock.quantity)
+
+        portfolios_df = pd.DataFrame(portfolios_dict)
+        portfolios_df.to_excel(user_portfolios_filename)
+
 
 class TradingData:
     ''' methods to handle trading data from various sources
@@ -459,8 +495,8 @@ class TradingData:
             '''  only add if stock_symbol is listed on one of the markets or
                  markets is empty
             '''
-            if markets == [] or Stock.objects.filter(symbol=stock_symbol).\
-                                    first().exchange.exchange_short in markets:
+            if markets == [] or Stock.objects.filter(
+                    symbol=stock_symbol).first().exchange.exchange_short in markets:
                 stock_symbols.add(stock_symbol)
             else:
                 pass
@@ -483,7 +519,7 @@ class TradingData:
                     add_stock_symbol_if_valid(stock_symbol)
 
             else:
-                #  check if name of the companay contains the stock_name (exact match)
+                #  check if name of the company contains the stock_name (exact match)
                 for stock in Stock.objects.filter(company__icontains=stock_name):
                     stock_symbol = Stock.objects.get(symbol=stock.symbol).symbol
                     add_stock_symbol_if_valid(stock_symbol)

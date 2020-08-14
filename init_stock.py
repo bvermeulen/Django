@@ -2,7 +2,7 @@ import os
 
 def populate_stock():
     import stock.module_stock
-    stock_populate = stock.module_stock.PopulateStock()
+    stock_populate = stock.module_stock.StockTools()
     filename = './stock/stock info/worldtradingdata-tokyo_exchange.csv'
     stock_populate.read_csv(filename)
     stock_populate.exchanges_and_currencies()

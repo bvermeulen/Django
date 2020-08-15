@@ -1,7 +1,6 @@
 import decimal
 from decimal import Decimal as d
 import datetime
-import csv
 from collections import namedtuple
 import pandas as pd
 from decouple import config
@@ -21,70 +20,52 @@ from stock.module_alpha_vantage import (
 logger = Logger.getlogger()
 
 class StockTools:
+    ''' methods to read stocks and populate the database
+    '''
+    @staticmethod
+    def exchanges_and_currencies(filename):
+        stock_df = pd.read_excel(filename, index_col=0)
 
-    @classmethod
-    def read_csv(cls, filename):
-        cls.stock_data = []
-        with open(filename) as csv_file:
-            _stock_data = csv.reader(csv_file, delimiter=",")
-            # skip the header
-            next(_stock_data, None)
-            for row in _stock_data:
-                cls.stock_data.append(row)
-
-    @classmethod
-    def exchanges_and_currencies(cls,):
-        db_exchanges = [exchange.exchange_short for exchange in Exchange.objects.all()]
+        db_exchanges = [exchange.mic for exchange in Exchange.objects.all()]
         db_currencies = [currency.currency for currency in Currency.objects.all()]
 
-        for row in cls.stock_data:
-            if row[2] == '':
+        for index, row in stock_df.iterrows():
+            if pd.isnull(row['currency']):
                 currency = 'N/A'
 
             else:
-                currency = row[2]
+                currency = row['currency']
 
-            # ignore if exchange is N/A or already exist
-            if not row[4] or row[4] in db_exchanges or row[4] == 'N/A':
+            if currency not in db_currencies:
+                try:
+                    Currency.objects.create(currency=currency)
+                    db_currencies.append(row.currency)
+                    print(f'processing {index:4}: adding currency: {currency}')
+
+                except IntegrityError:
+                    print(f'processing {index:4}: currency: {currency} already processed')
+
+            # ignore if exchange already exist
+            if row['mic'] in db_exchanges:
                 continue
-
-            if row[0][0] == '^':
-                exchange_short = 'INDEX'
-                exchange_long = 'INDEX'
-                time_zone_name = 'EST'
-
-            else:
-                exchange_long = row[3]
-                exchange_short = row[4]
-                if not row[5]:
-                    time_zone_name = 'EST'
-
-                else:
-                    time_zone_name = row[5]
 
             try:
                 Exchange.objects.create(
-                    exchange_long=exchange_long,
-                    exchange_short=exchange_short,
-                    time_zone_name=time_zone_name,
+                    mic=row['mic'],
+                    ric=row['ric'],
+                    name=row['name'],
+                    acronym=row['acronym'],
+                    country_code=row['country_code'],
+                    city=row['city'],
+                    website=row['website'],
+                    timezone=row['timezone'],
+                    currency=Currency.objects.get(currency=currency)
                 )
-                db_exchanges.append(exchange_long)
-                print(f'adding exchange: {exchange_long}')
+                db_exchanges.append(row.mic)
+                print(f'processing {index:4}: adding exchange: {row["name"]}')
 
             except IntegrityError:
-                pass
-
-            if row[2] in db_currencies:
-                continue
-
-            else:
-                try:
-                    Currency.objects.create(currency=currency)
-                    db_currencies.append(currency)
-                    print(f'adding currency: {currency}')
-
-                except IntegrityError:
-                    pass
+                print(f'processing {index:4}: integrity error for exchange: {row["name"]}')
 
     @classmethod
     def symbols(cls,):
@@ -118,7 +99,6 @@ class StockTools:
                     logger.info(f'processing row {i}, stock {row[0]} - {row[1]}')
 
                 except IntegrityError:
-                    pass
                     print(f'already in database, stock: {row[1]}')
                     # logger.info(f'already in database, stock: {row[1]}')
 

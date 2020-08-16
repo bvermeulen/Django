@@ -12,7 +12,6 @@ from howdimain.utils.last_tradetime import last_trade_time
 from howdimain.utils.min_max import get_min, get_max
 from howdimain.howdimain_vars import MAX_SYMBOLS_ALLOWED, URL_FMP
 from stock.models import Exchange, Currency, Stock, Portfolio, StockSelection
-from stock.stock_lists import stock_lists
 from stock.module_alpha_vantage import (
     get_stock_alpha_vantage, get_intraday_alpha_vantage, get_history_alpha_vantage,
 )
@@ -23,13 +22,13 @@ class StockTools:
     ''' methods to read stocks and populate the database
     '''
     @staticmethod
-    def exchanges_and_currencies(filename):
-        stock_df = pd.read_excel(filename, index_col=0)
+    def exchanges_and_currencies(filename: str):
+        exchanges_df = pd.read_excel(filename, index_col=0)
 
         db_exchanges = [exchange.mic for exchange in Exchange.objects.all()]
         db_currencies = [currency.currency for currency in Currency.objects.all()]
 
-        for index, row in stock_df.iterrows():
+        for index, row in exchanges_df.iterrows():
             if pd.isnull(row['currency']):
                 currency = 'N/A'
 
@@ -65,114 +64,92 @@ class StockTools:
                 print(f'processing {index:4}: adding exchange: {row["name"]}')
 
             except IntegrityError:
-                print(f'processing {index:4}: integrity error for exchange: {row["name"]}')
+                print(
+                    f'processing {index:4}: integrity error for exchange: {row["name"]}')
 
-    @classmethod
-    def symbols(cls,):
-        for i, row in enumerate(cls.stock_data):
+    @staticmethod
+    def symbols(filename: str):
+        stocks_df = pd.read_excel(filename, index_col=0)
 
-            # ignore if exchange is N/A
-            if not row[4] or row[4] == 'N/A':
+        for index, row in stocks_df.iterrows():
+
+            if row['symbol'][0] == '^':
+                exchange_mic = 'INDEX'
+
+            else:
+                exchange_mic = row['exchange_mic']
+
+            try:
+                Stock.objects.create(
+                    symbol=row['symbol'],
+                    symbol_ric=row['symbol_ric'],
+                    company=str(row['name'])[0:75],
+                    exchange=Exchange.objects.get(mic=exchange_mic),
+                    currency=Exchange.objects.get(mic=exchange_mic).currency,
+                )
+                print(f'processing {index:4}: symbol {row["symbol"]} - {row["name"]}')
+                logger.info(
+                    f'processing {index:4}: symbol {row["symbol"]} - {row["name"]}')
+
+            except IntegrityError:
+                print(
+                    f'processing {index:4}: already in database, symbol: {row["symbol"]}')
+                logger.info(
+                    f'processing {index:4}: already in database, symbol: {row["symbol"]}')
+
+    @staticmethod
+    def create_portfolios(filename: str, ric=False):
+        portfolios_df = pd.read_excel(filename, index_col=0)
+
+        for index, row in portfolios_df.iterrows():
+            try:
+                user = User.objects.get(username=row['username'])
+            except User.DoesNotExist:
                 continue
 
-            if row[0][0] == '^':
-                exchange_short = 'INDEX'
+            try:
+                if ric:
+                    stock = Stock.objects.get(symbol_ric=row['symbol'])
 
-            else:
-                exchange_short = row[4]
+                else:
+                    stock = Stock.objects.get(symbol='symbol')
 
-            if row[2] == '':
-                currency = 'N/A'
+            except Stock.DoesNotExist:
+                continue
 
-            else:
-                currency = row[2]
+            try:
+                Portfolio.objects.create(
+                    portfolio_name=row['portfolio_name'],
+                    user=user,
+                )
 
-            if row[0]:
-                try:
-                    _ = Stock.objects.create(
-                        symbol=row[0],
-                        company=row[1][0:75],
-                        currency=Currency.objects.get(currency=currency),
-                        exchange=Exchange.objects.get(exchange_short=exchange_short),
-                        )
-                    print(f'processing row {i}, stock {row[0]} - {row[1]}')
-                    logger.info(f'processing row {i}, stock {row[0]} - {row[1]}')
+            except IntegrityError:
+                pass
 
-                except IntegrityError:
-                    print(f'already in database, stock: {row[1]}')
-                    # logger.info(f'already in database, stock: {row[1]}')
+            try:
+                StockSelection.objects.create(
+                    stock=stock,
+                    quantity=row['quantity'],
+                    portfolio=Portfolio.objects.get(
+                        portfolio_name=row['portfolio_name'],
+                        user=user,
+                    )
+                )
+                print(
+                    f'processing {index:4}: add {row["symbol"]} '
+                    f'to portfolio {row["portfolio_name"]} '
+                    f'for user {row["username"]}'
+                )
 
-    @classmethod
-    def create_default_portfolios(cls,):
-        default = User.objects.get(username='default_user')
+            except IntegrityError:
+                print(
+                    f'processing {index:4}: unable to add {row["symbol"]}'
+                    f'to portfolio {row["portfolio_name"]} '
+                    f'for user {row["username"]}'
+                )
 
-        portfolio = Portfolio.objects.create(portfolio_name='Techno', user=default)
-        for stock_symbol in stock_lists.get('TECH'):
-            stock = Stock.objects.get(symbol=stock_symbol)
-            _ = StockSelection.objects.create(
-                stock=stock, quantity=1, portfolio=portfolio)
-
-        portfolio = Portfolio.objects.create(
-            portfolio_name='AEX', user=default)
-        for stock_symbol in stock_lists.get('AEX'):
-            stock = Stock.objects.get(symbol=stock_symbol)
-            _ = StockSelection.objects.create(
-                stock=stock, quantity=1, portfolio=portfolio)
-
-        portfolio = Portfolio.objects.create(portfolio_name='Dow Jones', user=default)
-        for stock_symbol in stock_lists.get('DOW'):
-            print(stock_symbol)
-            stock = Stock.objects.get(symbol=stock_symbol)
-            _ = StockSelection.objects.create(
-                stock=stock, quantity=1, portfolio=portfolio)
-
-    @classmethod
-    def compare_and_clean_database_with_wtd(cls, dummy=True):
-        ''' cleans database by comparing to wrd stock listing
-            to affect database dummy must be set to False
-        '''
-        database_symbols = [
-            stock.symbol for stock in Stock.objects.all()]
-        database_exchanges = [
-            exchange.exchange_short for exchange in Exchange.objects.all()]
-        database_currencies = [
-            currency.currency for currency in Currency.objects.all()]
-
-        wtd_symbols = {stock[0] for stock in cls.stock_data}
-        wtd_exchanges = {stock[4] for stock in cls.stock_data}
-        wtd_currencies = {stock[2] for stock in cls.stock_data}
-
-        print('clearing stocks')
-        logger.info('clearing stocks')
-        for symbol in database_symbols:
-            if symbol not in wtd_symbols:
-                print(f'delete stock {symbol}')
-                logger.info(f'delete stock {symbol}')
-                if not dummy:
-                    Stock.objects.get(symbol=symbol).delete()
-
-        print('clearing exchanges')
-        logger.info('clearing exchanges')
-        for exchange in database_exchanges:
-            if exchange not in wtd_exchanges:
-                print(f'delete exchange {exchange}')
-                logger.info(f'delete exchange {exchange}')
-                if not dummy:
-                    Exchange.objects.get(exchange_short=exchange).delete()
-
-        print('clearing currencies')
-        logger.info('clearing currencies')
-        for currency in database_currencies:
-            if currency not in wtd_currencies and currency != 'N/A':
-                print(f'delete currency {currency}')
-                logger.info(f'delete currency {currency}')
-                if not dummy:
-                    Currency.objects.get(currency=currency).delete()
-
-
-    @classmethod
-    def extract_portfolios(cls):
-        user_portfolios_filename = './user_portfolios.xlsx'
+    @staticmethod
+    def extract_portfolios(user_portfolios_filename: str):
         users = User.objects.all()
 
         portfolios_dict = {

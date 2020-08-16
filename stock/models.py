@@ -31,10 +31,10 @@ class Stock(models.Model):
     symbol = models.CharField(max_length=20, unique=True)
     symbol_ric = models.CharField(max_length=20, unique=True)
     company = models.CharField(max_length=75, unique=False)
-    currency = models.ForeignKey(Currency, on_delete=models.CASCADE,
-                                 related_name='stocks')
-    exchange = models.ForeignKey(Exchange, on_delete=models.CASCADE,
-                                 related_name='stocks')
+    currency = models.ForeignKey(
+        Currency, on_delete=models.CASCADE, related_name='stocks')
+    exchange = models.ForeignKey(
+        Exchange, on_delete=models.CASCADE, related_name='stocks')
 
     def __str__(self):
         return Truncator(self.company).chars(20)

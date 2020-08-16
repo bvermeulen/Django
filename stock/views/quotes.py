@@ -34,11 +34,11 @@ class QuoteView(View):
         form = self.form_class(initial={'quote_string': quote_string,
                                         'markets': markets, })
 
-        portfolios = [item.portfolio_name for item in Portfolio.objects.filter(
+        portfolios = [p.portfolio_name for p in Portfolio.objects.filter(
             user=default_user)]
 
         if user.is_authenticated:
-            portfolios += [item.portfolio_name for item in Portfolio.objects.filter(
+            portfolios += [p.portfolio_name for p in Portfolio.objects.filter(
                 user=user)]
 
         context = {'source': source,
@@ -70,28 +70,21 @@ class QuoteView(View):
             if selected_portfolio:
                 try:
                     # try if user has selected a portfolio
-                    portfolio = Portfolio.objects.filter(
-                        user=user, portfolio_name=selected_portfolio)
-
-                    for stock in portfolio.first().stocks.all():
-                        symbols.append(stock.stock.symbol)
-
-                    stock_info = self.td.get_stock_trade_info(symbols[0:20])
-                    stock_info += self.td.get_stock_trade_info(symbols[20:40])
-
-                except (TypeError, AttributeError):
-                    # try if it is a default portfolio
-                    try:
-                        portfolio = Portfolio.objects.filter(
-                            user=default_user, portfolio_name=selected_portfolio)
-
-                        for stock in portfolio.first().stocks.all():
-                            symbols.append(stock.stock.symbol)
-
+                    if user.is_authenticated:
+                        symbols = Portfolio.objects.get(
+                            user=user, portfolio_name=selected_portfolio).get_stock()
                         stock_info = self.td.get_stock_trade_info(symbols[0:20])
                         stock_info += self.td.get_stock_trade_info(symbols[20:40])
 
-                    except AttributeError:
+                except Portfolio.DoesNotExist:
+                    # try if it is a default portfolio
+                    try:
+                        symbols = Portfolio.objects.get(
+                            user=default_user, portfolio_name=selected_portfolio).get_stock()  #pylint: disable=line-too-long
+                        stock_info = self.td.get_stock_trade_info(symbols[0:20])
+                        stock_info += self.td.get_stock_trade_info(symbols[20:40])
+
+                    except Portfolio.DoesNotExist:
                         pass
 
             else:
@@ -106,11 +99,11 @@ class QuoteView(View):
         else:
             stock_info = []
 
-        portfolios = [item.portfolio_name for item in Portfolio.objects.filter(
+        portfolios = [p.portfolio_name for p in Portfolio.objects.filter(
             user=default_user)]
 
         if user.is_authenticated:
-            portfolios += [item.portfolio_name for item in Portfolio.objects.filter(
+            portfolios += [p.portfolio_name for p in Portfolio.objects.filter(
                 user=user)]
 
         stock_info = add_display_tokens(stock_info)

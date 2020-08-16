@@ -13,8 +13,8 @@ class StockQuoteForm(forms.Form):
 
         self.fields['selected_portfolio'] = forms.CharField(required=False)
 
-        choices = [(exchange.exchange_short, exchange.exchange_long)\
-            for exchange in Exchange.objects.all().order_by('exchange_long')]
+        choices = [(exchange.mic, exchange.name)\
+            for exchange in Exchange.objects.all().order_by('name')]
 
         self.fields['markets'] = forms.MultipleChoiceField(
             widget=forms.CheckboxSelectMultiple(),

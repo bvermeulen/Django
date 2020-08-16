@@ -91,7 +91,7 @@
       <tr>
         <td width="17%"><a href="{% url 'stock_intraday' source stock.symbol %}">{{ stock.name|truncatechars:18 }}</a></td>
         <td width="10%">{{ stock.symbol }}</td>
-        <td width="10%">{{ stock.stock_exchange_short|truncatechars:9 }}</td>
+        <td width="10%">{{ stock.exchange_mic|truncatechars:9 }}</td>
         <td width="7%">{{ stock.currency }}</td>
         <td style="width: 2%; color:{{ stock.font_color }}">{{ stock.caret_up_down }}</td>
         <td style="width: 7%; color:{{ stock.font_color }}">{{ stock.price }}</td>

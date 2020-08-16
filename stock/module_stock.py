@@ -184,7 +184,7 @@ class StockTools:
 
 class TradingData:
     ''' methods to handle trading data from various sources
-        based on FMP and as fall back Alpha Vantage
+        based on FMP and as fall back to Marketstack
     '''
     @classmethod
     def setup(cls,):
@@ -251,13 +251,13 @@ class TradingData:
             # get currency and exchange info from the database if it does not exist
             # skip this quote
             try:
-                stock_db = Stock.objects.get(symbol=quote['symbol'])
+                stock_db = Stock.objects.get(symbol_ric=quote['symbol'])
 
             except Stock.DoesNotExist:
                 continue
 
             stock_dict['currency'] = stock_db.currency.currency
-            stock_dict['stock_exchange_short'] = stock_db.exchange.exchange_short
+            stock_dict['exchange_mic'] = stock_db.exchange.mic
 
             stock_dict['symbol'] = quote.get('symbol')
             stock_dict['name'] = quote.get('name')
@@ -270,7 +270,7 @@ class TradingData:
             stock_dict['day_change'] = quote.get('change')
             stock_dict['change_pct'] = quote.get('changesPercentage')
             stock_dict['last_trade_time'] = last_trade_time(
-                quote.get('lastTradeTimeStamp'), stock_dict['stock_exchange_short']
+                quote.get('lastTradeTimeStamp'), stock_dict['exchange_mic']
             )
 
             stock_info.append(stock_dict)
@@ -430,7 +430,7 @@ class TradingData:
         return daily_trades
 
     @classmethod
-    def parse_stock_name(cls, stock_string: str, markets=None):
+    def parse_stock_name(cls, stock_string: str, markets=None) -> list:
         ''' parse stock names searching the worldtradingdata database in three
             passes: 1) is the stock name the actual ticker symbol,
             2) if not does it start with the stock_name or 3) does the company
@@ -453,7 +453,7 @@ class TradingData:
                  markets is empty
             '''
             if markets == [] or Stock.objects.filter(
-                    symbol=stock_symbol).first().exchange.exchange_short in markets:
+                    symbol_ric=stock_symbol).first().exchange.acronym in markets:
                 stock_symbols.add(stock_symbol)
             else:
                 pass
@@ -464,28 +464,23 @@ class TradingData:
                 continue
 
             #  check if stock_name is the actual symbol
-            if Stock.objects.filter(symbol=stock_name.upper()):
+            if Stock.objects.filter(symbol_ric=stock_name.upper()):
                 add_stock_symbol_if_valid(stock_name.upper())
                 continue
 
-            stock_query = Stock.objects.filter(company__startswith=stock_name.title())
-            if stock_query:
-                #  check if name of the company starts with stock_name (titled)
-                for stock in stock_query:
-                    stock_symbol = Stock.objects.get(symbol=stock.symbol).symbol
-                    add_stock_symbol_if_valid(stock_symbol)
+            #  add symbols if the company starts with stock_name (titled)
+            for stock in Stock.objects.filter(company__startswith=stock_name.title()):
+                add_stock_symbol_if_valid(stock.symbol_ric)
 
-            else:
-                #  check if name of the company contains the stock_name (exact match)
-                for stock in Stock.objects.filter(company__icontains=stock_name):
-                    stock_symbol = Stock.objects.get(symbol=stock.symbol).symbol
-                    add_stock_symbol_if_valid(stock_symbol)
+            #  add symbols if the company contains the stock_name (exact match)
+            for stock in Stock.objects.filter(company__icontains=stock_name):
+                add_stock_symbol_if_valid(stock.symbol_ric)
 
         return list(stock_symbols)
 
     @classmethod
     def get_portfolio_stock_info(cls, portfolio, base_currency):
-        symbols_quantities = {stock.stock.symbol: stock.quantity
+        symbols_quantities = {stock.stock.symbol_ric: stock.quantity
                               for stock in portfolio.stocks.all()}
         list_symbols = list(symbols_quantities.keys())
         stock_trade_info = cls.get_stock_trade_info(

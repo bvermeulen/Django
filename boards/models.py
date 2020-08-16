@@ -22,7 +22,7 @@ class Board(models.Model):
         return Post.objects.filter(topic__board=self).order_by('-created_at').first()
 
     def __str__(self):
-        return self.name
+        return str(self.name)
 
 
 class Topic(models.Model):

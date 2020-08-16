@@ -19,7 +19,7 @@ def convert_timezone(timezone: str) -> str:
         return timezone
 
 
-def last_trade_time(trade_time: str, exchange_short: str) -> datetime:
+def last_trade_time(trade_time: str, exchange_mic: str) -> datetime:
 
     # try default option where tradetime is in a valid format
     try:
@@ -28,13 +28,13 @@ def last_trade_time(trade_time: str, exchange_short: str) -> datetime:
     except ValueError:
         # otherwise base the last trade time on the current time in the exchange timezone
         try:
-            exchange = Exchange.objects.get(exchange_short=exchange_short)
+            exchange = Exchange.objects.get(mic=exchange_mic)
 
         except Exchange.DoesNotExist:
             return datetime.datetime(1963, 10, 22)
 
         try:
-            timezone_stock = convert_timezone(exchange.time_zone_name.upper())
+            timezone_stock = convert_timezone(exchange.timezone.upper())
 
             _date_time = datetime.datetime.now(
                 pytz.timezone(timezone_stock)).replace(tzinfo=None)

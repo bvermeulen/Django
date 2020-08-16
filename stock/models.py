@@ -32,12 +32,12 @@ class Stock(models.Model):
     symbol_ric = models.CharField(max_length=20, unique=True)
     company = models.CharField(max_length=75, unique=False)
     currency = models.ForeignKey(
-        Currency, on_delete=models.CASCADE, related_name='stocks')
+        Currency, on_delete=models.CASCADE)
     exchange = models.ForeignKey(
-        Exchange, on_delete=models.CASCADE, related_name='stocks')
+        Exchange, on_delete=models.CASCADE)
 
     def __str__(self):
-        return Truncator(self.company).chars(20)
+        return Truncator(self.company).charPs(20)
 
 
 class Portfolio(models.Model):
@@ -46,6 +46,9 @@ class Portfolio(models.Model):
 
     class Meta:
         unique_together = ['portfolio_name', 'user']
+
+    def get_stock(self) -> list:
+        return [stock.stock.symbol for stock in self.stocks.all()]
 
     def __str__(self):
         return f'{self.portfolio_name} for {self.user.username}'

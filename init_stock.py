@@ -9,9 +9,10 @@ def populate_stock():
     filename_portfolios = './200814_howdimain_user_portfolios.xlsx'
 
 
-    stock_populate.exchanges_and_currencies(filename_exchanges)
-    stock_populate.symbols(filename_stocks)
+    # stock_populate.exchanges_and_currencies(filename_exchanges)
+    # stock_populate.symbols(filename_stocks)
     # stock_populate.create_portfolios(filename_portfolios, ric=True)
+    stock_populate.extract_portfolios('zz_test.xlsx')
 
 
 if __name__ == "__main__":

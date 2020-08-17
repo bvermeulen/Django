@@ -17,7 +17,8 @@ from ..module_news import (feedparser_time_to_datetime,
 logger = Logger.getlogger()
 NewsStatus = recordtype(
     'NewsStatus',
-    'current_news_site news_site updated item news_items banner error_message')
+    'current_news_site news_site updated item news_items banner error_message'
+)
 
 
 def set_session_newsstatus(request, newsstatus):
@@ -64,7 +65,7 @@ def store_news_item(user, ns, feed_items, ip):
 def add_img_tag_adjust_width(summary, image_src):
     ''' - Add image tag if image_src is found
         - Search for all images in new_summary and adjust width to IMG_WIDTH_PERC
-        if width picture exceeds IMG_WIDTH_PX
+            if width picture exceeds IMG_WIDTH_PX
     '''
     if image_src:
         new_summary = summary + f'<p><img src="{image_src}" /></p>'
@@ -83,7 +84,7 @@ def add_img_tag_adjust_width(summary, image_src):
         try:
             im = Image.open(requests.get(source_file_url, stream=True).raw)
             width, _ = im.size
-        except:
+        except:  #pylint: disable=bare-except
             continue
 
         if width > IMG_WIDTH_PX:

@@ -453,7 +453,7 @@ class TradingData:
                  markets is empty
             '''
             if markets == [] or Stock.objects.filter(
-                    symbol_ric=stock_symbol).first().exchange.acronym in markets:
+                    symbol_ric=stock_symbol).first().exchange.mic in markets:
                 stock_symbols.add(stock_symbol)
             else:
                 pass

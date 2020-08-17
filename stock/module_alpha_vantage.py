@@ -60,16 +60,16 @@ def get_stock_alpha_vantage(stock_symbols):
 
             # get other stock info from the database if does not exist skip this quote
             try:
-                stock_db = Stock.objects.get(symbol=stock_dict['symbol'])
+                stock_db = Stock.objects.get(symbol_ric=stock_dict['symbol'])
 
             except Stock.DoesNotExist:
                 continue
 
             stock_dict['name'] = stock_db.company
             stock_dict['currency'] = stock_db.currency.currency
-            stock_dict['stock_exchange_short'] = stock_db.exchange.exchange_short
+            stock_dict['exchange_mic'] = stock_db.exchange.mic
             stock_dict['last_trade_time'] = last_trade_time(
-                _date_trade, stock_dict['stock_exchange_short'])
+                _date_trade, stock_dict['exchange_mic'])
 
             stock_info.append(stock_dict)
 

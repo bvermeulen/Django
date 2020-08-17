@@ -19,56 +19,85 @@ class PortfolioTestCase(TestCase):
         cls.test_user_pw = '123'
         default_user = 'default_user'
 
-        cls.test_user = User.objects.create_user(username=cls.test_user_name,
-                                                 email='test@howdiweb.nl',
-                                                 password=cls.test_user_pw)
+        cls.test_user = User.objects.create_user(
+            username=cls.test_user_name,
+            email='test@howdiweb.nl',
+            password=cls.test_user_pw,
+        )
 
-        default_user = User.objects.create_user(username='default_user',
-                                                email='default@howdiweb.nl',
-                                                password='456')
+        default_user = User.objects.create_user(
+            username='default_user',
+            email='default@howdiweb.nl',
+            password='456',
+        )
 
-        usd = Currency.objects.create(currency='USD',
-                                      usd_exchange_rate='1.0')
+        usd = Currency.objects.create(
+            currency='USD',
+            usd_exchange_rate='1.0',
+        )
 
-        cls.eur = Currency.objects.create(currency='EUR',
-                                          usd_exchange_rate='0.9')
+        eur = Currency.objects.create(
+            currency='EUR',
+            usd_exchange_rate='0.9',
+        )
 
-        nyse = Exchange.objects.create(exchange_short='NYSE',
-                                       exchange_long='New York Stock Exchange',
-                                       time_zone_name='America/New_York',)
+        nyse = Exchange.objects.create(
+            mic='XNYS',
+            ric='None',
+            acronym='NYSE',
+            name='New York Stock Exchange',
+            currency=usd,
+            timezone='America/New_York',
+            country_code='US',
+            city='New York',
+            website='www.nyse.com',
+        )
 
-        aex = Exchange.objects.create(exchange_short='AEX',
-                                      exchange_long='Amsterdam AEX',
-                                      time_zone_name='Europe/Amsterdam',)
+        aex = Exchange.objects.create(
+            mic='XAMS',
+            ric='AS',
+            name='Amsterdam AEX',
+            currency=eur,
+            timezone='Europe/Amsterdam',
+            country_code='NL',
+            city='Amsterdam',
+            website='www.aex.com',
+        )
 
-        cls.apple = Stock.objects.create(symbol='AAPL',
-                                         company='Apple',
-                                         currency=usd,
-                                         exchange=nyse,)
+        cls.apple = Stock.objects.create(
+            symbol='AAPL',
+            symbol_ric='AAPL',
+            company='Apple',
+            currency=usd,
+            exchange=nyse,
+        )
 
-        cls.rds = Stock.objects.create(symbol='RDSA.AS',
-                                       company='Royal Dutch Shell',
-                                       currency=cls.eur,
-                                       exchange=aex)
+        cls.rds = Stock.objects.create(
+            symbol='RDSA.XAMS',
+            symbol_ric='RDSA.AS',
+            company='Royal Dutch Shell',
+            currency=eur,
+            exchange=aex,
+        )
 
-        Stock.objects.create(symbol='WKL.AS',
-                             company='Wolters Kluwer',
-                             currency=cls.eur,
-                             exchange=aex)
+        Stock.objects.create(
+            symbol='WKL.XAMS',
+            symbol_ric='WKL.AS',
+            company='Wolters Kluwer',
+            currency=eur,
+            exchange=aex,
+        )
 
-        cls.test_portfolio = Portfolio.objects.create(portfolio_name='test_portfolio',
-                                                      user=cls.test_user)
+        cls.test_portfolio = Portfolio.objects.create(
+            portfolio_name='test_portfolio',
+            user=cls.test_user,
+        )
 
-        StockSelection.objects.create(stock=cls.apple,
-                                      quantity=10,
-                                      portfolio=cls.test_portfolio)
-
-        default_aex = Portfolio.objects.create(portfolio_name='AEX_index',
-                                               user=default_user,)
-
-        StockSelection.objects.create(stock=cls.rds,
-                                      quantity=1,
-                                      portfolio=default_aex)
+        StockSelection.objects.create(
+            stock=cls.apple,
+            quantity=10,
+            portfolio=cls.test_portfolio,
+        )
 
 
 class TestPortfolioView(PortfolioTestCase):
@@ -182,7 +211,7 @@ class TestPortfolioPost(PortfolioTestCase):
         stocks_portfolio_db = Portfolio.objects.filter(
             user=self.test_user, portfolio_name='test_portfolio').first().stocks.all()
         self.assertEqual(2, len(stocks_portfolio_db))
-        self.assertEqual('RDSA.AS', stocks_portfolio_db[1].stock.symbol)
+        self.assertEqual('RDSA.AS', stocks_portfolio_db[1].stock.symbol_ric)
         self.assertEqual('RDSA.AS', response.context['stocks'][1]['symbol'])
 
     def test_link_to_intraday_view(self):

@@ -1,6 +1,6 @@
 from django.test import TestCase
 from howdimain.howdimain_vars import IMG_WIDTH_PERC
-from ..views.views_utils import add_width_to_img_tag
+from ..views.views_utils import add_img_tag_adjust_width
 
 
 class TestUtils(TestCase):
@@ -17,13 +17,11 @@ class TestUtils(TestCase):
             f'something more >'
         )
 
-        new_a = add_width_to_img_tag(a)
+        new_a = add_img_tag_adjust_width(a, None)
         self.assertEqual(new_a, (
             f'123 <img style="width: {IMG_WIDTH_PERC}; color: red" '
             f'src="{url_big_picture}" something more >'
         ))
-
-        new_a = add_width_to_img_tag(a)
 
         # test big picture without style
         a = (
@@ -31,7 +29,7 @@ class TestUtils(TestCase):
             f'something more >'
         )
 
-        new_a = add_width_to_img_tag(a)
+        new_a = add_img_tag_adjust_width(a, None)
         self.assertEqual(new_a, (
             f'<img style="width: {IMG_WIDTH_PERC}" '
             f'src="{url_big_picture}" something more >'
@@ -45,7 +43,7 @@ class TestUtils(TestCase):
             f'basta and <img src="{url_big_picture}" again>'
         )
 
-        new_a = add_width_to_img_tag(a)
+        new_a = add_img_tag_adjust_width(a, None)
         self.assertEqual(new_a, (
             f'<img style="width: {IMG_WIDTH_PERC}; color: red" '
             f'src="{url_big_picture}" alright> '
@@ -57,18 +55,18 @@ class TestUtils(TestCase):
 
         # test non valid url
         a = (
-            f'123 <img style="color: red" src="hihaho.jpg" '
-            f'something more >'
+            '123 <img style="color: red" src="hihaho.jpg" '
+            'something more >'
         )
 
-        new_a = add_width_to_img_tag(a)
+        new_a = add_img_tag_adjust_width(a, None)
         self.assertEqual(new_a, a)
 
         # test total goobly cook
         a = (
-            f'123 <img src="hihaho.jpg" abcdefge 456 @@!! and '
-            f'something more '
+            '123 <img src="hihaho.jpg" abcdefge 456 @@!! and '
+            'something more '
         )
 
-        new_a = add_width_to_img_tag(a)
+        new_a = add_img_tag_adjust_width(a, None)
         self.assertEqual(new_a, a)

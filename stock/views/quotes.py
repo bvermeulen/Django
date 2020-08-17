@@ -20,12 +20,13 @@ class QuoteView(View):
 
     td = TradingData()
     td.setup()
-    markets = ['NASDAQ', 'NYSE', 'AEX', 'INDEX']
+    markets = ['XNAS', 'XNYS', 'XAMS', 'INDEX']
     data_provider_url = td.data_provider_url
     def get(self, request):
         user = request.user
         try:
             default_user = User.objects.get(username='default_user')
+
         except User.DoesNotExist:
             default_user = None
 
@@ -53,6 +54,7 @@ class QuoteView(View):
         user = request.user
         try:
             default_user = User.objects.get(username='default_user')
+
         except User.DoesNotExist:
             default_user = None
 
@@ -69,12 +71,15 @@ class QuoteView(View):
 
             if selected_portfolio:
                 try:
-                    # try if user has selected a portfolio
+                    # try if user has selected a portfolio if authenticated
                     if user.is_authenticated:
                         symbols = Portfolio.objects.get(
                             user=user, portfolio_name=selected_portfolio).get_stock()
                         stock_info = self.td.get_stock_trade_info(symbols[0:20])
                         stock_info += self.td.get_stock_trade_info(symbols[20:40])
+
+                    else:
+                        raise Portfolio.DoesNotExist
 
                 except Portfolio.DoesNotExist:
                     # try if it is a default portfolio

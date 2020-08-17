@@ -48,7 +48,7 @@ class Portfolio(models.Model):
         unique_together = ['portfolio_name', 'user']
 
     def get_stock(self) -> list:
-        return [stock.stock.symbol for stock in self.stocks.all()]
+        return [stock.stock.symbol_ric for stock in self.stocks.all()]
 
     def __str__(self):
         return f'{self.portfolio_name} for {self.user.username}'

@@ -229,7 +229,7 @@ class PortfolioView(View):
         elif self.btn1_pressed == 'add_new_symbol':
             try:
                 StockSelection.objects.create(
-                    stock=Stock.objects.get(symbol=self.symbol),
+                    stock=Stock.objects.get(symbol_ric=self.symbol),
                     quantity=0,
                     portfolio=self.portfolio)
 
@@ -258,7 +258,7 @@ class PortfolioView(View):
         except ValueError:
             return GetStock.NO
 
-        portfolio_selected_stock = self.portfolio.stocks.get(stock__symbol=symbol)
+        portfolio_selected_stock = self.portfolio.stocks.get(stock__symbol_ric=symbol)
 
         if  portfolio_selected_stock.stock.currency.currency != 'N/A':
             portfolio_selected_stock.quantity = quantity
@@ -276,7 +276,7 @@ class PortfolioView(View):
             logger.warning(f'{self.portfolio}: check existance of portfolio')
             return GetStock.NO
 
-        self.portfolio.stocks.get(stock__symbol=self.delete_symbol_btn_pressed).delete()
+        self.portfolio.stocks.get(stock__symbol_ric=self.delete_symbol_btn_pressed).delete()
 
         return GetStock.YES
 

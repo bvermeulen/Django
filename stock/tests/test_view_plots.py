@@ -13,21 +13,37 @@ class PlotsTestCase(TestCase):
         self.test_user_name = 'test_user'
         self.test_user_pw = '123'
 
-        _ = User.objects.create_user(username=self.test_user_name,
-                                     email='test@howdiweb.nl',
-                                     password=self.test_user_pw)
+        _ = User.objects.create_user(
+            username=self.test_user_name,
+            email='test@howdiweb.nl',
+            password=self.test_user_pw,
+        )
 
-        usd = Currency.objects.create(currency='USD',
-                                      usd_exchange_rate='1.0')
+        usd = Currency.objects.create(
+            currency='USD',
+            usd_exchange_rate='1.0',
+        )
 
-        nyse = Exchange.objects.create(exchange_short='NYSE',
-                                       exchange_long='New York Stock Exchange',
-                                       time_zone_name='America/New_York',)
+        nyse = Exchange.objects.create(
+            mic='NYSE',
+            ric='None',
+            acronym='NYSE',
+            name='New York Stock Exchange',
+            timezone='America/New_York',
+            currency=usd,
+            country_code='US',
+            city='New York',
+            website='www.nyse.com',
+        )
 
-        _ = Stock.objects.create(symbol='AAPL',
-                                 company='Apple',
-                                 currency=usd,
-                                 exchange=nyse,)
+        _ = Stock.objects.create(
+            symbol='AAPL',
+            symbol_ric='AAPL',
+            company='Apple',
+            currency=usd,
+            exchange=nyse,
+        )
+
 
 class IntraDayTests(PlotsTestCase):
     def setUp(self):

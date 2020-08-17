@@ -15,7 +15,6 @@ api_token = config('API_token_Alpha_Vantage')
 alpha_vantage_api_url = 'https://www.alphavantage.co/query'
 
 
-
 def get_stock_alpha_vantage(stock_symbols):
     ''' return the stock trade info as a dict
     '''

@@ -23,7 +23,6 @@ width = '100%'
 periods = ['max', '5', '3', '1']
 
 logger = Logger.getlogger()
-source = None
 
 
 class IntraDayView(View):
@@ -35,7 +34,7 @@ class IntraDayView(View):
 
     def get(self, request, source, symbol):
 
-        if not Stock.objects.filter(symbol=symbol):
+        if not Stock.objects.filter(symbol_ric=symbol):
             return redirect(reverse('stock_quotes'))
 
         intraday_trades = self.td.get_stock_intraday_info(symbol)
@@ -79,14 +78,14 @@ class IntraDayView(View):
                 txt_color = 'txt_green'
                 caret = CARET_UP
 
-            subcaption = ''.join([Stock.objects.get(symbol=symbol).currency.currency,
+            subcaption = ''.join([Stock.objects.get(symbol_ric=symbol).currency.currency,
                                   f' {float(latest_close):.2f} ({prc_change:.1f}%)',
                                   f' {caret}'])
         else:
             subcaption = ''
             txt_color = 'txt_normal'
 
-        caption = ''.join([Stock.objects.get(symbol=symbol).company,
+        caption = ''.join([Stock.objects.get(symbol_ric=symbol).company,
                            ' (', symbol, ')'])
 
         schema = json.dumps(self.td.get_schema(date_format))
@@ -162,7 +161,7 @@ class HistoryView(View):
         elif period == 'max':
             period = '1000'
 
-        if not Stock.objects.filter(symbol=symbol):
+        if not Stock.objects.filter(symbol_ric=symbol):
             return redirect(reverse('stock_quotes'))
 
         history_trades = self.td.get_stock_history_info(symbol)
@@ -198,7 +197,7 @@ class HistoryView(View):
             max_volume = 0
 
         subcaption = ''
-        caption = ''.join([Stock.objects.get(symbol=symbol).company,
+        caption = ''.join([Stock.objects.get(symbol_ric=symbol).company,
                            ' (', symbol, ')'])
 
         schema = json.dumps(self.td.get_schema(date_format))
@@ -216,7 +215,7 @@ class HistoryView(View):
             {'plot': [{'value':{
                 'open':'open', 'high':'high', 'low': 'low', 'close': 'close'},
                        'type': 'candlestick'}],
-             'title': 'Stock Value (' + Stock.objects.get(symbol=symbol).
+             'title': 'Stock Value (' + Stock.objects.get(symbol_ric=symbol).
                       currency.currency + ')',
              'min': min_price*0.99,
              'max': max_price*1.01,

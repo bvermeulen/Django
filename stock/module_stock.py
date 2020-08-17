@@ -1,3 +1,26 @@
+'''  module to handle stock. It has two classes:
+        - StockTools, handling initiating the stock database and extracting and creating
+                      portfolios based on data in excel files
+          Methods:
+            - exchanges_and_currencies
+            - symbols
+            - create_portfolios
+            - extract_portfolios
+
+        - TradingData, method for parsing quotes, extracting symbols and communicates
+                       with stock providing API of Financial Modeling Prep. If a stock
+                       symbol is not found in Financial Modeling Prep it will try to get
+                       the information from an alternative API, defined in another module
+          Methods:
+            - setup
+            - get_schema
+            - get_stock_trade_info
+            - get_stock_intraday_info
+            - get_stock_history_info
+            - parse_stock_quote
+            - get_portfolio_stock_info
+            - calculate_stocks_value
+'''
 import decimal
 from decimal import Decimal as d
 import datetime
@@ -12,9 +35,10 @@ from howdimain.utils.last_tradetime import last_trade_time
 from howdimain.utils.min_max import get_min, get_max
 from howdimain.howdimain_vars import MAX_SYMBOLS_ALLOWED, URL_FMP
 from stock.models import Exchange, Currency, Stock, Portfolio, StockSelection
-from stock.module_alpha_vantage import (
-    get_stock_alpha_vantage, get_intraday_alpha_vantage, get_history_alpha_vantage,
+from stock.module_marketstack import (
+    get_stock_marketstack, get_intraday_marketstack, get_history_marketstack,
 )
+
 
 logger = Logger.getlogger()
 
@@ -285,7 +309,7 @@ class TradingData:
 
         if missing_symbols:
             logger.info(f'missing symbols: {missing_symbols}')
-            stock_info += get_stock_alpha_vantage(missing_symbols)
+            stock_info += get_stock_marketstack(missing_symbols)
 
         return stock_info
 
@@ -370,14 +394,8 @@ class TradingData:
             )
 
         else:
-            # if not succeeded try with fallback site on alpha vantage
-            intraday_trades = get_intraday_alpha_vantage(stock_symbol)
-            logger.info(
-                f'going to Alpha Vantage to get intraday trade for {stock_symbol}')
-
-        if not intraday_trades:
-            logger.info(f'unable to get intraday stock data for '
-                        f'{cls.history_url} {stock_symbol} {params}')
+            # if not succeeded try with fallback site on marketstack
+            intraday_trades = get_intraday_marketstack(stock_symbol)
 
         return intraday_trades
 
@@ -418,10 +436,8 @@ class TradingData:
                 )
 
         else:
-            # if not succeeded try with fallback site on alpha vantage
-            daily_trades = get_history_alpha_vantage(stock_symbol)
-            logger.info(
-                f'going to Alpha Vantage to get history trades for {stock_symbol}')
+            # if not succeeded try with fallback site on marketstack
+            daily_trades = get_history_marketstack(stock_symbol)
 
         if not daily_trades:
             logger.info(f'unable to get stock history data for '
@@ -430,7 +446,7 @@ class TradingData:
         return daily_trades
 
     @classmethod
-    def parse_stock_name(cls, stock_string: str, markets=None) -> list:
+    def parse_stock_quote(cls, stock_quote: str, markets=None) -> list:
         ''' parse stock names searching the worldtradingdata database in three
             passes: 1) is the stock name the actual ticker symbol,
             2) if not does it start with the stock_name or 3) does the company
@@ -446,7 +462,7 @@ class TradingData:
 
         #  use set to avoid duplicates and extract stock names from the string
         stock_symbols = set()
-        stock_names = [stock.strip() for stock in stock_string.split(',')]
+        stock_names = [stock.strip() for stock in stock_quote.split(',')]
 
         def add_stock_symbol_if_valid(stock_symbol):
             '''  only add if stock_symbol is listed on one of the markets or

@@ -93,7 +93,7 @@ class QuoteView(View):
                         pass
 
             else:
-                symbols = self.td.parse_stock_name(quote_string, markets=markets)
+                symbols = self.td.parse_stock_quote(quote_string, markets=markets)
                 stock_info = self.td.get_stock_trade_info(symbols[0:20])
 
             request.session['quote_string'] = quote_string

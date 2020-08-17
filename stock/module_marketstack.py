@@ -96,69 +96,72 @@ def get_intraday_marketstack(symbol: str) -> list:
 
 
 def get_history_marketstack(symbol):
+    trade = namedtuple('trade', 'date open close low high volume')
     symbol = symbol.upper()
     symbol = convert_stock_symbols([symbol])
-
     history_url = marketstack_api_url + 'eod'
-    offset = 0
-    params = {'symbols': symbol,
-              'offset': offset,
-              'access_key': api_token}
 
-    history_series = {}
-    try:
-        res = requests.get(history_url, params=params)
-        limit = res.json().get('pagination').get('limit')
-        if res:
-            pages = res.json().get('pagination').get('total') // limit
-
-            history_series = res.json().get('data', {})
-
-    except requests.exceptions.ConnectionError:
-        logger.info(f'connection error: {history_url} {params}')
-
-    if not history_series:
-        return []
-
-    # if there is history info, convert date string and provide date and
-    # create list of trade_info tuples
-    trade = namedtuple('trade', 'date open close low high volume')
-    history_trades = []
-
-    for _ in range(0, pages + 1):
-
-        _history_trades = []
-        for trade_info in history_series:
-            _history_trades.append(trade(
-                date=datetime.datetime.strptime(trade_info.get('date')[0:10], "%Y-%m-%d"),
-                open=trade_info.get('open'),
-                close=trade_info.get('high'),
-                low=trade_info.get('low'),
-                high=trade_info.get('close'),
-                volume=trade_info.get('volume'),
-            ))
-
-        history_trades += _history_trades
-        offset += limit
-        params = {
-            'symbols': symbol,
-            'offset': offset,
-            'access_key': api_token}
+    def get_max_history():
+        offset = 0
+        params = {'symbols': symbol,
+                'offset': offset,
+                'access_key': api_token}
 
         try:
             res = requests.get(history_url, params=params)
-
+            limit = res.json().get('pagination').get('limit')
             if res:
-                history_series = res.json().get('data', {})
+                pages = res.json().get('pagination').get('total') // limit
 
-            else:
-                break
+                batch_history_series = res.json().get('data', [])
 
         except requests.exceptions.ConnectionError:
-            break
+            logger.info(f'connection error: {history_url} {params}')
+            return []
+
+        history_series = []
+        for page in range(0, pages + 1):
+            print(f'\rProcessing page {page:4} from '
+                  f'{offset:4} to {offset+limit:4} ...', end='')
+
+            history_series += batch_history_series
+
+            offset += limit
+            params = {
+                'symbols': symbol,
+                'offset': offset,
+                'access_key': api_token}
+
+            try:
+                res = requests.get(history_url, params=params)
+
+                if res:
+                    batch_history_series = res.json().get('data', {})
+
+                else:
+                    break
+
+            except requests.exceptions.ConnectionError:
+                break
+
+        return history_series
+
+    history_series = get_max_history()
+
+    # create list of trade_info tuples
+    history_trades = []
+    for trade_info in history_series:
+        history_trades.append(trade(
+            date=datetime.datetime.strptime(trade_info.get('date')[0:10], "%Y-%m-%d"),
+            open=trade_info.get('open'),
+            close=trade_info.get('high'),
+            low=trade_info.get('low'),
+            high=trade_info.get('close'),
+            volume=trade_info.get('volume'),
+        ))
 
     if not history_trades:
         logger.info(f'unable to get stock history data for '
-                    f'{history_url} {params}')
+                    f'{history_url} {symbol}')
 
     return history_trades

@@ -411,7 +411,7 @@ class TradingData:
         try:
             res = requests.get(history_url, params=params)
             if res:
-                _daily_trades = res.json().get('history', [])
+                _daily_trades = res.json().get('historical', [])
             else:
                 pass
 

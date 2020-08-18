@@ -1,7 +1,7 @@
 from django.contrib.auth.models import User
 from django.urls import reverse, resolve
 from django.test import TestCase
-from howdimain.howdimain_vars import URL_ALPHAVANTAGE, URL_WORLDTRADE, URL_FMP
+from howdimain.howdimain_vars import URL_FMP
 from ..views.plots import IntraDayView, HistoryView
 from ..models import Currency, Exchange, Stock
 
@@ -90,9 +90,9 @@ class IntraDayTests(PlotsTestCase):
             'source': 'quotes', 'symbol': 'AAPL', 'period': '3'})
         self.assertContains(self.response, f"href='{history_url}'")
 
-    def test_intraday_view_contains_link_to_history_5(self):
+    def test_intraday_view_contains_link_to_history_0_5(self):
         history_url = reverse('stock_history', kwargs={
-            'source': 'quotes', 'symbol': 'AAPL', 'period': '5'})
+            'source': 'quotes', 'symbol': 'AAPL', 'period': '0.5'})
         self.assertContains(self.response, f"href='{history_url}'")
 
     def test_intraday_view_contains_link_to_history_max(self):
@@ -123,7 +123,7 @@ class HistoryTests(PlotsTestCase):
         self.assertEqual(response.status_code, 200)
 
         history_url = reverse('stock_history', kwargs={
-            'source': 'quotes', 'symbol': 'AAPL', 'period': '5'})
+            'source': 'quotes', 'symbol': 'AAPL', 'period': '0.5'})
         response = self.client.get(history_url)
         self.assertEqual(response.status_code, 200)
 

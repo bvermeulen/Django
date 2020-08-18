@@ -3,7 +3,7 @@ import decimal
 from collections import namedtuple
 import requests
 from decouple import config
-from howdimain.howdimain_vars import MAX_SYMBOLS_ALLOWED, PERIODS
+from howdimain.howdimain_vars import MAX_SYMBOLS_ALLOWED, PLOT_PERIODS
 from howdimain.utils.last_tradetime import last_trade_time
 from howdimain.utils.format_and_tokens import calc_change
 from howdimain.utils.plogger import Logger
@@ -108,17 +108,11 @@ def get_history_marketstack(symbol, period):
     symbol = convert_stock_symbols([symbol])
     history_url = marketstack_api_url + 'eod'
 
-    if period == PERIODS[0]:
-        set_total = int(float(PERIODS[0]) * 365)
-
-    elif period == PERIODS[1]:
-        set_total = int(float(PERIODS[1]) * 365)
-
-    elif period == PERIODS[2]:
-        set_total = int(float(PERIODS[2]) * 365)
+    if period == PLOT_PERIODS[-1]:
+        set_total = None
 
     else:
-        set_total = None
+        set_total = int(float(period) * 365)
 
     history_series = pagination_marketstack(history_url, api_token, symbol, set_total)
 

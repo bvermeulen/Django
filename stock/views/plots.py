@@ -6,7 +6,7 @@ from stock.models import Stock
 from stock.module_stock import TradingData
 from howdimain.utils.min_max import get_min, get_max
 from howdimain.utils.get_ip import get_client_ip
-from howdimain.howdimain_vars import CARET_UP, CARET_DOWN, CARET_NO_CHANGE, PERIODS
+from howdimain.howdimain_vars import CARET_UP, CARET_DOWN, CARET_NO_CHANGE, PLOT_PERIODS
 from howdimain.utils.fusioncharts import FusionCharts, FusionTable, TimeSeries
 from howdimain.utils.plogger import Logger
 
@@ -42,7 +42,7 @@ class IntraDayView(View):
             return redirect(
                 reverse(
                     'stock_history',
-                    kwargs={'symbol': symbol, 'source': source, 'period': PERIODS[0]}
+                    kwargs={'symbol': symbol, 'source': source, 'period': PLOT_PERIODS[0]}
                 )
             )
 
@@ -145,7 +145,7 @@ class IntraDayView(View):
                    'data_provider_url': self.data_provider_url,
                    'stock_symbol': symbol,
                    'source': source,
-                   'periods': PERIODS,
+                   'periods': PLOT_PERIODS,
                   }
 
         logger.info(f'user {request.user} [ip: {get_client_ip(request)}] is looking '
@@ -165,10 +165,10 @@ class HistoryView(View):
 
     def get(self, request, source, symbol, period):
 
-        if period not in PERIODS:
+        if period not in PLOT_PERIODS:
             return redirect(reverse('stock_quotes'))
 
-        elif period == PERIODS[3]:
+        elif period == PLOT_PERIODS[-1]:
             period_num = 50
 
         else:
@@ -252,7 +252,7 @@ class HistoryView(View):
                    'stock_symbol': symbol,
                    'source': source,
                    'period': period,
-                   'periods': PERIODS,
+                   'periods': PLOT_PERIODS,
                   }
 
         logger.info(f'user {request.user} [ip: {get_client_ip(request)}] is looking '

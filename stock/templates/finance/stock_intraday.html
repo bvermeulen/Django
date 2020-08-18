@@ -1,6 +1,6 @@
 {% extends 'base.html' %}<html>
 
-{% load static %}
+{% load static stock_tags %}
 
 {%block title %}Latest stock trading{% endblock %}
 
@@ -25,11 +25,17 @@
 {% block content %}
 
 	<div class="flex-d" id="chart-container">FusionCharts()</div>
-	<div>
-    <button class="btn btn-primary btn-sm" onclick="window.location.href='{% url 'stock_history' source stock_symbol 'max' %}'">History (max)</button>
-    <button class="btn btn-primary btn-sm" onclick="window.location.href='{% url 'stock_history' source stock_symbol '5' %}'">5 years</button>
-    <button class="btn btn-primary btn-sm" onclick="window.location.href='{% url 'stock_history' source stock_symbol '3' %}'">3 years</button>
-    <button class="btn btn-primary btn-sm" onclick="window.location.href='{% url 'stock_history' source stock_symbol '1' %}'">1 year</button>
+  <div>
+    <button class="btn btn-primary btn-sm"
+      onclick="window.location.href='{% url 'stock_intraday' source stock_symbol %}'">Latest stock trading</button>
+    <button class="btn btn-primary btn-sm"
+      onclick="window.location.href='{% url 'stock_history' source stock_symbol periods|index:3 %}'">History ({{periods|index:3}})</button>
+    <button class="btn btn-primary btn-sm"
+      onclick="window.location.href='{% url 'stock_history' source stock_symbol periods|index:2 %}'">{{periods|index:2}} years</button>
+    <button class="btn btn-primary btn-sm"
+      onclick="window.location.href='{% url 'stock_history' source stock_symbol periods|index:1 %}'">{{periods|index:1}} year</button>
+    <button class="btn btn-primary btn-sm"
+      onclick="window.location.href='{% url 'stock_history' source stock_symbol periods|index:0 %}'">{{periods|index:0}} year</button>
   </div>
   <br>
 	<small>Data provided by <a href="https://{{ data_provider_url }}">{{ data_provider_url }}</a></small>

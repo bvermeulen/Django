@@ -1,17 +1,20 @@
 import datetime
+import decimal
 from collections import namedtuple
 import requests
 from decouple import config
-from howdimain.howdimain_vars import MAX_SYMBOLS_ALLOWED
+from howdimain.howdimain_vars import MAX_SYMBOLS_ALLOWED, PERIODS
 from howdimain.utils.last_tradetime import last_trade_time
+from howdimain.utils.format_and_tokens import calc_change
 from howdimain.utils.plogger import Logger
+from howdimain.utils.pagination_marketstack import pagination_marketstack
 from stock.models import Stock
 
 
 logger = Logger.getlogger()
 api_token = config('access_key_marketstack')
 marketstack_api_url = 'https://api.marketstack.com/v1/'
-
+d = decimal.Decimal
 
 def convert_stock_symbols(symbols_ric: list) -> list:
 
@@ -68,18 +71,22 @@ def get_stock_marketstack(stock_symbols: list) -> dict:
         except Stock.DoesNotExist:
             continue
 
+        s_open = quote.get('open')
+        s_close = quote.get('close')
+        s_change, s_change_pct = calc_change(s_open, s_close)
+
         stock_dict['currency'] = stock_db.currency.currency
         stock_dict['exchange_mic'] = stock_db.exchange.mic
         stock_dict['symbol'] = stock_db.symbol_ric
         stock_dict['name'] = stock_db.company
-        stock_dict['open'] = quote.get('open')
+        stock_dict['open'] = s_open
         stock_dict['day_high'] = quote.get('high')
         stock_dict['day_low'] = quote.get('low')
-        stock_dict['price'] = quote.get('close')
+        stock_dict['price'] = s_close
         stock_dict['volume'] = quote.get('volume')
-        stock_dict['close_yesterday'] = quote.get('open')
-        stock_dict['day_change'] = quote.get('change', '0')
-        stock_dict['change_pct'] = quote.get('changepercentage', '0')
+        stock_dict['close_yesterday'] = s_open
+        stock_dict['day_change'] = s_change
+        stock_dict['change_pct'] = s_change_pct
         stock_dict['last_trade_time'] = last_trade_time(
             quote.get('date'), stock_dict['exchange_mic']
         )
@@ -95,58 +102,25 @@ def get_intraday_marketstack(symbol: str) -> list:
     return []
 
 
-def get_history_marketstack(symbol):
+def get_history_marketstack(symbol, period):
     trade = namedtuple('trade', 'date open close low high volume')
     symbol = symbol.upper()
     symbol = convert_stock_symbols([symbol])
     history_url = marketstack_api_url + 'eod'
 
-    def get_max_history():
-        offset = 0
-        params = {'symbols': symbol,
-                'offset': offset,
-                'access_key': api_token}
+    if period == PERIODS[0]:
+        set_total = int(float(PERIODS[0]) * 365)
 
-        try:
-            res = requests.get(history_url, params=params)
-            limit = res.json().get('pagination').get('limit')
-            if res:
-                pages = res.json().get('pagination').get('total') // limit
+    elif period == PERIODS[1]:
+        set_total = int(float(PERIODS[1]) * 365)
 
-                batch_history_series = res.json().get('data', [])
+    elif period == PERIODS[2]:
+        set_total = int(float(PERIODS[2]) * 365)
 
-        except requests.exceptions.ConnectionError:
-            logger.info(f'connection error: {history_url} {params}')
-            return []
+    else:
+        set_total = None
 
-        history_series = []
-        for page in range(0, pages + 1):
-            print(f'\rProcessing page {page:4} from '
-                  f'{offset:4} to {offset+limit:4} ...', end='')
-
-            history_series += batch_history_series
-
-            offset += limit
-            params = {
-                'symbols': symbol,
-                'offset': offset,
-                'access_key': api_token}
-
-            try:
-                res = requests.get(history_url, params=params)
-
-                if res:
-                    batch_history_series = res.json().get('data', {})
-
-                else:
-                    break
-
-            except requests.exceptions.ConnectionError:
-                break
-
-        return history_series
-
-    history_series = get_max_history()
+    history_series = pagination_marketstack(history_url, api_token, symbol, set_total)
 
     # create list of trade_info tuples
     history_trades = []
@@ -163,5 +137,5 @@ def get_history_marketstack(symbol):
     if not history_trades:
         logger.info(f'unable to get stock history data for '
                     f'{history_url} {symbol}')
-
+    print()
     return history_trades

@@ -1,6 +1,7 @@
 {% extends 'base.html' %}<html>
 
 {% load static %}
+{% load stock_tags %}
 
 {%block title %}Stock History{% endblock %}
 
@@ -29,8 +30,24 @@
 	<div>
     <button class="btn btn-primary btn-sm"
       onclick="window.location.href='{% url 'stock_intraday' source stock_symbol %}'">Latest stock trading</button>
-    </div>
-	<br>
+    {% if period != periods|index:3 %}
+      <button class="btn btn-primary btn-sm"
+        onclick="window.location.href='{% url 'stock_history' source stock_symbol periods|index:3 %}'">History ({{periods|index:3}})</button>
+    {% endif %}
+    {% if period != periods|index:2 %}
+      <button class="btn btn-primary btn-sm"
+        onclick="window.location.href='{% url 'stock_history' source stock_symbol periods|index:2 %}'">{{periods|index:2}} years</button>
+    {% endif %}
+    {% if period != periods|index:1 %}
+      <button class="btn btn-primary btn-sm"
+        onclick="window.location.href='{% url 'stock_history' source stock_symbol periods|index:1 %}'">{{periods|index:1}} year</button>
+    {% endif %}
+    {% if period != periods|index:0 %}
+      <button class="btn btn-primary btn-sm"
+        onclick="window.location.href='{% url 'stock_history' source stock_symbol periods|index:0 %}'">{{periods|index:0}} year</button>
+    {% endif %}
+  </div>
+  <br>
 	<small>Data provided by <a href="https://{{ data_provider_url }}">{{ data_provider_url }}</a></small>
 	<br><br><br><br>
 

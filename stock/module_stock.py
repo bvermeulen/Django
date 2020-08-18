@@ -400,7 +400,7 @@ class TradingData:
         return intraday_trades
 
     @classmethod
-    def get_stock_history_info(cls, stock_symbol: str) -> list:
+    def get_stock_history_info(cls, stock_symbol: str, period=None) -> list:
         '''  return stock history info as a dict retrieved from url json,
              key 'history'
         '''
@@ -437,7 +437,7 @@ class TradingData:
 
         else:
             # if not succeeded try with fallback site on marketstack
-            daily_trades = get_history_marketstack(stock_symbol)
+            daily_trades = get_history_marketstack(stock_symbol, period)
 
         if not daily_trades:
             logger.info(f'unable to get stock history data for '

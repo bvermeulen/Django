@@ -6,7 +6,7 @@ from stock.models import Stock
 from stock.module_stock import TradingData
 from howdimain.utils.min_max import get_min, get_max
 from howdimain.utils.get_ip import get_client_ip
-from howdimain.howdimain_vars import CARET_UP, CARET_DOWN, CARET_NO_CHANGE
+from howdimain.howdimain_vars import CARET_UP, CARET_DOWN, CARET_NO_CHANGE, PERIODS
 from howdimain.utils.fusioncharts import FusionCharts, FusionTable, TimeSeries
 from howdimain.utils.plogger import Logger
 
@@ -20,7 +20,6 @@ chart_theme = 'candy'  #  other selection is fusion see www.fusioncharts.com
 # todo: small sreen below values large screen reduce
 height = '400'
 width = '100%'
-periods = ['max', '5', '3', '1']
 
 logger = Logger.getlogger()
 
@@ -38,6 +37,15 @@ class IntraDayView(View):
             return redirect(reverse('stock_quotes'))
 
         intraday_trades = self.td.get_stock_intraday_info(symbol)
+
+        if not intraday_trades:
+            return redirect(
+                reverse(
+                    'stock_history',
+                    kwargs={'symbol': symbol, 'source': source, 'period': PERIODS[0]}
+                )
+            )
+
         chart_data = []
         min_price, max_price, max_volume = None, None, None
         date_format = '%d-%m-%Y %H:%M'
@@ -137,6 +145,7 @@ class IntraDayView(View):
                    'data_provider_url': self.data_provider_url,
                    'stock_symbol': symbol,
                    'source': source,
+                   'periods': PERIODS,
                   }
 
         logger.info(f'user {request.user} [ip: {get_client_ip(request)}] is looking '
@@ -156,18 +165,22 @@ class HistoryView(View):
 
     def get(self, request, source, symbol, period):
 
-        if period not in periods:
+        if period not in PERIODS:
             return redirect(reverse('stock_quotes'))
-        elif period == 'max':
-            period = '1000'
+
+        elif period == PERIODS[3]:
+            period_num = 50
+
+        else:
+            period_num = float(period)
 
         if not Stock.objects.filter(symbol_ric=symbol):
             return redirect(reverse('stock_quotes'))
 
-        history_trades = self.td.get_stock_history_info(symbol)
+        history_trades = self.td.get_stock_history_info(symbol, period)
         if history_trades:
             start_period = history_trades[0].date -\
-                           datetime.timedelta(days=int(period) * 365)
+                           datetime.timedelta(days=int(period_num*365))
 
         chart_data = []
         min_price, max_price, max_volume = None, None, None
@@ -238,6 +251,8 @@ class HistoryView(View):
                    'data_provider_url': self.data_provider_url,
                    'stock_symbol': symbol,
                    'source': source,
+                   'period': period,
+                   'periods': PERIODS,
                   }
 
         logger.info(f'user {request.user} [ip: {get_client_ip(request)}] is looking '

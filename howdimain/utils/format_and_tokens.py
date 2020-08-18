@@ -151,3 +151,33 @@ def format_totals_values(total_value, total_value_change):
 
     return {'value': total_value, 'value_change': total_value_change,
             'caret': caret, 'color': color}
+
+def calc_change(s_open: str, s_close: str) -> tuple:
+    ''' calculates difference of s_close minus s_open and percentage change
+        (s_close - s_open ) / s_open
+        if s_open is zero percentage change is zero
+        invalid input results in out ('0', '0')
+        Arguments:
+          s_open, s_close: string
+
+        Returns:
+          tuple (s_change: str, s_change_pct: str)
+    '''
+    try:
+        s_open = d(s_open)
+        s_close = d(s_close)
+        s_change = s_close - s_open
+        if s_open == 0:
+            s_change_pct = '0'
+
+        else:
+            s_change_pct = s_change / s_open * d('100')
+
+        s_change = str(s_change)
+        s_change_pct = str(s_change_pct)
+
+    except decimal.InvalidOperation:
+        s_change = '0'
+        s_change_pct = '0'
+
+    return s_change, s_change_pct

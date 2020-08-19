@@ -28,13 +28,12 @@ from collections import namedtuple
 import pandas as pd
 from decouple import config
 import requests
-from django.contrib.auth.models import User
 from django.db.utils import IntegrityError
 from howdimain.utils.plogger import Logger
 from howdimain.utils.last_tradetime import last_trade_time
 from howdimain.utils.min_max import get_min, get_max
 from howdimain.howdimain_vars import MAX_SYMBOLS_ALLOWED, URL_FMP
-from stock.models import Exchange, Currency, Stock, Portfolio, StockSelection
+from stock.models import Person, Exchange, Currency, Stock, Portfolio, StockSelection
 from stock.module_marketstack import (
     get_stock_marketstack, get_intraday_marketstack, get_history_marketstack,
 )
@@ -127,8 +126,8 @@ class StockTools:
 
         for index, row in portfolios_df.iterrows():
             try:
-                user = User.objects.get(username=row['username'])
-            except User.DoesNotExist:
+                user = Person.objects.get(username=row['username'])
+            except Person.DoesNotExist:
                 continue
 
             try:
@@ -174,7 +173,7 @@ class StockTools:
 
     @staticmethod
     def extract_portfolios(user_portfolios_filename: str):
-        users = User.objects.all()
+        users = Person.objects.all()
 
         portfolios_dict = {
             'username': [],

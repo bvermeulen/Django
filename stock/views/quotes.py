@@ -1,9 +1,8 @@
 
-from django.contrib.auth.models import User
 from django.shortcuts import render
 from django.views.generic import View
 from stock.forms import StockQuoteForm
-from stock.models import Portfolio
+from stock.models import Person, Portfolio
 from stock.module_stock import TradingData
 from howdimain.utils.get_ip import get_client_ip
 from howdimain.utils.format_and_tokens import add_display_tokens, format_and_sort_stocks
@@ -22,12 +21,17 @@ class QuoteView(View):
     td.setup()
     markets = ['XNAS', 'XNYS', 'XAMS', 'INDEX']
     data_provider_url = td.data_provider_url
+
     def get(self, request):
         user = request.user
-        try:
-            default_user = User.objects.get(username='default_user')
+        if user.is_authenticated:
+            # add Person class to user
+            user.__class__ = Person
 
-        except User.DoesNotExist:
+        try:
+            default_user = Person.objects.get(username='default_user')
+
+        except Person.DoesNotExist:
             default_user = None
 
         quote_string = request.session.get('quote_string', '')
@@ -35,12 +39,10 @@ class QuoteView(View):
         form = self.form_class(initial={'quote_string': quote_string,
                                         'markets': markets, })
 
-        portfolios = [p.portfolio_name for p in Portfolio.objects.filter(
-            user=default_user)]
+        portfolios = default_user.get_portfolio_names()
 
         if user.is_authenticated:
-            portfolios += [p.portfolio_name for p in Portfolio.objects.filter(
-                user=user)]
+            portfolios += user.get_portfolio_names()
 
         context = {'source': source,
                    'stock_info': [],
@@ -52,10 +54,14 @@ class QuoteView(View):
 
     def post(self, request):
         user = request.user
-        try:
-            default_user = User.objects.get(username='default_user')
+        # add Person class to user
+        if user.is_authenticated:
+            user.__class__ = Person
 
-        except User.DoesNotExist:
+        try:
+            default_user = Person.objects.get(username='default_user')
+
+        except Person.DoesNotExist:
             default_user = None
 
         quote_string = request.session.get('quote_string', '')
@@ -98,18 +104,16 @@ class QuoteView(View):
 
             request.session['quote_string'] = quote_string
             request.session['markets'] = markets
-            logger.info(f'user {request.user} [ip: {get_client_ip(request)}] looking '
-                        f'up: {quote_string}  / {selected_portfolio}')
+            logger.info(f'user {user} [ip: {get_client_ip(request)}] looking '
+                        f'up: {quote_string} / {selected_portfolio}')
 
         else:
             stock_info = []
 
-        portfolios = [p.portfolio_name for p in Portfolio.objects.filter(
-            user=default_user)]
+        portfolios = default_user.get_portfolio_names()
 
         if user.is_authenticated:
-            portfolios += [p.portfolio_name for p in Portfolio.objects.filter(
-                user=user)]
+            portfolios += user.get_portfolio_names()
 
         stock_info = add_display_tokens(stock_info)
         stock_info = format_and_sort_stocks(stock_info)

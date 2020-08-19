@@ -1,8 +1,8 @@
-from decimal import Decimal
 from django.contrib.auth.models import User
+from decimal import Decimal
 from django.urls import reverse, resolve
 from django.test import TestCase
-from howdimain.howdimain_vars import URL_ALPHAVANTAGE, URL_WORLDTRADE, URL_FMP
+from howdimain.howdimain_vars import URL_FMP
 from ..views.portfolios import PortfolioView
 from ..models import Currency, Exchange, Stock, StockSelection, Portfolio
 
@@ -17,18 +17,11 @@ class PortfolioTestCase(TestCase):
 
         cls.test_user_name = 'test_user'
         cls.test_user_pw = '123'
-        default_user = 'default_user'
 
         cls.test_user = User.objects.create_user(
             username=cls.test_user_name,
             email='test@howdiweb.nl',
             password=cls.test_user_pw,
-        )
-
-        default_user = User.objects.create_user(
-            username='default_user',
-            email='default@howdiweb.nl',
-            password='456',
         )
 
         usd = Currency.objects.create(

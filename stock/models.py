@@ -3,6 +3,20 @@ from django.contrib.auth.models import User
 from django.utils.text import Truncator
 
 
+class Person(User):
+    ''' this is a proxy for User
+    '''
+    class Meta:
+        proxy = True
+
+    def say_hello(self):
+        print(f'{self.username} says hello')
+
+    def get_portfolio_names(self):
+        return [
+            p.portfolio_name for p in self.portfolios.all().order_by('portfolio_name')]
+
+
 class Currency(models.Model):
     currency = models.CharField(max_length=3, unique=True)
     usd_exchange_rate = models.CharField(max_length=20, default='1.0')
@@ -42,7 +56,7 @@ class Stock(models.Model):
 
 class Portfolio(models.Model):
     portfolio_name = models.CharField(max_length=20)
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='+')
+    user = models.ForeignKey(Person, on_delete=models.CASCADE, related_name='portfolios')
 
     class Meta:
         unique_together = ['portfolio_name', 'user']

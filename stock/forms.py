@@ -1,6 +1,6 @@
 from django import forms
 from howdimain.howdimain_vars import BASE_CURRENCIES
-from .models import Exchange, Portfolio
+from .models import Exchange
 
 class StockQuoteForm(forms.Form):
 
@@ -13,8 +13,8 @@ class StockQuoteForm(forms.Form):
 
         self.fields['selected_portfolio'] = forms.CharField(required=False)
 
-        choices = [(exchange.mic, exchange.name)\
-            for exchange in Exchange.objects.all().order_by('name')]
+        choices = [(exchange.mic, exchange.name)
+                   for exchange in Exchange.objects.all().order_by('name')]
 
         self.fields['markets'] = forms.MultipleChoiceField(
             widget=forms.CheckboxSelectMultiple(),
@@ -40,13 +40,9 @@ class PortfolioForm(forms.Form):
         self.fields['change_qty_btn_pressed'] = forms.CharField(required=False)
         self.fields['delete_symbol_btn_pressed'] = forms.CharField(required=False)
 
-        portfolios = [(item.portfolio_name, item.portfolio_name)
-                      for item in Portfolio.objects.
-                      filter(user=user).order_by('portfolio_name')]
-
         self.fields['portfolios'] = forms.ChoiceField(
             widget=forms.Select(),
-            choices=portfolios,
+            choices=list(zip(user.get_portfolio_names(), user.get_portfolio_names())),
             required=False,
         )
 

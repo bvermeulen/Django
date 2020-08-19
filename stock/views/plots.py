@@ -32,6 +32,7 @@ class IntraDayView(View):
     data_provider_url = td.data_provider_url
 
     def get(self, request, source, symbol):
+        user = request.user
 
         if not Stock.objects.filter(symbol_ric=symbol):
             return redirect(reverse('stock_quotes'))
@@ -148,7 +149,7 @@ class IntraDayView(View):
                    'periods': PLOT_PERIODS,
                   }
 
-        logger.info(f'user {request.user} [ip: {get_client_ip(request)}] is looking '
+        logger.info(f'user {user} [ip: {get_client_ip(request)}] is looking '
                     f'intraday trades for {symbol}')
         return render(request, self.template_name, context)
 
@@ -164,6 +165,7 @@ class HistoryView(View):
     data_provider_url = td.data_provider_url
 
     def get(self, request, source, symbol, period):
+        user = request.user
 
         if period not in PLOT_PERIODS:
             return redirect(reverse('stock_quotes'))
@@ -255,7 +257,7 @@ class HistoryView(View):
                    'periods': PLOT_PERIODS,
                   }
 
-        logger.info(f'user {request.user} [ip: {get_client_ip(request)}] is looking '
+        logger.info(f'user {user} [ip: {get_client_ip(request)}] is looking '
                     f'historic trades for {symbol}')
         return render(request, self.template_name, context)
 

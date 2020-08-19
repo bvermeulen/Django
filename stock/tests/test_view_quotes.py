@@ -1,7 +1,7 @@
 from django.contrib.auth.models import User
 from django.urls import reverse, resolve
 from django.test import TestCase
-from howdimain.howdimain_vars import URL_ALPHAVANTAGE, URL_WORLDTRADE, URL_FMP
+from howdimain.howdimain_vars import URL_FMP
 from ..views.quotes import QuoteView
 from ..models import Currency, Exchange, Stock, StockSelection, Portfolio
 
@@ -12,7 +12,7 @@ class QuotesTestCase(TestCase):
     def setUp(self):
         self.test_user = 'test_user'
         self.test_user_pw = '123'
-        default_user = 'default_user'
+        self.default_user = 'default_user'
 
         test_user = User.objects.create_user(
             username=self.test_user,
@@ -144,6 +144,7 @@ class QuotesViewTestCase(QuotesTestCase):
     def test_valid_quote_string_returns_stock_info(self):
         data = {'markets': ['XAMS'],
                 'quote_string': 'wolters'}
+
         url = reverse('stock_quotes')
         response = self.client.post(url, data)
         self.assertEqual('WKL.AS', response.context['stock_info'][0]['symbol'])

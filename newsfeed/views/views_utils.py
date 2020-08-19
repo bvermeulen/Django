@@ -73,7 +73,7 @@ def add_img_tag_adjust_width(summary, image_src):
     else:
         new_summary = summary
 
-    for img_tag_match in re.finditer(r'<img.*?>', summary):
+    for img_tag_match in re.finditer(r'<img.*?>', new_summary):
         img_tag = img_tag_match.group(0)
 
         try:
@@ -91,7 +91,7 @@ def add_img_tag_adjust_width(summary, image_src):
             if re.search(r'jpg&', img_tag):
                 continue
 
-            if re.search(r'<img.*style="', img_tag):
+            if re.search(r'<img.*?style="', img_tag):
                 new_img_tag = re.sub(
                     r'style="', f'style="width: {IMG_WIDTH_PERC}; ', img_tag)
 

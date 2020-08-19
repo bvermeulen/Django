@@ -18,7 +18,7 @@ WIDTH_TITLE = 120
 HELP_ARROWS = 'Use left/ right arrow to toggle news items. '
 HELP_BANNER = 'Press Banner to toggle banner on/ off. '
 IMG_WIDTH_PX = 900
-IMG_WIDTH_PERC = '100%'
+IMG_WIDTH_PERC = '70%'
 RIGHT_ARROW = '\u25B6'
 LEFT_ARROW = '\u25C0'
 

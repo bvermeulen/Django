@@ -19,6 +19,12 @@ class PlotsTestCase(TestCase):
             password=self.test_user_pw,
         )
 
+        _ = User.objects.create_user(
+            username='default_user',
+            email='default_user@howdiweb.nl',
+            password='1234',
+        )
+
         usd = Currency.objects.create(
             currency='USD',
             usd_exchange_rate='1.0',

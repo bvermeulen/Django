@@ -11,8 +11,8 @@ from howdimain.utils.plogger import Logger
 from howdimain.utils.get_ip import get_client_ip
 from howdimain.utils.format_and_tokens import (
     add_display_tokens, format_totals_values, format_and_sort_stocks)
+from stock.models import Person, Stock, Portfolio, StockSelection
 from stock.forms import PortfolioForm
-from stock.models import Stock, Portfolio, StockSelection
 from stock.module_stock import TradingData
 
 logger = Logger.getlogger()
@@ -37,31 +37,34 @@ class PortfolioView(View):
 
     def get(self, request):
         currency = request.session.get('currency', 'EUR')
-        portfolios = request.session.get('selected_portfolio', '')
+        selected_portfolio = request.session.get('selected_portfolio', '')
         user = request.user
+        # add Person class to user
+        if user.is_authenticated:
+            user.__class__ = Person
 
         portfolio_name = ''
         stocks = []
 
-        if portfolios:
+        if selected_portfolio:
             try:
                 self.portfolio = Portfolio.objects.get(
-                    user=user, portfolio_name=portfolios)
+                    user=user, portfolio_name=selected_portfolio)
                 portfolio_name = self.portfolio.portfolio_name
                 stocks = self.get_stock_info(GetStock.YES, currency)
                 request.session['stock_info'] = json.dumps(stocks, cls=DjangoJSONEncoder)
 
             except Portfolio.DoesNotExist:
-                portfolios = ''
+                selected_portfolio = ''
 
         else:
             pass
 
         form = self.form_class(
-            user=request.user,
+            user=user,
             initial={'symbol': '',
                      'portfolio_name': portfolio_name,
-                     'portfolios': portfolios,
+                     'portfolios': selected_portfolio,
                      'currencies': currency
                     })
 
@@ -81,6 +84,10 @@ class PortfolioView(View):
 
         self.request = request
         self.user = self.request.user
+        # add Person class to user
+        if self.user.is_authenticated:
+            self.user.__class__ = Person
+
         currency = request.session.get('currency', 'EUR')
 
         form = self.form_class(self.request.POST, user=self.user)
@@ -276,7 +283,8 @@ class PortfolioView(View):
             logger.warning(f'{self.portfolio}: check existance of portfolio')
             return GetStock.NO
 
-        self.portfolio.stocks.get(stock__symbol_ric=self.delete_symbol_btn_pressed).delete()
+        self.portfolio.stocks.get(
+            stock__symbol_ric=self.delete_symbol_btn_pressed).delete()
 
         return GetStock.YES
 

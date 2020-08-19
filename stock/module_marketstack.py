@@ -62,6 +62,10 @@ def get_stock_marketstack(stock_symbols: list) -> dict:
     stock_info = []
     for quote in stock_list:
 
+        # res.json() has return [[]] therefor check if element is actually a dict
+        if not isinstance(quote, dict):
+            continue
+
         stock_dict = {}
         # get currency and exchange info from the database if it does not exist
         # skip this quote

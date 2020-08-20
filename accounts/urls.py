@@ -1,5 +1,4 @@
-from django.conf.urls import url
-from django.urls import path
+from django.urls import path, re_path
 from django.contrib import admin
 from django.contrib.auth import views as auth_views
 from accounts import views
@@ -23,10 +22,10 @@ urlpatterns = [
     path('reset/done/', auth_views.PasswordResetDoneView.as_view(
         template_name='accounts/password_reset_done.html'),
          name='password_reset_done'),
-    url(r'^reset/(?P<uidb64>[0-9A-Za-z_\-]+)/(?P<token>[0-9A-Za-z]{1,13}-[0-9A-Za-z]{1,20})/$',  #pylint: disable=line-too-long
-        auth_views.PasswordResetConfirmView.as_view(
-            template_name='accounts/password_reset_confirm.html'),
-        name='password_reset_confirm'),
+    re_path(r'^reset/(?P<uidb64>[0-9A-Za-z_\-]+)/(?P<token>[0-9A-Za-z]{1,13}-[0-9A-Za-z]{1,20})/$',  #pylint: disable=line-too-long
+            auth_views.PasswordResetConfirmView.as_view(
+                template_name='accounts/password_reset_confirm.html'),
+            name='password_reset_confirm'),
     path('reset/complete/', auth_views.PasswordResetCompleteView.as_view(
         template_name='accounts/password_reset_complete.html'),
          name='password_reset_complete'),

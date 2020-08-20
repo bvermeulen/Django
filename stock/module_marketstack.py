@@ -7,7 +7,7 @@ from howdimain.howdimain_vars import MAX_SYMBOLS_ALLOWED, PLOT_PERIODS
 from howdimain.utils.last_tradetime import last_trade_time
 from howdimain.utils.format_and_tokens import calc_change
 from howdimain.utils.plogger import Logger
-from howdimain.utils.pagination_marketstack import pagination_marketstack
+from howdimain.utils.pagination_marketstack import pagination_marketstack_threaded
 from stock.models import Stock
 
 
@@ -118,7 +118,8 @@ def get_history_marketstack(symbol, period):
     else:
         set_total = int(float(period) * 365)
 
-    history_series = pagination_marketstack(history_url, api_token, symbol, set_total)
+    history_series = pagination_marketstack_threaded(
+        history_url, api_token, symbol, set_total)
 
     # create list of trade_info tuples
     history_trades = []
@@ -135,5 +136,4 @@ def get_history_marketstack(symbol, period):
     if not history_trades:
         logger.info(f'unable to get stock history data for '
                     f'{history_url} {symbol}')
-    print()
     return history_trades

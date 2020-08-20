@@ -4,7 +4,8 @@
 from concurrent.futures import ThreadPoolExecutor
 import requests
 
-def pagination_marketstack_threaded(url:str, token:str, symbol:str, set_total=None) -> list:
+def pagination_marketstack_threaded(
+        url: str, token: str, symbol: str, set_total=None) -> list:
     ''' pagination using threading, all (up to 50 batches) are dealt
         with simultaneously
     '''
@@ -50,9 +51,10 @@ def pagination_marketstack_threaded(url:str, token:str, symbol:str, set_total=No
         return []
 
     #TODO remove after debugging
-    print(f'days: {total}, number of threads: {len(range(limit, total, limit))}: {list(range(limit, total, limit))}')
+    print(f'days: {total}, number of threads: {len(range(limit, total, limit))}: {list(range(limit, total, limit))}')  #pylint: disable=line-too-long
 
-    # ThreadPoolExecutor maintains the order of res_list the same as the mapping input order
+    # ThreadPoolExecutor maintains the order of res_list the same as the mapping
+    # input order
     with ThreadPoolExecutor(max_workers=50) as pool:
         res_list = pool.map(get_url, [offset for offset in range(limit, total, limit)])
 

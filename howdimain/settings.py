@@ -17,7 +17,7 @@ logformat = '%(asctime)s:%(levelname)s:%(message)s'
 Logger.set_logger(config('LOG_FILE'), logformat, 'INFO')
 logger = Logger.getlogger()
 HOWDIMAIN_VERSION = 'https://github.com/bvermeulen/Django/tree/howdimain-digitalocean_v8'
-HOWDIMAIN_DATE = ' xxxx xx, 2020 - revise stock info providers'
+HOWDIMAIN_DATE = 'August 22, 2020 - [stock: revised schema, add marketstack, stock plot newsfeed: handling images'  #pylint: disable=line-too-long
 HOWDIMAIN_AUTHOR = 'bruno.vermeulen@hotmail.com'
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)

@@ -50,9 +50,6 @@ def pagination_marketstack_threaded(
     if not series:
         return []
 
-    #TODO remove after debugging
-    print(f'days: {total}, number of threads: {len(range(limit, total, limit))}: {list(range(limit, total, limit))}')  #pylint: disable=line-too-long
-
     # ThreadPoolExecutor maintains the order of res_list the same as the mapping
     # input order
     with ThreadPoolExecutor(max_workers=50) as pool:

@@ -48,7 +48,7 @@ class Stock(models.Model):
         Exchange, on_delete=models.CASCADE)
 
     def __str__(self):
-        return Truncator(self.company).charPs(20)
+        return Truncator(self.company).chars(20)
 
 
 class Portfolio(models.Model):

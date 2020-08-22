@@ -135,7 +135,7 @@ class StockTools:
                     stock = Stock.objects.get(symbol_ric=row['symbol'])
 
                 else:
-                    stock = Stock.objects.get(symbol='symbol')
+                    stock = Stock.objects.get(symbol=row['symbol'])
 
             except Stock.DoesNotExist:
                 continue

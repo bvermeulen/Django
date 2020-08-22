@@ -9,9 +9,6 @@ class Person(User):
     class Meta:
         proxy = True
 
-    def say_hello(self):
-        print(f'{self.username} says hello')
-
     def get_portfolio_names(self):
         return [
             p.portfolio_name for p in self.portfolios.all().order_by('portfolio_name')]

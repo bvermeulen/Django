@@ -37,6 +37,8 @@ from stock.models import Person, Exchange, Currency, Stock, Portfolio, StockSele
 from stock.module_marketstack import (
     get_stock_marketstack, get_intraday_marketstack, get_history_marketstack,
 )
+from stock.module_alpha_vantage import (
+    get_stock_alpha_vantage, get_intraday_alpha_vantage, get_history_alpha_vantage,)
 
 
 logger = Logger.getlogger()
@@ -281,9 +283,9 @@ class TradingData:
 
             stock_dict['currency'] = stock_db.currency.currency
             stock_dict['exchange_mic'] = stock_db.exchange.mic
+            stock_dict['name'] = stock_db.company
 
             stock_dict['symbol'] = quote.get('symbol')
-            stock_dict['name'] = quote.get('name')
             stock_dict['open'] = quote.get('open')
             stock_dict['day_high'] = quote.get('dayHigh')
             stock_dict['day_low'] = quote.get('dayLow')
@@ -298,7 +300,7 @@ class TradingData:
 
             stock_info.append(stock_dict)
 
-        # try to get missing symbols through alpha_vantage
+        # try to get missing symbols through marketstack
         if stock_info:
             captured_symbols = [s.get('symbol', '') for s in stock_info]
         else:
@@ -307,8 +309,21 @@ class TradingData:
         missing_symbols = [s for s in stock_symbols if s not in captured_symbols]
 
         if missing_symbols:
-            logger.info(f'missing symbols: {missing_symbols}')
+            print(f'missing symbols: {missing_symbols} for marketstack')
             stock_info += get_stock_marketstack(missing_symbols)
+
+        # try to get missing symbols through alpha vantage
+        if stock_info:
+            captured_symbols = [s.get('symbol', '') for s in stock_info]
+        else:
+            captured_symbols = []
+
+        missing_symbols = [
+            s for s in stock_symbols if s not in captured_symbols]
+
+        if missing_symbols:
+            print(f'missing symbols: {missing_symbols} for alpha vantage')
+            stock_info += get_stock_alpha_vantage(missing_symbols)
 
         return stock_info
 
@@ -396,6 +411,10 @@ class TradingData:
             # if not succeeded try with fallback site on marketstack
             intraday_trades = get_intraday_marketstack(stock_symbol)
 
+            # or (last resort) try alpha vantage
+            if not intraday_trades:
+                intraday_trades = get_intraday_alpha_vantage(stock_symbol)
+
         return intraday_trades
 
     @classmethod
@@ -438,9 +457,13 @@ class TradingData:
             # if not succeeded try with fallback site on marketstack
             daily_trades = get_history_marketstack(stock_symbol, period)
 
+            # or (last resort) try alpha vantage
+            if not daily_trades:
+                daily_trades = get_history_alpha_vantage(stock_symbol)
+
         if not daily_trades:
-            logger.info(f'unable to get stock history data for '
-                        f'{cls.history_url} {stock_symbol} {params}')
+            print(f'unable to get stock history data for '
+                  f'{cls.history_url} {stock_symbol} {params}')
 
         return daily_trades
 

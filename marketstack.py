@@ -76,12 +76,13 @@ MIC_RIC_table = {
     'OTCQ': 'None',
     'PINC': 'None',
     'IEXG': 'None',
+    'INDX': '^',
 }
 
 base_url = 'https://api.marketstack.com/v1/'
 api_key = config('access_key_marketstack')
-exchanges_filename = 'marketstack_exchanges.xlsx'
-stocks_filename = 'marketstack_stocks.xlsx'
+exchanges_filename = '200825_marketstack_exchanges.xlsx'
+stocks_filename = '200825_marketstack_stocks.xlsx'
 
 # extract exchanges
 url = base_url + 'exchanges'
@@ -108,6 +109,7 @@ exchanges = {
 }
 
 for exchange in res.json().get('data'):
+    print(f'Exchange: {exchange.get("mic")}')
     exchanges['mic'].append(exchange.get('mic'))
     exchanges['ric'].append(MIC_RIC_table.get(exchange.get('mic')))
     exchanges['name'].append(exchange.get('name'))
@@ -116,8 +118,18 @@ for exchange in res.json().get('data'):
     exchanges['country_code'].append(exchange.get('country_code'))
     exchanges['city'].append(exchange.get('city'))
     exchanges['website'].append(exchange.get('website'))
-    exchanges['timezone'].append(exchange.get('timezone').get('timezone'))
-    exchanges['currency'].append(exchange.get('currency').get('code'))
+    if exchange.get('timezone'):
+        exchanges['timezone'].append(exchange.get('timezone').get('timezone'))
+
+    else:
+        exchanges['timezone'].append('America/New York')
+
+
+    if exchange.get('currency'):
+        exchanges['currency'].append(exchange.get('currency').get('code'))
+
+    else:
+        exchanges['currency'].append('N/A')
 
 exchanges_df = pd.DataFrame(exchanges)
 exchanges_df.to_excel(exchanges_filename)
@@ -158,7 +170,14 @@ for page in range(0, pages + 1):
         symbol_mic = stock.get('symbol')
         symbol_parsed = symbol_mic.split('.')
         if len(symbol_parsed) == 2:
-            symbol_ric = symbol_parsed[0] + '.' + MIC_RIC_table.get(symbol_parsed[1], 'CHECKED')
+            if symbol_parsed[1] == 'INDX':
+                symbol_ric = (MIC_RIC_table.get(symbol_parsed[1], 'CHECKED') +
+                              symbol_parsed[0])
+
+            else:
+                symbol_ric = (symbol_parsed[0] + '.' +
+                              MIC_RIC_table.get(symbol_parsed[1], 'CHECKED'))
+
         else:
             symbol_ric = symbol_mic
 

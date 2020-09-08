@@ -309,7 +309,6 @@ class TradingData:
         missing_symbols = [s for s in stock_symbols if s not in captured_symbols]
 
         if missing_symbols:
-            print(f'missing symbols: {missing_symbols} for marketstack')
             stock_info += get_stock_marketstack(missing_symbols)
 
         # try to get missing symbols through alpha vantage
@@ -322,7 +321,6 @@ class TradingData:
             s for s in stock_symbols if s not in captured_symbols]
 
         if missing_symbols:
-            print(f'missing symbols: {missing_symbols} for alpha vantage')
             stock_info += get_stock_alpha_vantage(missing_symbols)
 
         return stock_info
@@ -460,10 +458,6 @@ class TradingData:
             # or (last resort) try alpha vantage
             if not daily_trades:
                 daily_trades = get_history_alpha_vantage(stock_symbol)
-
-        if not daily_trades:
-            print(f'unable to get stock history data for '
-                  f'{cls.history_url} {stock_symbol} {params}')
 
         return daily_trades
 

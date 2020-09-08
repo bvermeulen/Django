@@ -21,7 +21,7 @@
 
 {% block content %}
 	 <div class="container">
-	  	<h2 class="item1" style="font-weight: bold; text-align: left;">News from: {{ news_site }}</h2>
+	  	<h2 class="item1" style="font-weight: bold; text-align: left;">{{ news_site }}</h2>
 	  	{% if error_message %}
 		    	<div> <font color="red" <strong>{{ error_message }}</strong></font> <br><br></div>
 		  {% endif %}

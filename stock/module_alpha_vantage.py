@@ -72,12 +72,16 @@ def get_stock_alpha_vantage(stock_symbols):
 
             stock_info.append(stock_dict)
 
+    symbols = ', '.join([stock['symbol'] for stock in stock_info])
+    if stock_info:
+        print(f'alpha vantage symbols: {symbols}')
+
     return stock_info
 
 
-def get_intraday_alpha_vantage(symbol):
+def get_intraday_alpha_vantage(symbol_ric):
 
-    symbol = symbol.upper()
+    symbol = symbol_ric.upper()
     params = {'symbol': symbol,
               'function': 'TIME_SERIES_INTRADAY',
               'interval': '5min',
@@ -152,11 +156,19 @@ def get_intraday_alpha_vantage(symbol):
                     high=max_high, volume=None,
                    ))
 
+    if intraday_trades:
+        print(f'alpha vantage intraday: {symbol_ric}')
+
+    else:
+        logger.info(f'alpha vantage intraday: unable to get stock history data for '
+                    f'{alpha_vantage_api_url} {symbol_ric}')
+
     return intraday_trades
 
-def get_history_alpha_vantage(symbol):
 
-    symbol = symbol.upper()
+def get_history_alpha_vantage(symbol_ric):
+
+    symbol = symbol_ric.upper()
     params = {'symbol': symbol,
               'function': 'TIME_SERIES_DAILY',
               'outputsize': 'full',
@@ -190,10 +202,11 @@ def get_history_alpha_vantage(symbol):
                  )
             )
 
-    else:
-        logger.info(f'unable to get stock history data for '
-                    f'{alpha_vantage_api_url} {params}')
+    if history_trades:
+        print(f'alpha vantage history: {symbol_ric}')
 
-    # TODO: make sure to sure newest first
+    else:
+        logger.info(f'alpha vantage history: unable to get stock history data for '
+                    f'{alpha_vantage_api_url} {symbol_ric}')
 
     return history_trades

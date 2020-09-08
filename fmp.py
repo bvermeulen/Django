@@ -24,10 +24,8 @@ tickers = {
     'name': [],
     'exchange': [],
 }
-exchanges = {
-    'exchange': set(),
-}
 
+exchanges = set()
 for i, ticker in enumerate(res.json()):
     print(i, ticker)
     print(f'\rProcessing page {i:4} - {ticker["symbol"]} ...', end='')
@@ -35,9 +33,9 @@ for i, ticker in enumerate(res.json()):
     tickers['symbol'].append(ticker.get('symbol', 'N/A'))
     tickers['name'].append(ticker.get('name', 'N/A'))
     tickers['exchange'].append(ticker.get('exchange', 'N/A'))
-    exchanges['exchange'].add(ticker.get('exchange', 'N/A'))
+    exchanges.add(ticker.get('exchange', 'N/A'))
 
-exchange_df = pd.DataFrame(exchanges)
+exchange_df = pd.DataFrame({'exchange': list(exchanges)})
 exchange_df.to_excel(exchanges_filename)
 
 stocks_df = pd.DataFrame(tickers)

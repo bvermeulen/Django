@@ -96,6 +96,10 @@ def get_stock_marketstack(stock_symbols: list) -> dict:
         )
         stock_info.append(stock_dict)
 
+    symbols = ', '.join([stock['symbol'] for stock in stock_info])
+    if stock_info:
+        print(f'marketstack symbols: {symbols}')
+
     return stock_info
 
 
@@ -106,9 +110,9 @@ def get_intraday_marketstack(symbol: str) -> list:
     return []
 
 
-def get_history_marketstack(symbol, period):
+def get_history_marketstack(symbol_ric, period):
     trade = namedtuple('trade', 'date open close low high volume')
-    symbol = symbol.upper()
+    symbol = symbol_ric.upper()
     symbol = convert_stock_symbols([symbol])
     history_url = marketstack_api_url + 'eod'
 
@@ -133,7 +137,11 @@ def get_history_marketstack(symbol, period):
             volume=trade_info.get('volume'),
         ))
 
-    if not history_trades:
-        logger.info(f'unable to get stock history data for '
-                    f'{history_url} {symbol}')
+    if history_trades:
+        print(f'marketstack history: {symbol_ric}')
+
+    else:
+        logger.info(f'marketstack history: unable to get stock history data for '
+                    f'{history_url} {symbol_ric}')
+
     return history_trades

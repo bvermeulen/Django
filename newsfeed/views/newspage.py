@@ -6,17 +6,17 @@ from howdimain.utils.get_ip import get_client_ip
 from howdimain.howdimain_vars import LEFT_ARROW, RIGHT_ARROW
 from ..module_news import update_news, restore_feedparserdict
 from ..models import NewsSite, UserNewsSite
-from .views_utils import (set_session_newsstatus,
-                          store_news_item, create_news_context,
-                          obtain_news_sites_and_news_status_for_user,
+from .views_utils import (
+    set_session_newsstatus, store_news_item, create_news_context,
+    obtain_news_sites_and_news_status_for_user,
 )
 
 
 logger = Logger.getlogger()
-Controls = namedtuple('Controls', 'banner store next previous')
+Controls = namedtuple('Controls', 'banner store next previous scroll')
 
 # these controls determine what is shown on the template buttons and links
-cntr = Controls('banner', 'store', RIGHT_ARROW, LEFT_ARROW)
+cntr = Controls('banner', 'store', RIGHT_ARROW, LEFT_ARROW, 'auto-scroll')
 
 def newspage(request):
     ''' views function to render newspage.html
@@ -34,11 +34,15 @@ def newspage(request):
     elif button_cntr == cntr.previous:
         ns.item -= 1
     elif button_cntr == cntr.banner:
-        ns.banner = not ns.banner
+        # true/ false for javascript
+        ns.banner = 0 if ns.banner else 1
+    elif button_cntr == cntr.scroll:
+        # true/ false for javascript
+        ns.scroll = 0 if ns.scroll else 1
     elif button_cntr == cntr.store:
         pass
     else:
-        logger.warn(f'ValueError {button_cntr}: check template')
+        logger.warning(f'ValueError {button_cntr}: check template')
 
     if ns.news_items != 0:
         ns.item = ns.item % ns.news_items
@@ -63,7 +67,6 @@ def newspage(request):
         ns.news_site = ns.current_news_site
         ns.updated = today
         ns.item = 0
-        ns.banner = False
 
     else:
         feed_items = request.session['feed']

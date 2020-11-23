@@ -17,7 +17,7 @@ from ..module_news import (feedparser_time_to_datetime,
 logger = Logger.getlogger()
 NewsStatus = recordtype(
     'NewsStatus',
-    'current_news_site news_site updated item news_items banner error_message'
+    'current_news_site news_site updated item news_items banner scroll error_message'
 )
 
 
@@ -27,8 +27,8 @@ def set_session_newsstatus(request, newsstatus):
 
 
 def get_session_newsstatus(request):
-    ns_keys = NewsStatus(*[None]*7)
-    return NewsStatus(*[request.session[key] for key, _ in ns_keys._asdict().items()])
+    ns_keys = NewsStatus(*[None]*8)
+    return NewsStatus(*[request.session.get(key, None) for key, _ in ns_keys._asdict().items()])
 
 
 def store_news_item(user, ns, feed_items, ip):
@@ -150,7 +150,7 @@ def create_news_context(ns, news_sites, feed_items):
         news_summary_flat_text = ''
 
     length_summary = len(news_summary_flat_text)
-    delay = max(MIN_CHARS, (len(news_title)+length_summary))*DELAY_FACTOR/1000
+    delay = max(MIN_CHARS, (len(news_title)+length_summary))*DELAY_FACTOR/2000
     if length_summary > BANNER_LENGTH:
         show_banner_button = False
         help_banner = ''
@@ -170,6 +170,7 @@ def create_news_context(ns, news_sites, feed_items):
                'delay': delay,
                'show_banner_button': show_banner_button,
                'banner': ns.banner,
+               'scroll': ns.scroll,
                'help_arrows': HELP_ARROWS,
                'help_banner': help_banner,
                'error_message': ns.error_message,

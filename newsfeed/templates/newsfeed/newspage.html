@@ -20,103 +20,108 @@
 {% endblock %}
 
 {% block content %}
-	 <div class="container">
-	  	<h2 class="item1" style="font-weight: bold; text-align: left;">{{ news_site }}</h2>
-	  	{% if error_message %}
-		    	<div> <font color="red" <strong>{{ error_message }}</strong></font> <br><br></div>
-		  {% endif %}
-	 </div>
+	<div class="container mb-1">
+		<h2 class="item1" style="font-weight: bold; text-align: left;">{{ news_site }}</h2>
+	 	{% if error_message %}
+	    	<div> <font color="red" <strong>{{ error_message }}</strong></font> <br><br></div>
+	  {% endif %}
+	</div>
 
-	 <form id="controlform" method="post">
-	 <div class="container">
-     {% csrf_token %}
+	<form id="controlform" method="post">
+		<div class="container">
+  	  {% csrf_token %}
 
-     <div style="float: left" class"">
-       <button class="btn btn-primary btn-sm dropdown-toggle" type="button" id="SiteButton" data-toggle="dropdown" onclick="Pause()">
-                Sites<span class="caret"></span></button>
-         <ul class="dropdown-menu" style="height:40%; overflow:hidden; overflow-y:scroll">
-		 	   {% for site in news_sites %}
-			     <li><input type="submit" class="btn btn-sm item_select" name="site_btn" value="{{ site }}"></input></li></li>
-			   {% endfor %}
-         </ul>
-     </div>
+  	  <div style="float: left">
+  	    <button class="btn btn-primary btn-sm dropdown-toggle" type="button" id="SiteButton" data-toggle="dropdown">
+  	      Sites<span class="caret"></span></button>
+  	      <ul class="dropdown-menu" style="height:40%; overflow:hidden; overflow-y:scroll">
+				 	  {% for site in news_sites %}
+					    <li><input type="submit" class="btn btn-sm item_select" name="site_btn" value="{{ site }}"></input></li></li>
+				  	{% endfor %}
+  	      </ul>
+  	  </div>
 
-     <div style="float: left" class="ml-1 mr-1">
-       <button class="btn dropdown-toggle btn-primary btn-sm" type="button" data-toggle="dropdown" onclick="Pause()">
-                Titles<span class="caret"></span>
-       </button>
-       <ul class="dropdown-menu container dropdown-container" style="height:40%; overflow:hidden; overflow-y:scroll; overflow-x:scroll">
-         {% for item, title  in news_titles %}
-  			   <li><button type="submit" class="btn btn-sm item_select" name="title_btn" value="{{ item }}">{{ title|safe }}</button></li>
-  			 {% endfor %}
-       </ul>
-     </div>
+  	  <div style="float: left" class="ml-1 mr-1">
+  	    <button class="btn dropdown-toggle btn-primary btn-sm" type="button" data-toggle="dropdown">
+  	      Titles<span class="caret"></span>
+  	    </button>
+  	    <ul class="dropdown-menu container dropdown-container" style="height:40%; overflow:hidden; overflow-y:scroll; overflow-x:scroll">
+  	      {% for item, title  in news_titles %}
+  			    <li><button type="submit" class="btn btn-sm item_select" name="title_btn" value="{{ item }}">{{ title|safe }}</button></li>
+  		  	{% endfor %}
+  	    </ul>
+  	  </div>
 
-     <input type="hidden" name="control_btn" id="keyinput"></input>
-		 <input type="submit" class="btn btn-primary btn-sm" name="control_btn" value="{{ controls.previous }}"></input>
-		 <input type="submit" class="btn btn-primary btn-sm" name="control_btn" value="{{ controls.next }}"></input>
+  	  <input type="hidden" name="control_btn" id="keyinput"></input>
+			<input type="submit" class="hideOnMobile btn btn-primary btn-sm" name="control_btn" value="{{ controls.previous }}"></input>
+			<input type="submit" class="hideOnMobile btn btn-primary btn-sm" name="control_btn" value="{{ controls.next }}"></input>
 
+		  {% if user.is_authenticated %}
+  	    <a type="button" class="btn btn-primary btn-sm" href="{% url 'newssites' %}">Select</a>
+  		 	<a type="button" class="btn btn-primary btn-sm" href="{% url 'mynewsitems' %}">My news</a>
+			{% endif %}
+		</div>
 
-		 {% if user.is_authenticated %}
-       <button type="button" class="btn btn-primary btn-sm" onclick="window.location.href='{% url 'newssites' %}'">select</button>
-		 	 <button type="button" class="btn btn-primary btn-sm" onclick="window.location.href='{% url 'mynewsitems' %}'">My news</button>
-		 {% endif %}
-	 </div>
+		<div class="container">
+		  <small style="text-align:left;">{{ reference }}</small>
+			<div class="card" style="border-width: 2px">
+			  <card class="card-body">
+			  <h2 class="card-title" style="background-color:lightgrey">{{ news_title|safe }}</h2>
 
-	 <div class="container">
-	   <small>{{ reference }}</small>
-		 <div class="card" style="border-width: 2px">
-		   <card class="card-body">
-			 <h2 class="card-title" style="background-color:lightgrey">{{ news_title|safe }}</h2>
+				<a style="padding:0px" class="btn btn-link" href='{{ news_link }}'>link</a>
+				<input style="padding:0px" type="submit" class="btn btn-link" id="id_scroll" name="control_btn" value="{{ controls.scroll }}"></input>
 
-			 <a style="padding:0" class="btn btn-link" href='{{ news_link }}'>link</a>
-			 <button style="padding:0" type="button" class="btn btn-link" id="button_pause" onclick="Pause()">pause</button>
-			 {% if show_banner_button %}
-			   <input style="padding:0" type="submit" class="hideOnMobile btn btn-link" name="control_btn" value="{{ controls.banner }}"></input>
-  		 	 {% endif %}
+				{% if show_banner_button %}
+					<input style="padding:0px" type="submit" class="hideOnMobile btn btn-link" id="id_banner" name="control_btn" value="{{ controls.banner }}"></input>
+				{% endif %}
 
-			 {% if user.is_authenticated %}
-			   <input style="padding:0; margin:0" type="submit" class="btn btn-link" name="control_btn" value="{{ controls.store }}"></input>
-			 {% endif %}
+				{% if user.is_authenticated %}
+				  <input style="padding:0px" type="submit" class="btn btn-link" name="control_btn" value="{{ controls.store }}"></input>
+				{% endif %}
+				<a style="float: right"><small style="vertical-align: sub">{{ status }}</small></a>
 
-			 <div class="card-text">
-			 {% if banner and show_banner_button and news_summary_flat_text %}
-				 <svg style="background-color:lightgrey;" viewBox="0, 0, 300, 30">
-				 <text  x="500" y="15" style="font-size:10px; font-weight: bold">
-				   {{ news_summary_flat_text|safe }}
-				   <animate attributeName="x" from="300" to="-300" dur="{{ delay }}s" repeatCount="indefinite">
-				 </text>
-				 </svg>
-			 {% else %}
-			   <div class="textarea" contenteditable="false" style="background-color:lightgrey">{{ news_summary|safe }}</div>
-			 {% endif %}
-			 </div>
-		 </div>
-		 <small><p style="text-align:left;">{{ status }}<span class="hideOnMobile" style="float: right;">{{ help_arrows }}{{ help_banner }}</span></p></small>
-		 <br><br><br>
-  </div>
-  </form>
+				<div class="card-text">
+					{% if banner and show_banner_button and news_summary_flat_text %}
+						<script>
+							var button_banner = document.getElementById("id_banner");
+							set_banner_color();
+							function set_banner_color() {
+								button_banner.style["color"] = "orange";
+								button_banner.style["font-weight"] = "bolder";
+							};
+						</script>
+						<svg style="background-color:lightgrey;" viewBox="0, 0, 300, 30">
+					  	<text x="500" y="15" style="font-size:10px; font-weight: bold">
+						    {{ news_summary_flat_text|safe }}
+					      <animate attributeName="x" from="300" to="-300" dur="{{ delay }}s" repeatCount="indefinite">
+						  </text>
+						</svg>
+					{% else %}
+					  <div class="textarea" contenteditable="false" style="background-color:lightgrey">{{ news_summary|safe }}</div>
+					{% endif %}
+		  	</div>
+  		</div>
+			<small class="hideOnMobile" style="float: right;">{{ help_arrows }}{{ help_banner }}</small>
+		</div>
+		<br><br><br><br>
+	</form>
+
 {% endblock content %}
 
 {% block javascript %}
 <script>
-	var timeout = setTimeout("window.location.href='{% url 'newspage' %}'",{{ delay }}*900 );
-	var pause_status = false;
-	var button_pause = document.getElementById("button_pause");
   var form = document.getElementById("controlform");
+	var button_scroll = document.getElementById("id_scroll");
+	setAutoUpdate({{scroll}});
 
-	function Pause() {
-		if (pause_status == false) {
-			clearTimeout(timeout);
-			button_pause.style["color"] = "orange";
-      button_pause.style["font-weight"] = "bolder"
-			pause_status = true;
-			}
-		else {
-      // submit form to get next item
-      form.submit();
-			}
-		};
+  function setAutoUpdate(scroll) {
+		if (scroll) {
+			console.log("set auto update with a delay of " + {{ delay }});
+			setTimeout("window.location.href='{% url 'newspage' %}'", {{ delay }} *1000 );
+			button_scroll.style["color"] = "orange";
+			button_scroll.style["font-weight"] = "bolder";
+		}
+	};
 
 	document.addEventListener('keydown', handleKeyDown, false);
 	function handleKeyDown(event) {

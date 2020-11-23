@@ -5,9 +5,12 @@ from django.shortcuts import render, redirect
 from django.views.generic import UpdateView
 from django.utils.decorators import method_decorator
 from django.urls import reverse_lazy
+from howdimain.utils.plogger import Logger
+from howdimain.utils.get_ip import get_client_ip
 from .models import Signup, Home
 from .forms import SignUpForm
 
+logger = Logger.getlogger()
 
 def home_page(request):
     welcome_text = Home.objects.last().welcome_text
@@ -39,12 +42,16 @@ def signup(request):
                 user.save()
                 login(request, user)
                 signup_methods.send_welcome_email(user)
+                logger.info(f'user {user.username} (ip: {get_client_ip(request)}) '
+                            f'has succesfully signed up, email sent')
                 return redirect('home')
+
     else:
         form = SignUpForm()
 
-    return render(request, 'accounts/signup.html', {'form': form,
-                                                    'error_message': error_message})
+    return render(
+        request, 'accounts/signup.html', {'form': form, 'error_message': error_message})
+
 
 @method_decorator(login_required, name='dispatch')
 class UserUpdateView(UpdateView):

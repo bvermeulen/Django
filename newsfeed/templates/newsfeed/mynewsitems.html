@@ -37,7 +37,7 @@
       <a href="{{ item.link}}">  (link)</a></td>
     <td>
       <button class="btn btn-outline-secondary btn-sm" name="deleted_item_pk"
-              value="{{ item.pk }}" onclick="return Validate()">Delete</button>
+              value="{{ item.pk }}" onclick="return validateDelete('{{ item.title }}')">Delete</button>
     </td>
     </tr>
   {% endfor %}
@@ -48,8 +48,8 @@
 
 {% block javascript %}
 <script>
-  function Validate() {
-  	confirmed = confirm('Do you really want to delete this item?');
+  function validateDelete(title) {
+  	confirmed = confirm("Do you really want to delete?\n" + title.slice(0,40) + " ...");
     if (confirmed) {
       return true;
     }

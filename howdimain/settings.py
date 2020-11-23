@@ -16,8 +16,8 @@ from howdimain.utils.plogger import Logger
 logformat = '%(asctime)s:%(levelname)s:%(message)s'
 Logger.set_logger(config('LOG_FILE'), logformat, 'INFO')
 logger = Logger.getlogger()
-HOWDIMAIN_VERSION = 'https://github.com/bvermeulen/Django/tree/howdimain-digitalocean_v8'
-HOWDIMAIN_DATE = 'August 22, 2020 - [stock: revised schema, add marketstack, stock plot newsfeed: handling images'  #pylint: disable=line-too-long
+HOWDIMAIN_VERSION = 'https://github.com/bvermeulen/Django/tree/howdimain-digitalocean_v9'
+HOWDIMAIN_DATE = 'November, 2020 - remove auto news updates, styling improvements'
 HOWDIMAIN_AUTHOR = 'bruno.vermeulen@hotmail.com'
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
@@ -206,12 +206,12 @@ logger.info(f'{nl}------------------------------------------------------------'
 
 logger.info(f"{nl}DB_NAME: {config('DB_NAME')}"
             f"{nl}DB_USER: {config('DB_USER')}"
-            f"{nl}DB_PASSWORD: {'NOT SHOWN'}"
+            f"{nl}DB_PASSWORD: XXXXXXXXXX"
             f'{nl}EMAIL_BACKEND: {EMAIL_BACKEND}'
             f'{nl}EMAIL_HOST: {EMAIL_HOST}'
             f'{nl}EMAIL_PORT: {EMAIL_PORT}'
             f'{nl}EMAIL_HOST_USER: {EMAIL_HOST_USER}'
-            f"{nl}EMAIL_HOST_PASSWORD: {'NOT SHOWN'}"
+            f"{nl}EMAIL_HOST_PASSWORD: XXXXXXXXXX"
             f'{nl}EMAIL_USE_TLS: {EMAIL_USE_TLS}'
             f'{nl}IMGUR CLIENT ID: {MARTOR_IMGUR_CLIENT_ID}'
             f'{nl}------------------------------------------------------------')

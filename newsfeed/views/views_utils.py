@@ -27,8 +27,16 @@ def set_session_newsstatus(request, newsstatus):
 
 
 def get_session_newsstatus(request):
-    ns_keys = NewsStatus(*[None]*8)
-    return NewsStatus(*[request.session.get(key, None) for key, _ in ns_keys._asdict().items()])
+    return NewsStatus(
+        current_news_site=request.session.get('current_news_site', None),
+        news_site=request.session.get('news_site', None),
+        updated=request.session.get('updated', None),
+        item=request.session.get('item', 0),
+        news_items=request.session.get('news_items', 0),
+        banner=request.session.get('banner', 0),
+        scroll=request.session.get('scroll', 0),
+        error_message=request.session.get('error_message', None),
+    )
 
 
 def store_news_item(user, ns, feed_items, ip):

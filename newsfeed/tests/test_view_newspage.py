@@ -59,10 +59,10 @@ class NewsPageView(NewsPageTests):
         self.assertEqual('1', response.context['status'][11:12])
 
     def test_newspage_view_has_no_link_to_select_sites(self):
-        self.assertNotContains(self.response, "window.location.href='/news/mynewsitems/'")
+        self.assertNotContains(self.response, '/news/mynewsitems/')
 
     def test_newspage_view_has_no_link_to_mynewsitems(self):
-        self.assertNotContains(self.response, "window.location.href='/news/mynewsitems/'")
+        self.assertNotContains(self.response, '/news/mynewsitems/')
 
     def test_newspage_returns_default_newssite(self):
         self.assertEqual('BBC', self.response.context['news_sites'][0])
@@ -74,11 +74,11 @@ class NewsPageViewUser(NewsPageTests):
 
     def test_newspage_view_contains_link_to_select_sites(self):
         response = self.client.post(reverse('newspage'))
-        self.assertContains(response, "window.location.href='/news/sites/'")
+        self.assertContains(response, 'href="/news/sites/"')
 
     def test_newspage_view_contains_link_to_mynewsitems(self):
         response = self.client.post(reverse('newspage'))
-        self.assertContains(response, "window.location.href='/news/mynewsitems/'")
+        self.assertContains(response, 'href="/news/mynewsitems/"')
 
     def test_newspage_returns_user_newssite(self):
         response = self.client.post(reverse('newspage'))

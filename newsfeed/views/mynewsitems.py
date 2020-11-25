@@ -26,7 +26,8 @@ def mynewsitems(request):
                         news_site='',
                         updated='',
                         news_items=0,
-                        banner=False,
+                        banner=0,
+                        scroll=0,
                         error_message='')
         set_session_newsstatus(request, ns)
         return redirect(reverse('newspage'))

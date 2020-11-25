@@ -51,7 +51,7 @@ def get_stock_marketstack(stock_symbols: list) -> dict:
                 pass
 
         except requests.exceptions.ConnectionError:
-            logger.info(f'connection error: {stock_url} {params}')
+            logger.warning(f'connection error: {stock_url} {params}')
 
     else:
         pass
@@ -98,7 +98,7 @@ def get_stock_marketstack(stock_symbols: list) -> dict:
 
     symbols = ', '.join([stock['symbol'] for stock in stock_info])
     if stock_info:
-        print(f'marketstack symbols: {symbols}')
+        logger.info(f'marketstack symbols: {symbols}')
 
     return stock_info
 
@@ -138,10 +138,12 @@ def get_history_marketstack(symbol_ric, period):
         ))
 
     if history_trades:
-        print(f'marketstack history: {symbol_ric}')
+        logger.info(f'marketstack history: {symbol_ric}')
 
     else:
-        logger.info(f'marketstack history: unable to get stock history data for '
-                    f'{history_url} {symbol_ric}')
+        logger.warning(
+            f'marketstack history: unable to get stock history data for '
+            f'{history_url} {symbol_ric}'
+        )
 
     return history_trades

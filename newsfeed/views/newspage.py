@@ -83,7 +83,7 @@ def newspage(request):
             user__username='default_user').news_sites.first())
         ns.error_message = f'Newssite {ns.current_news_site} is not available, '\
                            f'revert to default site {default_site}'
-        logger.info(f'{ns.current_news_site} is not available, revert to default site')
+        logger.warning(f'{ns.current_news_site} is not available, revert to default site')
         ns.current_news_site = default_site
         set_session_newsstatus(request, ns)
         return redirect(reverse('newspage'))

@@ -74,7 +74,7 @@ def get_stock_alpha_vantage(stock_symbols):
 
     symbols = ', '.join([stock['symbol'] for stock in stock_info])
     if stock_info:
-        print(f'alpha vantage symbols: {symbols}')
+        logger.info(f'alpha vantage symbols: {symbols}')
 
     return stock_info
 
@@ -96,7 +96,7 @@ def get_intraday_alpha_vantage(symbol_ric):
             time_series = res.json().get('Time Series (5min)', {})
 
     except requests.exceptions.ConnectionError:
-        logger.info(f'connection error: {alpha_vantage_api_url} {params}')
+        logger.warning(f'connection error: {alpha_vantage_api_url} {params}')
 
     if not meta_data or not time_series:
         return []
@@ -157,11 +157,11 @@ def get_intraday_alpha_vantage(symbol_ric):
                    ))
 
     if intraday_trades:
-        print(f'alpha vantage intraday: {symbol_ric}')
+        logger.info(f'alpha vantage intraday: {symbol_ric}')
 
     else:
-        logger.info(f'alpha vantage intraday: unable to get stock history data for '
-                    f'{alpha_vantage_api_url} {symbol_ric}')
+        logger.warning(f'alpha vantage intraday: unable to get stock history data for '
+                       f'{alpha_vantage_api_url} {symbol_ric}')
 
     return intraday_trades
 
@@ -182,7 +182,7 @@ def get_history_alpha_vantage(symbol_ric):
             history_series = res.json().get('Time Series (Daily)', {})
 
     except requests.exceptions.ConnectionError:
-        logger.info(f'connection error: {alpha_vantage_api_url} {params}')
+        logger.warning(f'connection error: {alpha_vantage_api_url} {params}')
 
     if not history_series:
         return []
@@ -203,10 +203,10 @@ def get_history_alpha_vantage(symbol_ric):
             )
 
     if history_trades:
-        print(f'alpha vantage history: {symbol_ric}')
+        logger.info(f'alpha vantage history: {symbol_ric}')
 
     else:
-        logger.info(f'alpha vantage history: unable to get stock history data for '
-                    f'{alpha_vantage_api_url} {symbol_ric}')
+        logger.warning(f'alpha vantage history: unable to get stock history data for '
+                       f'{alpha_vantage_api_url} {symbol_ric}')
 
     return history_trades

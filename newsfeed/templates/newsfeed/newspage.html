@@ -86,7 +86,7 @@
 							var button_banner = document.getElementById("id_banner");
 							set_banner_color();
 							function set_banner_color() {
-								button_banner.style["color"] = "orange";
+								button_banner.style["color"] = "DodgerBlue";
 								button_banner.style["font-weight"] = "bolder";
 							};
 						</script>
@@ -118,7 +118,7 @@
 		if (scroll) {
 			console.log("set auto update with a delay of " + {{ delay }});
 			setTimeout("window.location.href='{% url 'newspage' %}'", {{ delay }} *1000 );
-			button_scroll.style["color"] = "orange";
+			button_scroll.style["color"] = "DodgerBlue";
 			button_scroll.style["font-weight"] = "bolder";
 		}
 	};

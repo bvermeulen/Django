@@ -16,7 +16,7 @@ logger = Logger.getlogger()
 Controls = namedtuple('Controls', 'banner store next previous scroll')
 
 # these controls determine what is shown on the template buttons and links
-cntr = Controls('banner', 'store', RIGHT_ARROW, LEFT_ARROW, 'auto-scroll')
+cntr = Controls('banner', 'save', RIGHT_ARROW, LEFT_ARROW, 'auto-scroll')
 
 def newspage(request):
     ''' views function to render newspage.html

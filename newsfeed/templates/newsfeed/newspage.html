@@ -152,13 +152,13 @@
 		var xUp = event.touches[0].clientX;
 		var xDiff = xDown - xUp;
 
-		if (xDiff > 5) {
+		if (xDiff > 10) {
 			// swipe left
 			document.getElementById("keyinput").value = "{{ controls.next }}";
 			form.submit();
 			}
 
-		if (xDiff < -5) {
+		if (xDiff < -10) {
 			// swipe right
 			document.getElementById("keyinput").value = "{{ controls.previous }}";
 			form.submit();

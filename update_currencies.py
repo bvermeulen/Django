@@ -13,6 +13,7 @@ logger = Logger.getlogger()
 
 class UpdateCurrencies:
     host = 'localhost'
+    db_port = config('DB_PORT')
     db_user = config('DB_USER')
     db_user_pw = config('DB_PASSWORD')
     database = config('DB_NAME')
@@ -24,8 +25,10 @@ class UpdateCurrencies:
     def update_currencies(cls):
         logger.info(f'update currencies using {cls.forex_url}')
 
-        connect_string = f'host=\'{cls.host}\' dbname=\'{cls.database}\''\
-                         f'user=\'{cls.db_user}\' password=\'{cls.db_user_pw}\''
+        connect_string = f'host=\'{cls.host}\' port=\'{cls.db_port}\' '\
+                         f'dbname=\'{cls.database}\' user=\'{cls.db_user}\' '\
+                         f'password=\'{cls.db_user_pw}\''
+
         connection = psycopg2.connect(connect_string)
         cursor = connection.cursor()
 

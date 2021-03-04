@@ -34,7 +34,7 @@
     </td>
     <td class="align-middle align-left">{{ item.published|date:"d b Y" }}</td>
     <td class="align-middle">{{ item.title }}
-      <a href="{{ item.link}}">  (link)</a></td>
+      <a href="{{ item.link}}" target="_blank">  (link)</a></td>
     <td>
       <button class="btn btn-outline-secondary btn-sm" name="deleted_item_pk"
               value="{{ item.pk }}" onclick="return validateDelete('{{ item.title }}')">Delete</button>

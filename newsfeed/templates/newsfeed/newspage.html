@@ -68,7 +68,7 @@
 			  <card class="card-body">
 			  <h2 class="card-title" style="background-color:lightgrey">{{ news_title|safe }}</h2>
 
-				<a style="padding:0px" class="btn btn-link" href='{{ news_link }}'>link</a>
+				<a style="padding:0px" class="btn btn-link" href="{{ news_link }}" target="_blank">link</a>
 				<input style="padding:0px" type="submit" class="btn btn-link" id="id_scroll" name="control_btn" value="{{ controls.scroll }}"></input>
 
 				{% if show_banner_button %}

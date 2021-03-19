@@ -22,5 +22,5 @@ recordtype==1.3
 requests==2.25.0
 six==1.15.0
 sqlparse==0.4.1
-urllib3==1.26.2
+urllib3==1.26.3
 wincertstore==0.2

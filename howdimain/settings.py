@@ -17,7 +17,7 @@ logformat = '%(asctime)s:%(levelname)s:%(message)s'
 Logger.set_logger(config('LOG_FILE'), logformat, 'INFO')
 logger = Logger.getlogger()
 HOWDIMAIN_VERSION = 'https://github.com/bvermeulen/Django/tree/howdimain-digitalocean_v9'
-HOWDIMAIN_DATE = 'November, 2020: implement auto-scroll & styling improvements'
+HOWDIMAIN_DATE = 'April, 2021: add exchange rate to portfolio view'
 HOWDIMAIN_AUTHOR = 'bruno.vermeulen@hotmail.com'
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
@@ -91,7 +91,7 @@ DATABASES = {
         'USER': config('DB_USER'),
         'PASSWORD': config('DB_PASSWORD'),
         'HOST': 'localhost',
-        'PORT': '5432',
+        'PORT': config('DB_PORT'),
         },
 }
 
@@ -195,23 +195,28 @@ DEFAULT_FROM_EMAIL = '<noreply@howdiweb.nl>'
 EMAIL_SUBJECT_PREFIX = '[Howdiweb] '
 
 nl = '\n'
-logger.info(f'{nl}------------------------------------------------------------'
-            f'{nl}        Howdimain version: {HOWDIMAIN_VERSION}'
-            f'{nl}        Version date: {HOWDIMAIN_DATE}'
-            f'{nl}        Author: {HOWDIMAIN_AUTHOR}'
-            f"{nl}        Logfile: {config('LOG_FILE')}"
-            f"{nl}        Debug: {config('DEBUG')}"
-            f"{nl}        Alowed hosts: {ALLOWED_HOSTS}"
-            f'{nl}------------------------------------------------------------')
+logger.info(
+    f'{nl}============================================================'
+    f'{nl}Howdimain version: {HOWDIMAIN_VERSION}'
+    f'{nl}Version date: {HOWDIMAIN_DATE}'
+    f'{nl}Author: {HOWDIMAIN_AUTHOR}'
+    f"{nl}Logfile: {config('LOG_FILE')}"
+    f"{nl}Debug: {config('DEBUG')}"
+    f"{nl}Alowed hosts: {ALLOWED_HOSTS}"
+    f'{nl}------------------------------------------------------------'
+)
 
-logger.info(f"{nl}DB_NAME: {config('DB_NAME')}"
-            f"{nl}DB_USER: {config('DB_USER')}"
-            f"{nl}DB_PASSWORD: XXXXXXXXXX"
-            f'{nl}EMAIL_BACKEND: {EMAIL_BACKEND}'
-            f'{nl}EMAIL_HOST: {EMAIL_HOST}'
-            f'{nl}EMAIL_PORT: {EMAIL_PORT}'
-            f'{nl}EMAIL_HOST_USER: {EMAIL_HOST_USER}'
-            f"{nl}EMAIL_HOST_PASSWORD: XXXXXXXXXX"
-            f'{nl}EMAIL_USE_TLS: {EMAIL_USE_TLS}'
-            f'{nl}IMGUR CLIENT ID: {MARTOR_IMGUR_CLIENT_ID}'
-            f'{nl}------------------------------------------------------------')
+logger.info(
+    f"{nl}DB_NAME: {config('DB_NAME')}"
+    f"{nl}DB_PORT: {config('DB_PORT')}"
+    f"{nl}DB_USER: {config('DB_USER')}"
+    f"{nl}DB_PASSWORD: XXXXXXXXXX"
+    f'{nl}EMAIL_BACKEND: {EMAIL_BACKEND}'
+    f'{nl}EMAIL_HOST: {EMAIL_HOST}'
+    f'{nl}EMAIL_PORT: {EMAIL_PORT}'
+    f'{nl}EMAIL_HOST_USER: {EMAIL_HOST_USER}'
+    f"{nl}EMAIL_HOST_PASSWORD: XXXXXXXXXX"
+    f'{nl}EMAIL_USE_TLS: {EMAIL_USE_TLS}'
+    f'{nl}IMGUR CLIENT ID: {MARTOR_IMGUR_CLIENT_ID}'
+    f'{nl}============================================================'
+)

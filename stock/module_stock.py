@@ -578,3 +578,15 @@ class TradingData:
                 pass
 
         return str(total_value), str(total_value_change)
+
+    @staticmethod
+    def get_usd_euro_exchangerate(currency):
+        exchange_rate = float(Currency.objects.get(currency="EUR").get_exchangerate())
+        if currency == 'USD':
+            return f'USD/EUR: {exchange_rate:.4f}'
+
+        elif currency == 'EUR':
+            return f'EUR/USD: { 1.0 / exchange_rate:.4f}'
+
+        else:
+            assert False, f'invalid currency parameter: {currency}, should be USD or EUR'

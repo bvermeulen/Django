@@ -18,6 +18,9 @@ class Currency(models.Model):
     currency = models.CharField(max_length=3, unique=True)
     usd_exchange_rate = models.CharField(max_length=20, default='1.0')
 
+    def get_exchangerate(self):
+        return self.usd_exchange_rate
+
     def __str__(self):
         return str(self.currency)
 

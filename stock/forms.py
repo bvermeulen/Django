@@ -46,6 +46,7 @@ class PortfolioForm(forms.Form):
             required=False,
         )
 
+        self.fields['exchangerate'] = forms.CharField(required=False)
         self.fields['currencies'] = forms.ChoiceField(
             widget=forms.Select(),
             choices=BASE_CURRENCIES,

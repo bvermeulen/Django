@@ -73,23 +73,24 @@
             onclick="return AddSymbol('{{ form.symbol.value }}')">
             Add symbol</button>
         </div>
+        <div class="dropdown">
+          <button type="button" class="btn dropdown-toggle btn-outline-primary btn-sm">{{ form.currencies.value }}</button>
+          <div class="dropdown-content">
+            {% for currency in form.currencies %}
+            {% if not currency.data.selected %}
+            <button class="btn btn-link" value="{{ currency.data.value}}" name="{{ currency.data.name }}">{{ currency.choice_label }}</button>
+            {% endif %}
+            {% endfor %}
+          </div>
+        </div>
+
 
         <div class="ml-auto">
           <strong>Value:</strong>
           <strong class="mr-2">{{ totals.value }}</strong>
           <strong class="mr-0">Change:</strong>
           <strong class="mr-2" style="color:{{totals.color }}">{{ totals.caret}} {{ totals.value_change }}</strong>
-          <div class="dropdown">
-            <button type="button" class="btn dropdown-toggle btn-outline-primary btn-sm">{{ form.currencies.value }}</button>
-            <div class="dropdown-content">
-              {% for currency in form.currencies %}
-                {% if not currency.data.selected %}
-                  <button class="btn btn-link" value="{{ currency.data.value}}"
-                    name="{{ currency.data.name }}">{{ currency.choice_label }}</button>
-                {% endif %}
-              {% endfor %}
-            </div>
-          </div>
+          <strong class="mr-2">{{ form.exchangerate.value }}</strong>
         </div>
       {% endif %}
     </div>

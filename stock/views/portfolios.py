@@ -65,7 +65,8 @@ class PortfolioView(View):
             initial={'symbol': '',
                      'portfolio_name': portfolio_name,
                      'portfolios': selected_portfolio,
-                     'currencies': currency
+                     'currencies': currency,
+                     'exchangerate': self.td.get_usd_euro_exchangerate(currency),
                     })
 
         totals_values = format_totals_values(*self.td.calculate_stocks_value(stocks))
@@ -155,7 +156,9 @@ class PortfolioView(View):
                 initial={'portfolio_name': self.portfolio_name,
                          'portfolios': self.selected_portfolio,
                          'symbol': self.symbol,
-                         'currencies': currency})
+                         'currencies': currency,
+                         'exchangerate': self.td.get_usd_euro_exchangerate(currency),
+                        })
 
             logger.info(f'user {self.user} [ip: {get_client_ip(self.request)}] '
                         f'views {self.selected_portfolio}')
@@ -166,7 +169,9 @@ class PortfolioView(View):
                 initial={'portfolios': '',
                          'portfolio_name': '',
                          'symbol': '',
-                         'currencies': currency})
+                         'currencies': currency,
+                         'exchangerate': self.td.get_usd_euro_exchangerate(currency),
+                        })
 
             stocks = []
 

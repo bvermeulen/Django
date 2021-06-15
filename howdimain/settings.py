@@ -17,7 +17,7 @@ logformat = '%(asctime)s:%(levelname)s:%(message)s'
 Logger.set_logger(config('LOG_FILE'), logformat, 'INFO')
 logger = Logger.getlogger()
 HOWDIMAIN_VERSION = 'https://github.com/bvermeulen/Django/tree/howdimain-digitalocean_v9'
-HOWDIMAIN_DATE = 'April, 2021: add exchange rate to portfolio view'
+HOWDIMAIN_DATE = 'June, 2021: add music app'
 HOWDIMAIN_AUTHOR = 'bruno.vermeulen@hotmail.com'
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     'boards',
     'newsfeed',
     'stock',
+    'music',
 ]
 
 CRISPY_TEMPLATE_PACK = 'bootstrap4'
@@ -70,14 +71,12 @@ TEMPLATES = [{
     'DIRS': [os.path.join(BASE_DIR, 'templates'),],
     'APP_DIRS': True,
     'OPTIONS': {'context_processors': [
-                'django.template.context_processors.debug',
-                'django.template.context_processors.request',
-                'django.contrib.auth.context_processors.auth',
-                'django.contrib.messages.context_processors.messages',
-                ],
-               },
-        },]
-
+        'django.template.context_processors.debug',
+        'django.template.context_processors.request',
+        'django.contrib.auth.context_processors.auth',
+        'django.contrib.messages.context_processors.messages',
+    ],},
+},]
 
 WSGI_APPLICATION = 'howdimain.wsgi.application'
 
@@ -87,11 +86,11 @@ WSGI_APPLICATION = 'howdimain.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
+        'HOST': 'localhost',
+        'PORT': config('DB_PORT'),
         'NAME': config('DB_NAME'),
         'USER': config('DB_USER'),
         'PASSWORD': config('DB_PASSWORD'),
-        'HOST': 'localhost',
-        'PORT': config('DB_PORT'),
         },
 }
 
@@ -152,7 +151,6 @@ MARTOR_SEARCH_USERS_URL = '/martor/search-user/' # default
 MARTOR_MARKDOWN_BASE_EMOJI_URL = 'https://github.githubassets.com/images/icons/emoji/'                  # default from github                 #pylint: disable=line-too-long
 # MARTOR_MARKDOWN_BASE_MENTION_URL = 'https://python.web.id/author/'                                    # please change this to your domain   #pylint: disable=line-too-long
 
-
 # Password validation
 # https://docs.djangoproject.com/en/1.11/ref/settings/#auth-password-validators
 AUTH_PASSWORD_VALIDATORS = [
@@ -194,6 +192,11 @@ EMAIL_USE_TLS = config('EMAIL_USE_TLS', default=True, cast=bool)
 DEFAULT_FROM_EMAIL = '<noreply@howdiweb.nl>'
 EMAIL_SUBJECT_PREFIX = '[Howdiweb] '
 
+# Spofity credetials
+SPOTIFY_CLIENT_ID = config('SPOTIFY_CLIENT_ID', default='')
+SPOTIFY_CLIENT_SECRET = config('SPOTIFY_CLIENT_SECRET', default='')
+SPOTIFY_REDIRECT_URI = config('SPOTIFY_REDIRECT_URI', default='')
+
 nl = '\n'
 logger.info(
     f'{nl}============================================================'
@@ -205,7 +208,6 @@ logger.info(
     f"{nl}Alowed hosts: {ALLOWED_HOSTS}"
     f'{nl}------------------------------------------------------------'
 )
-
 logger.info(
     f"{nl}DB_NAME: {config('DB_NAME')}"
     f"{nl}DB_PORT: {config('DB_PORT')}"

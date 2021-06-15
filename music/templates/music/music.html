@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+
+{% load static %}
+{% load crispy_forms_tags %}
+{% block title %}Music{% endblock %}
+
+{% block stylesheet %}
+  <link rel="stylesheet" type="text/css" href="{% static 'css/container-styles.css' %}">
+{% endblock %}
+
+{% block navbutton %}
+<ul class="navbar-nav mr-auto">
+  <li class="nav-item dropdown">
+    <a class="nav-link dropdown-toggle mr-1" href="#" data-toggle="dropdown">Music</a>
+    <div class="dropdown-menu dropdown-menu-left">
+      <a class="dropdown-item" href="{% url 'home' %}">Home</a>
+    </div>
+  </li>
+</ul>
+{% endblock %}
+
+{% block content %}
+  <form id="id_music" method="post">
+    {% csrf_token %}
+    <div class="form-group row">
+      <div class="col-sm-4">
+        <input name="uri" type="" class="form-control form-control-lg" id="colFormLabelLg" placeholder="Query artist">
+        <button type="submit" class="btn btn-primary btn-lg mt-1">submit</button>
+      </div>
+    </div>
+
+    {% if top_tracks %}
+      <div class="container bg-dark p-2">
+        {% for track in top_tracks %}
+          <ol class="list-group mt-1">
+            <li class="list-group-item bg-info text-center">
+              <h3 class="text-white">{{ track.name }}</h3>
+            </li>
+            {% if track.preview_url %}
+              <li class="list-group-item"><a href="{{ track.preview_url }}" target='_blank'><button type="button"
+                  class="btn btn-primary btn-lg mt-1">Play</button></a>
+              </li>
+            {% endif %}
+            <li class="list-group-item"><img width="30%" src="{{ track.album.images.0.url }}" class="img-fluid img-thumbnail" alt=""></li>
+          </ol>
+          <hr>
+        {% endfor %}
+      </div>
+    {% endif %}
+
+  </form>
+{% endblock content %}
+
+{% block javascript %}
+<script>
+</script>
+{% endblock %}

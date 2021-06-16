@@ -22,28 +22,30 @@
 {% block content %}
   <form id="id_music" method="post">
     {% csrf_token %}
-    <div class="form-group row">
-      <div class="col-sm-4">
-        <input name="uri" type="" class="form-control form-control-lg" id="colFormLabelLg" placeholder="Query artist">
-        <button type="submit" class="btn btn-primary btn-lg mt-1">submit</button>
-      </div>
+    <div class="form-group row col-sm-4">
+      <input name="artist_query" type="" class="form-control form-control-lg"
+        placeholder="{{ artist_query }}">
+      </input>
     </div>
 
     {% if top_tracks %}
-      <div class="container bg-dark p-2">
+      <div class="card-columns mb-5">
         {% for track in top_tracks %}
-          <ol class="list-group mt-1">
-            <li class="list-group-item bg-info text-center">
-              <h3 class="text-white">{{ track.name }}</h3>
-            </li>
-            {% if track.preview_url %}
-              <li class="list-group-item"><a href="{{ track.preview_url }}" target='_blank'><button type="button"
-                  class="btn btn-primary btn-lg mt-1">Play</button></a>
-              </li>
-            {% endif %}
-            <li class="list-group-item"><img width="30%" src="{{ track.album.images.0.url }}" class="img-fluid img-thumbnail" alt=""></li>
-          </ol>
-          <hr>
+          <div style="width: 18rem" class="card">
+            <img class="card-img-top" src="{{ track.album.images.0.url }}" class="img-fluid img-thumbnail" alt="">
+            <div class="card-body">
+              {% if track.preview_url %}
+                <h5 class="card-title">{{ track.name }}
+                <span>
+                  <a href="{{ track.preview_url }}" target="_blank">
+                  <img width="15rem" src="{% static 'img/play-icon.png' %}"></a>
+                </span>
+                </h5>
+              {% else %}
+                <h5 class="card-title">{{ track.name }}</h5>
+              {% endif %}
+            </div>
+          </div>
         {% endfor %}
       </div>
     {% endif %}

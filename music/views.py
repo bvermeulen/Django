@@ -1,11 +1,14 @@
-import datetime
 from django.shortcuts import render, redirect, reverse
 from django.views.generic import View
+from django.db import IntegrityError
 from howdimain.settings import SPOTIFY_CLIENT_ID, SPOTIFY_CLIENT_SECRET
 from howdimain.utils.get_ip import get_client_ip
 from howdimain.utils.plogger import Logger
+from music.models import PlayList
 import spotipy
 from spotipy.oauth2 import SpotifyClientCredentials
+from spotipy.exceptions import SpotifyException
+from pprint import pprint
 
 logger = Logger.getlogger()
 
@@ -14,8 +17,8 @@ spotify = spotipy.Spotify(client_credentials_manager=SpotifyClientCredentials(
     client_secret=SPOTIFY_CLIENT_SECRET,
 ))
 
-class MusicView(View):
-    template_name = 'music/music.html'
+class PlayTopTracksView(View):
+    template_name = 'music/play_top_tracks.html'
 
     def get(self, request):
         context = {
@@ -25,16 +28,39 @@ class MusicView(View):
 
     def post(self, request):
 
+        user = request.user
         if request.method=='POST':
             artist_query = request.POST.get('artist_query')
-            try:
-                artists = spotify.search(q='artist:' + artist_query, type='artist')
-                top_tracks = spotify.artist_top_tracks(
-                    artists['artists']['items'][0]['uri'][15:]
-                )['tracks'][:10]
+            track_id = request.POST.get('track_id')
 
-            except Exception as e:
-                top_tracks = []
+            top_tracks = request.session.get('top_tracks', [])
+            if artist_query:
+                try:
+                    artists = spotify.search(q='artist:' + artist_query, type='artist')
+                    top_tracks = spotify.artist_top_tracks(
+                        artists['artists']['items'][0]['uri'][15:]
+                    )['tracks'][:10]
+
+                except Exception as e:
+                    pass
+
+            else:
+                artist_query = request.session.get('artist_query', '')
+
+            if user.is_authenticated and track_id:
+                try:
+                    track_data = spotify.track(track_id)
+                    PlayList.objects.create(
+                        track_id=track_data.get('id'),
+                        track_artist=track_data.get('artists')[0].get('name')[:100],
+                        track_name=track_data.get('name')[:100],
+                        user=user,
+                    )
+                except (IntegrityError, SpotifyException):
+                    pass
+
+            request.session['artist_query'] = artist_query
+            request.session['top_tracks'] = top_tracks
 
             context = {
                 'top_tracks': top_tracks,

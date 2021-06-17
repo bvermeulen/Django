@@ -1,6 +1,6 @@
 from django.urls import path
-from .views import MusicView
+from .views import PlayTopTracksView
 
 urlpatterns = [
-    path('music/music/', MusicView.as_view(), name='music'),
+    path('music/play_top_tracks/', PlayTopTracksView.as_view(), name='play_top_tracks'),
 ]

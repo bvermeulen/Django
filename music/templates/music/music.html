@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+
+{% load static %}
+{% load crispy_forms_tags %}
+{% block title %}Music{% endblock %}
+
+{% block stylesheet %}
+  <link rel="stylesheet" type="text/css" href="{% static 'css/container-styles.css' %}">
+{% endblock %}
+
+{% block navbutton %}
+<ul class="navbar-nav mr-auto">
+  <li class="nav-item dropdown">
+    <a class="nav-link dropdown-toggle mr-1" href="#" data-toggle="dropdown">Music</a>
+    <div class="dropdown-menu dropdown-menu-left">
+      <a class="dropdown-item" href="{% url 'home' %}">Home</a>
+    </div>
+  </li>
+</ul>
+{% endblock %}
+
+{% block content %}
+  <form id="id_music" method="post">
+    {% csrf_token %}
+    <div class="form-group row col-sm-4">
+      <input name="artist_query" type="" class="form-control form-control-lg"
+        placeholder="{{ artist_query }}">
+      </input>
+    </div>
+
+    {% if top_tracks %}
+      <div class="card-columns mb-5">
+        {% for track in top_tracks %}
+          <div style="width: 18rem" class="card">
+            <div class="card-body">
+              <h5>{{ track.name }}</h5>
+              <iframe src="https://open.spotify.com/embed/track/{{ track.id }}" width="100%" height="300" frameborder="0"
+                allowtransparency="true" allow="encrypted-media"></iframe>
+              {% if track.preview_url %}
+                <audio controls style="float: left; width: 60%; margin: 5px">
+                  <source src="{{ track.preview_url }}">
+                </audio>
+              {% endif %}
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+
+  </form>
+{% endblock content %}
+
+{% block javascript %}
+<script>
+</script>
+{% endblock %}

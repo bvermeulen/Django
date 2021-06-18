@@ -2,7 +2,7 @@
 
 {% load static %}
 {% load crispy_forms_tags %}
-{% block title %}Music{% endblock %}
+{% block title %}Top tracks{% endblock %}
 
 {% block stylesheet %}
   <link rel="stylesheet" type="text/css" href="{% static 'css/container-styles.css' %}">
@@ -22,10 +22,11 @@
 {% block content %}
   <form id="id_music" method="post">
     {% csrf_token %}
-    <div class="form-group row col-sm-4">
-      <input name="artist_query" type="" class="form-control form-control-lg"
+    <div class="d-flex mb-4">
+      <input name="artist_query" type="" class="form-control form-control-lg col-sm-4"
         placeholder="{{ artist_query }}">
       </input>
+      <a class="btn btn-primary ml-1" href="{% url 'playlist' %}">Playlist</a>
     </div>
 
     {% if top_tracks %}

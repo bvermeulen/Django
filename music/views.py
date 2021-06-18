@@ -1,6 +1,8 @@
 from django.shortcuts import render, redirect, reverse
 from django.views.generic import View
 from django.db import IntegrityError
+from django.contrib.auth.decorators import login_required
+from django.utils.decorators import method_decorator
 from howdimain.settings import SPOTIFY_CLIENT_ID, SPOTIFY_CLIENT_SECRET
 from howdimain.utils.get_ip import get_client_ip
 from howdimain.utils.plogger import Logger
@@ -56,6 +58,10 @@ class PlayTopTracksView(View):
                         track_name=track_data.get('name')[:100],
                         user=user,
                     )
+                    logger.info(
+                        f'user {user} [ip: {get_client_ip(request)}] '
+                        f'added {track_data.get("name")} to playlist')
+
                 except (IntegrityError, SpotifyException):
                     pass
 
@@ -72,4 +78,17 @@ class PlayTopTracksView(View):
                 'artist_query': 'enter name artist',
             }
 
+        return render(request, self.template_name, context)
+
+
+@method_decorator(login_required, name='dispatch')
+class PlayListView(View):
+    template_name = 'music/playlist.html'
+
+    def get(self, request):
+        user = request.user
+        track_list = PlayList.objects.filter(user=user)
+        context = {
+            'track_list': track_list
+        }
         return render(request, self.template_name, context)

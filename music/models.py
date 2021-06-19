@@ -4,7 +4,7 @@ from django.contrib.auth.models import User
 from django.db.models.deletion import CASCADE
 
 
-class PlayList(models.Model):
+class MusicTrack(models.Model):
     track_id = models.CharField(max_length=30)
     track_artist = models.CharField(max_length=100)
     track_name = models.CharField(max_length=100)

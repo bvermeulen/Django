@@ -34,6 +34,7 @@ urlpatterns = [
     path('', include('accounts.urls')),
     path('', include('newsfeed.urls')),
     path('', include('stock.urls')),
+    path('', include('music.urls')),
     path('martor/', include('martor.urls')),
 ]
 

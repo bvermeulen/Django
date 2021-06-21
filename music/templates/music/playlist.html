@@ -3,7 +3,6 @@
 <!-- https://swiperjs.com/get-started -->
 <!-- https://raddy.co.uk/blog/better-netflix-carousel-using-swiperjs/?_ga=2.48700514.531499082.1624005259-591471417.1624005259 -->
 
-
 {% load static %}
 {% block title %}Playlist{% endblock %}
 
@@ -63,13 +62,44 @@
 
 <script>
   var swiper = new Swiper('.swiper-container', {
-    slidesPerView: 5,
-    spaceBetween: 10,
-    slidesPerGroup: 2,
+    keyboard: {
+      enabled: true,
+    },
+
+    // Responsive breakpoints for screen size
+    breakpoints: {
+      240: {
+        slidesPerView: 1,
+        spaceBetween: 5,
+        slidesPerGroup: 1,
+      },
+      480: {
+        slidesPerView: 2,
+        spaceBetween: 5,
+        slidesPerGroup: 1,
+      },
+      720: {
+        slidesPerView: 3,
+        spaceBetween: 5,
+        slidesPerGroup: 1,
+      },
+      900: {
+        slidesPerView: 4,
+        spaceBetween: 10,
+        slidesPerGroup: 2,
+      },
+      1200: {
+        slidesPerView: 5,
+        spaceBetween: 10,
+        slidesPerGroup: 3,
+      }
+    },
+
     pagination: {
       el: '.swiper-pagination',
       clickable: false,
     },
+
     navigation: {
       nextEl: '.swiper-button-next',
       prevEl: '.swiper-button-prev',

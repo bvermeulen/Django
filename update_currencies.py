@@ -19,7 +19,8 @@ class UpdateCurrencies:
     database = config('DB_NAME')
 
     access_key = config('access_key_currency')
-    forex_url = 'http://api.currencylayer.com/live'
+    # forex_url = 'http://api.currencylayer.com/live'
+    forex_url = 'http://apilayer.net/api/live'
 
     @classmethod
     def update_currencies(cls):

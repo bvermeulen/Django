@@ -25,7 +25,9 @@
       <input name="artist_query" type="" class="form-control form-control-lg col-sm-4"
         placeholder="{{ artist.artist }}">
       </input>
-      <a class="btn btn-primary ml-1" href="{% url 'playlist' %}">Playlist</a>
+      {% if user.is_authenticated %}
+        <a class="btn btn-primary ml-1" href="{% url 'playlist' %}">Playlist</a>
+      {% endif %}
     </div>
 
     {% if artist.top_tracks %}

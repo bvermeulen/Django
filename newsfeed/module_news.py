@@ -65,11 +65,10 @@ def update_news(news_url):
     return parser.entries
 
 
-def restore_feedparserdict(feed_items):
-    new_feed_items = {}
-    for i, feed_item in enumerate(feed_items):
-        new_feed_items[i] = feedparser.FeedParserDict(feed_item)
-    return new_feed_items
+def remove_feedburner_reference(summary):
+    feedburner_reference = r'<.*src="http://feeds\.feedburner\.com.*?>'
+    return re.sub(feedburner_reference, '', summary)
+
 
 def feedparser_time_to_datetime(feed_item):
     ''' Converts the feedparser parsed time (published_parsed or
@@ -91,9 +90,25 @@ def feedparser_time_to_datetime(feed_item):
     return news_published.replace(tzinfo=timezone.utc)
 
 
-def remove_feedburner_reference(summary):
-    feedburner_reference = r'<.*src="http://feeds\.feedburner\.com.*?>'
-    return re.sub(feedburner_reference, '', summary)
+def restore_sort_feedparserdict(feed_items):
+    ''' restore feed items to FeedParserDict - for some reason Django sessions
+        converts them to Dict; sort by date
+        :arguments: list of news item dicts
+        :returns: dictionary of news items dicts
+    '''
+    # sort the feed_items list first on date
+    feed_items_sorted = []
+    for feed_item in feed_items:
+        feed_items_sorted.append((feed_item, feedparser_time_to_datetime(feed_item)))
+
+    feed_items_sorted.sort(key=lambda k: k[1], reverse=True)
+
+    # now make the new feedparser dict
+    new_feed_items = {}
+    for i, feed_item in enumerate(feed_items_sorted):
+        new_feed_items[i] = feedparser.FeedParserDict(feed_item[0])
+
+    return new_feed_items
 
 
 def remove_all_references(summary):

@@ -4,7 +4,7 @@ from django.shortcuts import render, redirect, reverse
 from howdimain.utils.plogger import Logger
 from howdimain.utils.get_ip import get_client_ip
 from howdimain.howdimain_vars import LEFT_ARROW, RIGHT_ARROW
-from ..module_news import update_news, restore_feedparserdict
+from ..module_news import update_news, restore_sort_feedparserdict
 from ..models import NewsSite, UserNewsSite
 from .views_utils import (
     set_session_newsstatus, store_news_item, create_news_context,
@@ -72,8 +72,8 @@ def newspage(request):
         feed_items = request.session['feed']
 
     # restore feed items to FeedParserDict - for some reason Django sessions
-    # converts them to Dict
-    feed_items = restore_feedparserdict(feed_items)
+    # converts them to Dict; sort by date
+    feed_items = restore_sort_feedparserdict(feed_items)
 
     # test if newsfeed is not empty, if it is return to defauilt newssite
     # and reset session

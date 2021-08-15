@@ -96,7 +96,10 @@ def restore_sort_feedparserdict(feed_items):
         :arguments: list of news item dicts
         :returns: dictionary of news items dicts
     '''
-    # sort the feed_items list first on date
+    # first restore feed_item list to a feedparser dict
+    feed_items = [feedparser.FeedParserDict(feed_item) for feed_item in feed_items]
+
+    # sort the feed_items list on date
     feed_items_sorted = []
     for feed_item in feed_items:
         feed_items_sorted.append((feed_item, feedparser_time_to_datetime(feed_item)))
@@ -106,7 +109,7 @@ def restore_sort_feedparserdict(feed_items):
     # now make the new feedparser dict
     new_feed_items = {}
     for i, feed_item in enumerate(feed_items_sorted):
-        new_feed_items[i] = feedparser.FeedParserDict(feed_item[0])
+        new_feed_items[i] = feed_item[0]
 
     return new_feed_items
 

@@ -10,7 +10,7 @@ from django.urls import reverse_lazy
 from howdimain.utils.plogger import Logger
 from howdimain.utils.get_ip import get_client_ip
 from .models import Signup, Home
-from .forms import SignUpForm
+from .forms import SignUpForm, UserUpdateForm
 
 logger = Logger.getlogger()
 
@@ -64,7 +64,7 @@ def signup(request):
 @method_decorator(login_required, name='dispatch')
 class UserUpdateView(UpdateView):
     model = User
-    fields = ('first_name', 'last_name', 'email', )
+    form_class = UserUpdateForm
     template_name = 'accounts/my_account.html'
     success_url = reverse_lazy('home')
 

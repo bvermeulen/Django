@@ -29,7 +29,7 @@ class GetStock(Enum):
 @method_decorator(login_required, name='dispatch')
 class PortfolioView(View):
 
-    form_class = PortfolioForm
+    portfolio_form = PortfolioForm
     template_name = 'finance/stock_portfolio.html'
     td = TradingData()
     td.setup()
@@ -37,6 +37,7 @@ class PortfolioView(View):
 
     def get(self, request):
         currency = request.session.get('currency', 'EUR')
+        stockview = request.session.get('stockview', 'Graphs')
         selected_portfolio = request.session.get('selected_portfolio', '')
         user = request.user
         # add Person class to user
@@ -60,12 +61,13 @@ class PortfolioView(View):
         else:
             pass
 
-        form = self.form_class(
+        form = self.portfolio_form(
             user=user,
             initial={'symbol': '',
                      'portfolio_name': portfolio_name,
                      'portfolios': selected_portfolio,
                      'currencies': currency,
+                     'stockviews': stockview,
                      'exchangerate': self.td.get_usd_euro_exchangerate(currency),
                     })
 
@@ -90,11 +92,13 @@ class PortfolioView(View):
             self.user.__class__ = Person
 
         currency = request.session.get('currency', 'EUR')
+        stockview = request.session.get('stockview', 'Graphs')
 
-        form = self.form_class(self.request.POST, user=self.user)
+        form = self.portfolio_form(self.request.POST, user=self.user)
         if form.is_valid():
             form_data = form.cleaned_data
             currency = form_data.get('currencies')
+            stockview = form_data.get('stockviews')
             self.selected_portfolio = form_data.get('portfolios')
             self.portfolio_name = form_data.get('portfolio_name')
             self.new_portfolio = form_data.get('new_portfolio')
@@ -105,13 +109,15 @@ class PortfolioView(View):
             self.previous_selected = request.session.get('selected_portfolio')
             previous_currency = request.session.get('currency')
 
-            if (self.previous_selected != self.selected_portfolio or
-                    previous_currency != currency):
-                get_stock = GetStock.YES
-
-            else:
+            if (self.previous_selected == self.selected_portfolio and
+                    previous_currency == currency):
                 get_stock = GetStock.NO
 
+            else:
+                get_stock = GetStock.YES
+
+
+            print(f'stock view selection is: {stockview}')
             try:
                 self.portfolio = Portfolio.objects.get(
                     user=self.user, portfolio_name=self.selected_portfolio)
@@ -150,13 +156,15 @@ class PortfolioView(View):
             request.session['stock_info'] = json.dumps(stocks, cls=DjangoJSONEncoder)
             request.session['selected_portfolio'] = self.selected_portfolio
             request.session['currency'] = currency
+            request.session['stockview'] = stockview
 
-            form = self.form_class(
+            form = self.portfolio_form(
                 user=self.user,
                 initial={'portfolio_name': self.portfolio_name,
                          'portfolios': self.selected_portfolio,
                          'symbol': self.symbol,
                          'currencies': currency,
+                         'stockviews': stockview,
                          'exchangerate': self.td.get_usd_euro_exchangerate(currency),
                         })
 
@@ -164,12 +172,13 @@ class PortfolioView(View):
                         f'views {self.selected_portfolio}')
 
         else:
-            form = self.form_class(
+            form = self.portfolio_form(
                 user=self.user,
                 initial={'portfolios': '',
                          'portfolio_name': '',
                          'symbol': '',
                          'currencies': currency,
+                         'stockviews': stockview,
                          'exchangerate': self.td.get_usd_euro_exchangerate(currency),
                         })
 
@@ -178,13 +187,13 @@ class PortfolioView(View):
         totals_values = format_totals_values(*self.td.calculate_stocks_value(stocks))
         stocks = add_display_tokens(stocks)
         stocks = format_and_sort_stocks(stocks)
-        context = {'form': form,
-                   'stocks': stocks,
-                   'totals': totals_values,
-                   'source': source,
-                   'data_provider_url': self.data_provider_url,
-                  }
-
+        context = {
+            'form': form,
+            'stocks': stocks,
+            'totals': totals_values,
+            'source': source,
+            'data_provider_url': self.data_provider_url,
+        }
         return render(self.request, self.template_name, context)
 
     def create_new_portfolio(self):

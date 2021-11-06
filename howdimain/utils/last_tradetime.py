@@ -4,9 +4,13 @@ import datetime
 import pytz
 from stock.models import Exchange
 
+default_exchange = 'XNYS'
+start_trade = datetime.time(9, 0)
+end_trade = datetime.time(18,0)
+
 
 def convert_timezone(timezone: str) -> str:
-    ''' concvert time from database to pytz timezones
+    ''' convert time from database to pytz timezones
         for some known exceptions
     '''
     if timezone == 'JST':
@@ -19,8 +23,53 @@ def convert_timezone(timezone: str) -> str:
         return timezone
 
 
-def last_trade_time(trade_time: str, exchange_mic: str) -> datetime:
+def trade_time(exchange_mic: str) -> datetime:
+    ''' returns datetime of time of last trade, based on the following:
+            - trade is on weekdays between start_trade and end_trade
+            - if outside trading hours last trade time is given of the
+              previous day or last day of week.
+            - disregards bank holidays
+    '''
+    try:
+        exchange = Exchange.objects.get(mic=exchange_mic)
 
+    except Exchange.DoesNotExist:
+        exchange = Exchange.objects.get(mic=default_exchange)
+
+    timezone_exchange = convert_timezone(exchange.timezone.upper())
+    date_time = datetime.datetime.now(
+        pytz.timezone(timezone_exchange)).replace(tzinfo=None)
+
+    date_trade = date_time.date()
+    time_trade = date_time.time()
+
+    if date_trade.isoweekday() == 6:
+        date_trade -= datetime.timedelta(days=1)
+        trade_date_time = datetime.datetime.combine(date_trade, end_trade)
+
+    elif date_trade.isoweekday() == 7:
+        date_trade -= datetime.timedelta(days=2)
+        trade_date_time = datetime.datetime.combine(date_trade, end_trade)
+
+    elif time_trade < start_trade:
+        if date_trade.isoweekday() == 1:
+            date_trade -= datetime.timedelta(days=3)
+
+        else:
+            date_trade -= datetime.timedelta(days=1)
+
+        trade_date_time = datetime.datetime.combine(date_trade, end_trade)
+
+    elif time_trade < end_trade:
+        trade_date_time = date_time
+
+    else:
+        trade_date_time = datetime.datetime.combine(date_trade, end_trade)
+
+    return trade_date_time
+
+
+def last_trade_time(trade_time: str, exchange_mic: str) -> datetime:
     # try default option where tradetime is in a valid format
     try:
         return datetime.datetime.strptime(trade_time, '%Y-%m-%d %H:%M:%S')
@@ -31,7 +80,7 @@ def last_trade_time(trade_time: str, exchange_mic: str) -> datetime:
             exchange = Exchange.objects.get(mic=exchange_mic)
 
         except Exchange.DoesNotExist:
-            return datetime.datetime(1963, 10, 22)
+            exchange = Exchange.objects.get(mic=default_exchange)
 
         try:
             timezone_stock = convert_timezone(exchange.timezone.upper())

@@ -39,16 +39,20 @@ class PortfolioForm(forms.Form):
         self.fields['btn1_pressed'] = forms.CharField(required=False)
         self.fields['change_qty_btn_pressed'] = forms.CharField(required=False)
         self.fields['delete_symbol_btn_pressed'] = forms.CharField(required=False)
+        self.fields['exchangerate'] = forms.CharField(required=False)
 
         self.fields['portfolios'] = forms.ChoiceField(
             widget=forms.Select(),
             choices=list(zip(user.get_portfolio_names(), user.get_portfolio_names())),
             required=False,
         )
-
-        self.fields['exchangerate'] = forms.CharField(required=False)
         self.fields['currencies'] = forms.ChoiceField(
             widget=forms.Select(),
             choices=BASE_CURRENCIES,
+            required=True,
+        )
+        self.fields['stockviews'] = forms.ChoiceField(
+            widget=forms.Select(),
+            choices=[('Graphs', 'Graphs'), ('News', 'News')],
             required=True,
         )

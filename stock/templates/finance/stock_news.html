@@ -1,0 +1,32 @@
+{% extends 'base.html' %}<html>
+
+{% load static stock_tags %}
+
+{%block title %}Stock news{% endblock %}
+
+{% block navbutton %}
+<ul class="navbar-nav mr-auto">
+  <li class="nav-item dropdown">
+    <a class="nav-link dropdown-toggle mr-1" href="#" data-toggle="dropdown">
+      Stock news
+    </a>
+    <div class="dropdown-menu dropdown-menu-left">
+      {% if source == 'quotes' %}
+        <a class="dropdown-item" href="{% url 'stock_quotes' %}">Quotes</a>
+      {% else %}
+        <a class="dropdown-item" href="{% url 'portfolio' %}">Portfolio</a>
+      {% endif %}
+      <a class="dropdown-item" href="{% url 'home' %}">Home</a>
+    </div>
+  </li>
+</ul>
+{% endblock %}
+
+{% block content %}
+
+  {{ source }} - {{ symbol }}
+	<h1>Stock news for {{ symbol }}</h1>
+
+{% endblock content %}
+
+{% block javascript %}{% endblock javascript %}

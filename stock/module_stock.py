@@ -30,7 +30,7 @@ from decouple import config
 import requests
 from django.db.utils import IntegrityError
 from howdimain.utils.plogger import Logger
-from howdimain.utils.last_tradetime import last_trade_time
+from howdimain.utils.last_tradetime import trade_time
 from howdimain.utils.min_max import get_min, get_max
 from howdimain.howdimain_vars import MAX_SYMBOLS_ALLOWED, URL_FMP
 from stock.models import Person, Exchange, Currency, Stock, Portfolio, StockSelection
@@ -214,7 +214,9 @@ class TradingData:
     @classmethod
     def setup(cls,):
         cls.api_token = config('API_token')
-        cls.stock_url = 'https://financialmodelingprep.com/api/v3/quote-symex-private-endpoint/'  #pylint: disable=line-too-long
+
+        # cls.stock_url = 'https://financialmodelingprep.com/api/v3/quote-symex-private-endpoint/'  #pylint: disable=line-too-long
+        cls.stock_url = 'https://financialmodelingprep.com/api/v3/quote/'
         cls.intraday_url = 'https://financialmodelingprep.com/api/v3/historical-chart/'           #pylint: disable=line-too-long
         cls.history_url = 'https://financialmodelingprep.com/api/v3/historical-price-full/'       #pylint: disable=line-too-long
         cls.time_interval = '5min'
@@ -294,9 +296,7 @@ class TradingData:
             stock_dict['close_yesterday'] = quote.get('previousClose')
             stock_dict['day_change'] = quote.get('change')
             stock_dict['change_pct'] = quote.get('changesPercentage')
-            stock_dict['last_trade_time'] = last_trade_time(
-                quote.get('lastTradeTimeStamp'), stock_dict['exchange_mic']
-            )
+            stock_dict['last_trade_time'] = trade_time(stock_dict['exchange_mic'])
 
             stock_info.append(stock_dict)
 

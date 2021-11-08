@@ -7,6 +7,7 @@ from django.shortcuts import render
 from django.views.generic import View
 from django.utils.decorators import method_decorator
 from django.db.utils import IntegrityError
+from howdimain.howdimain_vars import BASE_CURRENCIES, STOCK_DETAILS
 from howdimain.utils.plogger import Logger
 from howdimain.utils.get_ip import get_client_ip
 from howdimain.utils.format_and_tokens import (
@@ -36,8 +37,8 @@ class PortfolioView(View):
     data_provider_url = td.data_provider_url
 
     def get(self, request):
-        currency = request.session.get('currency', 'EUR')
-        stockview = request.session.get('stockview', 'Graphs')
+        currency = request.session.get('currency', BASE_CURRENCIES[0][0])
+        stockdetail = request.session.get('stockdetail', STOCK_DETAILS[0][0])
         selected_portfolio = request.session.get('selected_portfolio', '')
         user = request.user
         # add Person class to user
@@ -67,7 +68,7 @@ class PortfolioView(View):
                      'portfolio_name': portfolio_name,
                      'portfolios': selected_portfolio,
                      'currencies': currency,
-                     'stockviews': stockview,
+                     'stockdetails': stockdetail,
                      'exchangerate': self.td.get_usd_euro_exchangerate(currency),
                     })
 
@@ -91,14 +92,14 @@ class PortfolioView(View):
         if self.user.is_authenticated:
             self.user.__class__ = Person
 
-        currency = request.session.get('currency', 'EUR')
-        stockview = request.session.get('stockview', 'Graphs')
+        currency = request.session.get('currency', BASE_CURRENCIES[0][0])
+        stockdetail = request.session.get('stockdetail', STOCK_DETAILS[0][0])
 
         form = self.portfolio_form(self.request.POST, user=self.user)
         if form.is_valid():
             form_data = form.cleaned_data
             currency = form_data.get('currencies')
-            stockview = form_data.get('stockviews')
+            stockdetail = form_data.get('stockdetails')
             self.selected_portfolio = form_data.get('portfolios')
             self.portfolio_name = form_data.get('portfolio_name')
             self.new_portfolio = form_data.get('new_portfolio')
@@ -116,8 +117,6 @@ class PortfolioView(View):
             else:
                 get_stock = GetStock.YES
 
-
-            print(f'stock view selection is: {stockview}')
             try:
                 self.portfolio = Portfolio.objects.get(
                     user=self.user, portfolio_name=self.selected_portfolio)
@@ -156,7 +155,7 @@ class PortfolioView(View):
             request.session['stock_info'] = json.dumps(stocks, cls=DjangoJSONEncoder)
             request.session['selected_portfolio'] = self.selected_portfolio
             request.session['currency'] = currency
-            request.session['stockview'] = stockview
+            request.session['stockdetail'] = stockdetail
 
             form = self.portfolio_form(
                 user=self.user,
@@ -164,7 +163,7 @@ class PortfolioView(View):
                          'portfolios': self.selected_portfolio,
                          'symbol': self.symbol,
                          'currencies': currency,
-                         'stockviews': stockview,
+                         'stockdetails': stockdetail,
                          'exchangerate': self.td.get_usd_euro_exchangerate(currency),
                         })
 
@@ -178,7 +177,7 @@ class PortfolioView(View):
                          'portfolio_name': '',
                          'symbol': '',
                          'currencies': currency,
-                         'stockviews': stockview,
+                         'stockdetails': stockdetail,
                          'exchangerate': self.td.get_usd_euro_exchangerate(currency),
                         })
 

@@ -1,5 +1,5 @@
 from django import forms
-from howdimain.howdimain_vars import BASE_CURRENCIES
+from howdimain.howdimain_vars import BASE_CURRENCIES, STOCK_DETAILS
 from .models import Exchange
 
 class StockQuoteForm(forms.Form):
@@ -51,8 +51,8 @@ class PortfolioForm(forms.Form):
             choices=BASE_CURRENCIES,
             required=True,
         )
-        self.fields['stockviews'] = forms.ChoiceField(
+        self.fields['stockdetails'] = forms.ChoiceField(
             widget=forms.Select(),
-            choices=[('Graphs', 'Graphs'), ('News', 'News')],
+            choices=STOCK_DETAILS,
             required=True,
         )

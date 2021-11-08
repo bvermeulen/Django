@@ -43,6 +43,7 @@ from stock.module_alpha_vantage import (
 
 logger = Logger.getlogger()
 
+
 class StockTools:
     ''' methods to read stocks and populate the database
     '''
@@ -215,10 +216,12 @@ class TradingData:
     def setup(cls,):
         cls.api_token = config('API_token')
 
-        # cls.stock_url = 'https://financialmodelingprep.com/api/v3/quote-symex-private-endpoint/'  #pylint: disable=line-too-long
+        # cls.stock_url = 'https://financialmodelingprep.com/api/v3/quote-symex-private-endpoint/'
         cls.stock_url = 'https://financialmodelingprep.com/api/v3/quote/'
-        cls.intraday_url = 'https://financialmodelingprep.com/api/v3/historical-chart/'           #pylint: disable=line-too-long
-        cls.history_url = 'https://financialmodelingprep.com/api/v3/historical-price-full/'       #pylint: disable=line-too-long
+        cls.intraday_url = 'https://financialmodelingprep.com/api/v3/historical-chart/'
+        cls.history_url = 'https://financialmodelingprep.com/api/v3/historical-price-full/'
+        cls.news_url = 'https://financialmodelingprep.com/api/v3/stock_news'
+        cls.press_url = 'https://financialmodelingprep.com/api/v3/press-releases/'
         cls.time_interval = '5min'
 
         cls.data_provider_url = URL_FMP
@@ -590,3 +593,49 @@ class TradingData:
 
         else:
             assert False, f'invalid currency parameter: {currency}, should be USD or EUR'
+
+    def get_press_news(cls, stock_symbol: str, limit: int = 10) -> list:
+        press_news = []
+        press_url = cls.press_url + stock_symbol.upper()
+        params = {
+            'limit': limit,
+            'apikey': cls.api_token
+        }
+        try:
+            res = requests.get(press_url, params=params)
+            if res and res.status_code == 200:
+                press_news = res.json()
+            else:
+                pass
+
+        except requests.exceptions.ConnectionError:
+            logger.info(f'connection error: {press_url} {params}')
+
+        return press_news
+
+    def get_stock_news(cls, stock_symbol: str, limit: int = 10) -> list:
+        stock_news = []
+        params = {
+            'tickers': stock_symbol.upper(),
+            'limit': limit,
+            'apikey': cls.api_token
+        }
+        try:
+            res = requests.get(cls.news_url, params=params)
+            if res and res.status_code == 200:
+                stock_news = res.json()
+            else:
+                pass
+
+        except requests.exceptions.ConnectionError:
+            logger.info(f'connection error: {cls.news_url} {params}')
+
+        return stock_news
+
+    @staticmethod
+    def get_company_name(stock_symbol):
+        try:
+            return Stock.objects.get(symbol_ric=stock_symbol).company
+
+        except Stock.DoesNotExist:
+            return ''

@@ -29,7 +29,7 @@
     {% csrf_token %}
     <a style="display: none">{{ form.new_portfolio }} {{ form.portfolio_name }}
                              {{ form.portfolios }} {{ form.currencies }}
-                             {{ form.symbol }}</a>
+                             {{ form.symbol }} {{ form.stockdetails }}</a>
 
     <div class="d-flex">
       <div class="dropdown">
@@ -74,11 +74,11 @@
             Add symbol</button>
         </div>
         <div class="dropdown">
-          <button type="button" class="btn dropdown-toggle btn-outline-primary btn-sm">{{ form.stockviews.value }}</button>
+          <button type="button" class="btn dropdown-toggle btn-outline-primary btn-sm">{{ form.stockdetails.value }}</button>
           <div class="dropdown-content">
-            {% for stockview in form.stockviews %}
-              {% if not stockview.data.selected %}
-                <button class="btn btn-link" value="{{ stockview.data.value }}" name="{{ stockview.data.name }}">{{stockview.choice_label }}</button>
+            {% for stockdetail in form.stockdetails %}
+              {% if not stockdetail.data.selected %}
+                <button class="btn btn-link" value="{{ stockdetail.data.value }}" name="{{ stockdetail.data.name }}">{{stockdetail.choice_label }}</button>
               {% endif %}
             {% endfor %}
           </div>
@@ -124,7 +124,7 @@
         {% increment -1 as change_btn_counter %}
         {% for stock in stocks %}
           <tr>
-            {% if form.stockviews.value == 'Graphs' %}
+            {% if form.stockdetails.value == 'Graphs' %}
               <td width="17%"><a href="{% url 'stock_intraday' source stock.symbol %}">{{ stock.name|truncatechars:15 }}</a></td>
             {% else %}
               <td width="17%"><a href="{% url 'stock_news' source stock.symbol %}">{{ stock.name|truncatechars:15 }}</a></td>

@@ -27,6 +27,7 @@ URL_ALPHAVANTAGE = 'www.alphavantage.co'
 URL_WORLDTRADE = 'www.worldtradedata.com'
 URL_FMP = 'financialmodelingprep.com'
 BASE_CURRENCIES = [('EUR', 'EUR'), ('USD', 'USD')]
+STOCK_DETAILS = [('Graphs', 'Graphs'), ('News', 'News'), ('Press', 'Press')]
 CARET_UP = '\u25B2'         # up triangle
 CARET_DOWN = '\u25BC'       # down triangle
 CARET_NO_CHANGE = '\u25AC'  # rectangle

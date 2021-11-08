@@ -24,8 +24,27 @@
 
 {% block content %}
 
-  {{ source }} - {{ symbol }}
-	<h1>Stock news for {{ symbol }}</h1>
+	<h3><strong>Stock news for {{ company }} ({{ symbol }})</strong></h1>
+  {% for news_item in stock_news %}
+    <div class="card mb-2">
+      <div class="card-body">
+        <h4 class="card-title"><strong>{{ news_item.title }}</strong></h4>
+        <p class="card-text">
+          <small><strong>{{ news_item.site }}: {{ news_item.publishedDate }}</strong></small>
+          <br>{{ news_item.text }}
+        </p>
+        <a class="btn btn-outline-primary btn-sm" href="{{ news_item.url }}" target="_blank">link</a>
+        <a class="btn btn-outline-primary btn-sm" href="{% url 'stock_intraday' source symbol %}" >Graphs</a>
+        <a class="btn btn-outline-primary btn-sm" href="#" >Press releases</a>
+        {% if source == 'quotes' %}
+          <a class="btn btn-outline-primary btn-sm" href="{% url 'stock_quotes' %}">Return</a>
+        {% else %}
+          <a class="btn btn-outline-primary btn-sm" href="{% url 'portfolio' %}">Return</a>
+        {% endif %}
+      </div>
+    </div>
+  {% endfor %}
+  <div class="mb-5"> </div>
 
 {% endblock content %}
 

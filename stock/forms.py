@@ -22,6 +22,11 @@ class StockQuoteForm(forms.Form):
             required=False,
             label='',
         )
+        self.fields['stockdetails'] = forms.ChoiceField(
+            widget=forms.Select(),
+            choices=STOCK_DETAILS,
+            required=True,
+        )
 
 
 class PortfolioForm(forms.Form):
@@ -39,7 +44,6 @@ class PortfolioForm(forms.Form):
         self.fields['btn1_pressed'] = forms.CharField(required=False)
         self.fields['change_qty_btn_pressed'] = forms.CharField(required=False)
         self.fields['delete_symbol_btn_pressed'] = forms.CharField(required=False)
-        self.fields['exchangerate'] = forms.CharField(required=False)
 
         self.fields['portfolios'] = forms.ChoiceField(
             widget=forms.Select(),

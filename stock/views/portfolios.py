@@ -16,6 +16,7 @@ from stock.models import Person, Stock, Portfolio, StockSelection
 from stock.forms import PortfolioForm
 from stock.module_stock import TradingData
 
+
 logger = Logger.getlogger()
 d = Decimal
 source = 'portfolio'
@@ -69,7 +70,6 @@ class PortfolioView(View):
                      'portfolios': selected_portfolio,
                      'currencies': currency,
                      'stockdetails': stockdetail,
-                     'exchangerate': self.td.get_usd_euro_exchangerate(currency),
                     })
 
         totals_values = format_totals_values(*self.td.calculate_stocks_value(stocks))
@@ -79,6 +79,7 @@ class PortfolioView(View):
                    'stocks': stocks,
                    'totals': totals_values,
                    'source': source,
+                   'exchangerate': self.td.get_usd_euro_exchangerate(currency),
                    'data_provider_url': self.data_provider_url,
                   }
         return render(request, self.template_name, context)
@@ -159,28 +160,26 @@ class PortfolioView(View):
 
             form = self.portfolio_form(
                 user=self.user,
-                initial={'portfolio_name': self.portfolio_name,
-                         'portfolios': self.selected_portfolio,
-                         'symbol': self.symbol,
-                         'currencies': currency,
-                         'stockdetails': stockdetail,
-                         'exchangerate': self.td.get_usd_euro_exchangerate(currency),
-                        })
-
+                initial={
+                    'portfolio_name': self.portfolio_name,
+                    'portfolios': self.selected_portfolio,
+                    'symbol': self.symbol,
+                    'currencies': currency,
+                    'stockdetails': stockdetail,
+            })
             logger.info(f'user {self.user} [ip: {get_client_ip(self.request)}] '
                         f'views {self.selected_portfolio}')
 
         else:
             form = self.portfolio_form(
                 user=self.user,
-                initial={'portfolios': '',
-                         'portfolio_name': '',
-                         'symbol': '',
-                         'currencies': currency,
-                         'stockdetails': stockdetail,
-                         'exchangerate': self.td.get_usd_euro_exchangerate(currency),
-                        })
-
+                initial={
+                    'portfolios': '',
+                    'portfolio_name': '',
+                    'symbol': '',
+                    'currencies': currency,
+                    'stockdetails': stockdetail,
+            })
             stocks = []
 
         totals_values = format_totals_values(*self.td.calculate_stocks_value(stocks))
@@ -191,6 +190,7 @@ class PortfolioView(View):
             'stocks': stocks,
             'totals': totals_values,
             'source': source,
+            'exchangerate': self.td.get_usd_euro_exchangerate(currency),
             'data_provider_url': self.data_provider_url,
         }
         return render(self.request, self.template_name, context)

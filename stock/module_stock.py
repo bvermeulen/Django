@@ -594,7 +594,7 @@ class TradingData:
         else:
             assert False, f'invalid currency parameter: {currency}, should be USD or EUR'
 
-    def get_press_news(cls, stock_symbol: str, limit: int = 10) -> list:
+    def get_stock_press(cls, stock_symbol: str, limit: int = 10) -> list:
         press_news = []
         press_url = cls.press_url + stock_symbol.upper()
         params = {

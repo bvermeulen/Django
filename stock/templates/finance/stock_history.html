@@ -30,6 +30,10 @@
   <div>
     <button class="btn btn-primary btn-sm"
       onclick="window.location.href='{% url 'stock_intraday' source stock_symbol %}'">Latest stock trading</button>
+    <button class="btn btn-primary btn-sm"
+      onclick="window.location.href='{% url 'stock_news' source stock_symbol %}'">Stock news</button>
+    <button class="btn btn-primary btn-sm"
+      onclick="window.location.href='{% url 'stock_press' source stock_symbol %}'">Press releases</button>
     {% for prd in periods reversed %}
       {% if period != prd %}
         {% if prd == periods|index:-1 %}

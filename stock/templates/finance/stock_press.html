@@ -2,13 +2,13 @@
 
 {% load static stock_tags %}
 
-{%block title %}Stock news{% endblock %}
+{%block title %}Stock press{% endblock %}
 
 {% block navbutton %}
 <ul class="navbar-nav mr-auto">
   <li class="nav-item dropdown">
     <a class="nav-link dropdown-toggle mr-1" href="#" data-toggle="dropdown">
-      Stock news
+      Stock press
     </a>
     <div class="dropdown-menu dropdown-menu-left">
       {% if source == 'quotes' %}
@@ -24,18 +24,17 @@
 
 {% block content %}
 
-	<h3><strong>Stock news for {{ company }} ({{ symbol }})</strong></h1>
-  {% for news_item in stock_news %}
+	<h3><strong>Press releases for {{ company }} ({{ symbol }})</strong></h1>
+  {% for press_item in stock_press %}
     <div class="card mb-2">
       <div class="card-body">
-        <h4 class="card-title"><strong>{{ news_item.title }}</strong></h4>
+        <h4 class="card-title"><strong>{{ press_item.title }}</strong></h4>
         <p class="card-text">
-          <small><strong>{{ news_item.site }}: {{ news_item.publishedDate }}</strong></small>
-          <br>{{ news_item.text }}
+          <small><strong>{{ press_item.date }}</strong></small>
+          <br>{{ press_item.text }}
         </p>
-        <a class="btn btn-outline-primary btn-sm" href="{{ news_item.url }}" target="_blank">link</a>
         <a class="btn btn-outline-primary btn-sm" href="{% url 'stock_intraday' source symbol %}" >Graphs</a>
-        <a class="btn btn-outline-primary btn-sm" href="{% url 'stock_press' source symbol %}" >Press releases</a>
+        <a class="btn btn-outline-primary btn-sm" href="{% url 'stock_news' source symbol %}" >Stock news</a>
         {% if source == 'quotes' %}
           <a class="btn btn-outline-primary btn-sm" href="{% url 'stock_quotes' %}">Return</a>
         {% else %}
@@ -44,11 +43,11 @@
       </div>
     </div>
   {% endfor %}
-  {% if not stock_news %}
+  {% if not stock_press %}
     <div>
-      <h2>Alas, there is no news ...</h2>
+      <h2>Alas, there are no press releases ...</h2>
       <a class="btn btn-outline-primary btn-sm" href="{% url 'stock_intraday' source symbol %}">Graphs</a>
-      <a class="btn btn-outline-primary btn-sm" href="{% url 'stock_press' source symbol %}">Press releases</a>
+      <a class="btn btn-outline-primary btn-sm" href="{% url 'stock_news' source symbol %}">Stock news</a>
       {% if source == 'quotes' %}
         <a class="btn btn-outline-primary btn-sm" href="{% url 'stock_quotes' %}">Return</a>
       {% else %}

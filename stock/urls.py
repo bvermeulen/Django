@@ -5,7 +5,10 @@ urlpatterns = [
     path('finance/stock_quote/', quotes.QuoteView.as_view(), name='stock_quotes'),
 
     path('finance/stock_news/<str:source>/<str:symbol>/',
-         news.NewsView.as_view(), name='stock_news'),
+         news.StockNewsView.as_view(), name='stock_news'),
+
+    path('finance/stock_press/<str:source>/<str:symbol>/',
+         news.StockPressView.as_view(), name='stock_press'),
 
     path('finance/stock_intraday/<str:source>/<str:symbol>/',
          plots.IntraDayView.as_view(), name='stock_intraday'),

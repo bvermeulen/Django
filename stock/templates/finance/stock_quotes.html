@@ -27,16 +27,17 @@
 
 <form id="id_stockquote" method="post">
 {% csrf_token %}
-<a style="display: none">{{ form.quote_string }} </a>
+<a style="display: none">{{ form.quote_string }} {{ form.stockdetails }}
+                         {{ form.markets }}</a>
 
   <div class="d-flex">
     <div>
-      <button class="btn btn-primary btn-sm"
+      <button class="btn btn-outline-primary btn-sm"
         onclick="return SubmitQuoteString('{{ form.quote_string.value }}')">Quote</button>
     </div>
 
     <div>
-      <button class="btn dropdown-toggle btn-primary btn-sm ml-1" data-toggle="dropdown"
+      <button class="btn dropdown-toggle btn-outline-primary btn-sm ml-1" data-toggle="dropdown"
         >Portfolio's</button>
         <ul class="dropdown-menu scroll" style="height:40%;">
      		 	 {% for portfolio in portfolios %}
@@ -47,16 +48,28 @@
     </div>
 
     <div>
-      <button class="btn dropdown-toggle btn-primary btn-sm ml-1" data-toggle="dropdown"
+      <button class="btn dropdown-toggle btn-outline-primary btn-sm mx-1" data-toggle="dropdown"
         >Markets</button>
         <ul class="dropdown-menu scroll" style="height:40%;">
           {{ form.markets|as_crispy_field }}
         </ul>
     </div>
 
+    <div class="dropdown">
+      <button type="button" class="btn dropdown-toggle btn-outline-primary btn-sm">{{ form.stockdetails.value }}</button>
+      <div class="dropdown-content">
+        {% for stockdetail in form.stockdetails %}
+          {% if not stockdetail.data.selected %}
+            <button class="btn btn-link" value="{{ stockdetail.data.value }}"
+              name="{{ stockdetail.data.name }}">{{stockdetail.choice_label }}</button>
+          {% endif %}
+        {% endfor %}
+      </div>
+    </div>
+
     {% if user.is_authenticated %}
       <div>
-        <button type="button" class="btn btn-primary btn-sm ml-1"
+        <button type="button" class="btn btn-outline-primary btn-sm ml-1"
           onclick="window.location.href='{% url 'portfolio' %}'">My portfolio</button>
       </div>
     {% endif %}
@@ -89,7 +102,13 @@
     <tbody>
     {% for stock in stock_info %}
       <tr>
-        <td width="17%"><a href="{% url 'stock_intraday' source stock.symbol %}">{{ stock.name|truncatechars:18 }}</a></td>
+        {% if form.stockdetails.value == form.stockdetails.field.choices.0.0 %}
+          <td width="17%"><a href="{% url 'stock_intraday' source stock.symbol %}">{{ stock.name|truncatechars:15 }}</a></td>
+        {% elif form.stockdetails.value == form.stockdetails.field.choices.1.0 %}
+          <td width="17%"><a href="{% url 'stock_news' source stock.symbol %}">{{ stock.name|truncatechars:15 }}</a></td>
+        {% elif form.stockdetails.value == form.stockdetails.field.choices.2.0 %}
+          <td width="17%"><a href="{% url 'stock_press' source stock.symbol %}">{{ stock.name|truncatechars:15 }}</a></td>
+        {% endif %}
         <td width="10%">{{ stock.symbol }}</td>
         <td width="10%">{{ stock.exchange_mic|truncatechars:9 }}</td>
         <td width="7%">{{ stock.currency }}</td>

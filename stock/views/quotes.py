@@ -4,6 +4,7 @@ from django.views.generic import View
 from stock.forms import StockQuoteForm
 from stock.models import Person, Portfolio
 from stock.module_stock import TradingData
+from howdimain.howdimain_vars import STOCK_DETAILS
 from howdimain.utils.get_ip import get_client_ip
 from howdimain.utils.format_and_tokens import add_display_tokens, format_and_sort_stocks
 from howdimain.utils.plogger import Logger
@@ -14,7 +15,7 @@ source = 'quotes'
 
 
 class QuoteView(View):
-    form_class = StockQuoteForm
+    stockquote_form = StockQuoteForm
     template_name = 'finance/stock_quotes.html'
 
     td = TradingData()
@@ -36,9 +37,12 @@ class QuoteView(View):
 
         quote_string = request.session.get('quote_string', '')
         markets = request.session.get('markets', self.markets)
-        form = self.form_class(initial={'quote_string': quote_string,
-                                        'markets': markets, })
-
+        stockdetail = request.session.get('stockdetail', STOCK_DETAILS[0][0])
+        form = self.stockquote_form(initial={
+            'quote_string': quote_string,
+            'markets': markets,
+            'stockdetails': stockdetail,
+        })
         portfolios = default_user.get_portfolio_names()
 
         if user.is_authenticated:
@@ -66,12 +70,15 @@ class QuoteView(View):
 
         quote_string = request.session.get('quote_string', '')
         markets = request.session.get('markets', self.markets)
+        stockdetail = request.session.get('stockdetail', STOCK_DETAILS[0][0])
 
-        form = self.form_class(request.POST)
+        form = self.stockquote_form(request.POST)
         if form.is_valid():
-            quote_string = form.cleaned_data.get('quote_string')
-            selected_portfolio = form.cleaned_data.get('selected_portfolio')
-            markets = form.cleaned_data.get('markets')
+            form_data = form.cleaned_data
+            quote_string = form_data.get('quote_string')
+            selected_portfolio = form_data.get('selected_portfolio')
+            markets = form_data.get('markets')
+            stockdetail = form_data.get('stockdetails')
             symbols = []
             stock_info = []
 
@@ -104,6 +111,7 @@ class QuoteView(View):
 
             request.session['quote_string'] = quote_string
             request.session['markets'] = markets
+            request.session['stockdetail'] = stockdetail
             logger.info(f'user {user} [ip: {get_client_ip(request)}] looking '
                         f'up: {quote_string} / {selected_portfolio}')
 

@@ -7,6 +7,17 @@
 
 {% block stylesheet %}
   <link rel="stylesheet" type="text/css" href="{% static 'css/container-styles.css' %}">
+  <style>
+    .responsive-float {
+      float: right;
+    }
+    @media (max-width: 750px) {
+      .responsive-float {
+        clear: both;
+        float: left;
+      }
+    }
+  </style>
 {% endblock %}
 
 {% block navbutton %}
@@ -30,7 +41,7 @@
 <a style="display: none">{{ form.quote_string }} {{ form.stockdetails }}
                          {{ form.markets }} {{form.selected_portfolio }}</a>
 
-  <div class="d-flex">
+  <div class="d-inline-flex float-left">
     <div>
       <button class="btn btn-outline-primary btn-sm"
         onclick="return SubmitQuoteString('{{ form.quote_string.value }}')">Quote</button>
@@ -73,11 +84,11 @@
           onclick="window.location.href='{% url 'portfolio' %}'">My portfolio</button>
       </div>
     {% endif %}
+  </div>
 
+  <div class="responsive-float">
     {% if form.selected_portfolio.value %}
-      <div>
-        <strong><a class="ml-4">Portfolio:</a><a class="ml-1">{{ form.selected_portfolio.value }}</a></strong>
-      </div>
+      <strong><a>Portfolio:</a><a class="ml-1">{{ form.selected_portfolio.value }}</a></strong>
     {% endif %}
   </div>
 

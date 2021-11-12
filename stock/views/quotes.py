@@ -90,16 +90,6 @@ class QuoteView(View):
 
     def post(self, request):
         user = request.user
-        # add Person class to user
-        if user.is_authenticated:
-            user.__class__ = Person
-
-        try:
-            default_user = Person.objects.get(username='default_user')
-
-        except Person.DoesNotExist:
-            default_user = None
-
         quote_string = request.session.get('quote_string', '')
         selected_portfolio = request.session.get('selected_portfolio', '')
         markets = request.session.get('markets', self.markets)

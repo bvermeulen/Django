@@ -53,6 +53,8 @@
         <div class="dropdown-content">
           <button class="btn btn-primary btn-sm my-1" onclick="return PromptNewPortfolioName()">New</button>
 
+          <div class="dropdown-divider"></div>
+
           {% if form.portfolio_name.value != '' %}
             <button class="btn btn-primary btn-sm my-1" name="btn1_pressed"
               value="rename_portfolio"
@@ -65,15 +67,15 @@
               Delete</button>
           {% endif %}
 
-          <div class="dropdown-divider">
-            {% for portfolio in form.portfolios %}
-              {% if not portfolio.data.selected %}
-                <button class="btn btn-link my-0" value="{{ portfolio.data.value}}"
-                  name="{{ portfolio.data.name }}">
-                  <a>{{ portfolio.choice_label }}</a></button>
-              {% endif %}
-            {% endfor %}
-          </div>
+          <div class="dropdown-divider"></div>
+
+          {% for portfolio in form.portfolios %}
+            {% if not portfolio.data.selected %}
+              <button class="btn btn-link my-0" value="{{ portfolio.data.value}}"
+                name="{{ portfolio.data.name }}">
+                <a>{{ portfolio.choice_label }}</a></button>
+            {% endif %}
+          {% endfor %}
         </div>
       </div>
 

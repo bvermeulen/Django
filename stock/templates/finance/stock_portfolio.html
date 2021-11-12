@@ -8,6 +8,16 @@
 
 {% block stylesheet %}
   <link rel="stylesheet" type="text/css" href="{% static 'css/container-styles.css' %}">
+  <style>
+    .responsive-float {
+      float: right;
+    }
+    @media (max-width: 750px) {
+      .responsive-float {
+        float: left;
+      }
+    }
+  </style>
 {% endblock %}
 
 {% block navbutton %}
@@ -31,7 +41,7 @@
                              {{ form.portfolios }} {{ form.currencies }}
                              {{ form.symbol }} {{ form.stockdetails }}</a>
 
-    <div class="d-flex">
+    <div class="d-inline-flex float-left">
       <div class="dropdown">
         <button type="button" class="dropdown-toggle btn btn-outline-primary btn-sm">
           {% if form.portfolio_name.value == '' %}
@@ -55,24 +65,23 @@
               Delete</button>
           {% endif %}
 
-          <div class="dropdown-divider"></div>
-          {% for portfolio in form.portfolios %}
-            {% if not portfolio.data.selected %}
-              <button class="btn btn-link my-0" value="{{ portfolio.data.value}}"
-                name="{{ portfolio.data.name }}">
-                <a>{{ portfolio.choice_label }}</a></button>
-            {% endif %}
-          {% endfor %}
+          <div class="dropdown-divider">
+            {% for portfolio in form.portfolios %}
+              {% if not portfolio.data.selected %}
+                <button class="btn btn-link my-0" value="{{ portfolio.data.value}}"
+                  name="{{ portfolio.data.name }}">
+                  <a>{{ portfolio.choice_label }}</a></button>
+              {% endif %}
+            {% endfor %}
+          </div>
         </div>
       </div>
 
       {% if form.portfolio_name.value != '' %}
-        <div>
-          <button class="btn btn-outline-primary btn-sm mx-1" name="btn1_pressed"
+        <button class="btn btn-outline-primary btn-sm mx-1" name="btn1_pressed"
             value="add_new_symbol"
             onclick="return AddSymbol('{{ form.symbol.value }}')">
             Add symbol</button>
-        </div>
         <div class="dropdown">
           <button type="button" class="btn dropdown-toggle btn-outline-primary btn-sm">{{ form.stockdetails.value }}</button>
           <div class="dropdown-content">
@@ -93,78 +102,80 @@
             {% endfor %}
           </div>
         </div>
+      {% endif %}
+    </div>
 
-        <div class="ml-auto">
-          <strong>Value:</strong>
-          <strong class="mr-2">{{ totals.value }}</strong>
-          <strong class="mr-0">Change:</strong>
-          <strong class="mr-2" style="color:{{ totals.color }}">{{ totals.caret}} {{ totals.value_change }}</strong>
-          <strong class="mr-2">{{ exchangerate }}</strong>
-        </div>
+    <div class="d-inline-flex responsive-float">
+      {% if form.portfolio_name.value != '' %}
+        <strong>Value:</strong>
+        <strong class="mr-2">{{ totals.value }}</strong>
+        <strong class="mr-0">Change:</strong>
+        <strong class="mr-2" style="color:{{ totals.color }}">{{ totals.caret}} {{ totals.value_change }}</strong>
+        <strong class="mr-2">{{ exchangerate }}</strong>
       {% endif %}
     </div>
 
     <div class="table-responsive text-nowrap" style="overflow: hidden">
-    <table id="dtHorizontalVerticalScroll" class="table table-striped mb-2 mt-1 table-sm" cellspacing="0" width="100%">
-      <thead class="col-sm-8 custom-thead-grey">
-        <tr>
-          <th width="17%">Company</th>
-          <th width="10%">Symbol</th>
-          <th width="10%">Currency</th>
-          <th width="10%">Price</th>
-          <th width="10%">Qty</th>
-          <th width="10%">Value<br>({{form.currencies.value}})</th>
-          <th width="3%"></th>
-          <th width="10%">Change<br>({{form.currencies.value}})</th>
-          <th width="10%"></th>
-          <th width="10%"></th>
-        </tr>
-      </thead>
-      <tbody>
-        {% increment -1 as change_btn_counter %}
-        {% for stock in stocks %}
+      <table id="dtHorizontalVerticalScroll" class="table table-striped mb-2 mt-1 table-sm" cellspacing="0" width="100%">
+        <thead class="col-sm-8 custom-thead-grey">
           <tr>
-            {% if form.stockdetails.value == form.stockdetails.field.choices.0.0 %}
-              <td width="17%"><a href="{% url 'stock_intraday' source stock.symbol %}">{{ stock.name|truncatechars:15 }}</a></td>
-            {% elif form.stockdetails.value == form.stockdetails.field.choices.1.0 %}
-              <td width="17%"><a href="{% url 'stock_news' source stock.symbol %}">{{ stock.name|truncatechars:15 }}</a></td>
-            {% elif form.stockdetails.value == form.stockdetails.field.choices.2.0 %}
-              <td width="17%"><a href="{% url 'stock_press' source stock.symbol %}">{{ stock.name|truncatechars:15 }}</a></td>
-            {% endif %}
-            <td width="10%">{{ stock.symbol }}</td>
-            <td width="10%">{{ stock.currency }}</td>
-            <td width="10%">{{ stock.price }}</td>
-
-            {% if stock.currency != 'N/A' %}
-              <td width="10%">{{ stock.quantity }}</td>
-              <td width="10%">{{ stock.value }}</td>
-              <td style="width: 3%; color:{{ stock.font_color }}">{{ stock.caret_up_down }}</td>
-              <td style="width: 10%; color:{{ stock.font_color }}">{{ stock.value_change }}</td>
-              <td width="10%">
-                <button class="btn btn-outline-secondary btn-sm" name="change_qty_btn_pressed"
-                        value="{{ stock.symbol }}, "
-                        onclick="return ChangeQuantity('{{ stock.name }}',
-                                                       '{{ stock.quantity }}',
-                                                       '{{ change_btn_counter }}')">Change</button>
-              </td>
-              {% increment change_btn_counter as change_btn_counter %}
-
-            {% else %}
-              <td width="10%"></td>
-              <td width="10%"></td>
-              <td style="width:3%"></td>
-              <td width="10%"></td>
-              <td width="10%"></td>
-            {% endif %}
-
-            <td width="10%">
-              <button class="btn btn-outline-secondary btn-sm" name="delete_symbol_btn_pressed"
-                      value="{{ stock.symbol }}" onclick="return ConfirmDeleteSymbol('{{ stock.name }}' )">Delete</button>
-            </td>
+            <th width="17%">Company</th>
+            <th width="10%">Symbol</th>
+            <th width="10%">Currency</th>
+            <th width="10%">Price</th>
+            <th width="10%">Qty</th>
+            <th width="10%">Value<br>({{form.currencies.value}})</th>
+            <th width="3%"></th>
+            <th width="10%">Change<br>({{form.currencies.value}})</th>
+            <th width="10%"></th>
+            <th width="10%"></th>
           </tr>
-        {% endfor %}
-      </tbody>
-    </table>
+        </thead>
+        <tbody>
+          {% increment -1 as change_btn_counter %}
+          {% for stock in stocks %}
+            <tr>
+              {% if form.stockdetails.value == form.stockdetails.field.choices.0.0 %}
+                <td width="17%"><a href="{% url 'stock_intraday' source stock.symbol %}">{{ stock.name|truncatechars:15 }}</a></td>
+              {% elif form.stockdetails.value == form.stockdetails.field.choices.1.0 %}
+                <td width="17%"><a href="{% url 'stock_news' source stock.symbol %}">{{ stock.name|truncatechars:15 }}</a></td>
+              {% elif form.stockdetails.value == form.stockdetails.field.choices.2.0 %}
+                <td width="17%"><a href="{% url 'stock_press' source stock.symbol %}">{{ stock.name|truncatechars:15 }}</a></td>
+              {% endif %}
+              <td width="10%">{{ stock.symbol }}</td>
+              <td width="10%">{{ stock.currency }}</td>
+              <td width="10%">{{ stock.price }}</td>
+
+              {% if stock.currency != 'N/A' %}
+                <td width="10%">{{ stock.quantity }}</td>
+                <td width="10%">{{ stock.value }}</td>
+                <td style="width: 3%; color:{{ stock.font_color }}">{{ stock.caret_up_down }}</td>
+                <td style="width: 10%; color:{{ stock.font_color }}">{{ stock.value_change }}</td>
+                <td width="10%">
+                  <button class="btn btn-outline-secondary btn-sm" name="change_qty_btn_pressed"
+                          value="{{ stock.symbol }}, "
+                          onclick="return ChangeQuantity('{{ stock.name }}',
+                                                         '{{ stock.quantity }}',
+                                                         '{{ change_btn_counter }}')">Change</button>
+                </td>
+                {% increment change_btn_counter as change_btn_counter %}
+
+              {% else %}
+                <td width="10%"></td>
+                <td width="10%"></td>
+                <td style="width:3%"></td>
+                <td width="10%"></td>
+                <td width="10%"></td>
+              {% endif %}
+
+              <td width="10%">
+                <button class="btn btn-outline-secondary btn-sm" name="delete_symbol_btn_pressed"
+                        value="{{ stock.symbol }}" onclick="return ConfirmDeleteSymbol('{{ stock.name }}' )">Delete</button>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
     </div>
     <small>Data provided by <a href="https://{{ data_provider_url }}" target="_blank">{{ data_provider_url }}</a></small>
 

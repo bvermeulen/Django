@@ -1,9 +1,9 @@
 import re
 import requests
-from recordtype import recordtype
 from PIL import Image
 from django.core.exceptions import ObjectDoesNotExist
 from howdimain.utils.plogger import Logger
+from howdimain.utils.recordtype import recordtype
 from howdimain.howdimain_vars import (DELAY_FACTOR, MIN_CHARS, BANNER_LENGTH,
                                       HELP_ARROWS, HELP_BANNER, IMG_WIDTH_PX,
                                       IMG_WIDTH_PERC, WIDTH_TITLE,

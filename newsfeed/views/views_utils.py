@@ -1,9 +1,9 @@
 import re
 import requests
+from dataclasses import dataclass, asdict
 from PIL import Image
 from django.core.exceptions import ObjectDoesNotExist
 from howdimain.utils.plogger import Logger
-from howdimain.utils.recordtype import recordtype
 from howdimain.howdimain_vars import (DELAY_FACTOR, MIN_CHARS, BANNER_LENGTH,
                                       HELP_ARROWS, HELP_BANNER, IMG_WIDTH_PX,
                                       IMG_WIDTH_PERC, WIDTH_TITLE,
@@ -12,17 +12,23 @@ from ..models import NewsSite, UserNewsSite, UserNewsItem
 from ..module_news import (feedparser_time_to_datetime,
                            remove_feedburner_reference, remove_all_references,
                           )
-
-
 logger = Logger.getlogger()
-NewsStatus = recordtype(
-    'NewsStatus',
-    'current_news_site news_site updated item news_items banner scroll error_message'
-)
+
+
+@dataclass
+class NewsStatus:
+    current_news_site: str
+    news_site: str
+    updated: str
+    item: int
+    news_items: int
+    banner: bool
+    scroll: bool
+    error_message: str
 
 
 def set_session_newsstatus(request, newsstatus):
-    for key, value in newsstatus._asdict().items():
+    for key, value in asdict(newsstatus).items():
         request.session[key] = value
 
 
@@ -43,7 +49,7 @@ def store_news_item(user, ns, feed_items, ip):
     ''' store news item to model UserNewsItem
         arguments:
         :user: user (type model User)
-        :ns: newstatus (type recordtype)
+        :ns: newstatus (type NewsStatus)
         :feed_items: feed items (feedparser dict type)
         :ip: ip address (type string)
     '''
@@ -115,7 +121,7 @@ def add_img_tag_adjust_width(summary, image_src):
 def create_news_context(ns, news_sites, feed_items):
     ''' create news context to be rendered to newspage
         arguments:
-        :ns: news status (type recordtype)
+        :ns: news status (type NewsStatus)
         :feed_items: feed items (feedparser dict type)
         return:
         :context: dict with newspage items

@@ -56,13 +56,13 @@
 			<input type="submit" class="hideOnMobile btn btn-primary btn-sm" name="control_btn" value="{{ controls.previous }}"></input>
 			<input type="submit" class="hideOnMobile btn btn-primary btn-sm" name="control_btn" value="{{ controls.next }}"></input>
 
-		  {% if user.is_authenticated %}
-  	    <a class="btn btn-primary btn-sm" href="{% url 'newssites' %}">Select</a>
-  		 	<a class="btn btn-primary btn-sm" href="{% url 'mynewsitems' %}">My news</a>
-			{% endif %}
+  		{% if user.is_authenticated %}
+	 			<a class="btn btn-primary btn-sm" href="{% url 'newssites' %}">Select</a>
+				<a class="btn btn-primary btn-sm" href="{% url 'mynewsitems' %}">My news</a>
+	  	{% endif %}
 		</div>
 
-		<div class="container">
+		<div class="container" style="clear:both">
 		  <small style="text-align:left;">{{ reference }}</small>
 			<div class="card" style="border-width: 2px">
 			  <card class="card-body">

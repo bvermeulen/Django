@@ -197,6 +197,7 @@ def obtain_news_sites_and_news_status_for_user(request, user):
     try:
         default_news_sites = [item.news_site for item in UserNewsSite.objects.get(
             user__username='default_user').news_sites.all()]
+        default_news_sites.sort()
 
     except (ObjectDoesNotExist, TypeError):
         default_news_sites = []

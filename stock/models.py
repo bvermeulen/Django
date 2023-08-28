@@ -49,7 +49,7 @@ class Stock(models.Model):
     company = models.CharField(max_length=75, unique=False)
     type = models.CharField(max_length=10, blank=True, null=True, default=None)
     currency = models.ForeignKey(Currency, on_delete=models.CASCADE)
-    exchange = models.ForeignKey(Exchange, on_delete=models.CASCADE)
+    exchange = models.ForeignKey(Exchange, on_delete=models.CASCADE, related_name="stocks")
 
     def mic(self):
         return self.exchange.mic

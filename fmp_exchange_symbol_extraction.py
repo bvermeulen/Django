@@ -19,9 +19,7 @@ url = base_url + "list"
 params = {
     "apikey": api_key,
 }
-
 res = requests.get(url, params)
-
 
 tickers = {
     "symbol": [],
@@ -30,8 +28,6 @@ tickers = {
     "exchange_fmp": [],
     "type": [],
 }
-
-exchanges = set()
 for i, ticker in enumerate(res.json()):
     print(f'\rProcessing page {i:4} - {ticker["symbol"]:40} ...', end="")
 

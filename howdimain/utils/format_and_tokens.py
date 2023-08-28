@@ -63,6 +63,7 @@ def format_and_sort_stocks(stocks):
     '''
     _stocks = []
     _stocks_index = []
+    _stocks_cash = []
     for stock in stocks:
         try:
             stock['value'] = format_decimal_number(stock['value'])
@@ -115,6 +116,9 @@ def format_and_sort_stocks(stocks):
         if stock['symbol'][0] == '^' or stock['currency'] == 'N/A':
             _stocks_index.append(stock)
 
+        elif stock['symbol'][-5:] == '.CASH':
+            _stocks_cash.append(stock)
+
         else:
             _stocks.append(stock)
 
@@ -124,7 +128,10 @@ def format_and_sort_stocks(stocks):
     if _stocks:
         _stocks = sorted(_stocks, key=lambda x: x['name'].lower())
 
-    return _stocks_index + _stocks
+    if _stocks_cash:
+        _stocks_cash = sorted(_stocks_cash, key=lambda x: x['name'].lower())
+
+    return _stocks_index + _stocks + _stocks_cash
 
 
 def format_totals_values(total_value, total_value_change):

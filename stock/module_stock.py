@@ -241,10 +241,15 @@ class TradingData:
     based on FMP and as fall back to Marketstack
     """
 
+    try:
+        cash_exchange = Exchange.objects.get(mic="CASH")
+        cash_stocks = [symbol.symbol_ric for symbol in cash_exchange.stocks.all()]
+
+    except ValueError:
+        cash_stocks = []
+
     @classmethod
-    def setup(
-        cls,
-    ):
+    def setup(cls):
         cls.api_token = config("API_token")
 
         # cls.stock_url = 'https://financialmodelingprep.com/api/v3/quote-symex-private-endpoint/'
@@ -291,8 +296,13 @@ class TradingData:
 
     @classmethod
     def get_stock_trade_info(cls, stock_symbols: list) -> list:
-        """return the stock trade info as a dict retrieved from url json, key 'data'"""
+        """return the stock trade info as a dict retrieved from url json, key data.
+        Ensure no cash stocks are in the list
+        """
         symbols = ",".join(stock_symbols).upper()
+        if not all([True if el not in cls.cash_stocks else False for el in symbols]):
+            return []
+
         stock_url = cls.stock_url + symbols
         params = {"apikey": cls.api_token}
 
@@ -321,15 +331,14 @@ class TradingData:
             # get currency and exchange info from the database if it does not exist
             # skip this quote
             try:
-                stock_db = Stock.objects.get(symbol_ric=quote["symbol"])
+                stock = Stock.objects.get(symbol_ric=quote["symbol"])
 
             except Stock.DoesNotExist:
                 continue
 
-            stock_dict["currency"] = stock_db.currency.currency
-            stock_dict["exchange_mic"] = stock_db.exchange.mic
-            stock_dict["name"] = stock_db.company
-
+            stock_dict["currency"] = stock.currency.currency
+            stock_dict["exchange_mic"] = stock.exchange.mic
+            stock_dict["name"] = stock.company
             stock_dict["symbol"] = quote.get("symbol")
             stock_dict["open"] = quote.get("open")
             stock_dict["day_high"] = quote.get("dayHigh")
@@ -367,11 +376,42 @@ class TradingData:
 
         return stock_info
 
+    @staticmethod
+    def get_cash_trade_info(cash_list: list) -> list:
+        cash_info = []
+        for symbol in cash_list:
+            cash_dict = {}
+            try:
+                cash_stock = Stock.objects.get(symbol_ric=symbol)
+
+            except Stock.DoesNotExist:
+                continue
+
+            cash_dict["currency"] = cash_stock.currency.currency
+            cash_dict["exchange_mic"] = cash_stock.exchange.mic
+            cash_dict["name"] = cash_stock.company
+            cash_dict["symbol"] = symbol
+            cash_dict["open"] = 1.0
+            cash_dict["day_high"] = 1.0
+            cash_dict["day_low"] = 1.0
+            cash_dict["price"] = 1.0
+            cash_dict["volume"] = 1.0
+            cash_dict["close_yesterday"] = 1.0
+            cash_dict["day_change"] = 0.0
+            cash_dict["change_pct"] = 0.0
+            cash_dict["last_trade_time"] = ""
+            cash_info.append(cash_dict)
+
+        return cash_info
+
     @classmethod
     def get_stock_intraday_info(cls, stock_symbol: str) -> list:
         """return stock intraday info as a dict retrieved from url json,
         key 'intraday'
         """
+        if stock_symbol.upper() in cls.cash_stocks:
+            return []
+
         intraday_url = cls.intraday_url + "/".join([cls.time_interval, stock_symbol])
         params = {"apikey": cls.api_token}
         _intraday_trades = []
@@ -470,6 +510,9 @@ class TradingData:
         """return stock history info as a dict retrieved from url json,
         key 'history'
         """
+        if stock_symbol.upper() in cls.cash_stocks:
+            return []
+
         history_url = cls.history_url + stock_symbol
         params = {"apikey": cls.api_token}
 
@@ -539,7 +582,8 @@ class TradingData:
                 or Stock.objects.filter(symbol_ric=stock_symbol).first().exchange.mic
                 in markets
             ):
-                stock_symbols.add(stock_symbol)
+                if not stock_symbol.upper() in cls.cash_stocks:
+                    stock_symbols.add(stock_symbol)
             else:
                 pass
 
@@ -566,20 +610,32 @@ class TradingData:
     @classmethod
     def get_portfolio_stock_info(cls, portfolio, base_currency):
         symbols_quantities = {
-            stock.stock.symbol_ric: stock.quantity for stock in portfolio.stocks.all()
+            stock.stock.symbol_ric.upper(): stock.quantity
+            for stock in portfolio.stocks.all()
         }
         list_symbols = list(symbols_quantities.keys())
+
+        # split cash components
+        cash_symbols = []
+        for el in cls.cash_stocks:
+            try:
+                index = list_symbols.index(el)
+                del list_symbols[index]
+                cash_symbols.append(el)
+
+            except ValueError:
+                pass
+
         stock_trade_info = cls.get_stock_trade_info(list_symbols[0:MAX_SYMBOLS_ALLOWED])
         stock_trade_info += cls.get_stock_trade_info(
             list_symbols[MAX_SYMBOLS_ALLOWED : 2 * MAX_SYMBOLS_ALLOWED]
         )
-
         if len(list_symbols) > 2 * MAX_SYMBOLS_ALLOWED:
             logger.warning(
                 f"number of symbols in portfolio exceed "
                 f"maximum of {2 * MAX_SYMBOLS_ALLOWED}"
             )
-
+        stock_trade_info += cls.get_cash_trade_info(cash_symbols)
         exchange_rate_euro = Currency.objects.get(currency="EUR").usd_exchange_rate
 
         stock_info = []

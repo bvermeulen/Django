@@ -245,7 +245,7 @@ class TradingData:
         cash_exchange = Exchange.objects.get(mic="CASH")
         cash_stocks = [symbol.symbol_ric for symbol in cash_exchange.stocks.all()]
 
-    except ValueError:
+    except (ValueError, Exchange.DoesNotExist):
         cash_stocks = []
 
     @classmethod

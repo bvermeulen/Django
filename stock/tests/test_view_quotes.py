@@ -63,14 +63,16 @@ class QuotesTestCase(TestCase):
             symbol='AAPL',
             symbol_ric='AAPL',
             company='Apple',
+            type='stock',
             currency=usd,
             exchange=nyse,
         )
 
-        rds = Stock.objects.create(
-            symbol='RDSA.XAMS',
-            symbol_ric='RDSA.AS',
-            company='Royal Dutch Shell',
+        asml = Stock.objects.create(
+            symbol='ASML.XAMS',
+            symbol_ric='ASML.AS',
+            company='ASML Holding',
+            type='stock',
             currency=eur,
             exchange=aex,
         )
@@ -79,6 +81,7 @@ class QuotesTestCase(TestCase):
             symbol='WKL.XAMS',
             symbol_ric='WKL.AS',
             company='Wolters Kluwer',
+            type='stock',
             currency=eur,
             exchange=aex,
         )
@@ -100,7 +103,7 @@ class QuotesTestCase(TestCase):
         )
 
         StockSelection.objects.create(
-            stock=rds,
+            stock=asml,
             quantity=1,
             portfolio=default_aex,
         )
@@ -169,7 +172,7 @@ class QuotesViewTestCase(QuotesTestCase):
 
         url = reverse('stock_quotes')
         response = self.client.post(url, data)
-        self.assertEqual('RDSA.AS', response.context['stock_info'][0]['symbol'])
+        self.assertEqual('ASML.AS', response.context['stock_info'][0]['symbol'])
 
     def test_user_portfolio_returns_stock_info(self):
         self.client.login(username=self.test_user, password=self.test_user_pw)

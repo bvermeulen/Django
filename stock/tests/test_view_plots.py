@@ -46,6 +46,7 @@ class PlotsTestCase(TestCase):
             symbol='AAPL',
             symbol_ric='AAPL',
             company='Apple',
+            type="Stock",
             currency=usd,
             exchange=nyse,
         )

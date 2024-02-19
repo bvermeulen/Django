@@ -61,14 +61,16 @@ class PortfolioTestCase(TestCase):
             symbol='AAPL',
             symbol_ric='AAPL',
             company='Apple',
+            type='stock',
             currency=usd,
             exchange=nyse,
         )
 
-        cls.rds = Stock.objects.create(
-            symbol='RDSA.XAMS',
-            symbol_ric='RDSA.AS',
-            company='Royal Dutch Shell',
+        cls.asml = Stock.objects.create(
+            symbol='ASML.XAMS',
+            symbol_ric='ASML.AS',
+            company='ASML HOLDING',
+            type='stock',
             currency=eur,
             exchange=aex,
         )
@@ -77,6 +79,7 @@ class PortfolioTestCase(TestCase):
             symbol='WKL.XAMS',
             symbol_ric='WKL.AS',
             company='Wolters Kluwer',
+            type='stock',
             currency=eur,
             exchange=aex,
         )
@@ -199,13 +202,13 @@ class TestPortfolioPost(PortfolioTestCase):
         self.data['portfolios'] = 'test_portfolio'
         self.data['portfolio_name'] = 'test_portfolio'
         self.data['btn1_pressed'] = 'add_new_symbol'
-        self.data['symbol'] = 'RDSA.AS'
+        self.data['symbol'] = 'ASML.AS'
         response = self.client.post(reverse('portfolio'), self.data)
         stocks_portfolio_db = Portfolio.objects.filter(
             user=self.test_user, portfolio_name='test_portfolio').first().stocks.all()
         self.assertEqual(2, len(stocks_portfolio_db))
-        self.assertEqual('RDSA.AS', stocks_portfolio_db[1].stock.symbol_ric)
-        self.assertEqual('RDSA.AS', response.context['stocks'][1]['symbol'])
+        self.assertEqual('ASML.AS', stocks_portfolio_db[1].stock.symbol_ric)
+        self.assertEqual('ASML.AS', response.context['stocks'][1]['symbol'])
 
     def test_link_to_intraday_view(self):
         self.data['portfolios'] = 'test_portfolio'
@@ -236,10 +239,10 @@ class TestPortfolioPost(PortfolioTestCase):
     def test_delete_stock(self):
         # first add a new symbol to the portfolio
         StockSelection.objects.create(
-            stock=self.rds, quantity=0, portfolio=self.test_portfolio)
+            stock=self.asml, quantity=0, portfolio=self.test_portfolio)
 
         self.data['portfolios'] = 'test_portfolio'
-        self.data['delete_symbol_btn_pressed'] = 'RDSA.AS'
+        self.data['delete_symbol_btn_pressed'] = 'ASML.AS'
         response = self.client.post(reverse('portfolio'), self.data)
         stocks_portfolio_db = Portfolio.objects.filter(
             user=self.test_user, portfolio_name='test_portfolio').first().stocks.all()

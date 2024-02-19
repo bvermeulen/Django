@@ -87,18 +87,18 @@ WSGI_APPLICATION = 'howdimain.wsgi.application'
 # https://docs.djangoproject.com/en/1.11/ref/settings/#databases
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'HOST': 'localhost',
-        'PORT': config('DB_PORT'),
-        'NAME': config('DB_NAME'),
-        'USER': config('DB_USER'),
-        'PASSWORD': config('DB_PASSWORD'),
-        },
     #'default': {
-    #    'ENGINE': 'django.db.backends.sqlite3',
-    #    'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-    #},
+        #'ENGINE': 'django.db.backends.postgresql',
+        #'HOST': 'localhost',
+        #'PORT': config('DB_PORT'),
+        #'NAME': config('DB_NAME'),
+        #'USER': config('DB_USER'),
+        #'PASSWORD': config('DB_PASSWORD'),
+        #},
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+    },
 }
 
 # Global martor settings

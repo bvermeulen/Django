@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     'widget_tweaks',
     'martor',
     'crispy_forms',
+	'crispy_bootstrap4',
     'accounts',
     'boards',
     'newsfeed',
@@ -53,6 +54,7 @@ INSTALLED_APPS = [
     'music',
 ]
 
+CRISPY_ALLOWED_TEMPLATE_PACKS = 'bootstrap4'
 CRISPY_TEMPLATE_PACK = 'bootstrap4'
 
 MIDDLEWARE = [
@@ -93,14 +95,11 @@ DATABASES = {
         'USER': config('DB_USER'),
         'PASSWORD': config('DB_PASSWORD'),
         },
+    #'default': {
+    #    'ENGINE': 'django.db.backends.sqlite3',
+    #    'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+    #},
 }
-
-# DATABASES = {            ### USE THIS AS AN ALTERNATIVE FOR TESTING
-#     'default': {
-#         'ENGINE': 'django.db.backends.sqlite3',
-#          'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-#      }
-# }
 
 # Global martor settings
 # Input: string boolean, `true/false`

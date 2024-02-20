@@ -40,23 +40,25 @@ class TestPlayTopTracksView(MusicTests):
 
     def test_url_resolves(self):
         view = resolve('/music/play_top_tracks/')
-        self.assertEqual(view.func.__name__, PlayTopTracksView.__name__)
+        self.assertEqual(view.func.view_class, PlayTopTracksView)
 
     def test_view_contains_link_to_home_page(self):
         home_url = reverse('home')
         self.assertContains(self.response, f'href="{home_url}"')
 
     def test_valid_artist_query(self):
-        data = {'artist_query': 'Adele'}
+        valid_artist = 'Adele'
+        data = {'artist_query': valid_artist}
         response = self.client.post(reverse('play_top_tracks'), data)
         self.assertGreater(len(response.context['artist']['top_tracks']), 0)
-        self.assertContains(response, 'placeholder="Adele"')
+        self.assertContains(response, f'placeholder="{valid_artist}"')
 
     def test_invalid_artist_query(self):
-        data = {'artist_query': '_Adele'}
+        invalid_artist = "~~~PietjePuk~~~"
+        data = {'artist_query': invalid_artist}
         response = self.client.post(reverse('play_top_tracks'), data)
         self.assertEqual(len(response.context['artist']['top_tracks']), 0)
-        self.assertContains(response, 'placeholder="_Adele"')
+        self.assertContains(response, f'placeholder="{invalid_artist}"')
 
     def test_with_login(self):
         self.client.login(username='testuser', password='testuser_pw')
@@ -102,7 +104,7 @@ class TestPlayListView(MusicTests):
 
     def test_url_resolves(self):
         view = resolve('/music/playlist/')
-        self.assertEqual(view.func.__name__, PlayListView.__name__)
+        self.assertEqual(view.func.view_class, PlayListView)
 
     def test_view_contains_link_to_toptracks(self):
         tracks_url = reverse('play_top_tracks')

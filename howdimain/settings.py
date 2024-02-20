@@ -17,7 +17,7 @@ logformat = '%(asctime)s:%(levelname)s:%(message)s'
 Logger.set_logger(config('LOG_FILE'), logformat, 'INFO')
 logger = Logger.getlogger()
 HOWDIMAIN_VERSION = 'https://github.com/bvermeulen/Django/tree/howdimain-digitalocean_v9'
-HOWDIMAIN_DATE = 'November, 2021: add stock news'
+HOWDIMAIN_DATE = 'December, 2023: fix tests, modifications for Django 5 and Python 12'
 HOWDIMAIN_AUTHOR = 'bruno.vermeulen@hotmail.com'
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     'widget_tweaks',
     'martor',
     'crispy_forms',
+	'crispy_bootstrap4',
     'accounts',
     'boards',
     'newsfeed',
@@ -53,6 +54,7 @@ INSTALLED_APPS = [
     'music',
 ]
 
+CRISPY_ALLOWED_TEMPLATE_PACKS = 'bootstrap4'
 CRISPY_TEMPLATE_PACK = 'bootstrap4'
 
 MIDDLEWARE = [
@@ -93,14 +95,11 @@ DATABASES = {
         'USER': config('DB_USER'),
         'PASSWORD': config('DB_PASSWORD'),
         },
+    #'default': {
+    #    'ENGINE': 'django.db.backends.sqlite3',
+    #    'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+    #},
 }
-
-# DATABASES = {            ### USE THIS AS AN ALTERNATIVE FOR TESTING
-#     'default': {
-#         'ENGINE': 'django.db.backends.sqlite3',
-#          'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-#      }
-# }
 
 # Global martor settings
 # Input: string boolean, `true/false`

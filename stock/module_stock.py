@@ -240,13 +240,9 @@ class TradingData:
     """methods to handle trading data from various sources
     based on FMP and as fall back to Marketstack
     """
-
-    try:
-        cash_exchange = Exchange.objects.get(mic="CASH")
-        cash_stocks = [symbol.symbol_ric for symbol in cash_exchange.stocks.all()]
-
-    except (ValueError, Exchange.DoesNotExist):
-        cash_stocks = []
+    cash_stocks = []
+    if Exchange.objects.filter(mic="CASH").exists():
+        cash_stocks = [symbol.symbol_ric for symbol in Exchange.objects.get(mic="CASH").stocks.all()]
 
     @classmethod
     def setup(cls):

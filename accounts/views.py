@@ -1,7 +1,11 @@
-from django.contrib.auth import login
+from django.contrib.auth import login, logout
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.signals import user_logged_in, user_logged_out, user_login_failed
+from django.contrib.auth.signals import (
+    user_logged_in,
+    user_logged_out,
+    user_login_failed,
+)
 from django.dispatch import receiver
 from django.shortcuts import render, redirect
 from django.views.generic import UpdateView
@@ -14,34 +18,37 @@ from .forms import SignUpForm, UserUpdateForm
 
 logger = Logger.getlogger()
 
+
 def home_page(request):
     welcome_text = Home.objects.last().welcome_text
     welcome_image = Home.objects.last().welcome_image
     member_text = Home.objects.last().member_text
     member_image = Home.objects.last().member_image
 
-    context = {'welcome_image': welcome_image,
-               'welcome_text': welcome_text,
-               'member_image': member_image,
-               'member_text': member_text,
-              }
+    context = {
+        "welcome_image": welcome_image,
+        "welcome_text": welcome_text,
+        "member_image": member_image,
+        "member_text": member_text,
+    }
 
-    return render(request, 'accounts/home.html', context)
+    return render(request, "accounts/home.html", context)
 
 
 def signup(request):
     signup_methods = Signup()
-    error_message = ''
-    if request.method == 'POST':
+    error_message = ""
+    if request.method == "POST":
         form = SignUpForm(request.POST)
         if form.is_valid():
             user = form.save(commit=False)
             ip_address = get_client_ip(request)
             if signup_methods.email_exist(user):
-                error_message = f'A user with email {user.email} already exists'
+                error_message = f"A user with email {user.email} already exists"
                 logger.info(
-                    f'user {user.username} (ip: {ip_address}) tries to use '
-                    f'existing email: {user.email}')
+                    f"user {user.username} (ip: {ip_address}) tries to use "
+                    f"existing email: {user.email}"
+                )
                 form = SignUpForm()
 
             else:
@@ -49,31 +56,37 @@ def signup(request):
                 login(request, user)
                 signup_methods.send_welcome_email(user)
                 logger.info(
-                    f'user {user.username} (ip: {ip_address}) '
-                    f'has succesfully signed up, email sent to {user.email}'
+                    f"user {user.username} (ip: {ip_address}) "
+                    f"has succesfully signed up, email sent to {user.email}"
                 )
-                return redirect('home')
+                return redirect("home")
 
     else:
         form = SignUpForm()
 
     return render(
-        request, 'accounts/signup.html', {'form': form, 'error_message': error_message})
+        request, "accounts/signup.html", {"form": form, "error_message": error_message}
+    )
 
 
-@method_decorator(login_required, name='dispatch')
+@method_decorator(login_required, name="dispatch")
 class UserUpdateView(UpdateView):
     model = User
     form_class = UserUpdateForm
-    template_name = 'accounts/my_account.html'
-    success_url = reverse_lazy('home')
+    template_name = "accounts/my_account.html"
+    success_url = reverse_lazy("home")
 
-    def get_object(self):  #pylint: disable=arguments-differ
+    def get_object(self):  # pylint: disable=arguments-differ
         logger.info(
-            f'user: {self.request.user.username} (ip: {get_client_ip(self.request)}) '
-            f'is updating account'
+            f"user: {self.request.user.username} (ip: {get_client_ip(self.request)}) "
+            f"is updating account"
         )
         return self.request.user
+
+
+def logout_view(request):
+    logout(request)
+    return redirect("home")
 
 
 @receiver(user_logged_in)
@@ -81,7 +94,7 @@ def user_logged_in_callback(sender, request, user, **kwargs):
     # in tests there is no attribute user
     try:
         logger.info(
-            f'user: {request.user.username} (ip: {get_client_ip(request)}) has logged in'
+            f"user: {request.user.username} (ip: {get_client_ip(request)}) has logged in"
         )
 
     except AttributeError:
@@ -93,7 +106,7 @@ def user_logged_out_callback(sender, request, user, **kwargs):
     # in tests there is no attribute user
     try:
         logger.info(
-            f'user: {request.user.username} (ip: {get_client_ip(request)}) has logged out'
+            f"user: {request.user.username} (ip: {get_client_ip(request)}) has logged out"
         )
 
     except AttributeError:
@@ -106,8 +119,6 @@ def user_login_failed_callback(sender, request, credentials, **kwargs):
         username = credentials["username"]
 
     except KeyError:
-        username = ''
+        username = ""
 
-    logger.info(
-        f'login failed for user: {username} (ip: {get_client_ip(request)})'
-    )
+    logger.info(f"login failed for user: {username} (ip: {get_client_ip(request)})")

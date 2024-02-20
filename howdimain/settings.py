@@ -17,7 +17,7 @@ logformat = '%(asctime)s:%(levelname)s:%(message)s'
 Logger.set_logger(config('LOG_FILE'), logformat, 'INFO')
 logger = Logger.getlogger()
 HOWDIMAIN_VERSION = 'https://github.com/bvermeulen/Django/tree/howdimain-digitalocean_v9'
-HOWDIMAIN_DATE = 'November, 2021: add stock news'
+HOWDIMAIN_DATE = 'December, 2023: fix tests, modifications for Django 5 and Python 12'
 HOWDIMAIN_AUTHOR = 'bruno.vermeulen@hotmail.com'
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
@@ -87,18 +87,18 @@ WSGI_APPLICATION = 'howdimain.wsgi.application'
 # https://docs.djangoproject.com/en/1.11/ref/settings/#databases
 
 DATABASES = {
-    #'default': {
-        #'ENGINE': 'django.db.backends.postgresql',
-        #'HOST': 'localhost',
-        #'PORT': config('DB_PORT'),
-        #'NAME': config('DB_NAME'),
-        #'USER': config('DB_USER'),
-        #'PASSWORD': config('DB_PASSWORD'),
-        #},
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-    },
+        'ENGINE': 'django.db.backends.postgresql',
+        'HOST': 'localhost',
+        'PORT': config('DB_PORT'),
+        'NAME': config('DB_NAME'),
+        'USER': config('DB_USER'),
+        'PASSWORD': config('DB_PASSWORD'),
+        },
+    #'default': {
+    #    'ENGINE': 'django.db.backends.sqlite3',
+    #    'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+    #},
 }
 
 # Global martor settings

@@ -1,4 +1,3 @@
-
 from django.shortcuts import render, redirect, reverse
 from django.views.generic import View
 from stock.forms import StockQuoteForm

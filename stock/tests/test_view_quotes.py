@@ -129,15 +129,18 @@ class QuotesViewTestCase(QuotesTestCase):
         self.assertContains(response, 'csrfmiddlewaretoken')
 
     def test_correct_number_input_tags(self):
-        ''' 6 <input> tags to be found:
+        ''' 8 <input> tags to be found:
             csrf token
             quote_string
             selected_portfolio
-            markets XAMS
+            markets XNAS
             markets XNYS
+            Graphs
+            News
+            Press
         '''
         response = self.client.get(reverse('stock_quotes'))
-        self.assertContains(response, '<input', 5)
+        self.assertContains(response, '<input', 8)
 
     def test_not_logged_does_not_give_my_portfolio(self):
         response = self.client.get(reverse('stock_quotes'))
@@ -145,49 +148,83 @@ class QuotesViewTestCase(QuotesTestCase):
         self.assertNotContains(response, 'My Portfolio')
 
     def test_valid_quote_string_returns_stock_info(self):
-        data = {'markets': ['XAMS'],
-                'quote_string': 'wolters'}
-
+        s = self.client.session
+        s.update(
+            {
+                "quote_string": "kluwer",
+                "selected_portfolio": "",
+                "markets": ["XAMS"],
+                "stockdetail": "Graphs",
+            }
+        )
+        s.save()
         url = reverse('stock_quotes')
-        response = self.client.post(url, data)
+        response = self.client.get(url)
         self.assertEqual('WKL.AS', response.context['stock_info'][0]['symbol'])
 
     def test_valid_quote_string_has_a_link_to_intraday_view(self):
-        data = {'markets': ['XAMS'],
-                'quote_string': 'kluwer'}
+        s = self.client.session
+        s.update({
+            'quote_string': 'kluwer',
+            'selected_portfolio': '',
+            'markets': ['XAMS'],
+            'stockdetail': 'Graphs',
+        })
+        s.save()
         url = reverse('stock_quotes')
-        response = self.client.post(url, data)
+        response = self.client.get(url)
         self.assertContains(response, 'href="/finance/stock_intraday/quotes/WKL.AS/"')
 
     def test_invalid_quote_string_returns_empty_stock_info(self):
-        data = {'quote_string': 'Goobliecook'}
+        s = self.client.session
+        s.update(
+            {
+                "quote_string": "Goobliecook",
+                "selected_portfolio": "",
+                "markets": ["XAMS"],
+                "stockdetail": "Graphs",
+            }
+        )
+        s.save()
         url = reverse('stock_quotes')
-        response = self.client.post(url, data)
+        response = self.client.get(url)
         self.assertEqual(True, not response.context['stock_info'])
 
     def test_select_portfolio_returns_stock_info(self):
-        data = {'quote_string': 'Goobliecook',
-                'selected_portfolio': 'AEX_index',
-               }
-
+        s = self.client.session
+        s.update(
+            {
+                "quote_string": "",
+                "selected_portfolio": "AEX_index",
+                "markets": ["XAMS"],
+                "stockdetail": "Graphs",
+            }
+        )
+        s.save()
         url = reverse('stock_quotes')
-        response = self.client.post(url, data)
+        response = self.client.get(url)
         self.assertEqual('ASML.AS', response.context['stock_info'][0]['symbol'])
 
     def test_user_portfolio_returns_stock_info(self):
         self.client.login(username=self.test_user, password=self.test_user_pw)
-        data = {'quote_string': 'Goobliecook',
-                'selected_portfolio': 'test_portfolio',
-               }
-
+        s = self.client.session
+        s.update(
+            {
+                "quote_string": "",
+                "selected_portfolio": "test_portfolio",
+                "markets": ["XAMS"],
+                "stockdetail": "Graphs",
+            }
+        )
+        s.save()
         url = reverse('stock_quotes')
-        response = self.client.post(url, data)
+        response = self.client.get(url)
+
         self.assertEqual('AAPL', response.context['stock_info'][0]['symbol'])
 
     def test_response_contains_ref_to_url_provider(self):
         response = self.client.get(reverse('stock_quotes'))
         self.assertEqual(URL_PROVIDER, response.context['data_provider_url'])
-
         file_name = 'stock/tests/test_quotes.html'
         with open(file_name, 'wt', encoding='utf-8') as f:
             f.write(response.content.decode())

@@ -11,7 +11,6 @@ from music.models import MusicTrack
 import spotipy
 from spotipy.oauth2 import SpotifyClientCredentials
 from spotipy.exceptions import SpotifyException
-from pprint import pprint
 
 logger = Logger.getlogger()
 

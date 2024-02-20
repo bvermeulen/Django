@@ -43,6 +43,7 @@
           <li class="nav-item"><a class="nav-link" href="{% url 'play_top_tracks' %}">Music</a></li>
           <li class="nav-item"><a class="nav-link" href="{% url 'stock_quotes' %}">Stock quote</a></li>
         </ul>
+        <form class="form-inline ml-auto">
         {% if user.is_authenticated %}
         <ul class="navbar-nav ml-auto">
           <li class="nav-item dropdown">
@@ -64,11 +65,10 @@
           </li>
         </ul>
         {% else %}
-        <form class="form-inline ml-auto">
           <a href="{% url 'login' %}" class="btn btn-outline-secondary mr-1">Log in</a>
           <a href="{% url 'signup' %}" class="btn btn-primary">Join now</a>
+          {% endif %}
         </form>
-        {% endif %}
       </div>
     </div>
   </nav>
@@ -82,7 +82,7 @@
             target="_blank"></small>
         <img src="{% static 'img/512px-DigitalOcean_logo.png' %}"
           style="width:40px; height:30px; vertical-align:middle"></a>
-        <span style="float:right;"><small>&copy; 2023 Howdimain</small></span>
+        <span style="float:right;"><small>&copy; 2024 Howdimain</small></span>
       </div>
     </div>
   </div>

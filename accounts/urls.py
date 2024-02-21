@@ -1,11 +1,13 @@
 from django.urls import path
 from django.contrib import admin
 from django.contrib.auth import views as auth_views
+from django.conf.urls import include
 from accounts import views
 
 urlpatterns = [
     path("", views.home_page, name="home"),
     path("signup/", views.signup, name="signup"),
+    path('captcha', include('captcha.urls')),
     path("settings/account/", views.UserUpdateView.as_view(), name="my_account"),
     path("admin/", admin.site.urls),
     path(

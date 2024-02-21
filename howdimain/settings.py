@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.humanize',
+	'captcha',
     'widget_tweaks',
     'martor',
     'crispy_forms',

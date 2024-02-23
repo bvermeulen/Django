@@ -1,0 +1,27 @@
+{% extends "accounts/base_accounts.html" %}
+
+{% block title %}Link expired{% endblock %}
+
+{%block content%}
+
+<div class="row justify-content-center">
+    <div class="col-lg-4 col-md-6 col-sm-8">
+        <div class="card">
+            <div class="card-body">
+                <h3 class="card-title">{{ status }}</h3>
+                <form method="post" novalidate>
+                    <p>The link has lived its life :(</p>
+                    <p style="color: rgb(30, 144, 255)">We cannot revive a dead link, but you can get another one.</p>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row justify-content-center mt-4">
+    <a href="{% url 'request-new-link-from-token' encoded_email encoded_token %}" class="btn btn-primary"
+        style="align-items: center; border-radius: 20px; margin-left: 10px; margin-right: 10px;">
+        Request Another Link
+    </a>
+</div>
+
+{% endblock %}

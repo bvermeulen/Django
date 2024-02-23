@@ -35,7 +35,6 @@
       </button>
       <div class="collapse navbar-collapse" id="mainMenu">
         <ul class="navbar-nav mr-auto">
-          {% block navbutton %}{% endblock %}
           {% if user.is_authenticated %}
           <li class="nav-item"><a class="nav-link" href="{% url 'boards' %}">Boards</a></li>
           {% endif %}
@@ -43,40 +42,31 @@
           <li class="nav-item"><a class="nav-link" href="{% url 'play_top_tracks' %}">Music</a></li>
           <li class="nav-item"><a class="nav-link" href="{% url 'stock_quotes' %}">Stock quote</a></li>
         </ul>
-          <ul class="navbar-nav mr-auto">
-            {% block navbutton %}{% endblock %}
-            {% if user.is_authenticated %}
-              <li class="nav-item"><a class="nav-link" href="{% url 'boards' %}">Boards</a></li>
-            {% endif %}
-            <li class="nav-item"><a class="nav-link" href="{% url 'newspage' %}">News</a></li>
-            <li class="nav-item"><a class="nav-link" href="{% url 'play_top_tracks' %}">Music</a></li>
-            <li class="nav-item"><a class="nav-link" href="{% url 'stock_quotes' %}">Stock quote</a></li>
-          </ul>
         <form class="form-inline ml-auto" method="post">
-        {% if user.is_authenticated %}
-        <ul class="navbar-nav ml-auto">
-          <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" href="#" data-toggle="dropdown">
-              {{ user.username }}
-            </a>
-            <div class="dropdown-menu dropdown-menu-left">
-              <a class="dropdown-item" href="{% url 'mynewsitems' %}">My news</a>
-              <a class="dropdown-item" href="{% url 'playlist' %}">My music</a>
-              <a class="dropdown-item" href="{% url 'portfolio' %}">My portfolio</a>
-              <a class="dropdown-item" href="{% url 'my_account' %}">My account</a>
-              <a class="dropdown-item" href="{% url 'password_change' %}">Change password</a>
-              {% if user.is_staff %}
-              <a class="dropdown-item" href="{% url 'admin:index' %}">Admin</a>
-              {% endif %}
-              <div class="dropdown-divider"></div>
-              <a class="dropdown-item" href="{% url 'logout' %}">Log out</a>
-            </div>
-          </li>
-        </ul>
-        {% else %}
+          {% if user.is_authenticated %}
+          <ul class="navbar-nav ml-auto">
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#" data-toggle="dropdown">
+                {{ user.username }}
+              </a>
+              <div class="dropdown-menu dropdown-menu-left">
+                <a class="dropdown-item" href="{% url 'mynewsitems' %}">My news</a>
+                <a class="dropdown-item" href="{% url 'playlist' %}">My music</a>
+                <a class="dropdown-item" href="{% url 'portfolio' %}">My portfolio</a>
+                <a class="dropdown-item" href="{% url 'my_account' %}">My account</a>
+                <a class="dropdown-item" href="{% url 'password_change' %}">Change password</a>
+                {% if user.is_staff %}
+                <a class="dropdown-item" href="{% url 'admin:index' %}">Admin</a>
+                {% endif %}
+                <div class="dropdown-divider"></div>
+                <a class="dropdown-item" href="{% url 'logout' %}">Log out</a>
+              </div>
+            </li>
+          </ul>
+          {% else %}
           <a href="{% url 'login' %}" class="btn btn-outline-secondary mr-1">Log in</a>
           <a href="{% url 'signup' %}" class="btn btn-primary">Join now</a>
-        {% endif %}
+          {% endif %}
         </form>
       </div>
     </div>
@@ -91,7 +81,7 @@
             target="_blank"></small>
         <img src="{% static 'img/512px-DigitalOcean_logo.png' %}"
           style="width:40px; height:30px; vertical-align:middle"></a>
-        <span style="float:right;"><small>&copy; 2023 Howdimain</small></span>
+        <span style="float:right;"><small>&copy; 2024 Howdimain</small></span>
       </div>
     </div>
   </div>

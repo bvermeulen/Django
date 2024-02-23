@@ -11,6 +11,7 @@ from django.shortcuts import render, redirect
 from django.views.generic import UpdateView
 from django.utils.decorators import method_decorator
 from django.urls import reverse_lazy
+from verify_email.email_handler import send_verification_email
 from howdimain.utils.plogger import Logger
 from howdimain.utils.get_ip import get_client_ip
 from .models import Signup, Home
@@ -52,11 +53,10 @@ def signup(request):
                 form = SignUpForm()
 
             else:
-                user.save()
-                login(request, user)
-                signup_methods.send_welcome_email(user)
+                inactive_user = send_verification_email(request, form)
+                signup_methods.send_welcome_email(inactive_user)
                 logger.info(
-                    f"user {user.username} (ip: {ip_address}) "
+                    f"user {inactive_user.username} (ip: {ip_address}) "
                     f"has succesfully signed up, email sent to {user.email}"
                 )
                 return redirect("home")

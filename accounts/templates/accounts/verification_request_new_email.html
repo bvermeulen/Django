@@ -1,0 +1,25 @@
+{% extends "accounts/base_accounts.html" %}
+
+{% block title %}Request new email{% endblock %}
+
+{%block content%}
+<form method='POST'>
+{% csrf_token %}
+<div class="row justify-content-center">
+    <div class="col-lg-4 col-md-6 col-sm-8">
+        <div class="card">
+            <div class="card-body">
+                <h3 class="card-title">Request Verification</h3>
+                <fieldset>
+                    {{form}}
+                </fieldset>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row justify-content-center mt-4">
+    <button class="btn btn-primary" type="submit">Request New Email</button>
+</div>
+</form>
+
+{% endblock %}

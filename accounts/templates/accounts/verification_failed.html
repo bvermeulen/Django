@@ -1,0 +1,24 @@
+{% extends "accounts/base_accounts.html" %}
+
+{% block title %}Account failed{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-4 col-md-6 col-sm-8">
+        <div class="card">
+            <div class="card-body">
+                <h3 class="card-title">{{ status }}</h3>
+                <form method="post" novalidate>
+                    <p>{{ msg }}</p>
+                    <p style="color: rgb(30, 144, 255)">{{ minor_msg}}</p>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row justify-content-center mt-4">
+    <p>
+        Please contact the howdimain admin at <a href="mailto:info@howdiweb.nl">admin@howdiweb.nl</a>.
+    </p>
+</div>
+{%endblock%}

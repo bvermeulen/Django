@@ -1,0 +1,26 @@
+{% extends "accounts/base_accounts.html" %}
+
+{% block title %}Account verified{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-4 col-md-6 col-sm-8">
+        <div class="card">
+            <div class="card-body">
+                <h3 class="card-title">{{ status }}</h3>
+                <form method="post" novalidate>
+                    {{ msg }}
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+<div class="row justify-content-center mt-4">
+    <a href="{{ link }}" class="btn btn-primary"
+        style="align-items: center; border-radius: 20px; margin-left: 10px; margin-right: 10px;">
+        Log In
+    </a>
+</div>
+</div>
+{% endblock %}

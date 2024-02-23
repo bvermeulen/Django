@@ -7,7 +7,8 @@ from accounts import views
 urlpatterns = [
     path("", views.home_page, name="home"),
     path("signup/", views.signup, name="signup"),
-    path('captcha', include('captcha.urls')),
+    path("captcha/", include("captcha.urls")),
+    path("verification/", include("verify_email.urls")),
     path("settings/account/", views.UserUpdateView.as_view(), name="my_account"),
     path("admin/", admin.site.urls),
     path(
@@ -21,6 +22,7 @@ urlpatterns = [
         auth_views.PasswordResetView.as_view(
             template_name="accounts/password_reset.html",
             email_template_name="accounts/email_password_reset_body.html",
+            html_email_template_name="accounts/email_password_reset_body_html.html",
             subject_template_name="accounts/email_password_reset_subject.txt",
         ),
         name="password_reset",

@@ -42,37 +42,36 @@
           <li class="nav-item"><a class="nav-link" href="{% url 'play_top_tracks' %}">Music</a></li>
           <li class="nav-item"><a class="nav-link" href="{% url 'stock_quotes' %}">Stock quote</a></li>
         </ul>
-        <form class="form-inline ml-auto" method="post">
-          {% if user.is_authenticated %}
-          <ul class="navbar-nav ml-auto">
-            <li class="nav-item dropdown">
-              <a class="nav-link dropdown-toggle" href="#" data-toggle="dropdown">
-                {{ user.username }}
-              </a>
-              <div class="dropdown-menu dropdown-menu-left">
-                <a class="dropdown-item" href="{% url 'mynewsitems' %}">My news</a>
-                <a class="dropdown-item" href="{% url 'playlist' %}">My music</a>
-                <a class="dropdown-item" href="{% url 'portfolio' %}">My portfolio</a>
-                <a class="dropdown-item" href="{% url 'my_account' %}">My account</a>
-                <a class="dropdown-item" href="{% url 'password_change' %}">Change password</a>
-                {% if user.is_staff %}
-                <a class="dropdown-item" href="{% url 'admin:index' %}">Admin</a>
-                {% endif %}
-                <div class="dropdown-divider"></div>
-                <a class="dropdown-item" href="{% url 'logout' %}">Log out</a>
-              </div>
-            </li>
-          </ul>
-          {% else %}
-          <a href="{% url 'login' %}" class="btn btn-outline-secondary mr-1">Log in</a>
-          <a href="{% url 'signup' %}" class="btn btn-primary">Join now</a>
-          {% endif %}
-        </form>
+        {% if user.is_authenticated %}
+        <ul class="navbar-nav ml-auto">
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" data-toggle="dropdown">
+              {{ user.username }}
+            </a>
+            <div class="dropdown-menu dropdown-menu-left">
+              <a class="dropdown-item" href="{% url 'mynewsitems' %}">My news</a>
+              <a class="dropdown-item" href="{% url 'playlist' %}">My music</a>
+              <a class="dropdown-item" href="{% url 'portfolio' %}">My portfolio</a>
+              <a class="dropdown-item" href="{% url 'my_account' %}">My account</a>
+              <a class="dropdown-item" href="{% url 'password_change' %}">Change password</a>
+              {% if user.is_staff %}
+              <a class="dropdown-item" href="{% url 'admin:index' %}">Admin</a>
+              {% endif %}
+              <div class="dropdown-divider"></div>
+              <a class="dropdown-item" href="{% url 'logout' %}">Log out</a>
+            </div>
+          </li>
+        </ul>
+        {% else %}
+        <a href="{% url 'login' %}" class="btn btn-outline-secondary mr-1">Log in</a>
+        <a href="{% url 'signup' %}" class="btn btn-primary">Join now</a>
+        {% endif %}
       </div>
     </div>
   </nav>
 
   <div class="container" style="padding-top: 75px">
+    {% block navbutton %}{% endblock %}
     {% block breadcrumb %}{% endblock %}
     {% block content %}{% endblock %}
     <div class="footer">

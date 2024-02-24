@@ -35,7 +35,6 @@
       </button>
       <div class="collapse navbar-collapse" id="mainMenu">
         <ul class="navbar-nav mr-auto">
-          {% block navbutton %}{% endblock %}
           {% if user.is_authenticated %}
           <li class="nav-item"><a class="nav-link" href="{% url 'boards' %}">Boards</a></li>
           {% endif %}
@@ -43,16 +42,6 @@
           <li class="nav-item"><a class="nav-link" href="{% url 'play_top_tracks' %}">Music</a></li>
           <li class="nav-item"><a class="nav-link" href="{% url 'stock_quotes' %}">Stock quote</a></li>
         </ul>
-          <ul class="navbar-nav mr-auto">
-            {% block navbutton %}{% endblock %}
-            {% if user.is_authenticated %}
-              <li class="nav-item"><a class="nav-link" href="{% url 'boards' %}">Boards</a></li>
-            {% endif %}
-            <li class="nav-item"><a class="nav-link" href="{% url 'newspage' %}">News</a></li>
-            <li class="nav-item"><a class="nav-link" href="{% url 'play_top_tracks' %}">Music</a></li>
-            <li class="nav-item"><a class="nav-link" href="{% url 'stock_quotes' %}">Stock quote</a></li>
-          </ul>
-        <form class="form-inline ml-auto" method="post">
         {% if user.is_authenticated %}
         <ul class="navbar-nav ml-auto">
           <li class="nav-item dropdown">
@@ -74,15 +63,15 @@
           </li>
         </ul>
         {% else %}
-          <a href="{% url 'login' %}" class="btn btn-outline-secondary mr-1">Log in</a>
-          <a href="{% url 'signup' %}" class="btn btn-primary">Join now</a>
-          {% endif %}
-        </form>
+        <a href="{% url 'login' %}" class="btn btn-outline-secondary mr-1">Log in</a>
+        <a href="{% url 'signup' %}" class="btn btn-primary">Join now</a>
+        {% endif %}
       </div>
     </div>
   </nav>
 
   <div class="container" style="padding-top: 75px">
+    {% block navbutton %}{% endblock %}
     {% block breadcrumb %}{% endblock %}
     {% block content %}{% endblock %}
     <div class="footer">

@@ -24,7 +24,7 @@ logger = Logger.getlogger()
 HOWDIMAIN_VERSION = (
     "https://github.com/bvermeulen/Django/tree/howdimain-digitalocean_v9"
 )
-HOWDIMAIN_DATE = "December, 2023: fix tests, modifications for Django 5 and Python 12"
+HOWDIMAIN_DATE = "February, 2024: implement captcha and email verification"
 HOWDIMAIN_AUTHOR = "bruno.vermeulen@hotmail.com"
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)

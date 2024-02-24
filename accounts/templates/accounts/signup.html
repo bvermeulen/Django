@@ -1,24 +1,54 @@
 {% extends 'accounts/base_accounts.html' %}
 
 {% block title %}Sign up to Howdiweb{% endblock %}
+{% load form_tags widget_tweaks %}
+{% load crispy_forms_tags %}
 
 {% block content %}
-  <div class="row justify-content-center">
-    <div class="col-lg-8 col-md-10 col-sm-12">
-      <div class="card">
-        <div class="card-body">
-          <h3 class="card-title">Join now</h3>
-          <form method="post" novalidate>
-            {% csrf_token %}
-            {% include 'includes/form.html' %}
-            {{ error_message }}
-            <button type="submit" class="btn btn-primary btn-block">Create an account</button>
-          </form>
-        </div>
-        <div class="card-footer text-muted text-center">
-          Already have an account? <a href="{% url 'login' %}">Log in</a>
-        </div>
+<div class="row justify-content-center">
+  <div class="col-lg-8 col-md-10 col-sm-12">
+    <div class="card">
+      <div class="card-body">
+        <h3 class="card-title">Join now</h3>
+        <form method="post" novalidate>
+          {% csrf_token %}
+          {% if form.non_field_errors %}
+          <div class="alert alert-danger" role="alert">
+            {% for error in form.non_field_errors %}
+            <p{% if forloop.last %} class="mb-0" {% endif %}>{{ error }}</p>
+              {% endfor %}
+          </div>
+          {% endif %}
+          {% for field in form %}
+          <div class="form-group">
+            {% if field.label != 'Captcha' %}
+            {{ field.label}}
+            {% render_field field class=field|input_class %}
+            {% else %}
+            {{ field }}
+            {% endif %}
+            {% for error in field.errors %}
+            <div class="text-danger">
+              {{ error }}
+            </div>
+            {% endfor %}
+            {% if field.help_text and field.label == 'Username' or field.label == 'Password' %}
+            <small class="form-text text-muted">
+              {{field.help_text|safe }}
+            </small>
+            {% endif %}
+          </div>
+          {% endfor %}
+          {{ error_message }}
+          <button type="submit" class="btn btn-primary btn-block">Create an account</button>
+        </form>
+      </div>
+      <div class="card-footer text-muted text-center">
+        Have an account?></a><a style="margin-left: 2px" href="{% url 'login' %}">Log in</a>
+        <a style="margin-left: 20px">New verification?</a><a style="margin-left: 2px"
+          href="{% url 'request-new-link-from-email' %}">Provide email</a>
       </div>
     </div>
   </div>
+</div>
 {% endblock %}

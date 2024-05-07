@@ -26,6 +26,25 @@ class Currency(models.Model):
         return str(self.currency)
 
 
+class CurrencyHistory(models.Model):
+    currency = models.ForeignKey(
+        Currency, on_delete=models.CASCADE, related_name="history"
+    )
+    currency_date = models.DateField()
+    usd_exchange_rate_low = models.CharField(max_length=20, default="1.0")
+    usd_exchange_rate_high = models.CharField(max_length=20, default="1.0")
+    usd_exchange_rate = models.CharField(max_length=20, default="1.0")
+
+    def __str__(self):
+        return (
+            f"{self.currency_date.strftime('%d-%m-%Y')}: "
+            f"{self.currency.currency}, "
+            f"{self.usd_exchange_rate}, "
+            f"{self.usd_exchange_rate_low}, "
+            f"{self.usd_exchange_rate_high}"
+        )
+
+
 class Exchange(models.Model):
     mic = models.CharField(max_length=5, unique=True)
     ric = models.CharField(max_length=5, unique=False, default=None)
@@ -49,7 +68,9 @@ class Stock(models.Model):
     company = models.CharField(max_length=75, unique=False)
     type = models.CharField(max_length=10, blank=True, null=True, default=None)
     currency = models.ForeignKey(Currency, on_delete=models.CASCADE)
-    exchange = models.ForeignKey(Exchange, on_delete=models.CASCADE, related_name="stocks")
+    exchange = models.ForeignKey(
+        Exchange, on_delete=models.CASCADE, related_name="stocks"
+    )
 
     def mic(self):
         return self.exchange.mic

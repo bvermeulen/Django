@@ -136,7 +136,7 @@ class StockHistory(models.Model):
 
     def __str__(self) -> str:
         return (
-            f"\n{self.stock_selection.portfolio.portfolio_name}, {self.stock_selection.stock.symbol}\n"
+            f"\n{self.stock_selection.portfolio.portfolio_name}, {self.quantity} {self.stock_selection.stock.symbol_ric}\n"
             f"last trading date: {self.trading_date.strftime("%d-%m-%Y")}\n"
             f"close yesterday: {self.close_yesterday}, open: {self.open}, price: {self.latest_price}, \n"
             f"day_low: {self.day_low}, day_high: {self.day_high}, volume: {self.volume}, \n"

@@ -9,7 +9,7 @@ class Person(User):
     class Meta:
         proxy = True
 
-    def get_portfolio_names(self):
+    def get_portfolio_names(self) -> list[str]:
         return [
             p.portfolio_name for p in self.portfolios.all().order_by("portfolio_name")
         ]
@@ -19,10 +19,10 @@ class Currency(models.Model):
     currency = models.CharField(max_length=3, unique=True)
     usd_exchange_rate = models.CharField(max_length=20, default="1.0")
 
-    def get_exchangerate(self):
+    def get_exchangerate(self) -> str:
         return self.usd_exchange_rate
 
-    def __str__(self):
+    def __str__(self) -> str:
         return str(self.currency)
 
 
@@ -35,7 +35,7 @@ class CurrencyHistory(models.Model):
     usd_exchange_rate_high = models.CharField(max_length=20, default="1.0")
     usd_exchange_rate = models.CharField(max_length=20, default="1.0")
 
-    def __str__(self):
+    def __str__(self) -> str:
         return (
             f"{self.currency_date.strftime('%d-%m-%Y')}: "
             f"{self.currency.currency}, "
@@ -58,7 +58,7 @@ class Exchange(models.Model):
         Currency, on_delete=models.CASCADE, related_name="exchanges"
     )
 
-    def __str__(self):
+    def __str__(self) -> str:
         return str(self.name)
 
 
@@ -72,13 +72,13 @@ class Stock(models.Model):
         Exchange, on_delete=models.CASCADE, related_name="stocks"
     )
 
-    def mic(self):
+    def mic(self) -> str:
         return self.exchange.mic
 
-    def ric(self):
+    def ric(self) -> str:
         return self.exchange.ric
 
-    def __str__(self):
+    def __str__(self) -> str:
         return Truncator(self.company).chars(20)
 
 
@@ -108,7 +108,7 @@ class StockSelection(models.Model):
     class Meta:
         unique_together = ["stock", "portfolio"]
 
-    def __str__(self):
+    def __str__(self) -> str:
         return (
             f"{self.portfolio.user.username}, {self.portfolio.portfolio_name}: "
             f"{self.stock.symbol}, {self.quantity}"
@@ -134,10 +134,10 @@ class StockHistory(models.Model):
     class Meta:
         unique_together = ["stock_selection", "trading_date"]
 
-    def __str__(self):
+    def __str__(self) -> str:
         return (
-            f"{self.stockselection.portfolio.portfolio_name}, {self.stockselection.stock.symbol}\n"
-            f"last trading time: {self.trading_datetime.strftime('%d-%m-%Y %H:%M')}\n"
+            f"\n{self.stock_selection.portfolio.portfolio_name}, {self.stock_selection.stock.symbol}\n"
+            f"last trading date: {self.trading_date.strftime("%d-%m-%Y")}\n"
             f"close yesterday: {self.close_yesterday}, open: {self.open}, price: {self.latest_price}, \n"
             f"day_low: {self.day_low}, day_high: {self.day_high}, volume: {self.volume}, \n"
             f"change: {self.day_change}, percentage: {self.change_pct}\n"

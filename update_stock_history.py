@@ -19,7 +19,7 @@ def update_stock_history():
 
         stock_info = td.get_stock_trade_info(list_symbols[0:MAX_SYMBOLS_ALLOWED])
         stock_info += td.get_stock_trade_info(
-            list(symbols.keys())[MAX_SYMBOLS_ALLOWED : 2 * MAX_SYMBOLS_ALLOWED]
+            list_symbols[MAX_SYMBOLS_ALLOWED : 2 * MAX_SYMBOLS_ALLOWED]
         )
         stock_info += td.get_cash_trade_info(cash_symbols)
         for stock in stock_info:

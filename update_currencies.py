@@ -139,6 +139,10 @@ class UpdateCurrencies:
         connection.close()
 
 
-if __name__ == "__main__":
+def main():
     uc = UpdateCurrencies()
     uc.update_currencies()
+
+
+if __name__ == "__main__":
+    main()

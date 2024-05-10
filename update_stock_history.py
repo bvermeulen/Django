@@ -1,8 +1,17 @@
 import os
+
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "howdimain.settings")
 import datetime
 import django
+
+django.setup()
+from stock.module_stock import TradingData
+from stock.models import Portfolio, StockHistory, Stock, StockSelection
 from django.db.utils import IntegrityError
 from howdimain.howdimain_vars import MAX_SYMBOLS_ALLOWED
+
+td = TradingData()
+td.setup()
 
 
 def update_stock_history():
@@ -47,12 +56,10 @@ def update_stock_history():
                     pass  # already created
 
 
-if __name__ == "__main__":
-    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "howdimain.settings")
-    django.setup()
-    from stock.module_stock import TradingData
-    from stock.models import Portfolio, StockHistory, Stock, StockSelection
+def main():
 
-    td = TradingData()
-    td.setup()
     update_stock_history()
+
+
+if __name__ == "__main__":
+    main()

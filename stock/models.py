@@ -26,6 +26,25 @@ class Currency(models.Model):
         return str(self.currency)
 
 
+class CurrencyHistory(models.Model):
+    currency = models.ForeignKey(
+        Currency, on_delete=models.CASCADE, related_name="history"
+    )
+    currency_date = models.DateField()
+    usd_exchange_rate_low = models.CharField(max_length=20, default="1.0")
+    usd_exchange_rate_high = models.CharField(max_length=20, default="1.0")
+    usd_exchange_rate = models.CharField(max_length=20, default="1.0")
+
+    def __str__(self):
+        return (
+            f"{self.currency_date.strftime('%d-%m-%Y')}: "
+            f"{self.currency.currency}, "
+            f"{self.usd_exchange_rate}, "
+            f"{self.usd_exchange_rate_low}, "
+            f"{self.usd_exchange_rate_high}"
+        )
+
+
 class Exchange(models.Model):
     mic = models.CharField(max_length=5, unique=True)
     ric = models.CharField(max_length=5, unique=False, default=None)
@@ -49,7 +68,9 @@ class Stock(models.Model):
     company = models.CharField(max_length=75, unique=False)
     type = models.CharField(max_length=10, blank=True, null=True, default=None)
     currency = models.ForeignKey(Currency, on_delete=models.CASCADE)
-    exchange = models.ForeignKey(Exchange, on_delete=models.CASCADE, related_name="stocks")
+    exchange = models.ForeignKey(
+        Exchange, on_delete=models.CASCADE, related_name="stocks"
+    )
 
     def mic(self):
         return self.exchange.mic
@@ -70,16 +91,16 @@ class Portfolio(models.Model):
     class Meta:
         unique_together = ["portfolio_name", "user"]
 
-    def get_stock(self) -> list:
-        return [stock.stock.symbol_ric for stock in self.stocks.all()]
+    def get_stock(self) -> dict:
+        return {stock.stock.symbol_ric: stock.quantity for stock in self.stocks.all()}
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"{self.portfolio_name} for {self.user.username}"
 
 
 class StockSelection(models.Model):
     stock = models.ForeignKey(Stock, on_delete=models.CASCADE)
-    quantity = models.CharField(max_length=20, default=1.0)
+    quantity = models.CharField(max_length=20, default=0.0)
     portfolio = models.ForeignKey(
         Portfolio, on_delete=models.CASCADE, related_name="stocks"
     )
@@ -91,4 +112,33 @@ class StockSelection(models.Model):
         return (
             f"{self.portfolio.user.username}, {self.portfolio.portfolio_name}: "
             f"{self.stock.symbol}, {self.quantity}"
+        )
+
+
+class StockHistory(models.Model):
+    stock_selection = models.ForeignKey(
+        StockSelection, on_delete=models.CASCADE, related_name="history"
+    )
+    trading_date = models.DateField()
+    symbol = models.CharField(max_length=20, default="")
+    quantity = models.CharField(max_length=20, default=0.0)
+    open = models.CharField(max_length=20, default=0.0)
+    latest_price = models.CharField(max_length=20, default=0.0)
+    day_low = models.CharField(max_length=20, default=0.0)
+    day_high = models.CharField(max_length=20, default=0.0)
+    volume = models.CharField(max_length=20, default=0.0)
+    close_yesterday = models.CharField(max_length=20, default=0.0)
+    change_pct = models.CharField(max_length=20, default=0.0)
+    day_change = models.CharField(max_length=20, default=0.0)
+
+    class Meta:
+        unique_together = ["stock_selection", "trading_date"]
+
+    def __str__(self):
+        return (
+            f"{self.stockselection.portfolio.portfolio_name}, {self.stockselection.stock.symbol}\n"
+            f"last trading time: {self.trading_datetime.strftime('%d-%m-%Y %H:%M')}\n"
+            f"close yesterday: {self.close_yesterday}, open: {self.open}, price: {self.latest_price}, \n"
+            f"day_low: {self.day_low}, day_high: {self.day_high}, volume: {self.volume}, \n"
+            f"change: {self.day_change}, percentage: {self.change_pct}\n"
         )

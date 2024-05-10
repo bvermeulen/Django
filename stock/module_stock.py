@@ -24,6 +24,7 @@
 import decimal
 from decimal import Decimal as d
 import datetime
+from datetime import timezone
 from collections import namedtuple
 import pandas as pd
 from decouple import config
@@ -293,12 +294,12 @@ class TradingData:
     @classmethod
     def get_stock_trade_info(cls, stock_symbols: list) -> list:
         """return the stock trade info as a dict retrieved from url json, key data.
-        Ensure no cash stocks are in the list
         """
-        symbols = ",".join(stock_symbols).upper()
-        if not all([True if el not in cls.cash_stocks else False for el in symbols]):
-            return []
+        for cash_symbol in cls.cash_stocks:
+            if cash_symbol in stock_symbols:
+                stock_symbols.remove(cash_symbol)
 
+        symbols = ",".join(stock_symbols).upper()
         stock_url = cls.stock_url + symbols
         params = {"apikey": cls.api_token}
 
@@ -395,7 +396,7 @@ class TradingData:
             cash_dict["close_yesterday"] = 1.0
             cash_dict["day_change"] = 0.0
             cash_dict["change_pct"] = 0.0
-            cash_dict["last_trade_time"] = ""
+            cash_dict["last_trade_time"] = datetime.datetime.now(timezone.utc)
             cash_info.append(cash_dict)
 
         return cash_info
@@ -605,22 +606,15 @@ class TradingData:
 
     @classmethod
     def get_portfolio_stock_info(cls, portfolio, base_currency):
-        symbols_quantities = {
-            stock.stock.symbol_ric.upper(): stock.quantity
-            for stock in portfolio.stocks.all()
-        }
+        symbols_quantities = portfolio.get_stock()
         list_symbols = list(symbols_quantities.keys())
 
         # split cash components
         cash_symbols = []
-        for el in cls.cash_stocks:
-            try:
-                index = list_symbols.index(el)
-                del list_symbols[index]
-                cash_symbols.append(el)
-
-            except ValueError:
-                pass
+        for cash_stock in cls.cash_stocks:
+            if cash_stock in list_symbols:
+                list_symbols.remove(cash_stock)
+                cash_symbols.append(cash_stock)
 
         stock_trade_info = cls.get_stock_trade_info(list_symbols[0:MAX_SYMBOLS_ALLOWED])
         stock_trade_info += cls.get_stock_trade_info(

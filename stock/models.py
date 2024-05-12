@@ -119,7 +119,7 @@ class StockHistory(models.Model):
     stock_selection = models.ForeignKey(
         StockSelection, on_delete=models.CASCADE, related_name="history"
     )
-    trading_date = models.DateField()
+    last_trading_date = models.DateTimeField()
     symbol = models.CharField(max_length=20, default="")
     quantity = models.CharField(max_length=20, default=0.0)
     open = models.CharField(max_length=20, default=0.0)
@@ -132,12 +132,12 @@ class StockHistory(models.Model):
     day_change = models.CharField(max_length=20, default=0.0)
 
     class Meta:
-        unique_together = ["stock_selection", "trading_date"]
+        unique_together = ["stock_selection", "last_trading_date"]
 
     def __str__(self) -> str:
         return (
             f"\n{self.stock_selection.portfolio.portfolio_name}, {self.quantity} {self.stock_selection.stock.symbol_ric}\n"
-            f"last trading date: {self.trading_date.strftime("%d-%m-%Y")}\n"
+            f"last trading date: {self.last_trading_date.strftime("%d-%m-%Y %H:%M")}\n"
             f"close yesterday: {self.close_yesterday}, open: {self.open}, price: {self.latest_price}, \n"
             f"day_low: {self.day_low}, day_high: {self.day_high}, volume: {self.volume}, \n"
             f"change: {self.day_change}, percentage: {self.change_pct}\n"

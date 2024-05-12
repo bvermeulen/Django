@@ -36,18 +36,19 @@ def update_stock_history():
         for stock in stock_info:
             stock_object = Stock.objects.get(symbol_ric=stock["symbol"])
             portfolio_stock_selection = StockSelection.objects.get(
-                portfolio=portfolio,
-                stock= stock_object
+                portfolio=portfolio, stock=stock_object
             )
             exchange_timezone = get_exchange_timezone(stock_object.exchange.mic)
-            datetime_now_at_exchange = (datetime.datetime.now(ZoneInfo(exchange_timezone))).replace(tzinfo=None)
+            datetime_now_at_exchange = (
+                datetime.datetime.now(ZoneInfo(exchange_timezone))
+            ).replace(tzinfo=None)
             datetime_stock = stock["last_trade_time"]
 
             if datetime_now_at_exchange > datetime_stock + datetime.timedelta(hours=1):
                 try:
                     StockHistory.objects.create(
                         stock_selection=portfolio_stock_selection,
-                        trading_date=datetime_stock.date(),
+                        last_trading_date=datetime_stock,
                         symbol=stock["symbol"],
                         quantity=symbols[stock["symbol"]],
                         open=stock["open"],

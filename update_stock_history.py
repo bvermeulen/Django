@@ -2,6 +2,7 @@ import os
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "howdimain.settings")
 import datetime
+from zoneinfo import ZoneInfo
 import django
 
 django.setup()
@@ -9,6 +10,7 @@ from stock.module_stock import TradingData
 from stock.models import Portfolio, StockHistory, Stock, StockSelection
 from django.db.utils import IntegrityError
 from howdimain.howdimain_vars import MAX_SYMBOLS_ALLOWED
+from howdimain.utils.tradetime import get_exchange_timezone
 
 td = TradingData()
 td.setup()
@@ -32,15 +34,20 @@ def update_stock_history():
         )
         stock_info += td.get_cash_trade_info(cash_symbols)
         for stock in stock_info:
+            stock_object = Stock.objects.get(symbol_ric=stock["symbol"])
             portfolio_stock_selection = StockSelection.objects.get(
                 portfolio=portfolio,
-                stock=Stock.objects.get(symbol_ric=stock["symbol"]),
+                stock= stock_object
             )
-            if stock["last_trade_time"].time() >= datetime.time(18, 0, 0):
+            exchange_timezone = get_exchange_timezone(stock_object.exchange.mic)
+            datetime_now_at_exchange = (datetime.datetime.now(ZoneInfo(exchange_timezone))).replace(tzinfo=None)
+            datetime_stock = stock["last_trade_time"]
+
+            if datetime_now_at_exchange > datetime_stock + datetime.timedelta(hours=1):
                 try:
                     StockHistory.objects.create(
                         stock_selection=portfolio_stock_selection,
-                        trading_date=stock["last_trade_time"].date(),
+                        trading_date=datetime_stock.date(),
                         symbol=stock["symbol"],
                         quantity=symbols[stock["symbol"]],
                         open=stock["open"],

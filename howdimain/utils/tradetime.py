@@ -20,7 +20,7 @@ def get_exchange_timezone(exchange_mic: str) -> str:
     except Exchange.DoesNotExist:
         exchange = Exchange.objects.get(mic=default_exchange)
 
-    exchange_timezone = exchange.timezone.capitalize()
+    exchange_timezone = exchange.timezone.title()
 
     if exchange_timezone == "JST":
         return "Asia/Tokyo"
@@ -34,17 +34,21 @@ def get_exchange_timezone(exchange_mic: str) -> str:
 
 def tradetime_fromtimestamp(timestamp: int, exchange_mic: str) -> datetime:
     exchange_timezone = get_exchange_timezone(exchange_mic)
-    return (datetime.datetime.fromtimestamp(timestamp).astimezone(
-        ZoneInfo(exchange_timezone))
-        ).replace(tzinfo=None)
+    return (
+        datetime.datetime.fromtimestamp(timestamp).astimezone(
+            ZoneInfo(exchange_timezone)
+        )
+    ).replace(tzinfo=None)
 
 
 def tradetime_fromstring(trade_time: str, exchange_mic: str) -> datetime:
     # try default option where tradetime is in a valid format
     exchange_timezone = get_exchange_timezone(exchange_mic)
     try:
-        return (datetime.datetime.strptime(trade_time, "%Y-%m-%d %H:%M:%S").astimezone(
-            ZoneInfo(exchange_timezone))
+        return (
+            datetime.datetime.strptime(trade_time, "%Y-%m-%d %H:%M:%S").astimezone(
+                ZoneInfo(exchange_timezone)
+            )
         ).replace(tzinfo=None)
 
     except ValueError:

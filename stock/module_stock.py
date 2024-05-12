@@ -32,7 +32,7 @@ from decouple import config
 import requests
 from django.db.utils import IntegrityError
 from howdimain.utils.plogger import Logger
-from howdimain.utils.tradetime import tradetime_fromtimestamp
+from howdimain.utils.tradetime import tradetime_fromtimestamp, tradetime_fromstring
 from howdimain.utils.min_max import get_min, get_max
 from howdimain.howdimain_vars import MAX_SYMBOLS_ALLOWED, URL_FMP
 from stock.models import Person, Exchange, Currency, Stock, Portfolio, StockSelection
@@ -402,7 +402,7 @@ class TradingData:
             cash_dict["close_yesterday"] = 1.0
             cash_dict["day_change"] = 0.0
             cash_dict["change_pct"] = 0.0
-            cash_dict["last_trade_time"] = datetime.datetime.now(timezone.utc)
+            cash_dict["last_trade_time"] = tradetime_fromstring("", cash_dict["exchange_mic"])
             cash_info.append(cash_dict)
 
         return cash_info

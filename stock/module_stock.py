@@ -21,6 +21,7 @@
             - get_portfolio_stock_info
             - calculate_stocks_value
 """
+
 import decimal
 from decimal import Decimal as d
 import datetime
@@ -31,7 +32,7 @@ from decouple import config
 import requests
 from django.db.utils import IntegrityError
 from howdimain.utils.plogger import Logger
-from howdimain.utils.last_tradetime import trade_time
+from howdimain.utils.tradetime import tradetime_fromtimestamp
 from howdimain.utils.min_max import get_min, get_max
 from howdimain.howdimain_vars import MAX_SYMBOLS_ALLOWED, URL_FMP
 from stock.models import Person, Exchange, Currency, Stock, Portfolio, StockSelection
@@ -241,9 +242,13 @@ class TradingData:
     """methods to handle trading data from various sources
     based on FMP and as fall back to Marketstack
     """
+
     cash_stocks = []
     if Exchange.objects.filter(mic="CASH").exists():
-        cash_stocks = [symbol.symbol_ric for symbol in Exchange.objects.get(mic="CASH").stocks.all()]
+        cash_stocks = [
+            symbol.symbol_ric
+            for symbol in Exchange.objects.get(mic="CASH").stocks.all()
+        ]
 
     @classmethod
     def setup(cls):
@@ -293,8 +298,7 @@ class TradingData:
 
     @classmethod
     def get_stock_trade_info(cls, stock_symbols: list) -> list:
-        """return the stock trade info as a dict retrieved from url json, key data.
-        """
+        """return the stock trade info as a dict retrieved from url json, key data."""
         for cash_symbol in cls.cash_stocks:
             if cash_symbol in stock_symbols:
                 stock_symbols.remove(cash_symbol)
@@ -345,7 +349,9 @@ class TradingData:
             stock_dict["close_yesterday"] = quote.get("previousClose")
             stock_dict["day_change"] = quote.get("change")
             stock_dict["change_pct"] = quote.get("changesPercentage")
-            stock_dict["last_trade_time"] = trade_time(stock_dict["exchange_mic"])
+            stock_dict["last_trade_time"] = tradetime_fromtimestamp(
+                quote.get("timestamp"), stock_dict["exchange_mic"]
+            )
 
             stock_info.append(stock_dict)
 

@@ -227,7 +227,7 @@ MARTOR_MARKDOWN_BASE_EMOJI_URL = "https://github.githubassets.com/images/icons/e
 # MARTOR_MARKDOWN_BASE_MENTION_URL = 'https://python.web.id/author/'                                    # please change this to your domain   #pylint: disable=line-too-long
 
 nl = "\n"
-logger.info(
+logger.debug(
     f"{nl}============================================================"
     f"{nl}Howdimain version: {HOWDIMAIN_VERSION}"
     f"{nl}Version date: {HOWDIMAIN_DATE}"
@@ -237,7 +237,7 @@ logger.info(
     f"{nl}Alowed hosts: {ALLOWED_HOSTS}"
     f"{nl}------------------------------------------------------------"
 )
-logger.info(
+logger.debug(
     f"{nl}DB_NAME: {config('DB_NAME')}"
     f"{nl}DB_PORT: {config('DB_PORT')}"
     f"{nl}DB_USER: {config('DB_USER')}"

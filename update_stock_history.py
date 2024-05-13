@@ -1,4 +1,5 @@
 import os
+import contextlib
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "howdimain.settings")
 import datetime
@@ -11,9 +12,11 @@ from stock.models import Portfolio, StockHistory, Stock, StockSelection
 from django.db.utils import IntegrityError
 from howdimain.howdimain_vars import MAX_SYMBOLS_ALLOWED
 from howdimain.utils.tradetime import get_exchange_timezone
+from howdimain.utils.plogger import Logger
 
 td = TradingData()
 td.setup()
+logger = Logger.getlogger()
 
 
 def update_stock_history():
@@ -32,6 +35,7 @@ def update_stock_history():
         stock_info += td.get_stock_trade_info(
             list_symbols[MAX_SYMBOLS_ALLOWED : 2 * MAX_SYMBOLS_ALLOWED]
         )
+        counter = 0
         stock_info += td.get_cash_trade_info(cash_symbols)
         for stock in stock_info:
             stock_object = Stock.objects.get(symbol_ric=stock["symbol"])
@@ -45,7 +49,7 @@ def update_stock_history():
             datetime_stock = stock["last_trade_time"]
 
             if datetime_now_at_exchange > datetime_stock + datetime.timedelta(hours=1):
-                try:
+                with contextlib.suppress(IntegrityError):
                     StockHistory.objects.create(
                         stock_selection=portfolio_stock_selection,
                         last_trading_date=datetime_stock,
@@ -60,14 +64,10 @@ def update_stock_history():
                         change_pct=stock["change_pct"],
                         day_change=stock["day_change"],
                     )
-                except IntegrityError:
-                    pass  # already created
+                    counter += 1
 
-
-def main():
-
-    update_stock_history()
+    logger.info(f"System updated history for {counter} stocks")
 
 
 if __name__ == "__main__":
-    main()
+    update_stock_history()

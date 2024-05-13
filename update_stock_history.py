@@ -21,6 +21,7 @@ logger = Logger.getlogger()
 
 def update_stock_history():
     portfolios = Portfolio.objects.all()
+    counter = 0
     for portfolio in portfolios:
         # split cash components
         symbols = portfolio.get_stock()
@@ -35,7 +36,6 @@ def update_stock_history():
         stock_info += td.get_stock_trade_info(
             list_symbols[MAX_SYMBOLS_ALLOWED : 2 * MAX_SYMBOLS_ALLOWED]
         )
-        counter = 0
         stock_info += td.get_cash_trade_info(cash_symbols)
         for stock in stock_info:
             stock_object = Stock.objects.get(symbol_ric=stock["symbol"])

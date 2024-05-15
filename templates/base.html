@@ -21,6 +21,28 @@
   <link rel="stylesheet" href="{% static 'css/addons/datatables.min.css' %}">
   <link rel="icon" href="{% static 'img/favicon.ico' %}">
 
+  <script src="{% static 'js/jquery-3.3.1.min.js' %}"></script>
+  <script src="{% static 'js/popper.min.js' %}"></script>
+  <script src="{% static 'js/bootstrap.min.js' %}"></script>
+  <script src="{% static 'js/addons/datatables.min.js' %}"></script>
+  <script src="{% static 'js/mdbtools.js' %}"></script>
+
+  <script src="{% static 'plugins/js/ace.js' %}"></script>
+  <script src="{% static 'plugins/js/semantic.min.js' %}"></script>
+  <script src="{% static 'plugins/js/mode-markdown.js' %}"></script>
+  <script src="{% static 'plugins/js/ext-language_tools.js' %}"></script>
+  <script src="{% static 'plugins/js/theme-github.js' %}"></script>
+  <script src="{% static 'plugins/js/highlight.min.js' %}"></script>
+  <script src="{% static 'plugins/js/resizable.min.js' %}"></script>
+  <script src="{% static 'plugins/js/emojis.min.js' %}"></script>
+  <script src="{% static 'martor/js/martor.min.js' %}"></script>
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/datepicker/0.6.5/datepicker.min.css"
+    integrity="sha256-b88RdwbRJEzRx95nCuuva+hO5ExvXXnpX+78h8DjyOE=" crossorigin="anonymous" />
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/datepicker/0.6.5/datepicker.min.js"
+    integrity="sha256-/7FLTdzP6CfC1VBAj/rsp3Rinuuu9leMRGd354hvk0k=" crossorigin="anonymous"></script>
+
   {% block stylesheet %}{% endblock %}
 
 </head>
@@ -88,23 +110,6 @@
     </div>
   </div>
   {% endblock body %}
-
-  <script src="{% static 'js/jquery-3.3.1.min.js' %}"></script>
-  <script src="{% static 'js/popper.min.js' %}"></script>
-  <script src="{% static 'js/bootstrap.min.js' %}"></script>
-  <script src="{% static 'js/addons/datatables.min.js' %}"></script>
-
-  <script src="{% static 'plugins/js/ace.js' %}"></script>
-  <script src="{% static 'plugins/js/semantic.min.js' %}"></script>
-  <script src="{% static 'plugins/js/mode-markdown.js' %}"></script>
-  <script src="{% static 'plugins/js/ext-language_tools.js' %}"></script>
-  <script src="{% static 'plugins/js/theme-github.js' %}"></script>
-  <script src="{% static 'plugins/js/highlight.min.js' %}"></script>
-  <script src="{% static 'plugins/js/resizable.min.js' %}"></script>
-  <script src="{% static 'plugins/js/emojis.min.js' %}"></script>
-  <script src="{% static 'martor/js/martor.min.js' %}"></script>
-
-  <script src="{% static 'js/mdbtools.js' %}"></script>
 
   {% block javascript %}{% endblock %}
 </body>

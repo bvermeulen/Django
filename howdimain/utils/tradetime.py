@@ -33,6 +33,10 @@ def get_exchange_timezone(exchange_mic: str) -> str:
 
 
 def tradetime_fromtimestamp(timestamp: int, exchange_mic: str) -> datetime:
+    #for invalid timestamp revert to 1 January 1980
+    if timestamp == 0:
+        timestamp = 315532800
+
     exchange_timezone = get_exchange_timezone(exchange_mic)
     return (
         datetime.datetime.fromtimestamp(timestamp).astimezone(

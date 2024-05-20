@@ -80,18 +80,20 @@
     </div>
 
     {% if user.is_authenticated %}
-    <div>
-      <button type="button" class="btn btn-outline-primary btn-sm ml-1"
-        onclick="window.location.href='{% url 'portfolio' %}'">My portfolio</button>
-    </div>
     <div class="ml-1">
       {{ form.datepicked }}
     </div>
     <div>
-      <button type="submit" class="btn btn-outline-primary btn-sm ml-1">Submit</button>
+      <button type="submit" class="btn btn-outline-primary btn-sm ml-1" name="datepicked_button"
+        value="true">Submit</button>
+    </div>
+    <div>
+      <button type="button" class="btn btn-outline-primary btn-sm ml-1"
+      onclick="window.location.href='{% url 'portfolio' %}'">My portfolio</button>
     </div>
   </div>
   {% endif %}
+
   <div class="responsive-float">
     {% if form.selected_portfolio.value %}
     <strong><a>Portfolio:</a><a class="ml-1">{{ form.selected_portfolio.value }}</a></strong>

@@ -1,3 +1,4 @@
+import datetime
 from django.db import models
 from django.contrib.auth.models import User
 from django.utils.text import Truncator
@@ -21,6 +22,14 @@ class Currency(models.Model):
 
     def get_exchangerate(self) -> str:
         return self.usd_exchange_rate
+
+    def get_exchangerate_on_date(self, currency_date: str) -> str:
+        if not currency_date:
+            return self.usd_exchange_rate
+
+        else:
+            currency = self.history.filter(currency_date=currency_date)
+            return currency.last().usd_exchange_rate if currency else self.usd_exchange_rate
 
     def __str__(self) -> str:
         return str(self.currency)
@@ -94,6 +103,9 @@ class Portfolio(models.Model):
     def get_stock(self) -> dict:
         return {stock.stock.symbol_ric: stock.quantity for stock in self.stocks.all()}
 
+    def get_stock_on_date(self, trading_date: str) -> dict:
+        return {stock.stock_history.stock.symbol_ric: stock.quantity for stock in self.history.filter(trading_date=trading_date)}
+
     def __str__(self) -> str:
         return f"{self.portfolio_name} for {self.user.username}"
 
@@ -116,12 +128,8 @@ class StockSelection(models.Model):
 
 
 class StockHistory(models.Model):
-    stock_selection = models.ForeignKey(
-        StockSelection, on_delete=models.CASCADE, related_name="history"
-    )
-    last_trading_date = models.DateTimeField()
-    symbol = models.CharField(max_length=20, default="")
-    quantity = models.CharField(max_length=20, default=0.0)
+    stock = models.ForeignKey(Stock, on_delete=models.CASCADE, related_name='history')
+    last_trading_time = models.DateTimeField()
     open = models.CharField(max_length=20, default=0.0)
     latest_price = models.CharField(max_length=20, default=0.0)
     day_low = models.CharField(max_length=20, default=0.0)
@@ -132,13 +140,29 @@ class StockHistory(models.Model):
     day_change = models.CharField(max_length=20, default=0.0)
 
     class Meta:
-        unique_together = ["stock_selection", "last_trading_date"]
+        unique_together = ["stock", "last_trading_time"]
 
     def __str__(self) -> str:
         return (
-            f"\n{self.stock_selection.portfolio.portfolio_name}, {self.quantity} {self.stock_selection.stock.symbol_ric}\n"
-            f"last trading date: {self.last_trading_date.strftime("%d-%m-%Y %H:%M")}\n"
+            f"\n{self.stock.symbol_ric}:\n"
+            f"last trading time: {self.last_trading_time.strftime("%d-%m-%Y %H:%M")}\n"
             f"close yesterday: {self.close_yesterday}, open: {self.open}, price: {self.latest_price}, \n"
             f"day_low: {self.day_low}, day_high: {self.day_high}, volume: {self.volume}, \n"
             f"change: {self.day_change}, percentage: {self.change_pct}\n"
+        )
+
+
+class PortfolioHistory(models.Model):
+    portfolio = models.ForeignKey(Portfolio, on_delete=models.CASCADE, related_name='history')
+    trading_date = models.DateField()
+    quantity = models.CharField(max_length=20, default=0.0)
+    stock_history = models.ForeignKey(StockHistory, on_delete=models.CASCADE)
+
+    class Meta:
+        unique_together = ["portfolio", "stock_history"]
+
+    def __str__(self) -> str:
+        return (
+            f"\nPortfolio {self.portfolio.portfolio_name} on {self.trading_date.strftime("%d-%m-%Y")}\n"
+            f"{self.quantity} {self.stock_history.stock.symbol_ric}, last price: {self.stock_history.latest_price}"
         )

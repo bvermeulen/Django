@@ -8,7 +8,7 @@ import django
 
 django.setup()
 from stock.module_stock import TradingData
-from stock.models import Portfolio, StockHistory, Stock, StockSelection
+from stock.models import Portfolio, Stock, StockHistory, PortfolioHistory
 from django.db.utils import IntegrityError
 from howdimain.howdimain_vars import MAX_SYMBOLS_ALLOWED
 from howdimain.utils.tradetime import get_exchange_timezone
@@ -39,22 +39,20 @@ def update_stock_history():
         stock_info += td.get_cash_trade_info(cash_symbols)
         for stock in stock_info:
             stock_object = Stock.objects.get(symbol_ric=stock["symbol"])
-            portfolio_stock_selection = StockSelection.objects.get(
-                portfolio=portfolio, stock=stock_object
-            )
             exchange_timezone = get_exchange_timezone(stock_object.exchange.mic)
             datetime_now_at_exchange = (
                 datetime.datetime.now(ZoneInfo(exchange_timezone))
             ).replace(tzinfo=None)
             datetime_stock = stock["last_trade_time"]
 
-            if datetime_now_at_exchange > datetime_stock + datetime.timedelta(hours=1):
-                with contextlib.suppress(IntegrityError):
+            # check if the stock has not been updated for 4 hours, then it is assumed the exchange is closed
+            if datetime_now_at_exchange > datetime_stock + datetime.timedelta(hours=4):
+                if not StockHistory.objects.filter(
+                    stock=stock_object, last_trading_time=datetime_stock
+                ).exists():
                     StockHistory.objects.create(
-                        stock_selection=portfolio_stock_selection,
-                        last_trading_date=datetime_stock,
-                        symbol=stock["symbol"],
-                        quantity=symbols[stock["symbol"]],
+                        stock=stock_object,
+                        last_trading_time=datetime_stock,
                         open=stock["open"],
                         latest_price=stock["price"],
                         day_low=stock["day_low"],
@@ -63,6 +61,19 @@ def update_stock_history():
                         close_yesterday=stock["close_yesterday"],
                         change_pct=stock["change_pct"],
                         day_change=stock["day_change"],
+                    )
+
+                stock_history = StockHistory.objects.get(
+                    stock=stock_object, last_trading_time=datetime_stock
+                )
+                if not PortfolioHistory.objects.filter(
+                    portfolio=portfolio, stock_history=stock_history
+                ).exists():
+                    PortfolioHistory.objects.create(
+                        portfolio=portfolio,
+                        trading_date=datetime_stock.date(),
+                        quantity=symbols[stock["symbol"]],
+                        stock_history=stock_history,
                     )
                     counter += 1
 

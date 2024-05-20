@@ -1,20 +1,24 @@
 """  module to handle stock. It has two classes:
-        - StockTools, handling initiating the stock database and extracting and creating
-                      portfolios based on data in excel files
+        - StockTools:
+          handling initiating the stock database and extracting and creating
+          portfolios based on data in excel files
           Methods:
             - exchanges_and_currencies
             - symbols
             - create_portfolios
             - extract_portfolios
 
-        - TradingData, method for parsing quotes, extracting symbols and communicates
-                       with stock providing API of Financial Modeling Prep. If a stock
-                       symbol is not found in Financial Modeling Prep it will try to get
-                       the information from an alternative API, defined in another module
+        - TradingData:
+          method for parsing quotes, extracting symbols and communicates
+          with stock providing API of Financial Modeling Prep. If a stock
+          symbol is not found in Financial Modeling Prep it will try to get
+          the information from an alternative API, defined in another module
           Methods:
             - setup
             - get_schema
             - get_stock_trade_info
+            - get_cash_trade_info
+            - get_stock_trade_info_on_date
             - get_stock_intraday_info
             - get_stock_history_info
             - parse_stock_quote
@@ -25,7 +29,6 @@
 import decimal
 from decimal import Decimal as d
 import datetime
-from datetime import timezone
 from collections import namedtuple
 import pandas as pd
 from decouple import config
@@ -35,7 +38,14 @@ from howdimain.utils.plogger import Logger
 from howdimain.utils.tradetime import tradetime_fromtimestamp, tradetime_fromstring
 from howdimain.utils.min_max import get_min, get_max
 from howdimain.howdimain_vars import MAX_SYMBOLS_ALLOWED, URL_FMP
-from stock.models import Person, Exchange, Currency, Stock, Portfolio, StockSelection
+from stock.models import (
+    Person,
+    Exchange,
+    Currency,
+    Stock,
+    Portfolio,
+    StockSelection,
+)
 from stock.module_marketstack import (
     get_stock_marketstack,
     get_intraday_marketstack,
@@ -239,7 +249,7 @@ class StockTools:
 
 
 class TradingData:
-    """methods to handle trading data from various sources
+    """Methods to handle trading data from various sources
     based on FMP and as fall back to Marketstack
     """
 
@@ -402,10 +412,36 @@ class TradingData:
             cash_dict["close_yesterday"] = 1.0
             cash_dict["day_change"] = 0.0
             cash_dict["change_pct"] = 0.0
-            cash_dict["last_trade_time"] = tradetime_fromstring("", cash_dict["exchange_mic"])
+            cash_dict["last_trade_time"] = tradetime_fromstring(
+                "", cash_dict["exchange_mic"]
+            )
             cash_info.append(cash_dict)
 
         return cash_info
+
+    @staticmethod
+    def get_stock_trade_info_on_date(trading_date: str, symbols: list) -> list:
+        stock_info = []
+        for symbol in symbols:
+            stock_dict = {}
+            stock = Stock.objects.get(symbol_ric=symbol)
+            info = stock.history.filter(last_trading_time__date=trading_date).last()
+            stock_dict["currency"] = stock.currency.currency
+            stock_dict["exchange_mic"] = stock.exchange.mic
+            stock_dict["name"] = stock.company
+            stock_dict["symbol"] = stock.symbol_ric
+            stock_dict["open"] = info.open
+            stock_dict["day_high"] = info.day_high
+            stock_dict["day_low"] = info.day_low
+            stock_dict["price"] = info.latest_price
+            stock_dict["volume"] = info.volume
+            stock_dict["close_yesterday"] = info.close_yesterday
+            stock_dict["day_change"] = info.day_change
+            stock_dict["change_pct"] = info.change_pct
+            stock_dict["last_trade_time"] = info.last_trading_time
+            stock_info.append(stock_dict)
+
+        return stock_info
 
     @classmethod
     def get_stock_intraday_info(cls, stock_symbol: str) -> list:
@@ -611,28 +647,41 @@ class TradingData:
         return list(stock_symbols)
 
     @classmethod
-    def get_portfolio_stock_info(cls, portfolio, base_currency):
-        symbols_quantities = portfolio.get_stock()
+    def get_portfolio_stock_info(
+        cls, portfolio: Portfolio, base_currency_name: str, trading_date: str = None
+    ) -> list:
+        if trading_date is None:
+            symbols_quantities = portfolio.get_stock()
+
+        else:
+            symbols_quantities = portfolio.get_stock_on_date(trading_date)
+
         list_symbols = list(symbols_quantities.keys())
+        if trading_date is None:
+            # split cash components
+            cash_symbols = []
+            for cash_stock in cls.cash_stocks:
+                if cash_stock in list_symbols:
+                    list_symbols.remove(cash_stock)
+                    cash_symbols.append(cash_stock)
 
-        # split cash components
-        cash_symbols = []
-        for cash_stock in cls.cash_stocks:
-            if cash_stock in list_symbols:
-                list_symbols.remove(cash_stock)
-                cash_symbols.append(cash_stock)
-
-        stock_trade_info = cls.get_stock_trade_info(list_symbols[0:MAX_SYMBOLS_ALLOWED])
-        stock_trade_info += cls.get_stock_trade_info(
-            list_symbols[MAX_SYMBOLS_ALLOWED : 2 * MAX_SYMBOLS_ALLOWED]
-        )
-        if len(list_symbols) > 2 * MAX_SYMBOLS_ALLOWED:
-            logger.warning(
-                f"number of symbols in portfolio exceed "
-                f"maximum of {2 * MAX_SYMBOLS_ALLOWED}"
+            stock_trade_info = cls.get_stock_trade_info(
+                list_symbols[0:MAX_SYMBOLS_ALLOWED]
             )
-        stock_trade_info += cls.get_cash_trade_info(cash_symbols)
-        exchange_rate_euro = Currency.objects.get(currency="EUR").usd_exchange_rate
+            stock_trade_info += cls.get_stock_trade_info(
+                list_symbols[MAX_SYMBOLS_ALLOWED : 2 * MAX_SYMBOLS_ALLOWED]
+            )
+            if len(list_symbols) > 2 * MAX_SYMBOLS_ALLOWED:
+                logger.warning(
+                    f"number of symbols in portfolio exceed "
+                    f"maximum of {2 * MAX_SYMBOLS_ALLOWED}"
+                )
+            stock_trade_info += cls.get_cash_trade_info(cash_symbols)
+
+        else:
+            stock_trade_info = cls.get_stock_trade_info_on_date(
+                trading_date, list_symbols
+            )
 
         stock_info = []
         for stock in stock_trade_info:
@@ -640,7 +689,7 @@ class TradingData:
 
             exchange_rate = Currency.objects.get(
                 currency=stock["currency"]
-            ).usd_exchange_rate
+            ).get_exchangerate_on_date(trading_date)
 
             try:
                 value = d(stock["quantity"]) * d(stock["price"]) / d(exchange_rate)
@@ -652,15 +701,18 @@ class TradingData:
                 value = "n/a"
                 value_change = "n/a"
 
-            if base_currency == "USD" or value == "n/a":
+            if base_currency_name == "USD" or value == "n/a":
                 pass
 
-            elif base_currency == "EUR":
+            elif base_currency_name == "EUR":
+                exchange_rate_euro = Currency.objects.get(
+                    currency="EUR"
+                ).get_exchangerate_on_date(trading_date)
                 value *= d(exchange_rate_euro)
                 value_change *= d(exchange_rate_euro)
 
             else:
-                logger.warning(f"Invalid base currency {base_currency}")
+                logger.warning(f"Invalid base currency {base_currency_name}")
 
             stock["value"] = str(value)
             stock["value_change"] = str(value_change)
@@ -689,8 +741,8 @@ class TradingData:
         return str(total_value), str(total_value_change)
 
     @staticmethod
-    def get_usd_euro_exchangerate(currency):
-        exchange_rate = float(Currency.objects.get(currency="EUR").get_exchangerate())
+    def get_usd_euro_exchangerate(currency: str, trading_date: str=None):
+        exchange_rate = float(Currency.objects.get(currency="EUR").get_exchangerate_on_date(trading_date))
         if currency == "USD":
             return f"USD/EUR: {exchange_rate:.4f}"
 
@@ -738,7 +790,6 @@ class TradingData:
         return stock_news
 
     @staticmethod
-    # TODO move to models
     def get_company_name(stock_symbol):
         try:
             return Stock.objects.get(symbol_ric=stock_symbol).company

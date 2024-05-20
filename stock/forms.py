@@ -33,12 +33,13 @@ class StockQuoteForm(forms.Form):
             choices=STOCK_DETAILS,
             required=False,
         )
-
         self.fields["datepicked"] = forms.DateField(
             input_formats=["%d/%m/%Y"],
             widget=FengyuanChenDatePickerInput(attrs={'size': '8'}),
-            required=True,
+            required=False,
         )
+        self.fields["datepicked_button"] = forms.CharField(required=False)
+
 
 class PortfolioForm(forms.Form):
 
@@ -75,3 +76,9 @@ class PortfolioForm(forms.Form):
             choices=STOCK_DETAILS,
             required=True,
         )
+        self.fields["datepicked"] = forms.DateField(
+            input_formats=["%d/%m/%Y"],
+            widget=FengyuanChenDatePickerInput(attrs={"size": "8"}),
+            required=False,
+        )
+        self.fields["datepicked_button"] = forms.CharField(required=False)

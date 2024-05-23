@@ -38,8 +38,9 @@
 {% block content %}
 <form id="id_portfolio" method="post">
   {% csrf_token %}
-  <a style="display: none">{{ form.new_portfolio }} {{ form.portfolio_name }}
-    {{ form.portfolios }} {{ form.currencies }} {{ form.symbol }} {{ form.stockdetails }}</a>
+  <a style="display: none">{{ form.new_portfolio }} {{ form.portfolio_name }} {{ form.portfolios }}
+    {{ form.currencies }} {{ form.symbol }} {{ form.stockdetails }} {{ form.datepicked_pressed }}
+  </a>
 
   <div class="d-inline-flex float-left">
     <div class="dropdown">
@@ -74,6 +75,9 @@
         {% endfor %}
       </div>
     </div>
+    <div class="ml-1">
+      {{ form.datepicked }}
+    </div>
 
     {% if form.portfolio_name.value != '' %}
     <button class="btn btn-outline-primary btn-sm mx-1" name="btn1_pressed" value="add_symbol"
@@ -102,13 +106,6 @@
         {% endif %}
         {% endfor %}
       </div>
-    </div>
-    <div class="ml-1">
-      {{ form.datepicked }}
-    </div>
-    <div>
-      <button type="submit" class="btn btn-outline-primary btn-sm ml-1" name="datepicked_button"
-        value="true">Submit</button>
     </div>
     {% endif %}
   </div>
@@ -164,9 +161,7 @@
           <td style="width: 10%; color:{{ stock.font_color }}">{{ stock.value_change }}</td>
           <td width="10%">
             <button class="btn btn-outline-secondary btn-sm" name="change_qty_btn_pressed" value="{{ stock.symbol }}, "
-              onclick="return ChangeQuantity('{{ stock.name }}',
-                                                         '{{ stock.quantity }}',
-                                                         '{{ change_btn_counter }}')">Change</button>
+              onclick="return ChangeQuantity('{{ stock.name }}', '{{ stock.quantity }}', '{{ change_btn_counter }}')">Change</button>
           </td>
           {% increment change_btn_counter as change_btn_counter %}
 
@@ -285,6 +280,11 @@
       return false;
     }
   }
+
+  $('#id_datepicked').change(function () {
+    form.datepicked_pressed.value = 'true';
+    form.submit()
+  })
 
 </script>
 {% endblock %}

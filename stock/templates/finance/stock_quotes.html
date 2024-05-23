@@ -39,8 +39,8 @@
 
 <form id="id_stockquote" method="post">
   {% csrf_token %}
-  <a style="display: none">{{ form.quote_string }} {{ form.stockdetails }}
-    {{ form.markets }} {{form.selected_portfolio }}</a>
+  <a style="display: none">{{ form.quote_string }} {{ form.stockdetails }} {{ form.portfolios }}
+    {{ form.markets }} {{ form.datepicked_pressed }}</a>
 
   <div class="d-inline-flex float-left">
     <div>
@@ -48,25 +48,36 @@
         onclick="return SubmitQuoteString('{{ form.quote_string.value }}')">Quote</button>
     </div>
 
-    <div>
-      <button class="btn dropdown-toggle btn-outline-primary btn-sm ml-1" data-toggle="dropdown">Portfolio's</button>
-      <ul class="dropdown-menu scroll" style="height:40%;">
-        {% for portfolio in portfolios %}
-        <li><input type="submit" class="btn btn-sm item_select" name="selected_portfolio"
-            value="{{ portfolio }}"></input></li>
+    <div class="dropdown">
+      <button type="button" class="dropdown-toggle btn btn-outline-primary btn-sm ml-1">
+        {% if form.portfolios.value == '' %}
+        Portfolio
+        {% else %}
+        {{ form.portfolios.value }}
+        {% endif %}
+      </button>
+      <div class="dropdown-content">
+        {% for portfolio in form.portfolios %}
+        {% if not portfolio.data.selected %}
+        <button class="btn btn-link my-0" value="{{ portfolio.data.value}}" name="{{ portfolio.data.name }}">
+          <a>{{ portfolio.choice_label }}</a></button>
+        {% endif %}
         {% endfor %}
-      </ul>
+      </div>
+    </div>
+    <div class="ml-1">
+      {{ form.datepicked }}
     </div>
 
     <div>
-      <button class="btn dropdown-toggle btn-outline-primary btn-sm mx-1" data-toggle="dropdown">Markets</button>
+      <button class="btn dropdown-toggle btn-outline-primary btn-sm ml-1" data-toggle="dropdown">Markets</button>
       <ul class="dropdown-menu scroll" style="height:40%;">
         {{ form.markets|as_crispy_field }}
       </ul>
     </div>
 
     <div class="dropdown">
-      <button type="button" class="btn dropdown-toggle btn-outline-primary btn-sm">
+      <button type="button" class="btn dropdown-toggle btn-outline-primary btn-sm ml-1">
         {{ form.stockdetails.value }}
       </button>
       <div class="dropdown-content">
@@ -80,23 +91,8 @@
     </div>
 
     {% if user.is_authenticated %}
-    <div class="ml-1">
-      {{ form.datepicked }}
-    </div>
-    <div>
-      <button type="submit" class="btn btn-outline-primary btn-sm ml-1" name="datepicked_button"
-        value="true">Submit</button>
-    </div>
-    <div>
-      <button type="button" class="btn btn-outline-primary btn-sm ml-1"
+    <button type="button" class="btn btn-outline-primary btn-sm ml-1"
       onclick="window.location.href='{% url 'portfolio' %}'">My portfolio</button>
-    </div>
-  </div>
-  {% endif %}
-
-  <div class="responsive-float">
-    {% if form.selected_portfolio.value %}
-    <strong><a>Portfolio:</a><a class="ml-1">{{ form.selected_portfolio.value }}</a></strong>
     {% endif %}
   </div>
 
@@ -170,6 +166,11 @@
       return false;
     }
   }
+
+  $('#id_datepicked').change(function () {
+    form.datepicked_pressed.value = 'true';
+    form.submit();
+  })
 
 </script>
 {% endblock %}

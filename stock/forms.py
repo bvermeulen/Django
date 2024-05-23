@@ -1,12 +1,20 @@
 from django import forms
 from .widgets import FengyuanChenDatePickerInput
+from stock.models import Person
 from howdimain.howdimain_vars import BASE_CURRENCIES, STOCK_DETAILS
 from .models import Exchange
 
 
+try:
+    default_user = Person.objects.get(username="default_user")
+
+except Person.DoesNotExist:
+    default_user = None
+
+
 class StockQuoteForm(forms.Form):
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, user=None, **kwargs):
         super(StockQuoteForm, self).__init__(*args, **kwargs)
 
         self.fields["quote_string"] = forms.CharField(
@@ -17,28 +25,39 @@ class StockQuoteForm(forms.Form):
 
         self.fields["selected_portfolio"] = forms.CharField(required=False)
 
-        choices = [
+        portfolio_choices = default_user.get_portfolio_names() if default_user else []
+        if user and user.is_authenticated:
+            portfolio_choices += user.get_portfolio_names()
+        self.fields["portfolios"] = forms.ChoiceField(
+            widget=forms.Select(),
+            choices=[(p, p) for p in portfolio_choices],
+            required=False,
+        )
+
+        exchange_choices = [
             (exchange.mic, exchange.name)
             for exchange in Exchange.objects.all().order_by("name")
         ]
-
         self.fields["markets"] = forms.MultipleChoiceField(
             widget=forms.CheckboxSelectMultiple(),
-            choices=choices,
-            required=False,
+            choices=exchange_choices,
+            required=True,
             label="",
         )
+
         self.fields["stockdetails"] = forms.ChoiceField(
             widget=forms.Select(),
             choices=STOCK_DETAILS,
-            required=False,
+            required=True,
         )
+
         self.fields["datepicked"] = forms.DateField(
             input_formats=["%d/%m/%Y"],
-            widget=FengyuanChenDatePickerInput(attrs={'size': '8'}),
-            required=False,
+            widget=FengyuanChenDatePickerInput(attrs={"size": "8"}),
+            required=True,
         )
-        self.fields["datepicked_button"] = forms.CharField(required=False)
+
+        self.fields["datepicked_pressed"] = forms.CharField(required=False)
 
 
 class PortfolioForm(forms.Form):
@@ -61,9 +80,12 @@ class PortfolioForm(forms.Form):
         self.fields["change_qty_btn_pressed"] = forms.CharField(required=False)
         self.fields["delete_symbol_btn_pressed"] = forms.CharField(required=False)
 
+        portfolio_choices = (
+            user.get_portfolio_names() if user and user.is_authenticated else []
+        )
         self.fields["portfolios"] = forms.ChoiceField(
             widget=forms.Select(),
-            choices=list(zip(user.get_portfolio_names(), user.get_portfolio_names())),
+            choices=[(p, p) for p in portfolio_choices],
             required=False,
         )
         self.fields["currencies"] = forms.ChoiceField(
@@ -79,6 +101,6 @@ class PortfolioForm(forms.Form):
         self.fields["datepicked"] = forms.DateField(
             input_formats=["%d/%m/%Y"],
             widget=FengyuanChenDatePickerInput(attrs={"size": "8"}),
-            required=False,
+            required=True,
         )
-        self.fields["datepicked_button"] = forms.CharField(required=False)
+        self.fields["datepicked_pressed"] = forms.CharField(required=False)

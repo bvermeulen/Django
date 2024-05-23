@@ -26,6 +26,7 @@ LEFT_ARROW = "\u25C0"
 URL_ALPHAVANTAGE = "www.alphavantage.co"
 URL_WORLDTRADE = "www.worldtradedata.com"
 URL_FMP = "financialmodelingprep.com"
+MARKETS = ["XNAS", "XNYS", "XAMS", "INDEX"]
 BASE_CURRENCIES = [("EUR", "EUR"), ("USD", "USD")]
 STOCK_DETAILS = [("Graphs", "Graphs"), ("News", "News"), ("Press", "Press")]
 CARET_UP = "\u25B2"  # up triangle

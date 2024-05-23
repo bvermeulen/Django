@@ -46,6 +46,7 @@ class PortfolioView(View):
         stockdetail = request.session.get("stockdetail", STOCK_DETAILS[0][0])
         selected_portfolio = request.session.get("selected_portfolio", "")
         datepicked = datetime.datetime.now().strftime("%d/%m/%Y")
+        request.session["datepicked"] = datepicked
         user = request.user
         # add Person class to user
         if user.is_authenticated:
@@ -53,22 +54,18 @@ class PortfolioView(View):
 
         portfolio_name = ""
         stocks = []
-
         if selected_portfolio:
             try:
                 self.portfolio = Portfolio.objects.get(
                     user=user, portfolio_name=selected_portfolio
                 )
                 portfolio_name = self.portfolio.portfolio_name
-                stocks = self.get_stock_info(GetStock.YES, currency)
+                stocks = self.get_stock_info(request, GetStock.YES, currency)
                 request.session["stock_info"] = json.dumps(
                     stocks, cls=DjangoJSONEncoder
                 )
             except Portfolio.DoesNotExist:
-                selected_portfolio = ""
-
-        else:
-            pass
+                pass
 
         form = self.portfolio_form(
             user=user,
@@ -95,17 +92,17 @@ class PortfolioView(View):
         return render(request, self.template_name, context)
 
     def post(self, request):
-        self.request = request
-        self.user = self.request.user
+        user = request.user
         # add Person class to user
-        if self.user.is_authenticated:
-            self.user.__class__ = Person
+        if user.is_authenticated:
+            user.__class__ = Person
 
         date_today = datetime.datetime.now().date().strftime("%d/%m/%Y")
         currency = request.session.get("currency", BASE_CURRENCIES[0][0])
+        stockdetail = request.session.get("stockdetail", STOCK_DETAILS[0][0])
         datepicked = request.session.get("datepicked", date_today)
 
-        form = self.portfolio_form(self.request.POST, user=self.user)
+        form = self.portfolio_form(request.POST, user=user)
         if form.is_valid():
             previous_currency = currency
             previous_datepicked = datepicked
@@ -141,7 +138,7 @@ class PortfolioView(View):
             )
             try:
                 self.portfolio = Portfolio.objects.get(
-                    user=self.user, portfolio_name=self.selected_portfolio
+                    user=user, portfolio_name=self.selected_portfolio
                 )
             except Portfolio.DoesNotExist:
                 self.portfolio = None
@@ -151,7 +148,7 @@ class PortfolioView(View):
 
             match self.btn1_pressed:
                 case "new_portfolio":
-                    get_stock = self.create_new_portfolio
+                    get_stock = self.create_new_portfolio(user)
 
                 case "rename_portfolio":
                     get_stock = self.rename_portfolio()
@@ -186,7 +183,7 @@ class PortfolioView(View):
                 if datepicked != date_today
                 else None
             )
-            stocks = self.get_stock_info(get_stock, currency, dateval_query)
+            stocks = self.get_stock_info(request, get_stock, currency, dateval_query)
             request.session["stock_info"] = json.dumps(stocks, cls=DjangoJSONEncoder)
             request.session["selected_portfolio"] = self.selected_portfolio
             request.session["currency"] = currency
@@ -194,7 +191,7 @@ class PortfolioView(View):
             request.session["datepicked"] = datepicked
 
             form = self.portfolio_form(
-                user=self.user,
+                user=user,
                 initial={
                     "portfolio_name": self.portfolio_name,
                     "portfolios": self.selected_portfolio,
@@ -205,12 +202,12 @@ class PortfolioView(View):
                 },
             )
             logger.info(
-                f"user {self.user} [ip: {get_client_ip(self.request)}] "
+                f"user {user} [ip: {get_client_ip(request)}] "
                 f"views {self.selected_portfolio}"
             )
         else:
             form = self.portfolio_form(
-                user=self.user,
+                user=user,
                 initial={
                     "portfolios": "",
                     "portfolio_name": "",
@@ -230,18 +227,18 @@ class PortfolioView(View):
             "stocks": stocks,
             "totals": totals_values,
             "source": source,
-            "exchangerate": self.td.get_usd_euro_exchangerate(currency, dateval_query),
+            "exchangerate": self.td.get_usd_euro_exchangerate(currency),
             "data_provider_url": self.data_provider_url,
         }
-        return render(self.request, self.template_name, context)
+        return render(request, self.template_name, context)
 
-    def create_new_portfolio(self) -> GetStock:
+    def create_new_portfolio(self, user: Person) -> GetStock:
         if not self.new_portfolio:
             return GetStock.NO
 
         try:
             self.portfolio = Portfolio.objects.create(
-                user=self.user, portfolio_name=self.new_portfolio
+                user=user, portfolio_name=self.new_portfolio
             )
             self.selected_portfolio = self.new_portfolio
             return GetStock.EMPTY
@@ -369,7 +366,7 @@ class PortfolioView(View):
         return GetStock.YES
 
     def get_stock_info(
-        self, get_stock: GetStock, currency: str, datepicked: str = None
+        self, request, get_stock: GetStock, currency: str, datepicked: str = None
     ):
         stocks = []
         if not self.portfolio:
@@ -380,10 +377,13 @@ class PortfolioView(View):
                 stocks = self.td.get_portfolio_stock_info(
                     self.portfolio, currency, trading_date=datepicked
                 )
+                request.session["stock_info"] = json.dumps(
+                    stocks, cls=DjangoJSONEncoder
+                )
 
             case GetStock.NO:
                 try:
-                    stocks = json.loads(self.request.session.get("stock_info"))
+                    stocks = json.loads(request.session.get("stock_info"))
                 except TypeError:
                     stocks = self.td.get_portfolio_stock_info(
                         self.portfolio, currency, trading_date=datepicked

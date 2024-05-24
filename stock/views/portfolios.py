@@ -108,7 +108,8 @@ class PortfolioView(View):
             previous_datepicked = datepicked
             form_data = form.cleaned_data
             currency = form_data.get("currencies")
-            datepicked = form_data.get("datepicked").strftime("%d/%m/%Y")
+            if (dp := form_data.get("datepicked").strftime("%d/%m/%Y")) != '01/01/1970':
+                datepicked = dp
             stockdetail = form_data.get("stockdetails")
             self.selected_portfolio = form_data.get("portfolios")
             self.portfolio_name = form_data.get("portfolio_name")
@@ -117,7 +118,6 @@ class PortfolioView(View):
             self.btn1_pressed = form_data.get("btn1_pressed")
             self.change_qty_btn_pressed = form_data.get("change_qty_btn_pressed")
             self.delete_symbol_btn_pressed = form_data.get("delete_symbol_btn_pressed")
-
             self.previous_selected = request.session.get("selected_portfolio")
             datepicked = (
                 datepicked
@@ -218,6 +218,7 @@ class PortfolioView(View):
                 },
             )
             stocks = []
+            dateval_query = None
 
         totals_values = format_totals_values(*self.td.calculate_stocks_value(stocks))
         stocks = add_display_tokens(stocks)
@@ -227,7 +228,9 @@ class PortfolioView(View):
             "stocks": stocks,
             "totals": totals_values,
             "source": source,
-            "exchangerate": self.td.get_usd_euro_exchangerate(currency),
+            "exchangerate": self.td.get_usd_euro_exchangerate(
+                currency, trading_date=dateval_query
+            ),
             "data_provider_url": self.data_provider_url,
         }
         return render(request, self.template_name, context)

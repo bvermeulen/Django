@@ -75,16 +75,18 @@
         {% endfor %}
       </div>
     </div>
+
+    {% if form.portfolio_name.value != '' %}
     <div class="ml-1">
       {{ form.datepicked }}
     </div>
+    <button class="btn btn-outline-primary btn-sm ml-1" name="btn1_pressed" value="add_symbol"
+    onclick="return AddSymbol('{{ form.symbol.value }}')">
+    Add symbol
+    </button>
 
-    {% if form.portfolio_name.value != '' %}
-    <button class="btn btn-outline-primary btn-sm mx-1" name="btn1_pressed" value="add_symbol"
-      onclick="return AddSymbol('{{ form.symbol.value }}')">
-      Add symbol</button>
     <div class="dropdown">
-      <button type="button" class="btn dropdown-toggle btn-outline-primary btn-sm">
+      <button type="button" class="btn dropdown-toggle btn-outline-primary btn-sm ml-1">
         {{ form.stockdetails.value }}</button>
       <div class="dropdown-content">
         {% for stockdetail in form.stockdetails %}
@@ -95,8 +97,9 @@
         {% endfor %}
       </div>
     </div>
+
     <div class="dropdown">
-      <button type="button" class="btn dropdown-toggle btn-outline-primary btn-sm mx-1">
+      <button type="button" class="btn dropdown-toggle btn-outline-primary btn-sm ml-1">
         {{ form.currencies.value }}</button>
       <div class="dropdown-content">
         {% for currency in form.currencies %}
@@ -107,6 +110,8 @@
         {% endfor %}
       </div>
     </div>
+    {% else %}
+    <input type="hidden" id="id_datepicked" name="datepicked" value="01/01/1970">
     {% endif %}
   </div>
 

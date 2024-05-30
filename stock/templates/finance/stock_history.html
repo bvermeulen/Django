@@ -11,13 +11,13 @@
     Stock history
   </a>
   <ul class="dropdown-menu">
-    <li><a class="dropdown-item" href="{% url 'stock_intraday' source stock_symbol %}">Latest stock trading</a></li>
+    <li><a class="dropdown-item btn-link" href="{% url 'stock_intraday' source stock_symbol %}">Latest stock trading</a></li>
     {% if source == 'quotes' %}
-    <li><a class="dropdown-item" href="{% url 'stock_quotes' %}">Quotes</a></li>
+    <li><a class="dropdown-item btn-link" href="{% url 'stock_quotes' %}">Quotes</a></li>
     {% else %}
-    <li><a class="dropdown-item" href="{% url 'portfolio' %}">Portfolio</a></li>
+    <li><a class="dropdown-item btn-link" href="{% url 'portfolio' %}">Portfolio</a></li>
     {% endif %}
-    <li><a class="dropdown-item" href="{% url 'home' %}">Home</a></li>
+    <li><a class="dropdown-item btn-link" href="{% url 'home' %}">Home</a></li>
   </ul>
 </li>
 {% endblock %}

@@ -12,7 +12,7 @@
     Stock quotes
   </a>
   <ul class="dropdown-menu">
-    <li><a class="dropdown-item" href="{% url 'home' %}">Home</a></li>
+    <li><a class="dropdown-item btn-link" href="{% url 'home' %}">Home</a></li>
   </ul>
 </li>
 {% endblock %}
@@ -40,7 +40,7 @@
       <div class="dropdown-content">
         {% for portfolio in form.portfolios %}
         {% if not portfolio.data.selected %}
-        <button class="btn btn-link text-decoration-none text-nowrap" value="{{ portfolio.data.value}}"
+        <button class="btn btn-link text-nowrap" value="{{ portfolio.data.value}}"
           name="{{ portfolio.data.name }}">
           <a>{{ portfolio.choice_label }}</a>
         </button>
@@ -60,7 +60,7 @@
       <div class="dropdown-content">
         {% for stockdetail in form.stockdetails %}
         {% if not stockdetail.data.selected %}
-        <button class="btn btn-link text-decoration-none text-nowrap" value="{{ stockdetail.data.value }}"
+        <button class="btn btn-link text-nowrap" value="{{ stockdetail.data.value }}"
           name="{{ stockdetail.data.name }}">{{stockdetail.choice_label }}</button>
         {% endif %}
         {% endfor %}
@@ -94,13 +94,13 @@
         {% for stock in stock_info %}
         <tr>
           {% if form.stockdetails.value == form.stockdetails.field.choices.0.0 %}
-          <td width="17%"><a href="{% url 'stock_intraday' source stock.symbol %}">{{ stock.name|truncatechars:20 }}</a>
+          <td width="17%"><a class="btn-link" href="{% url 'stock_intraday' source stock.symbol %}">{{ stock.name|truncatechars:20 }}</a>
           </td>
           {% elif form.stockdetails.value == form.stockdetails.field.choices.1.0 %}
-          <td width="17%"><a href="{% url 'stock_news' source stock.symbol %}">{{ stock.name|truncatechars:20 }}</a>
+          <td width="17%"><a class="btn-link" href="{% url 'stock_news' source stock.symbol %}">{{ stock.name|truncatechars:20 }}</a>
           </td>
           {% elif form.stockdetails.value == form.stockdetails.field.choices.2.0 %}
-          <td width="17%"><a href="{% url 'stock_press' source stock.symbol %}">{{ stock.name|truncatechars:20 }}</a>
+          <td width="17%"><a class="btn-link" href="{% url 'stock_press' source stock.symbol %}">{{ stock.name|truncatechars:20 }}</a>
           </td>
           {% endif %}
           <td width="10%">{{ stock.symbol }}</td>

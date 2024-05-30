@@ -12,7 +12,7 @@
 		News
 	</a>
 	<ul class="dropdown-menu">
-		<li><a class="dropdown-item" href="{% url 'home' %}">Home</a></li>
+		<li><a class="dropdown-item btn-link" href="{% url 'home' %}">Home</a></li>
 	</ul>
 </li>
 {% endblock %}
@@ -46,8 +46,9 @@
 		<ul class="dropdown-menu container dropdown-container"
 			style="height:40%; overflow:hidden; overflow-y:scroll; overflow-x:scroll">
 			{% for item, title in news_titles %}
-			<li><button type="submit" class="btn btn-sm item_select" name="title_btn" value="{{ item }}">{{ title|safe
-					}}</button></li>
+			<li><button type="submit" class="btn btn-sm item_select" name="title_btn" value="{{ item }}">
+				{{ title|safe }}
+			</button></li>
 			{% endfor %}
 		</ul>
 
@@ -69,17 +70,17 @@
 			<card class="card-body">
 				<h2 class="card-title" style="background-color:lightgrey">{{ news_title|safe }}</h2>
 
-				<a style="padding:0px" class="btn btn-link text-decoration-none" href="{{ news_link }}" target="_blank">link</a>
-				<input style="padding:0px" type="submit" class="btn btn-link text-decoration-none" id="id_scroll"
+				<a style="padding:0px" class="btn btn-link" href="{{ news_link }}" target="_blank">link</a>
+				<input style="padding:0px" type="submit" class="btn btn-link" id="id_scroll"
 					name="control_btn" value="{{ controls.scroll }}"></input>
 
 				{% if show_banner_button %}
-				<input style="padding:0px" type="submit" class="hideOnMobile btn btn-link text-decoration-none" id="id_banner"
+				<input style="padding:0px" type="submit" class="hideOnMobile btn btn-link" id="id_banner"
 					name="control_btn" value="{{ controls.banner }}"></input>
 				{% endif %}
 
 				{% if user.is_authenticated %}
-				<input style="padding:0px" type="submit" class="btn btn-link text-decoration-none" name="control_btn"
+				<input style="padding:0px" type="submit" class="btn btn-link" name="control_btn"
 					value="{{ controls.store }}"></input>
 				{% endif %}
 				<a style="float: right"><small style="font-size:smaller; vertical-align: sub">{{ status }}</small></a>

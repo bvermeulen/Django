@@ -20,9 +20,9 @@
     {{ topic.topic_subject }}
   </a>
   <ul class="dropdown-menu">
-    <li><a class="dropdown-item" href="{% url 'board_topics' topic.board.pk %}">{{ topic.board.name }}</a></li>
-    <li><a class="dropdown-item" href="{% url 'boards' %}">Boards</a></li>
-    <li><a class="dropdown-item" href="{% url 'home' %}">Home</a></li>
+    <li><a class="dropdown-item btn-link" href="{% url 'board_topics' topic.board.pk %}">{{ topic.board.name }}</a></li>
+    <li><a class="dropdown-item btn-link" href="{% url 'boards' %}">Boards</a></li>
+    <li><a class="dropdown-item btn-link" href="{% url 'home' %}">Home</a></li>
   </ul>
 </li>
 {% endblock %}
@@ -86,4 +86,11 @@
 <script type="text/javascript" src="{% static 'plugins/js/emojis.min.js' %}"></script>
 <script type="text/javascript" src="{% static 'martor/js/martor.bootstrap.min.js' %}"></script>
 <script type="text/javascript" src="{% static 'js/board.js' %}"></script>
+<script>
+  /* apply coding highlighting
+  */
+  $('pre').each(function (i, block) {
+    hljs.highlightBlock(block);
+  });
+</script>
 {% endblock %}

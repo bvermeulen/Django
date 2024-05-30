@@ -8,7 +8,7 @@
     Boards
   </a>
   <ul class="dropdown-menu">
-    <li><a class="dropdown-item" href="{% url 'home' %}">Home</a></li>
+    <li><a class="dropdown-item btn-link" href="{% url 'home' %}">Home</a></li>
   </ul>
 </li>
 {% endblock %}
@@ -27,7 +27,7 @@
     {% for board in boards %}
     <tr>
       <td>
-        <a href="{% url 'board_topics' board.pk %}">{{board.name}}</a>
+        <a class="btn-link" href="{% url 'board_topics' board.pk %}">{{board.name}}</a>
         <small class="text-muted d-block">{{board.description}}</small>
       </td>
       <td class="align-middle">{{board.get_posts_count}}</td>
@@ -36,7 +36,7 @@
         {% with post=board.get_last_post %}
         {% if post %}
         <small>
-          <a href="{% url 'topic_posts' board.pk post.topic.pk %}">
+          <a class="btn-link" href="{% url 'topic_posts' board.pk post.topic.pk %}">
             By {{ post.created_by.username }} - {{ post.created_at|naturaltime }}
           </a>
         </small>

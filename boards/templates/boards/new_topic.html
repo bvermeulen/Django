@@ -18,9 +18,9 @@
     New topic
   </a>
   <ul class="dropdown-menu">
-    <li><a class="dropdown-item" href="{% url 'board_topics' board.pk %}">{{ board.name }}</a></li>
-    <li><a class="dropdown-item" href="{% url 'boards' %}">Boards</a></li>
-    <li><a class="dropdown-item" href="{% url 'home' %}">Home</a></li>
+    <li><a class="dropdown-item btn-link" href="{% url 'board_topics' board.pk %}">{{ board.name }}</a></li>
+    <li><a class="dropdown-item btn-link" href="{% url 'boards' %}">Boards</a></li>
+    <li><a class="dropdown-item btn-link" href="{% url 'home' %}">Home</a></li>
   </ul>
 </li>
 {% endblock %}
@@ -32,10 +32,10 @@
     <button type="submit" class="btn btn-primary btn-sm">Submit new topic</button>
     <button class="btn dropdown-toggle btn-primary btn-sm" data-bs-toggle="dropdown">Allowed editors<span
         class="caret"></span></button>
-    <ul class="dropdown-menu" style="height:40%; overflow:hidden; overflow-y:scroll;">
+    <ul class="dropdown-menu ps-1" style="height:40%; overflow:hidden; overflow-y:scroll;">
       {{ form2.allowed_editor|as_crispy_field }}
     </ul>
-    <a href="{% url 'board_topics' board.pk %}" class="btn btn-outline-primary btn-sm" role="button">Cancel</a>
+    <a class="btn btn-outline-primary btn-sm" href="{% url 'board_topics' board.pk %}" role="button">Cancel</a>
   </div>
   <div class="mb-4">
     {{ form1.topic_subject|as_crispy_field }}

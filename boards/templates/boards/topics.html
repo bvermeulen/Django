@@ -12,8 +12,8 @@
     {{ board.name }}
   </a>
   <ul class="dropdown-menu">
-    <li><a class="dropdown-item" href="{% url 'boards' %}">Boards</a></li>
-    <li><a class="dropdown-item" href="{% url 'home' %}">Home</a></li>
+    <li><a class="dropdown-item btn-link" href="{% url 'boards' %}">Boards</a></li>
+    <li><a class="dropdown-item btn-link" href="{% url 'home' %}">Home</a></li>
   </ul>
 </li>
 {% endblock %}
@@ -39,15 +39,15 @@
     <tr>
       <td>
         <p class="mb-0">
-          <a href="{{ topic_url }}">{{ topic.topic_subject }}</a>
+          <a class="btn-link" href="{{ topic_url }}">{{ topic.topic_subject }}</a>
         </p>
         <small class="text-muted">
           Pages:
           {% for i in topic.get_page_range %}
-          <a href="{{ topic_url }}?page={{ i }}">{{ i }}</a>
+          <a class="btn-link" href="{{ topic_url }}?page={{ i }}">{{ i }}</a>
           {% endfor %}
           {% if topic.has_many_pages %}
-          ... <a href="{{ topic_url }}?page={{ topic.get_page_count }}">Last Page</a>
+          ... <a class="btn-link" href="{{ topic_url }}?page={{ topic.get_page_count }}">Last Page</a>
           {% endif %}
         </small>
       </td>
@@ -64,3 +64,6 @@
 <br>
 <br>
 {% endblock %}
+
+{% block javascript %}{% endblock %}
+

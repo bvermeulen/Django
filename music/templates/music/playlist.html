@@ -7,46 +7,46 @@
 {% block title %}Playlist{% endblock %}
 
 {% block stylesheet %}
-  <link rel="stylesheet" type="text/css" href="{% static 'css/container-styles.css' %}">
-  <link rel="stylesheet" href="{% static 'css/swiper-bundle.css' %}">
-  <style>
+<link rel="stylesheet" type="text/css" href="{% static 'css/container-styles.css' %}">
+<link rel="stylesheet" href="{% static 'css/swiper-bundle.css' %}">
+<style>
   #slide:hover {
     transform: scale(1.02);
   }
-  </style>
+</style>
 {% endblock %}
 
 {% block navbutton %}
-<ul class="navbar-nav mr-auto">
 <li class="nav-item dropdown">
-        <a class="nav-link dropdown-toggle mr-1" href="#" data-toggle="dropdown">Playlist</a>
-        <div class="dropdown-menu dropdown-menu-left">
-          <a class="dropdown-item" href="{% url 'play_top_tracks' %}">Top tracks</a>
-        <div class="dropdown-menu dropdown-menu-left">
-            <a class="dropdown-item" href="{% url 'home' %}">Home</a>
-        </div>
-    </li>
-</ul>
+  <a class="nav-link dropdown-toggle me-auto" href="#" role="button" data-bs-toggle="dropdown">
+    Playlist
+  </a>
+  <ul class="dropdown-menu">
+    <li><a class="dropdown-item" href="{% url 'play_top_tracks' %}">Top tracks</a></li>
+    <li><a class="dropdown-item" href="{% url 'home' %}">Home</a></li>
+  </ul>
+</li>
 {% endblock %}
 
 {% block content %}
 <form id="id_playlist" method="post">
   {% csrf_token %}
   <div class="netflix-slider">
-    <h2 class="mb-5">Playlist {{ user.first_name }}</h2>
+    <h2 class="mb-4">Playlist {{ user.first_name }}</h2>
     <div class="swiper-container">
       <div class="swiper-wrapper">
         {% for track in track_list %}
-          <div id="slide" class="swiper-slide">
-            <h5>{{ track.track_name }}</h5>
-              <iframe src="https://open.spotify.com/embed/track/{{ track.track_id }}" width="100%" height="300" frameborder="0"
-              allowtransparency="true" allow="encrypted-media"></iframe>
-            <div style="display:flex">
-                <button style="float: left" type="submit" class="btn btn-link btn-sm" name="track_pk" value="{{ track.pk }}">
-                  delete from playlist
-                </button>
-            </div>
+        <div id="slide" class="swiper-slide">
+          <h5>{{ track.track_name }}</h5>
+          <iframe src="https://open.spotify.com/embed/track/{{ track.track_id }}" width="100%" height="300"
+            frameborder="0" allowtransparency="true" allow="encrypted-media"></iframe>
+          <div style="display:flex">
+            <button style="float: left" type="submit" class="btn btn-link btn-sm" name="track_pk"
+              value="{{ track.pk }}">
+              delete from playlist
+            </button>
           </div>
+        </div>
         {% endfor %}
       </div>
       <!-- Add Pagination -->

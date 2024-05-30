@@ -52,10 +52,10 @@ class AddToTopicTests(AddToTopicTestCase):
     def test_form_inputs(self):
         '''
         The view must contain:
-        <input: csrf, allowed_editor, post_subject, markdown-image-upload
+        <input: csrf (2x), allowed_editor, post_subject, markdown-image-upload
         <textarea: messege
         '''
-        self.assertContains(self.response, '<input', 4)
+        self.assertContains(self.response, '<input', 5)
         self.assertContains(self.response, '<textarea', 1)
 
 

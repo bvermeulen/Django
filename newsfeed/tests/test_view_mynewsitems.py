@@ -77,9 +77,9 @@ class MyNewsSitesPostTests(TestCase):
 
     def test_form_correct_input(self):
         ''' The view must contain:
-                2 <input>: csrf, site btn
+                3 <input>: csrf (2x), site btn
         '''
-        self.assertContains(self.response, '<input', 2)
+        self.assertContains(self.response, '<input', 3)
 
     def test_form_has_delete_button(self):
         self.assertContains(

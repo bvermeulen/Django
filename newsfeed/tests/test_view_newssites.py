@@ -32,6 +32,16 @@ class NewsSitesTests(TestCase):
         response = self.client.post(url, {})
         self.assertEqual(response.status_code, 200)
 
+    def test_newssites_view_log_has_correct_input(self):
+        """
+        The view must contain:
+        6 <input>: csrf (2x), submit, news_site, news_url, submit
+        """
+        self.client.login(username="testuser", password="123")
+        url = reverse("newssites")
+        response = self.client.post(url, {})
+        self.assertContains(response, "<input", 6)
+
     def test_newssites_view_valid_selected_redirects_to_newspage(self):
         newssite = NewsSite.objects.create(
             news_site='BBC', news_url='http://feeds.bbci.co.uk/news/world/rss.xml')
@@ -55,7 +65,7 @@ class NewsSitesTests(TestCase):
         url = reverse('newssites')
         response = self.client.post(url, data)
 
-        #check if new_site is added to NewsSite
+        # check if new_site is added to NewsSite
         self.assertEqual(NewsSite.objects.first().news_site, 'BBC')
 
         # and response gets back to 'newssites'
@@ -68,7 +78,7 @@ class NewsSitesTests(TestCase):
                 'news_url': 'http://howdiweb.com'}
         url = reverse('newssites')
         response = self.client.post(url, data)
-        #check if no new_site is added to NewsSite
+        # check if no new_site is added to NewsSite
         self.assertEqual(NewsSite.objects.count(), 0)
 
         # check correct error message
@@ -89,7 +99,7 @@ class NewsSitesTests(TestCase):
         url = reverse('newssites')
         response = self.client.post(url, data)
 
-        #check if no new_site is added to NewsSite
+        # check if no new_site is added to NewsSite
         self.assertEqual(NewsSite.objects.count(), 1)
 
         # check correct error message
@@ -106,7 +116,7 @@ class NewsSitesTests(TestCase):
         url = reverse('newssites')
         response = self.client.post(url, data)
 
-        #check if no new_site is added to NewsSite
+        # check if no new_site is added to NewsSite
         self.assertEqual(NewsSite.objects.count(), 0)
 
         # check correct error message

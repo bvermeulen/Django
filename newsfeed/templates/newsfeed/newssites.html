@@ -1,42 +1,43 @@
 {% extends 'base.html' %}
 
 {% block navbutton %}
-<ul class="navbar-nav mr-auto">
-  <li class="nav-item dropdown">
-    <a class="nav-link dropdown-toggle mr-1" href="#" data-toggle="dropdown">
-      Select sites
-    </a>
-    <div class="dropdown-menu dropdown-menu-left">
-      <a class="dropdown-item" href="{% url 'newspage' %}">News</a>
-      <a class="dropdown-item" href="{% url 'home' %}">Home</a>
-    </div>
-  </li>
-</ul>
+<li class="nav-item dropdown">
+  <a class="nav-link dropdown-toggle me-auto" href="#" role="button" data-bs-toggle="dropdown">
+    Select sites
+  </a>
+  <ul class="dropdown-menu">
+    <li><a class="dropdown-item" href="{% url 'newspage' %}">News</a></li>
+    <li><a class="dropdown-item" href="{% url 'home' %}">Home</a></li>
+  </ul>
+</li>
 {% endblock %}
 
 {% block content %}
-    <form method="post">
-      {% csrf_token %}
-      <div class="row">
-        {% for item in form_select_sites.selected_sites %}
-          <div class="col-sm-6 col-md-4 col-lg-3 col-xl-2" style="list-style-type: none;">
-            {{ item }}
-          </div>
-        {% endfor %}
-      </div>
-    ` <div style="clear:left">
-        <input type='submit' value='submit' class="btn btn-primary"></input>
-        <a href="{% url 'newspage' %}" class="btn btn-primary">Cancel</a>
-      </div>
+<form method="post">
+  {% csrf_token %}
+  <div class="row">
+    {% for item in form_select_sites.selected_sites %}
+    <div class="col-sm-6 col-md-4 col-lg-3 col-xl-2" style="list-style-type: none;">
+      {{ item }}
+    </div>
+    {% endfor %}
+  </div>
+  ` <div style="clear:left">
+    <input type='submit' value='submit' class="btn btn-primary"></input>
+    <a href="{% url 'newspage' %}" class="btn btn-primary">Cancel</a>
+  </div>
 
-      <div style="clear:left">
-        <br><br>
-        <p>Enter a new site ...</p>
-        <p><font color="red"> {{ new_site_error_message }}</font></p>
-        <div> {{ form_new_site.news_site }} {{ form_new_site.news_url }}
-        <input type='submit' value='add' class="btn-sm btn-primary"></input></div>
-        <br><br>
-      </div>
-    </form>
+  <div style="clear:left">
+    <br><br>
+    <p>Enter a new site ...</p>
+    <p>
+      <font color="red"> {{ new_site_error_message }}</font>
+    </p>
+    <div> {{ form_new_site.news_site }} {{ form_new_site.news_url }}
+      <input type='submit' value='add' class="btn-sm btn-primary"></input>
+    </div>
+    <br><br>
+  </div>
+</form>
 
 {% endblock content %}

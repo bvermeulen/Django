@@ -4,60 +4,60 @@
 {% block title %}Top tracks{% endblock %}
 
 {% block stylesheet %}
-  <link rel="stylesheet" type="text/css" href="{% static 'css/container-styles.css' %}">
+<link rel="stylesheet" type="text/css" href="{% static 'css/container-styles.css' %}">
 {% endblock %}
 
 {% block navbutton %}
-<ul class="navbar-nav mr-auto">
-  <li class="nav-item dropdown">
-    <a class="nav-link dropdown-toggle mr-1" href="#" data-toggle="dropdown">Music</a>
-    <div class="dropdown-menu dropdown-menu-left">
-      <a class="dropdown-item" href="{% url 'home' %}">Home</a>
-    </div>
-  </li>
-</ul>
+<li class="nav-item dropdown">
+  <a class="nav-link dropdown-toggle me-auto" href="#" role="button" data-bs-toggle="dropdown">
+    Music
+  </a>
+  <ul class="dropdown-menu">
+    <li><a class="dropdown-item" href="{% url 'home' %}">Home</a></li>
+  </ul>
+</li>
 {% endblock %}
 
 {% block content %}
-  <form id="id_music" method="post">
-    {% csrf_token %}
-    <div class="d-flex mb-4">
-      <input name="artist_query" type="" class="form-control form-control-lg col-sm-4"
-        placeholder="{{ artist.artist }}">
-      </input>
-      {% if user.is_authenticated %}
-        <a class="btn btn-primary ml-1" href="{% url 'playlist' %}">Playlist</a>
-      {% endif %}
-    </div>
-
-    {% if artist.top_tracks %}
-      <div class="card-columns mb-5">
-        {% for track in artist.top_tracks %}
-          <div style="width: 18rem" class="card">
-            <div class="card-body">
-              <h5>{{ track.name }}</h5>
-              <iframe src="https://open.spotify.com/embed/track/{{ track.id }}" width="100%" height="300" frameborder="0"
-                allowtransparency="true" allow="encrypted-media"></iframe>
-              <div style="display:flex">
-                {% if track.preview_url %}
-                  <audio controls style="float: left; width: 60%; margin: 5px">
-                    <source src="{{ track.preview_url }}">
-                  </audio>
-                {% endif %}
-                {% if user.is_authenticated %}
-                  <button style="float: left" type="submit" class="btn btn-link" name="track_id" value="{{ track.id }}">add to playlist</button>
-                {% endif %}
-              </div>
-            </div>
-          </div>
-        {% endfor %}
-      </div>
+<form id="id_music" method="post">
+  {% csrf_token %}
+  <div class="d-flex mb-4">
+    <input name="artist_query" type="text" class="form-control w-50" placeholder="{{ artist.artist }}">
+    </input>
+    {% if user.is_authenticated %}
+    <a class="btn btn-primary ms-1" href="{% url 'playlist' %}">Playlist</a>
     {% endif %}
+  </div>
 
-  </form>
+  {% if artist.top_tracks %}
+  <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-3">
+    {% for track in artist.top_tracks %}
+    <div class="col">
+      <div class="card">
+        <div class="card-body">
+          <h5>{{ track.name }}</h5>
+          <iframe src="https://open.spotify.com/embed/track/{{ track.id }}" width="100%" height="300" frameborder="0"
+            allowtransparency="true" allow="encrypted-media"></iframe>
+          <div style="display:flex">
+            {% if track.preview_url %}
+            <audio controls style="float: left; width: 60%; margin: 5px">
+              <source src="{{ track.preview_url }}">
+            </audio>
+            {% endif %}
+            {% if user.is_authenticated %}
+            <button style="float: left" type="submit" class="btn btn-link" name="track_id" value="{{ track.id }}">add to
+              playlist</button>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+</form>
 {% endblock content %}
 
 {% block javascript %}
-<script>
-</script>
 {% endblock %}

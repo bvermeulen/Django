@@ -1,60 +1,82 @@
 {% extends 'base.html' %}
 
+{% load static %}
 {% load boards_tags %}
 {% load martortags %}
-{% load crispy_forms_tags%}
+{% load crispy_forms_tags %}
 
 {% block title %}Post addition{% endblock %}
 
+{% block stylesheet %}
+<link href="{% static 'plugins/css/ace.min.css' %}" type="text/css" media="all" rel="stylesheet" />
+<link href="{% static 'martor/css/martor.bootstrap.min.css' %}" type="text/css" media="all" rel="stylesheet" />
+<link href="{% static 'plugins/css/semantic.min.css' %}" type="text/css" media="all" rel="stylesheet" />
+<link href="{% static 'plugins/css/resizable.min.css' %}" type="text/css" media="all" rel="stylesheet" />
+{% endblock %}
+
 {% block navbutton %}
-<ul class="navbar-nav mr-auto">
-  <li class="nav-item dropdown">
-    <a class="nav-link dropdown-toggle mr-1" href="#" data-toggle="dropdown">
-      Post addition
-    </a>
-    <div class="dropdown-menu dropdown-menu-left">
-      <a class="dropdown-item" href="{% url 'topic_posts' topic.board.pk topic.pk %}">{{ topic.topic_subject }}</a>
-      <a class="dropdown-item" href="{% url 'board_topics' topic.board.pk %}">{{ topic.board.name }}</a>
-      <a class="dropdown-item" href="{% url 'boards' %}">Boards</a>
-      <a class="dropdown-item" href="{% url 'home' %}">Home</a>
-    </div>
-  </li>
-</ul>
+<li class="nav-item dropdown">
+  <a class="nav-link dropdown-toggle me-auto" href="#" role="button" data-bs-toggle="dropdown">
+    Post addition
+  </a>
+  <ul class="dropdown-menu">
+    <li><a class="dropdown-item" href="{% url 'topic_posts' topic.board.pk topic.pk %}">{{ topic.topic_subject }}</a>
+    </li>
+    <li><a class="dropdown-item" href="{% url 'board_topics' topic.board.pk %}">{{ topic.board.name }}</a></li>
+    <li><a class="dropdown-item" href="{% url 'boards' %}">Boards</a></li>
+    <li><a class="dropdown-item" href="{% url 'home' %}">Home</a></li>
+  </ul>
+</li>
 {% endblock %}
 
 {% block content %}
-  <form method="post" class="mb-2">
-    {% csrf_token %}
+<form method="post" enctype=multipart/form-data>
+  {% csrf_token %}
+  <div class="mb-4">
     <button type="submit" class="btn btn-primary btn-sm">Post contribution</button>
-    <button class="btn dropdown-toggle btn-primary btn-sm" data-toggle="dropdown"
-      >Allowed editors<span class="caret"></span></button>
- 		<ul class="dropdown-menu">
+    <button class="btn dropdown-toggle btn-primary btn-sm" data-bs-toggle="dropdown">Allowed editors<span
+        class="caret"></span></button>
+    <ul class="dropdown-menu">
       {{ form.allowed_editor|as_crispy_field }}
     </ul>
-    <a href="{% url 'topic_posts' topic.board.pk topic.pk %}"
-       class="btn btn-outline-primary btn-sm"
-       role="button">Cancel</a>
+    <a href="{% url 'topic_posts' topic.board.pk topic.pk %}" class="btn btn-outline-primary btn-sm"
+      role="button">Cancel</a>
+  </div>
+  <div class="mb-4">
     {{ form.post_subject|as_crispy_field }}
-    {{ form.message|as_crispy_field }}
-  </form>
+    {{ form.message }}
+  </div>
+</form>
 
-  {% get_last_n_posts topic 5 as last_posts %}
-  {% for post in last_posts %}
-    <div class="card-body p-2">
-      <div class="card mb-2 border-dark">
-        {% if post.post_subject %}
-          <div class="card-header text-black bg-grey py-2 px-3">{{ post.post_subject }}</div>
-        {% endif %}
+{% get_last_n_posts topic 5 as last_posts %}
+{% for post in last_posts %}
+<div class="card-body p-2">
+  <div class="card mb-2 border-dark">
+    {% if post.post_subject %}
+    <div class="card-header text-black bg-grey py-2 px-3">{{ post.post_subject }}</div>
+    {% endif %}
 
-        <div class="row mb-4">
-          <small class="col test-left text-muted">created by: {{ post.created_by.username }}</small>
-          <small class="col text-muted">last updated by: {{post.updated_by }}</small>
-          <small class="col text-right text-muted"> last updated: {{ post.updated_at }}</small>
-        </div>
-        {{ post.get_message_as_markdown|safe_markdown }}
-      </div>
+    <div class="row mb-4">
+      <small class="col test-left text-muted">created by: {{ post.created_by.username }}</small>
+      <small class="col text-muted">last updated by: {{post.updated_by }}</small>
+      <small class="col text-right text-muted"> last updated: {{ post.updated_at }}</small>
     </div>
-  {% endfor %}
-  <br>
-  <br>
+    {{ post.get_message_as_markdown|safe_markdown }}
+  </div>
+</div>
+{% endfor %}
+{% endblock %}
+
+{% block javascript %}
+<script type="text/javascript" src="{% static 'plugins/js/ace.js' %}"></script>
+<script type="text/javascript" src="{% static 'plugins/js/mode-markdown.js' %}"></script>
+<script type="text/javascript" src="{% static 'plugins/js/ext-language_tools.js' %}"></script>
+<script type="text/javascript" src="{% static 'plugins/js/theme-github.js' %}"></script>
+<script type="text/javascript" src="{% static 'plugins/js/typo.js' %}"></script>
+<script type="text/javascript" src="{% static 'plugins/js/spellcheck.js' %}"></script>
+<script type="text/javascript" src="{% static 'plugins/js/highlight.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'plugins/js/resizable.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'plugins/js/emojis.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'martor/js/martor.bootstrap.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'js/board.js' %}"></script>
 {% endblock %}

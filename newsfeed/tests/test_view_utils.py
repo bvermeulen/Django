@@ -8,7 +8,9 @@ class TestUtils(TestCase):
     def test_add_width_to_img_tag(self):
         self.maxDiff = None
 
-        url_big_picture = 'https://i.imgur.com/p5KmtdF.jpg'
+        url_big_picture = (
+            "https://a.espncdn.com/photo/2024/0528/r1338674_1296x729_16-9.jpg"
+        )
         url_small_picture = 'https://i.imgur.com/rK5t5LP.png'
 
         # test big picture with style

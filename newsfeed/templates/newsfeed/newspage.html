@@ -3,123 +3,127 @@
 {% load static %}
 
 {% block stylesheet %}
-  <link rel="stylesheet" type="text/css" href="{% static 'css/container-styles.css' %}">
+<link href="{% static 'css/container-styles.css' %}" rel="stylesheet" type="text/css">
 {% endblock %}
 
 {% block navbutton %}
-<ul class="navbar-nav mr-auto">
-  <li class="nav-item dropdown">
-    <a class="nav-link dropdown-toggle mr-1" href="#" data-toggle="dropdown">
-      News
-    </a>
-    <div class="dropdown-menu dropdown-menu-left">
-      <a class="dropdown-item" href="{% url 'home' %}">Home</a>
-    </div>
-  </li>
-</ul>
+<li class="nav-item dropdown">
+	<a class="nav-link dropdown-toggle me-auto" href="#" role="button" data-bs-toggle="dropdown">
+		News
+	</a>
+	<ul class="dropdown-menu">
+		<li><a class="dropdown-item" href="{% url 'home' %}">Home</a></li>
+	</ul>
+</li>
 {% endblock %}
 
 {% block content %}
-	<div class="container mb-1">
-		<h2 class="item1" style="font-weight: bold; text-align: left;">{{ news_site }}</h2>
-	 	{% if error_message %}
-	    	<div> <font color="red" <strong>{{ error_message }}</strong></font> <br><br></div>
-	  {% endif %}
+<div class="container mb-1">
+	<h2 class="item1" style="font-weight: bold; text-align: left;">{{ news_site }}</h2>
+	{% if error_message %}
+	<div>
+		<font color="red" <strong>{{ error_message }}</strong></font> <br><br>
+	</div>
+	{% endif %}
+</div>
+
+<form id="controlform" method="post">
+	<div class="container">
+		{% csrf_token %}
+
+		<button class="btn btn-primary btn-sm dropdown-toggle" type="button" id="SiteButton" data-bs-toggle="dropdown">
+			Sites<span class="caret"></span></button>
+		<ul class="dropdown-menu" style="height:40%; overflow:hidden; overflow-y:scroll">
+			{% for site in news_sites %}
+			<li><input type="submit" class="btn btn-sm item_select" name="site_btn" value="{{ site }}"></input></li>
+			</li>
+			{% endfor %}
+		</ul>
+
+		<button class="btn dropdown-toggle btn-primary btn-sm" type="button" data-bs-toggle="dropdown">
+			Titles<span class="caret"></span>
+		</button>
+		<ul class="dropdown-menu container dropdown-container"
+			style="height:40%; overflow:hidden; overflow-y:scroll; overflow-x:scroll">
+			{% for item, title in news_titles %}
+			<li><button type="submit" class="btn btn-sm item_select" name="title_btn" value="{{ item }}">{{ title|safe
+					}}</button></li>
+			{% endfor %}
+		</ul>
+
+		<input type="hidden" name="control_btn" id="keyinput"></input>
+		<input type="submit" class="hideOnMobile btn btn-primary btn-sm" name="control_btn"
+			value="{{ controls.previous }}"></input>
+		<input type="submit" class="hideOnMobile btn btn-primary btn-sm" name="control_btn"
+			value="{{ controls.next }}"></input>
+
+		{% if user.is_authenticated %}
+		<a class="btn btn-primary btn-sm" href="{% url 'newssites' %}">Select</a>
+		<a class="btn btn-primary btn-sm" href="{% url 'mynewsitems' %}">My news</a>
+		{% endif %}
 	</div>
 
-	<form id="controlform" method="post">
-		<div class="container">
-  	  {% csrf_token %}
+	<div class="container" style="clear:both">
+		<div style="font-size:smaller; text-align:left;">{{ reference }}</div>
+		<div class="card" style="border-width: 2px">
+			<card class="card-body">
+				<h2 class="card-title" style="background-color:lightgrey">{{ news_title|safe }}</h2>
 
-  	  <div style="float: left">
-  	    <button class="btn btn-primary btn-sm dropdown-toggle" type="button" id="SiteButton" data-toggle="dropdown">
-  	      Sites<span class="caret"></span></button>
-  	      <ul class="dropdown-menu" style="height:40%; overflow:hidden; overflow-y:scroll">
-				 	  {% for site in news_sites %}
-					    <li><input type="submit" class="btn btn-sm item_select" name="site_btn" value="{{ site }}"></input></li></li>
-				  	{% endfor %}
-  	      </ul>
-  	  </div>
-
-  	  <div style="float: left" class="ml-1 mr-1">
-  	    <button class="btn dropdown-toggle btn-primary btn-sm" type="button" data-toggle="dropdown">
-  	      Titles<span class="caret"></span>
-  	    </button>
-  	    <ul class="dropdown-menu container dropdown-container" style="height:40%; overflow:hidden; overflow-y:scroll; overflow-x:scroll">
-  	      {% for item, title  in news_titles %}
-  			    <li><button type="submit" class="btn btn-sm item_select" name="title_btn" value="{{ item }}">{{ title|safe }}</button></li>
-  		  	{% endfor %}
-  	    </ul>
-  	  </div>
-
-  	  <input type="hidden" name="control_btn" id="keyinput"></input>
-			<input type="submit" class="hideOnMobile btn btn-primary btn-sm" name="control_btn" value="{{ controls.previous }}"></input>
-			<input type="submit" class="hideOnMobile btn btn-primary btn-sm" name="control_btn" value="{{ controls.next }}"></input>
-
-  		{% if user.is_authenticated %}
-	 			<a class="btn btn-primary btn-sm" href="{% url 'newssites' %}">Select</a>
-				<a class="btn btn-primary btn-sm" href="{% url 'mynewsitems' %}">My news</a>
-	  	{% endif %}
-		</div>
-
-		<div class="container" style="clear:both">
-		  <small style="text-align:left;">{{ reference }}</small>
-			<div class="card" style="border-width: 2px">
-			  <card class="card-body">
-			  <h2 class="card-title" style="background-color:lightgrey">{{ news_title|safe }}</h2>
-
-				<a style="padding:0px" class="btn btn-link" href="{{ news_link }}" target="_blank">link</a>
-				<input style="padding:0px" type="submit" class="btn btn-link" id="id_scroll" name="control_btn" value="{{ controls.scroll }}"></input>
+				<a style="padding:0px" class="btn btn-link text-decoration-none" href="{{ news_link }}" target="_blank">link</a>
+				<input style="padding:0px" type="submit" class="btn btn-link text-decoration-none" id="id_scroll"
+					name="control_btn" value="{{ controls.scroll }}"></input>
 
 				{% if show_banner_button %}
-					<input style="padding:0px" type="submit" class="hideOnMobile btn btn-link" id="id_banner" name="control_btn" value="{{ controls.banner }}"></input>
+				<input style="padding:0px" type="submit" class="hideOnMobile btn btn-link text-decoration-none" id="id_banner"
+					name="control_btn" value="{{ controls.banner }}"></input>
 				{% endif %}
 
 				{% if user.is_authenticated %}
-				  <input style="padding:0px" type="submit" class="btn btn-link" name="control_btn" value="{{ controls.store }}"></input>
+				<input style="padding:0px" type="submit" class="btn btn-link text-decoration-none" name="control_btn"
+					value="{{ controls.store }}"></input>
 				{% endif %}
-				<a style="float: right"><small style="vertical-align: sub">{{ status }}</small></a>
+				<a style="float: right"><small style="font-size:smaller; vertical-align: sub">{{ status }}</small></a>
 
 				<div class="card-text">
 					{% if banner and show_banner_button and news_summary_flat_text %}
-						<script>
-							var button_banner = document.getElementById("id_banner");
-							set_banner_color();
-							function set_banner_color() {
-								button_banner.style["color"] = "DodgerBlue";
-								button_banner.style["font-weight"] = "bolder";
-							};
-						</script>
-						<svg style="background-color:lightgrey;" viewBox="0, 0, 300, 30">
-					  	<text x="500" y="15" style="font-size:10px; font-weight: bold">
-						    {{ news_summary_flat_text|safe }}
-					      <animate attributeName="x" from="300" to="-300" dur="{{ delay }}s" repeatCount="indefinite">
-						  </text>
-						</svg>
+					<script>
+						var button_banner = document.getElementById("id_banner");
+						set_banner_color();
+						function set_banner_color() {
+							button_banner.style["color"] = "DodgerBlue";
+							button_banner.style["font-weight"] = "bolder";
+						};
+					</script>
+					<svg style="background-color:lightgrey;" viewBox="0, 0, 300, 30">
+						<text x="500" y="15" style="font-size:10px; font-weight: bold">
+							{{ news_summary_flat_text|safe }}
+							<animate attributeName="x" from="300" to="-300" dur="{{ delay }}s" repeatCount="indefinite">
+						</text>
+					</svg>
 					{% else %}
-					  <div class="textarea" contenteditable="false" style="background-color:lightgrey">{{ news_summary|safe }}</div>
+					<div class="textarea" contenteditable="false" style="font-size:large; background-color:lightgrey">{{ news_summary|safe }}</div>
 					{% endif %}
-		  	</div>
-  		</div>
-			<small class="hideOnMobile" style="float: right;">{{ help_arrows }}{{ help_banner }}</small>
+				</div>
 		</div>
-		<br><br><br><br>
-	</form>
+		<div class="hideOnMobile" style="font-size:smaller; float: right; padding:0px">{{ help_arrows }}{{ help_banner }}</div>
+	</div>
+	<br><br><br><br>
+</form>
 
 {% endblock content %}
 
 {% block javascript %}
 <script>
-  var form = document.getElementById("controlform");
+	var form = document.getElementById("controlform");
 	var button_scroll = document.getElementById("id_scroll");
-	setAutoUpdate({{scroll}});
+	setAutoUpdate({{ scroll }});
 
-  function setAutoUpdate(scroll) {
+	function setAutoUpdate(scroll) {
 		if (scroll) {
 			console.log("set auto update with a delay of " + {{ delay }});
-			setTimeout("window.location.href='{% url 'newspage' %}'", {{ delay }} *1000 );
-			button_scroll.style["color"] = "DodgerBlue";
-			button_scroll.style["font-weight"] = "bolder";
+		setTimeout("window.location.href='{% url 'newspage' %}'", {{ delay }} * 1000 );
+	button_scroll.style["color"] = "DodgerBlue";
+	button_scroll.style["font-weight"] = "bolder";
 		}
 	};
 
@@ -130,24 +134,24 @@
 		if (keyName == 'ArrowRight') {
 			document.getElementById("keyinput").value = "{{ controls.next }}";
 			form.submit();
-			}
+		}
 		else if (keyName == 'ArrowLeft') {
 			document.getElementById("keyinput").value = "{{ controls.previous }}";
 			form.submit();
-			}
-		};
+		}
+	};
 
 	document.addEventListener('touchstart', handleTouchStart, false);
 	document.addEventListener('touchmove', handleTouchMove, false);
 	var xDown = null;
 	function handleTouchStart(event) {
 		xDown = event.touches[0].clientX;
-		};
+	};
 
 	function handleTouchMove(event) {
-		if ( ! xDown ) {
+		if (!xDown) {
 			return;
-			}
+		}
 
 		var xUp = event.touches[0].clientX;
 		var xDiff = xDown - xUp;
@@ -156,16 +160,16 @@
 			// swipe left
 			document.getElementById("keyinput").value = "{{ controls.next }}";
 			form.submit();
-			}
+		}
 
 		if (xDiff < -10) {
 			// swipe right
 			document.getElementById("keyinput").value = "{{ controls.previous }}";
 			form.submit();
-			}
+		}
 
 		xDown = null;
-		};
+	};
 
 </script>
 {% endblock %}

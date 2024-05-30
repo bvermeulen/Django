@@ -5,55 +5,52 @@
 {%block title %}Latest stock trading{% endblock %}
 
 {% block navbutton %}
-<ul class="navbar-nav mr-auto">
-  <li class="nav-item dropdown">
-    <a class="nav-link dropdown-toggle mr-1" href="#" data-toggle="dropdown">
-      Latest stock trading
-    </a>
-    <div class="dropdown-menu dropdown-menu-left">
-      {% if source == 'quotes' %}
-        <a class="dropdown-item" href="{% url 'stock_quotes' %}">Quotes</a>
-      {% else %}
-        <a class="dropdown-item" href="{% url 'portfolio' %}">Portfolio</a>
-      {% endif %}
-      <a class="dropdown-item" href="{% url 'home' %}">Home</a>
-    </div>
-  </li>
-</ul>
+<li class="nav-item dropdown">
+  <a class="nav-link dropdown-toggle me-auto" href="#" role="button" data-bs-toggle="dropdown">
+    Latest stock trading
+  </a>
+  <ul class="dropdown-menu">
+    {% if source == 'quotes' %}
+    <li><a class="dropdown-item" href="{% url 'stock_quotes' %}">Quotes</a></li>
+    {% else %}
+    <li><a class="dropdown-item" href="{% url 'portfolio' %}">Portfolio</a></li>
+    {% endif %}
+    <li><a class="dropdown-item" href="{% url 'home' %}">Home</a></li>
+  </ul>
+</li>
 {% endblock %}
 
 {% block content %}
-
-	<div class="flex-d" id="chart-container">FusionCharts()</div>
-  <div>
-    <button class="btn btn-primary btn-sm"
-      onclick="window.location.href='{% url 'stock_news' source stock_symbol %}'">Stock news</button>
-    <button class="btn btn-primary btn-sm"
-      onclick="window.location.href='{% url 'stock_press' source stock_symbol %}'">Press releases</button>
-    {% for period in periods reversed %}
-      {% if period == periods|index:-1 %}
-        <button class="btn btn-primary btn-sm"
-          onclick="window.location.href='{% url 'stock_history' source stock_symbol period %}'">History ({{period}})</button>
-      {% else %}
-        {% if period|add:0 > 1 %}
-          <button class="btn btn-primary btn-sm"
-            onclick="window.location.href='{% url 'stock_history' source stock_symbol period %}'">{{period}} years</button>
-        {% else %}
-          <button class="btn btn-primary btn-sm"
-            onclick="window.location.href='{% url 'stock_history' source stock_symbol period %}'">{{period}} year</button>
-        {% endif %}
-      {% endif %}
-    {% endfor %}
-  </div>
-  <br>
-	<small>Data provided by <a href="https://{{ data_provider_url }}" target="_blank">{{ data_provider_url }}</a></small>
-	<br><br><br><br>
+<div class="flex-d" id="chart-container">FusionCharts()</div>
+<div>
+  <button class="btn btn-primary btn-sm"
+    onclick="window.location.href='{% url 'stock_news' source stock_symbol %}'">Stock news</button>
+  <button class="btn btn-primary btn-sm"
+    onclick="window.location.href='{% url 'stock_press' source stock_symbol %}'">Press releases</button>
+  {% for period in periods reversed %}
+  {% if period == periods|index:-1 %}
+  <button class="btn btn-primary btn-sm"
+    onclick="window.location.href='{% url 'stock_history' source stock_symbol period %}'">History ({{period}})</button>
+  {% else %}
+  {% if period|add:0 > 1 %}
+  <button class="btn btn-primary btn-sm"
+    onclick="window.location.href='{% url 'stock_history' source stock_symbol period %}'">{{period}} years</button>
+  {% else %}
+  <button class="btn btn-primary btn-sm"
+    onclick="window.location.href='{% url 'stock_history' source stock_symbol period %}'">{{period}} year</button>
+  {% endif %}
+  {% endif %}
+  {% endfor %}
+</div>
+<br>
+<small>Data provided by <a href="https://{{ data_provider_url }}" target="_blank">{{ data_provider_url }}</a></small>
+<br><br><br><br>
 
 {% endblock content %}
 
 {% block javascript %}
-	<script type="text/javascript" src="{% static "fusioncharts/types/fusioncharts.js" %}"></script>
-	<script type="text/javascript" src="{% static "fusioncharts/themes/fusioncharts.theme.candy.js" %}"></script>
-  <script type="text/javascript" src="{% static "fusioncharts/themes/fusioncharts.theme.fusion.js" %}"></script>
-	{{ chart_js|safe }}
+<script type="text/javascript" src="{% static 'fusioncharts/types/fusioncharts.js' %}"></script>
+<script type="text/javascript" src="{% static 'fusioncharts/themes/fusioncharts.theme.candy.js' %}"></script>
+<script type="text/javascript" src="{% static 'fusioncharts/themes/fusioncharts.theme.fusion.js' %}"></script>
+{{ chart_js|safe }}
 {% endblock javascript %}

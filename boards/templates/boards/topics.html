@@ -3,67 +3,64 @@
 {% load humanize %}
 
 {% block title %}
-  {{ board.name }} - {{ block.super }}
+{{ board.name }} - {{ block.super }}
 {% endblock %}
 
 {% block navbutton %}
-<ul class="navbar-nav mr-auto">
-  <li class="nav-item dropdown">
-    <a class="nav-link dropdown-toggle mr-1" href="#" data-toggle="dropdown">
-      {{ board.name }}
-    </a>
-    <div class="dropdown-menu dropdown-menu-left">
-      <a class="dropdown-item" href="{% url 'boards' %}">Boards</a>
-      <a class="dropdown-item" href="{% url 'home' %}">Home</a>
-    </div>
-  </li>
-</ul>
+<li class="nav-item dropdown">
+  <a class="nav-link dropdown-toggle me-auto" href="#" role="button" data-bs-toggle="dropdown">
+    {{ board.name }}
+  </a>
+  <ul class="dropdown-menu">
+    <li><a class="dropdown-item" href="{% url 'boards' %}">Boards</a></li>
+    <li><a class="dropdown-item" href="{% url 'home' %}">Home</a></li>
+  </ul>
+</li>
 {% endblock %}
 
 {% block content %}
-  <div class="mb-2">
-    <a href="{% url 'new_topic' board.pk %}"
-            class="btn btn-primary">New topic</a>
-  </div>
+<div class="mb-2">
+  <a href="{% url 'new_topic' board.pk %}" class="btn btn-primary">New topic</a>
+</div>
 
-  <table class="table table-striped mb-4">
-    <thead class="thead-inverse">
-      <tr>
-        <th>Topic</th>
-        <th>Starter</th>
-        <th>Posts</th>
-        <th>Views</th>
-        <th>Last Update</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for topic in topics %}
-        {% url 'topic_posts' board.pk topic.pk as topic_url %}
-        <tr>
-          <td>
-            <p class="mb-0">
-              <a href="{{ topic_url }}">{{ topic.topic_subject }}</a>
-            </p>
-            <small class="text-muted">
-              Pages:
-              {% for i in topic.get_page_range %}
-                <a href="{{ topic_url }}?page={{ i }}">{{ i }}</a>
-              {% endfor %}
-              {% if topic.has_many_pages %}
-                ... <a href="{{ topic_url }}?page={{ topic.get_page_count }}">Last Page</a>
-              {% endif %}
-            </small>
-          </td>
-          <td>{{ topic.starter.username }}</td>
-          <td>{{ topic.contributions }}</td>
-          <td>{{ topic.views }}</td>
-          <td>{{ topic.last_updated|naturaltime }}</td>
-        </tr>
-      {% endfor %}
-    </tbody>
-  </table>
+<table class="table table-striped mb-4">
+  <thead class="thead-inverse">
+    <tr>
+      <th>Topic</th>
+      <th>Starter</th>
+      <th>Posts</th>
+      <th>Views</th>
+      <th>Last Update</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for topic in topics %}
+    {% url 'topic_posts' board.pk topic.pk as topic_url %}
+    <tr>
+      <td>
+        <p class="mb-0">
+          <a href="{{ topic_url }}">{{ topic.topic_subject }}</a>
+        </p>
+        <small class="text-muted">
+          Pages:
+          {% for i in topic.get_page_range %}
+          <a href="{{ topic_url }}?page={{ i }}">{{ i }}</a>
+          {% endfor %}
+          {% if topic.has_many_pages %}
+          ... <a href="{{ topic_url }}?page={{ topic.get_page_count }}">Last Page</a>
+          {% endif %}
+        </small>
+      </td>
+      <td>{{ topic.starter.username }}</td>
+      <td>{{ topic.contributions }}</td>
+      <td>{{ topic.views }}</td>
+      <td>{{ topic.last_updated|naturaltime }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
 
-  {% include 'includes/pagination.html' %}
-  <br>
-  <br>
-  {% endblock %}
+{% include 'includes/pagination.html' %}
+<br>
+<br>
+{% endblock %}

@@ -66,7 +66,7 @@ class TestPlayTopTracksView(MusicTests):
         response = self.client.post(reverse('play_top_tracks'), data)
         playlist_url = reverse('playlist')
         self.assertContains(response, f'href="{playlist_url}"')
-        self.assertContains(response, 'add to playlist')
+        self.assertContains(response, 'add to')
 
     def test_view_adds(self):
         self.client.login(username='testuser', password='testuser_pw')
@@ -79,7 +79,7 @@ class TestPlayTopTracksView(MusicTests):
         response = self.client.post(reverse('play_top_tracks'), data)
         playlist_url = reverse('playlist')
         self.assertNotContains(response, f'href="{playlist_url}"')
-        self.assertNotContains(response, 'add to playlist')
+        self.assertNotContains(response, 'add to')
 
 
 class TestPlayListView(MusicTests):

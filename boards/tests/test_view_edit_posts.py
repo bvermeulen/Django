@@ -75,11 +75,11 @@ class PostUpdateViewTests(PostUpdateViewTestCase):
     def test_form_inputs(self):
         '''
         The view must contain:
-            6 <input: csrf, owner, Joe (allowed to edit), Jane
+            7 <input: csrf (2x), owner, Joe (allowed to edit), Jane
                       post_subject, markdown_image_upload
             1 <textarea: message
         '''
-        self.assertContains(self.response, '<input', 6)
+        self.assertContains(self.response, '<input', 7)
         self.assertContains(self.response, '<textarea', 1)
 
 

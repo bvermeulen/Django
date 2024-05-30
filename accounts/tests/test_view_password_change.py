@@ -33,10 +33,10 @@ class PasswordChangeTests(TestCase):
 
     def test_form_inputs(self):
         '''
-        The view must contain four inputs: csrf, old_password,
+        The view must contain five inputs: csrf (2x), old_password,
         new_password1, new_password2
         '''
-        self.assertContains(self.response, '<input', 4)
+        self.assertContains(self.response, '<input', 5)
         self.assertContains(self.response, 'type="password"', 3)
 
 

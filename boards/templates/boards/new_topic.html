@@ -1,41 +1,60 @@
 {% extends 'base.html' %}
 
+{% load static %}
 {% load crispy_forms_tags %}
 
 {% block title %}Start a New Topic{% endblock %}
 
+{% block stylesheet %}
+<link href="{% static 'plugins/css/ace.min.css' %}" type="text/css" media="all" rel="stylesheet" />
+<link href="{% static 'martor/css/martor.bootstrap.min.css' %}" type="text/css" media="all" rel="stylesheet" />
+<link href="{% static 'plugins/css/semantic.min.css' %}" type="text/css" media="all" rel="stylesheet" />
+<link href="{% static 'plugins/css/resizable.min.css' %}" type="text/css" media="all" rel="stylesheet" />
+{% endblock %}
+
 {% block navbutton %}
-<ul class="navbar-nav mr-auto">
-  <li class="nav-item dropdown">
-    <a class="nav-link dropdown-toggle mr-1" href="#" data-toggle="dropdown">
-      New topic
-    </a>
-    <div class="dropdown-menu dropdown-menu-left">
-      <a class="dropdown-item" href="{% url 'board_topics' board.pk %}">{{ board.name }}</a>
-      <a class="dropdown-item" href="{% url 'boards' %}">Boards</a>
-      <a class="dropdown-item" href="{% url 'home' %}">Home</a>
-    </div>
-  </li>
-</ul>
+<li class="nav-item dropdown">
+  <a class="nav-link dropdown-toggle me-auto" href="#" role="button" data-bs-toggle="dropdown">
+    New topic
+  </a>
+  <ul class="dropdown-menu">
+    <li><a class="dropdown-item" href="{% url 'board_topics' board.pk %}">{{ board.name }}</a></li>
+    <li><a class="dropdown-item" href="{% url 'boards' %}">Boards</a></li>
+    <li><a class="dropdown-item" href="{% url 'home' %}">Home</a></li>
+  </ul>
+</li>
 {% endblock %}
 
 {% block content %}
-  <form method="post" novalidate>
-    {% csrf_token %}
+<form method="post" enctype=multipart/form-data>
+  {% csrf_token %}
+  <div class="mb-4">
     <button type="submit" class="btn btn-primary btn-sm">Submit new topic</button>
-    <button class="btn dropdown-toggle btn-primary btn-sm" data-toggle="dropdown"
-      >Allowed editors<span class="caret"></span></button>
- 		<ul class="dropdown-menu"  style="height:40%; overflow:hidden; overflow-y:scroll;">
+    <button class="btn dropdown-toggle btn-primary btn-sm" data-bs-toggle="dropdown">Allowed editors<span
+        class="caret"></span></button>
+    <ul class="dropdown-menu" style="height:40%; overflow:hidden; overflow-y:scroll;">
       {{ form2.allowed_editor|as_crispy_field }}
     </ul>
-    <a href="{% url 'board_topics' board.pk %}"
-       class="btn btn-outline-primary btn-sm"
-       role="button">Cancel</a>
-    <br></br>
+    <a href="{% url 'board_topics' board.pk %}" class="btn btn-outline-primary btn-sm" role="button">Cancel</a>
+  </div>
+  <div class="mb-4">
     {{ form1.topic_subject|as_crispy_field }}
     {{ form2.post_subject|as_crispy_field }}
     {{ form2.message }}
-  </form>
-  <br>
-  <br>
+  </div>
+</form>
+{% endblock %}
+
+{% block javascript %}
+<script type="text/javascript" src="{% static 'plugins/js/ace.js' %}"></script>
+<script type="text/javascript" src="{% static 'plugins/js/mode-markdown.js' %}"></script>
+<script type="text/javascript" src="{% static 'plugins/js/ext-language_tools.js' %}"></script>
+<script type="text/javascript" src="{% static 'plugins/js/theme-github.js' %}"></script>
+<script type="text/javascript" src="{% static 'plugins/js/typo.js' %}"></script>
+<script type="text/javascript" src="{% static 'plugins/js/spellcheck.js' %}"></script>
+<script type="text/javascript" src="{% static 'plugins/js/highlight.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'plugins/js/resizable.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'plugins/js/emojis.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'martor/js/martor.bootstrap.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'js/board.js' %}"></script>
 {% endblock %}

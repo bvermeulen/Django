@@ -1,5 +1,5 @@
 import datetime
-from django.shortcuts import render, redirect, reverse
+from django.shortcuts import render
 from django.views.generic import View
 from stock.models import Person, Portfolio
 from stock.module_stock import TradingData
@@ -21,12 +21,6 @@ class QuoteView(View):
     td.setup()
     data_provider_url = td.data_provider_url
 
-    try:
-        default_user = Person.objects.get(username="default_user")
-
-    except Person.DoesNotExist:
-        default_user = None
-
     def get(self, request):
         user = request.user
         if user.is_authenticated:
@@ -35,7 +29,7 @@ class QuoteView(View):
 
         selected_portfolio = request.session.get("selected_portfolio", "")
         stockdetail = request.session.get("stockdetail", STOCK_DETAILS[0][0])
-        markets = MARKETS
+        markets = request.session.get("markets", MARKETS)
         quote_string = ""
         datepicked = datetime.datetime.now().strftime("%d/%m/%Y")
 
@@ -59,7 +53,7 @@ class QuoteView(View):
                 "markets": markets,
                 "stockdetails": stockdetail,
                 "datepicked": datepicked,
-            }
+            },
         )
         stock_info = add_display_tokens(stock_info)
         stock_info = format_and_sort_stocks(stock_info)
@@ -81,6 +75,8 @@ class QuoteView(View):
         quote_string = request.session.get("quote_string", "")
         selected_portfolio = request.session.get("selected_portfolio", "")
         datepicked = request.session.get("datepicked", date_today)
+        markets = request.session.get("markets", MARKETS)
+        stockdetail = request.session.get("stockdetail", STOCK_DETAILS[0][0])
 
         form = self.stockquote_form(request.POST, user=user)
         if form.is_valid():
@@ -116,9 +112,13 @@ class QuoteView(View):
                 )
 
             elif portfolio:
-                dateval_query = datetime.datetime.strptime(datepicked, "%d/%m/%Y").strftime("%Y-%m-%d")
+                dateval_query = datetime.datetime.strptime(
+                    datepicked, "%d/%m/%Y"
+                ).strftime("%Y-%m-%d")
                 symbols = list(portfolio.get_stock_on_date(dateval_query).keys())
-                stock_info = self.td.get_stock_trade_info_on_date(dateval_query, symbols)
+                stock_info = self.td.get_stock_trade_info_on_date(
+                    dateval_query, symbols
+                )
 
             else:
                 datepicked = date_today
@@ -128,11 +128,6 @@ class QuoteView(View):
                 )
                 selected_portfolio = ""
 
-            request.session["quote_string"] = quote_string
-            request.session["selected_portfolio"] = selected_portfolio
-            request.session["markets"] = markets
-            request.session["stockdetail"] = stockdetail
-            request.session["datepicked"] = datepicked
             logger.info(
                 f"user {user} [ip: {get_client_ip(request)}] looking "
                 f"up: {quote_string} / {selected_portfolio}"
@@ -150,6 +145,13 @@ class QuoteView(View):
                 "datepicked": datepicked,
             },
         )
+
+        request.session["quote_string"] = quote_string
+        request.session["selected_portfolio"] = selected_portfolio
+        request.session["markets"] = markets
+        request.session["stockdetail"] = stockdetail
+        request.session["datepicked"] = datepicked
+
         stock_info = add_display_tokens(stock_info)
         stock_info = format_and_sort_stocks(stock_info)
         context = {
@@ -173,10 +175,11 @@ class QuoteView(View):
 
             except Portfolio.DoesNotExist:
                 try:
+                    default_user = Person.objects.get(username="default_user")
                     portfolio = Portfolio.objects.get(
-                        user=self.default_user, portfolio_name=selected_portfolio
+                        user=default_user, portfolio_name=selected_portfolio
                     )
-                except Portfolio.DoesNotExist:
+                except (Person.DoesNotExist, Portfolio.DoesNotExist):
                     pass
 
         return portfolio

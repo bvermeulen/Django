@@ -7,7 +7,6 @@
 {% block title %}Portfolio{% endblock %}
 
 {% block stylesheet %}
-<link rel="stylesheet" type="text/css" href="{% static 'css/container-styles.css' %}">
 <style>
   .responsive-float {
     float: right;
@@ -22,17 +21,15 @@
 {% endblock %}
 
 {% block navbutton %}
-<ul class="navbar-nav mr-auto">
-  <li class="nav-item dropdown">
-    <a class="nav-link dropdown-toggle mr-1" href="#" data-toggle="dropdown">
-      Portfolio
-    </a>
-    <div class="dropdown-menu dropdown-menu-left">
-      <a class="dropdown-item" href="{% url 'stock_quotes' %}">Stock Quotes</a>
-      <a class="dropdown-item" href="{% url 'home' %}">Home</a>
-    </div>
-  </li>
-</ul>
+<li class="nav-item dropdown">
+  <a class="nav-link dropdown-toggle me-auto" href="#" role="button" data-bs-toggle="dropdown">
+    Portfolio
+  </a>
+  <ul class="dropdown-menu">
+    <li><a class="dropdown-item" href="{% url 'stock_quotes' %}">Stock Quotes</a></li>
+    <li><a class="dropdown-item" href="{% url 'home' %}">Home</a></li>
+  </ul>
+</li>
 {% endblock %}
 
 {% block content %}
@@ -42,9 +39,9 @@
     {{ form.currencies }} {{ form.symbol }} {{ form.stockdetails }} {{ form.datepicked_pressed }}
   </a>
 
-  <div class="d-inline-flex float-left">
+  <div class="d-inline-flex flex-wrap">
     <div class="dropdown">
-      <button type="button" class="dropdown-toggle btn btn-outline-primary btn-sm">
+      <button type="button" class="dropdown-toggle btn btn-outline-primary btn-sm mt-1">
         {% if form.portfolio_name.value == '' %}
         Portfolio
         {% else %}
@@ -52,59 +49,56 @@
         {% endif %}
       </button>
       <div class="dropdown-content">
-        <button class="btn btn-primary btn-sm my-1" name="btn1_pressed" value="new_portfolio"
+        <button class="btn btn-primary btn-sm mb=1 mb-1" name="btn1_pressed" value="new_portfolio"
           onclick="return PromptNewPortfolioName()">New</button>
         {% if form.portfolio_name.value != '' %}
-        <button class="btn btn-primary btn-sm my-1" name="btn1_pressed" value="rename_portfolio"
+        <button class="btn btn-primary btn-sm mb-1" name="btn1_pressed" value="rename_portfolio"
           onclick="return RenamePortfolio('{{ form.portfolio_name.value }}')">
           Rename</button>
-        <button class="btn btn-primary btn-sm my-1" name="btn1_pressed" value="copy_portfolio"
+        <button class="btn btn-primary btn-sm mb-1" name="btn1_pressed" value="copy_portfolio"
           onclick="return CopyPortfolio('{{ form.portfolio_name.value }}')">
           Copy</button>
-        <button class="btn btn-primary btn-sm my-1" name="btn1_pressed" value="delete_portfolio"
+        <button class="btn btn-primary btn-sm" name="btn1_pressed" value="delete_portfolio"
           onclick="return ConfirmDeletePortfolio('{{ form.portfolio_name.value }}')">
           Delete</button>
         {% endif %}
-
         <div class="dropdown-divider"></div>
         {% for portfolio in form.portfolios %}
         {% if not portfolio.data.selected %}
-        <button class="btn btn-link my-0" value="{{ portfolio.data.value}}" name="{{ portfolio.data.name }}">
+        <button class="btn btn-link text-decoration-none text-nowrap" value="{{ portfolio.data.value}}"
+          name="{{ portfolio.data.name }}">
           <a>{{ portfolio.choice_label }}</a></button>
         {% endif %}
         {% endfor %}
       </div>
     </div>
-
     {% if form.portfolio_name.value != '' %}
-    <div class="ml-1">
-      {{ form.datepicked }}
-    </div>
-    <button class="btn btn-outline-primary btn-sm ml-1" name="btn1_pressed" value="add_symbol"
-    onclick="return AddSymbol('{{ form.symbol.value }}')">
-    Add symbol
+    {{ form.datepicked }}
+    <button class="btn btn-outline-primary btn-sm ms-1 mt-1" name="btn1_pressed" value="add_symbol"
+      onclick="return AddSymbol('{{ form.symbol.value }}')">Add symbol
     </button>
-
     <div class="dropdown">
-      <button type="button" class="btn dropdown-toggle btn-outline-primary btn-sm ml-1">
-        {{ form.stockdetails.value }}</button>
+      <button type="button" class="btn dropdown-toggle btn-outline-primary btn-sm ms-1 mt-1">
+        {{ form.stockdetails.value }}
+      </button>
       <div class="dropdown-content">
         {% for stockdetail in form.stockdetails %}
         {% if not stockdetail.data.selected %}
-        <button class="btn btn-link" value="{{ stockdetail.data.value }}"
-          name="{{ stockdetail.data.name }}">{{stockdetail.choice_label }}</button>
+        <button class="btn btn-link text-decoration-none text-nowrap" value="{{ stockdetail.data.value }}"
+          name="{{ stockdetail.data.name }}">{{stockdetail.choice_label }}
+        </button>
         {% endif %}
         {% endfor %}
       </div>
     </div>
-
     <div class="dropdown">
-      <button type="button" class="btn dropdown-toggle btn-outline-primary btn-sm ml-1">
+      <button type="button" class="btn dropdown-toggle btn-outline-primary btn-sm ms-1 mt-1">
         {{ form.currencies.value }}</button>
       <div class="dropdown-content">
         {% for currency in form.currencies %}
         {% if not currency.data.selected %}
-        <button class="btn btn-link" value="{{ currency.data.value }}" name="{{ currency.data.name }}">
+        <button class="btn btn-link text-decoration-none text-nowrap" value="{{ currency.data.value }}"
+          name="{{ currency.data.name }}">
           {{ currency.choice_label }}</button>
         {% endif %}
         {% endfor %}
@@ -114,19 +108,18 @@
     <input type="hidden" id="id_datepicked" name="datepicked" value="01/01/1970">
     {% endif %}
   </div>
-
-  <div class="d-inline-flex responsive-float">
+  <div class="d-inline-flex responsive-float mt-2">
     {% if form.portfolio_name.value != '' %}
-    <strong>Value:</strong>
-    <strong class="mr-2">{{ totals.value }}</strong>
-    <strong class="mr-0">Change:</strong>
-    <strong class="mr-2" style="color:{{ totals.color }}">{{ totals.caret}} {{ totals.value_change }}</strong>
-    <strong class="mr-2">{{ exchangerate }}</strong>
+    <strong class="me-2">Value:</strong>
+    <strong class="me-2">{{ totals.value }}</strong>
+    <strong class="me-1">Change:</strong>
+    <strong class="me-2" style="color:{{ totals.color }}">{{ totals.caret}} {{ totals.value_change }}</strong>
+    <strong class="me-2">{{ exchangerate }}</strong>
     {% endif %}
   </div>
 
-  <div class="table-responsive text-nowrap" style="overflow: hidden">
-    <table id="dtHorizontalVerticalScroll" class="table table-striped mb-2 mt-1 table-sm" cellspacing="0" width="100%">
+  <div class="text-nowrap mt-2 mb-2" style="overflow: hidden; clear:both">
+    <table id="dtHorizontalVerticalScroll" class="table table-striped table-responsive table-sm" cellspacing="0" width="100%">
       <thead class="col-sm-8 custom-thead-grey">
         <tr>
           <th width="17%">Company</th>
@@ -146,13 +139,13 @@
         {% for stock in stocks %}
         <tr>
           {% if form.stockdetails.value == form.stockdetails.field.choices.0.0 %}
-          <td width="17%"><a href="{% url 'stock_intraday' source stock.symbol %}">{{ stock.name|truncatechars:15 }}</a>
+          <td width="17%"><a href="{% url 'stock_intraday' source stock.symbol %}">{{ stock.name|truncatechars:20 }}</a>
           </td>
           {% elif form.stockdetails.value == form.stockdetails.field.choices.1.0 %}
-          <td width="17%"><a href="{% url 'stock_news' source stock.symbol %}">{{ stock.name|truncatechars:15 }}</a>
+          <td width="17%"><a href="{% url 'stock_news' source stock.symbol %}">{{ stock.name|truncatechars:20 }}</a>
           </td>
           {% elif form.stockdetails.value == form.stockdetails.field.choices.2.0 %}
-          <td width="17%"><a href="{% url 'stock_press' source stock.symbol %}">{{ stock.name|truncatechars:15 }}</a>
+          <td width="17%"><a href="{% url 'stock_press' source stock.symbol %}">{{ stock.name|truncatechars:20 }}</a>
           </td>
           {% endif %}
           <td width="10%">{{ stock.symbol }}</td>
@@ -194,6 +187,7 @@
 {% endblock content %}
 
 {% block javascript %}
+<script type="text/javascript" src="{% static 'js/datepicker.min.js' %}"></script>
 <script>
   var form = document.getElementById('id_portfolio');
 

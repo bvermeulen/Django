@@ -143,7 +143,6 @@ class PortfolioView(View):
             except Portfolio.DoesNotExist:
                 self.portfolio = None
                 self.selected_portfolio = ""
-                self.btn1_pressed = ""
                 get_stock = GetStock.EMPTY
 
             match self.btn1_pressed:

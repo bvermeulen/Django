@@ -1,47 +1,46 @@
 {% extends 'base.html' %}
 
 {% block navbutton %}
-<ul class="navbar-nav mr-auto">
-  <li class="nav-item dropdown">
-    <a class="nav-link dropdown-toggle mr-1" href="#" data-toggle="dropdown">
-      My news
-    </a>
-    <div class="dropdown-menu dropdown-menu-left">
-      <a class="dropdown-item" href="{% url 'newspage' %}">News</a>
-      <a class="dropdown-item" href="{% url 'home' %}">Home</a>
-    </div>
-  </li>
-</ul>
+<li class="nav-item dropdown">
+  <a class="nav-link dropdown-toggle me-auto" href="#" role="button" data-bs-toggle="dropdown">
+    My news
+  </a>
+  <ul class="dropdown-menu">
+    <li><a class="dropdown-item" href="{% url 'newspage' %}">News</a></li>
+    <li><a class="dropdown-item" href="{% url 'home' %}">Home</a></li>
+  </ul>
+</li>
 {% endblock %}
 
 {% block content %}
 <form id="newsitemform" method="post">
-{% csrf_token %}
-<table class="table table-striped mb-4">
-  <thead class="thead-inverse">
-  <tr>
-    <th>Site</th>
-    <th style="min-width:110px;">Date</th>
-    <th>Item</th>
-    <th></th>
-  </tr>
-  </thead>
-  <tbody>
-  {% for item in newsitems %}
-    <tr>
-    <td class="align-middle">
-      <input type="submit" class="align-middle btn btn-link" name="site_btn" value="{{ item.news_site.news_site }}">
-    </td>
-    <td class="align-middle align-left">{{ item.published|date:"d b Y" }}</td>
-    <td class="align-middle">{{ item.title }}
-      <a href="{{ item.link}}" target="_blank">  (link)</a></td>
-    <td>
-      <button class="btn btn-outline-secondary btn-sm" name="deleted_item_pk"
-              value="{{ item.pk }}" onclick="return validateDelete('{{ item.title }}')">Delete</button>
-    </td>
-    </tr>
-  {% endfor %}
-</table>
+  {% csrf_token %}
+  <table class="table table-striped mb-4">
+    <thead class="thead-inverse">
+      <tr>
+        <th>Site</th>
+        <th style="min-width:110px;">Date</th>
+        <th>Item</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for item in newsitems %}
+      <tr>
+        <td class="align-middle">
+          <input type="submit" class="align-middle btn btn-link" name="site_btn" value="{{ item.news_site.news_site }}">
+        </td>
+        <td class="align-middle align-left">{{ item.published|date:"d b Y" }}</td>
+        <td class="align-middle">{{ item.title }}
+          <a href="{{ item.link}}" target="_blank"> (link)</a>
+        </td>
+        <td>
+          <button class="btn btn-outline-secondary btn-sm" name="deleted_item_pk" value="{{ item.pk }}"
+            onclick="return validateDelete('{{ item.title }}')">Delete</button>
+        </td>
+      </tr>
+      {% endfor %}
+  </table>
 </form>
 <br><br><br><br>
 {% endblock content %}
@@ -49,7 +48,7 @@
 {% block javascript %}
 <script>
   function validateDelete(title) {
-  	confirmed = confirm("Do you really want to delete?\n" + title.slice(0,40) + " ...");
+    confirmed = confirm("Do you really want to delete?\n" + title.slice(0, 40) + " ...");
     if (confirmed) {
       return true;
     }

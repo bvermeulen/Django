@@ -15,7 +15,6 @@ $(document).ready(function () {
   $('.dataTables_length').addClass('bs-select');
 });
 /* apply coding highlighting
-
 */
 $('pre').each(function(i, block){
   hljs.highlightBlock(block);

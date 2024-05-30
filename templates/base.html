@@ -8,37 +8,21 @@
 
   <title>{% block title %}Howdiweb{% endblock %}</title>
 
-  <link href="{% static 'plugins/css/ace.min.css' %}" type="text/css" media="all" rel="stylesheet" />
-  <link href="{% static 'plugins/css/semantic.min.css' %}" type="text/css" media="all" rel="stylesheet" />
-  <link href="{% static 'plugins/css/resizable.min.css' %}" type="text/css" media="all" rel="stylesheet" />
-  <link href="{% static 'martor/css/martor.min.css' %}" type="text/css" media="all" rel="stylesheet" />
-
-  <link href="https://fonts.googleapis.com/css?family=Peralta|Teko|Russo+One" rel="stylesheet">
-  <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
-  <link rel="stylesheet" href="{% static 'css/app.css' %}">
-  <link rel="stylesheet" href="{% static 'css/container-styles.css' %}">
-  <link rel="stylesheet" href="{% static 'css/addons/datatables.min.css' %}">
-  <link rel="stylesheet" href="{% static 'css/datepicker.min.css' %}">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Peralta|Teko|Russo+One">
+  <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}" type="text/css" media="all">
+  <link rel="stylesheet" href="{% static 'css/app.css' %}" type="text/css" media="all">
+  <link rel="stylesheet" href="{% static 'css/container-styles.css' %}" type="text/css" media="all">
+  <link rel="stylesheet" href="{% static 'css/addons/datatables.min.css' %}" type="text/css" media="all">
+  <link rel="stylesheet" href="{% static 'css/datepicker.min.css' %}" type="text/css" media="all">
   <link rel="icon" href="{% static 'img/favicon.ico' %}">
-
-  <script src="{% static 'js/jquery-3.7.1.min.js' %}"></script>
-  <script src="{% static 'js/popper.min.js' %}"></script>
-  <script src="{% static 'js/bootstrap.min.js' %}"></script>
-  <script src="{% static 'js/addons/datatables.min.js' %}"></script>
-  <script src="{% static 'js/mdbtools.js' %}"></script>
-  <script src="{% static 'js/datepicker.min.js' %}"></script>
-
-  <script src="{% static 'plugins/js/ace.js' %}"></script>
-  <script src="{% static 'plugins/js/semantic.min.js' %}"></script>
-  <script src="{% static 'plugins/js/mode-markdown.js' %}"></script>
-  <script src="{% static 'plugins/js/ext-language_tools.js' %}"></script>
-  <script src="{% static 'plugins/js/theme-github.js' %}"></script>
-  <script src="{% static 'plugins/js/highlight.min.js' %}"></script>
-  <script src="{% static 'plugins/js/resizable.min.js' %}"></script>
-  <script src="{% static 'plugins/js/emojis.min.js' %}"></script>
-  <script src="{% static 'martor/js/martor.min.js' %}"></script>
-
   {% block stylesheet %}{% endblock %}
+
+  <script type="text/javascript" src="{% static 'js/jquery-3.7.1.min.js' %}"></script>
+  <script type="text/javascript" src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
+  <script type="text/javascript" src="{% static 'js/addons/datatables.min.js' %}"></script>
+  <script type="text/javascript" src="{% static 'plugins/js/highlight.min.js' %}"></script>
+  <script type="text/javascript" src="{% static 'js/mdbtools.js' %}"></script>
+  <script type="text/javascript" src="{% static 'js/datepicker.min.js' %}"></script>
 
 </head>
 
@@ -47,11 +31,12 @@
   <nav class="navbar fixed-top navbar-expand-md navbar-dark bg-dark py-md-1">
     <div class="container">
       <a class="navbar-brand" href="{% url 'home' %}">Howdiweb</a>
-      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#mainMenu">
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainmenu"
+        aria-controls="mainmenu" aria-expanded="false" aria-controls="mainmenu">
         <span class="navbar-toggler-icon"></span>
       </button>
-      <div class="collapse navbar-collapse" id="mainMenu">
-        <ul class="navbar-nav mr-auto">
+      <div class="collapse navbar-collapse" id="mainmenu">
+        <ul class="navbar-nav me-auto">
           {% block navbutton %}{% endblock %}
           {% if user.is_authenticated %}
           <li class="nav-item"><a class="nav-link" href="{% url 'boards' %}">Boards</a></li>
@@ -60,40 +45,42 @@
           <li class="nav-item"><a class="nav-link" href="{% url 'play_top_tracks' %}">Music</a></li>
           <li class="nav-item"><a class="nav-link" href="{% url 'stock_quotes' %}">Stock quote</a></li>
         </ul>
-        {% if user.is_authenticated %}
-        <ul class="navbar-nav ml-auto">
+        <ul class="navbar-nav mr-auto">
+          {% if user.is_authenticated %}
           <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" href="#" data-toggle="dropdown">
+            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
               {{ user.username }}
             </a>
-            <div class="dropdown-menu dropdown-menu-left">
-              <a class="dropdown-item" href="{% url 'mynewsitems' %}">My news</a>
-              <a class="dropdown-item" href="{% url 'playlist' %}">My music</a>
-              <a class="dropdown-item" href="{% url 'portfolio' %}">My portfolio</a>
-              <a class="dropdown-item" href="{% url 'my_account' %}">My account</a>
-              <a class="dropdown-item" href="{% url 'password_change' %}">Change password</a>
+            <ul class="dropdown-menu">
+              <li><a class="dropdown-item" href="{% url 'mynewsitems' %}">My news</a></li>
+              <li><a class="dropdown-item" href="{% url 'playlist' %}">My music</a></li>
+              <li><a class="dropdown-item" href="{% url 'portfolio' %}">My portfolio</a></li>
+              <li><a class="dropdown-item" href="{% url 'my_account' %}">My account</a></li>
+              <li><a class="dropdown-item" href="{% url 'password_change' %}">Change password</a></li>
               {% if user.is_staff %}
-              <a class="dropdown-item" href="{% url 'admin:index' %}">Admin</a>
+              <li><a class="dropdown-item" href="{% url 'admin:index' %}">Admin</a></li>
               {% endif %}
               <div class="dropdown-divider"></div>
               <form id="form_logout" action="{% url 'logout' %}" method="post">
                 {% csrf_token %}
-                <a class="dropdown-item" href="javascript:$(form_logout).submit()">Log out</a>
+                <li><a class="dropdown-item" href="javascript:$(form_logout).submit()">Log out</a></li>
               </form>
-            </div>
+            </ul>
           </li>
+          {% else %}
+          <li><a href="{% url 'login' %}" class="btn btn-outline-secondary me-1">Log in</a></li>
+          <li><a href="{% url 'signup' %}" class="btn btn-primary">Join now</a></li>
+          {% endif %}
         </ul>
-        {% else %}
-        <a href="{% url 'login' %}" class="btn btn-outline-secondary mr-1">Log in</a>
-        <a href="{% url 'signup' %}" class="btn btn-primary">Join now</a>
-        {% endif %}
       </div>
     </div>
   </nav>
 
-  <div class="container" style="padding-top: 75px">
+  <div class="container">
+    <br><br><br>
     {% block breadcrumb %}{% endblock %}
     {% block content %}{% endblock %}
+    <br><br>
     <div class="footer">
       <div class="container">
         <small>powered by DigitalOcean<a style="color:black" href="https://www.digitalocean.com/"
@@ -105,8 +92,6 @@
     </div>
   </div>
   {% endblock body %}
-
-  {% block javascript %}{% endblock %}
 </body>
-
+{% block javascript %}{% endblock %}
 </html>

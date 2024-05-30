@@ -7,74 +7,83 @@
 
 {% block title %}{{ topic.topic_subject }}{% endblock %}
 
+{% block stylesheet %}
+<link href="{% static 'plugins/css/ace.min.css' %}" type="text/css" media="all" rel="stylesheet" />
+<link href="{% static 'martor/css/martor.bootstrap.min.css' %}" type="text/css" media="all" rel="stylesheet" />
+<link href="{% static 'plugins/css/semantic.min.css' %}" type="text/css" media="all" rel="stylesheet" />
+<link href="{% static 'plugins/css/resizable.min.css' %}" type="text/css" media="all" rel="stylesheet" />
+{% endblock %}
+
 {% block navbutton %}
-<ul class="navbar-nav mr-auto">
-  <li class="nav-item dropdown">
-    <a class="nav-link dropdown-toggle mr-1" href="#" data-toggle="dropdown">
-      {{ topic.topic_subject }}
-    </a>
-    <div class="dropdown-menu dropdown-menu-left">
-      <a class="dropdown-item" href="{% url 'board_topics' topic.board.pk %}">{{ topic.board.name }}</a>
-      <a class="dropdown-item" href="{% url 'boards' %}">Boards</a>
-      <a class="dropdown-item" href="{% url 'home' %}">Home</a>
-    </div>
-  </li>
-</ul>
+<li class="nav-item dropdown">
+  <a class="nav-link dropdown-toggle me-auto" href="#" role="button" data-bs-toggle="dropdown">
+    {{ topic.topic_subject }}
+  </a>
+  <ul class="dropdown-menu">
+    <li><a class="dropdown-item" href="{% url 'board_topics' topic.board.pk %}">{{ topic.board.name }}</a></li>
+    <li><a class="dropdown-item" href="{% url 'boards' %}">Boards</a></li>
+    <li><a class="dropdown-item" href="{% url 'home' %}">Home</a></li>
+  </ul>
+</li>
 {% endblock %}
 
 {% block content %}
-  <div class="mb-4">
-    <a href="{% url 'add_to_topic' topic.board.pk topic.pk %}" class="btn btn-primary" role="button">Add to topic</a>
-  </div>
-  {% for post in posts %}
-    <div class="card mb-2 border-dark">
-      <div class="card-header text-white bg-dark py-2 px-3">{{ topic.topic_subject }}</div>
-      {% if post.post_subject %}
-        <div class="card-header text-black bg-grey py-2 px-3">{{ post.post_subject }}</div>
-      {% endif %}
+<div class="mb-2">
+  <a href="{% url 'add_to_topic' topic.board.pk topic.pk %}" class="btn btn-primary" role="button">Add to topic</a>
+</div>
+{% for post in posts %}
+<div class="card mb-2 border-dark">
+  <div class="card-header text-white bg-dark py-2 px-3">{{ topic.topic_subject }}</div>
+  {% if post.post_subject %}
+  <div class="card-header text-black bg-grey py-2 px-3">{{ post.post_subject }}</div>
+  {% endif %}
 
-      <div class="card-body p-2">
-        <div class="row">
-          <div class="hideOnMobile col-2">
-            <img src="{{ post.created_by|gravatar }}" alt="{{ post.created_by.username }}" class="w-100">
-            <small>{{ post.created_by.username }}</small>
-            <small> - posts: {{ post.created_by.posts.count }}</small>
+  <div class="card-body p-2">
+    <div class="row">
+      <div class="hideOnMobile col-2">
+        <img src="{{ post.created_by|gravatar }}" alt="{{ post.created_by.username }}" class="w-100">
+        <small>{{ post.created_by.username }}</small>
+        <small> - posts: {{ post.created_by.posts.count }}</small>
+      </div>
+      <div class="col-10">
+        <div class="row mb-3">
+          <div class="col-6">
+            <small class="text-muted">Updated {{ post.updated_at|naturaltime }}</small>
+            <small class="text-muted"> by {{ post.updated_by.username }}</small>
           </div>
-          <div class="col-10">
-            <div class="row mb-3">
-              <div class="col-6">
-                <small class="text-muted">Updated {{ post.updated_at|naturaltime }}</small>
-                <small class="text-muted"> by {{ post.updated_by.username }}</small>
-              </div>
-              <div class="col-6 text-right">
-              </div>
-            </div>
-            {{ post.message|safe_markdown }}
-            {% if user in post.allowed_editor.all or user == post.created_by or user == moderator %}
-              <div class="mt-3; btn-group">
-                <a href="{% url 'edit_post' post.topic.board.pk post.topic.pk post.pk %}"
-                  style="margin:1px"
-                  class="btn btn-primary btn-sm"
-                  role="button">Edit</a>
-                <form method="post">
-                  {% csrf_token %}
-                  <button style="margin:1px" class="btn btn-primary btn-sm"
-                          name="deleted_post_pk" value="{{ post.pk }}"
-                          onclick="return Validate()">Delete</button>
-                </form>
-              </div>
-            {% endif %}
+          <div class="col-6 text-right">
           </div>
         </div>
+        {{ post.message|safe_markdown }}
+        {% if user in post.allowed_editor.all or user == post.created_by or user == moderator %}
+        <div class="mt-3; btn-group">
+          <a href="{% url 'edit_post' post.topic.board.pk post.topic.pk post.pk %}" style="margin:1px"
+            class="btn btn-primary btn-sm" role="button">Edit</a>
+          <form method="post">
+            {% csrf_token %}
+            <button style="margin:1px" class="btn btn-primary btn-sm" name="deleted_post_pk" value="{{ post.pk }}"
+              onclick="return Validate()">Delete</button>
+          </form>
+        </div>
+        {% endif %}
       </div>
     </div>
-  {% endfor %}
-
-  {% include 'includes/pagination.html' %}
-  <br>
-  <br>
+  </div>
+</div>
+{% endfor %}
+{% include 'includes/pagination.html' %}
 {% endblock %}
 
 {% block javascript %}
-  <script src="{% static 'js/board.js' %}"></script>
+<script type="text/javascript" src="{% static 'plugins/js/ace.js' %}"></script>
+<script type="text/javascript" src="{% static 'plugins/js/mode-markdown.js' %}"></script>
+<script type="text/javascript" src="{% static 'plugins/js/ext-language_tools.js' %}"></script>
+<script type="text/javascript" src="{% static 'plugins/js/theme-github.js' %}"></script>
+<script type="text/javascript" src="{% static 'plugins/js/typo.js' %}"></script>
+<script type="text/javascript" src="{% static 'plugins/js/spellcheck.js' %}"></script>
+<script type="text/javascript" src="{% static 'plugins/js/highlight.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'plugins/js/resizable.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'plugins/js/emojis.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'martor/js/martor.bootstrap.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'js/board.js' %}"></script>
 {% endblock %}

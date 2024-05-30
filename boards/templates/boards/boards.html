@@ -3,56 +3,54 @@
 {% load humanize %}
 
 {% block navbutton %}
-<ul class="navbar-nav mr-auto">
-  <li class="nav-item dropdown">
-    <a class="nav-link dropdown-toggle mr-1" href="#" data-toggle="dropdown">
-      Boards
-    </a>
-    <div class="dropdown-menu dropdown-menu-left">
-      <a class="dropdown-item" href="{% url 'home' %}">Home</a>
-    </div>
-  </li>
-</ul>
+<li class="nav-item dropdown">
+  <a class="nav-link dropdown-toggle me-auto" href="#" role="button" data-bs-toggle="dropdown">
+    Boards
+  </a>
+  <ul class="dropdown-menu">
+    <li><a class="dropdown-item" href="{% url 'home' %}">Home</a></li>
+  </ul>
+</li>
 {% endblock %}
 
 {% block content %}
-  <table class="table table-striped mb-4">
-    <thead class="thead-inverse">
+<table class="table table-striped mb-4">
+  <thead class="thead-inverse">
     <tr>
       <th>Board</th>
       <th>Posts</th>
       <th>Topics</th>
       <th>Last Post</th>
     </tr>
-    </thead>
-    <tbody>
+  </thead>
+  <tbody>
     {% for board in boards %}
-      <tr>
+    <tr>
       <td>
-      <a href="{% url 'board_topics' board.pk %}">{{board.name}}</a>
-         <small class="text-muted d-block">{{board.description}}</small>
+        <a href="{% url 'board_topics' board.pk %}">{{board.name}}</a>
+        <small class="text-muted d-block">{{board.description}}</small>
       </td>
       <td class="align-middle">{{board.get_posts_count}}</td>
       <td class="align-middle">{{board.topics.count}}</td>
       <td class="align-middle">
         {% with post=board.get_last_post %}
-          {% if post %}
-            <small>
-              <a href="{% url 'topic_posts' board.pk post.topic.pk %}">
-                By {{ post.created_by.username }} - {{ post.created_at|naturaltime }}
-              </a>
-            </small>
-          {% else %}
-            <small>
-              <em>No posts yet ... </em>
-            </small>
-          {% endif %}
+        {% if post %}
+        <small>
+          <a href="{% url 'topic_posts' board.pk post.topic.pk %}">
+            By {{ post.created_by.username }} - {{ post.created_at|naturaltime }}
+          </a>
+        </small>
+        {% else %}
+        <small>
+          <em>No posts yet ... </em>
+        </small>
+        {% endif %}
         {% endwith %}
       </td>
-      </tr>
+    </tr>
     {% endfor %}
-     </body>
-  </table>
-  <br>
-  <br>
+    </body>
+</table>
+<br>
+<br>
 {% endblock %}

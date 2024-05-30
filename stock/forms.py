@@ -5,17 +5,10 @@ from howdimain.howdimain_vars import BASE_CURRENCIES, STOCK_DETAILS
 from .models import Exchange
 
 
-try:
-    default_user = Person.objects.get(username="default_user")
-
-except Person.DoesNotExist:
-    default_user = None
-
-
 class StockQuoteForm(forms.Form):
-
     def __init__(self, *args, user=None, **kwargs):
         super(StockQuoteForm, self).__init__(*args, **kwargs)
+
 
         self.fields["quote_string"] = forms.CharField(
             max_length=150,
@@ -24,6 +17,12 @@ class StockQuoteForm(forms.Form):
         )
 
         self.fields["selected_portfolio"] = forms.CharField(required=False)
+
+        try:
+            default_user = Person.objects.get(username="default_user")
+
+        except Person.DoesNotExist:
+            default_user = None
 
         portfolio_choices = default_user.get_portfolio_names() if default_user else []
         if user and user.is_authenticated:
@@ -53,7 +52,9 @@ class StockQuoteForm(forms.Form):
 
         self.fields["datepicked"] = forms.DateField(
             input_formats=["%d/%m/%Y"],
-            widget=FengyuanChenDatePickerInput(attrs={"size": "9"}),
+            widget=FengyuanChenDatePickerInput(
+                attrs={"size": "9", "class": "btn btn-outline-primary btn-sm ms-1 mt-1"}
+            ),
             required=True,
         )
 
@@ -100,7 +101,9 @@ class PortfolioForm(forms.Form):
         )
         self.fields["datepicked"] = forms.DateField(
             input_formats=["%d/%m/%Y"],
-            widget=FengyuanChenDatePickerInput(attrs={"size": "9"}),
+            widget=FengyuanChenDatePickerInput(
+                attrs={"size": "9", "class": "btn btn-outline-primary btn-sm ms-1 mt-1"}
+            ),
             required=True,
         )
         self.fields["datepicked_pressed"] = forms.CharField(required=False)

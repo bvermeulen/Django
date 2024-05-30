@@ -2,22 +2,20 @@
 {% load humanize %}
 
 {% block navbutton %}
-<ul class="navbar-nav mr-auto">
-  <li class="nav-item dropdown">
-    <a class="nav-link mr-1">Home</a>
-  </li>
-</ul>
+<li class="nav-item dropdown">
+  <a class="nav-link me-1">Home</a>
+</li>
 {% endblock %}
 
 {% block content %}
 {% if user.is_authenticated %}
-  <img src="{{member_image.url}}" width="80%"</img>
-  <br><br>
-  <div class="textarea" contenteditable="false">{{ member_text|safe }}</div>
+<img src="{{member_image.url}}" width="80%" </img>
+<br><br>
+<div class="textarea" contenteditable="false">{{ member_text|safe }}</div>
 {% else %}
-  <img src="{{welcome_image.url}}" width="80%"</img>
-  <br><br>
-  <div class="textarea" contenteditable="false">{{ welcome_text|safe }}</div>
+<img src="{{welcome_image.url}}" width="80%" </img>
+<br><br>
+<div class="textarea" contenteditable="false">{{ welcome_text|safe }}</div>
 {% endif %}
 <br><br><br><br>
 {% endblock %}

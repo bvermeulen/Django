@@ -4,34 +4,17 @@
 {% load crispy_forms_tags %}
 
 {% block title %}Stock quotes{% endblock %}
-
-{% block stylesheet %}
-<link rel="stylesheet" type="text/css" href="{% static 'css/container-styles.css' %}">
-<style>
-  .responsive-float {
-    float: right;
-  }
-
-  @media (max-width: 750px) {
-    .responsive-float {
-      clear: both;
-      float: left;
-    }
-  }
-</style>
-{% endblock %}
+{% block stylesheet %}{% endblock %}
 
 {% block navbutton %}
-<ul class="navbar-nav mr-auto">
-  <li class="nav-item dropdown">
-    <a class="nav-link dropdown-toggle mr-1" href="#" data-toggle="dropdown">
-      Stock quotes
-    </a>
-    <div class="dropdown-menu dropdown-menu-left">
-      <a class="dropdown-item" href="{% url 'home' %}">Home</a>
-    </div>
-  </li>
-</ul>
+<li class="nav-item dropdown">
+  <a class="nav-link dropdown-toggle me-auto" href="#" role="button" data-bs-toggle="dropdown">
+    Stock quotes
+  </a>
+  <ul class="dropdown-menu">
+    <li><a class="dropdown-item" href="{% url 'home' %}">Home</a></li>
+  </ul>
+</li>
 {% endblock %}
 
 {% block content %}
@@ -42,14 +25,12 @@
   <a style="display: none">{{ form.quote_string }} {{ form.stockdetails }} {{ form.portfolios }}
     {{ form.markets }} {{ form.datepicked_pressed }}</a>
 
-  <div class="d-inline-flex float-left">
-    <div>
-      <button class="btn btn-outline-primary btn-sm"
-        onclick="return SubmitQuoteString('{{ form.quote_string.value }}')">Quote</button>
-    </div>
-
+  <div class="d-inline-flex flex-wrap">
+    <button class="btn btn-outline-primary btn-sm mt-1"
+      onclick="return SubmitQuoteString('{{ form.quote_string.value }}')">Quote
+    </button>
     <div class="dropdown">
-      <button type="button" class="dropdown-toggle btn btn-outline-primary btn-sm ml-1">
+      <button type="button" class="dropdown-toggle btn btn-outline-primary btn-sm ms-1 mt-1">
         {% if form.portfolios.value == '' %}
         Portfolio
         {% else %}
@@ -59,45 +40,40 @@
       <div class="dropdown-content">
         {% for portfolio in form.portfolios %}
         {% if not portfolio.data.selected %}
-        <button class="btn btn-link my-0" value="{{ portfolio.data.value}}" name="{{ portfolio.data.name }}">
-          <a>{{ portfolio.choice_label }}</a></button>
+        <button class="btn btn-link text-decoration-none text-nowrap" value="{{ portfolio.data.value}}"
+          name="{{ portfolio.data.name }}">
+          <a>{{ portfolio.choice_label }}</a>
+        </button>
         {% endif %}
         {% endfor %}
       </div>
     </div>
-    <div class="ml-1">
-      {{ form.datepicked }}
-    </div>
-
-    <div>
-      <button class="btn dropdown-toggle btn-outline-primary btn-sm ml-1" data-toggle="dropdown">Markets</button>
-      <ul class="dropdown-menu scroll" style="height:40%;">
-        {{ form.markets|as_crispy_field }}
-      </ul>
-    </div>
-
+    {{ form.datepicked }}
+    <button class="btn dropdown-toggle btn-outline-primary btn-sm ms-1 mt-1" data-bs-toggle="dropdown">Markets</button>
+    <ul class="dropdown-menu scroll ps-1" style="height:40%">
+      {{ form.markets|as_crispy_field }}
+    </ul>
     <div class="dropdown">
-      <button type="button" class="btn dropdown-toggle btn-outline-primary btn-sm ml-1">
+      <button type="button" class="btn dropdown-toggle btn-outline-primary btn-sm ms-1 mt-1">
         {{ form.stockdetails.value }}
       </button>
       <div class="dropdown-content">
         {% for stockdetail in form.stockdetails %}
         {% if not stockdetail.data.selected %}
-        <button class="btn btn-link" value="{{ stockdetail.data.value }}"
+        <button class="btn btn-link text-decoration-none text-nowrap" value="{{ stockdetail.data.value }}"
           name="{{ stockdetail.data.name }}">{{stockdetail.choice_label }}</button>
         {% endif %}
         {% endfor %}
       </div>
     </div>
-
     {% if user.is_authenticated %}
-    <button type="button" class="btn btn-outline-primary btn-sm ml-1"
+    <button type="button" class="btn btn-outline-primary btn-sm ms-1 mt-1"
       onclick="window.location.href='{% url 'portfolio' %}'">My portfolio</button>
     {% endif %}
   </div>
 
-  <div class="table-responsive text-nowrap" style="overflow: hidden">
-    <table id="dtHorizontalVerticalScroll" class="table table-striped mb-2 mt-1 table-sm" cellspacing="0" width="100%">
+  <div class="text-nowrap mb-2 mt-2" style="overflow: hidden">
+    <table id="dtHorizontalVerticalScroll" class="table table-responsive table-striped table-sm" cellspacing="0" width="100%">
       <thead class="custom-thead-grey">
         <tr>
           <th width="17%">Company</th>
@@ -118,13 +94,13 @@
         {% for stock in stock_info %}
         <tr>
           {% if form.stockdetails.value == form.stockdetails.field.choices.0.0 %}
-          <td width="17%"><a href="{% url 'stock_intraday' source stock.symbol %}">{{ stock.name|truncatechars:15 }}</a>
+          <td width="17%"><a href="{% url 'stock_intraday' source stock.symbol %}">{{ stock.name|truncatechars:20 }}</a>
           </td>
           {% elif form.stockdetails.value == form.stockdetails.field.choices.1.0 %}
-          <td width="17%"><a href="{% url 'stock_news' source stock.symbol %}">{{ stock.name|truncatechars:15 }}</a>
+          <td width="17%"><a href="{% url 'stock_news' source stock.symbol %}">{{ stock.name|truncatechars:20 }}</a>
           </td>
           {% elif form.stockdetails.value == form.stockdetails.field.choices.2.0 %}
-          <td width="17%"><a href="{% url 'stock_press' source stock.symbol %}">{{ stock.name|truncatechars:15 }}</a>
+          <td width="17%"><a href="{% url 'stock_press' source stock.symbol %}">{{ stock.name|truncatechars:20 }}</a>
           </td>
           {% endif %}
           <td width="10%">{{ stock.symbol }}</td>

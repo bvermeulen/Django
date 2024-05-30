@@ -6,45 +6,62 @@
 
 {% block title %}Edit post{% endblock %}
 
+{% block stylesheet %}
+<link rel="stylesheet" href="{% static 'plugins/css/ace.min.css' %}" type="text/css" media="all"/>
+<link rel="stylesheet" href="{% static 'martor/css/martor.bootstrap.min.css' %}" type="text/css" media="all"/>
+<link rel="stylesheet" href="{% static 'plugins/css/semantic.min.css' %}" type="text/css" media="all"/>
+<link rel="stylesheet" href="{% static 'plugins/css/resizable.min.css' %}" type="text/css" media="all"/>
+{% endblock %}
+
 {% block navbutton %}
-<ul class="navbar-nav mr-auto">
-  <li class="nav-item dropdown">
-    <a class="nav-link dropdown-toggle mr-1" href="#" data-toggle="dropdown">
-      Edit contribution
-    </a>
-    <div class="dropdown-menu dropdown-menu-left">
-      <a class="dropdown-item" href="{% url 'topic_posts' post.topic.board.pk post.topic.pk %}">{{ post.topic.topic_subject }}</a>
-      <a class="dropdown-item" href="{% url 'board_topics' post.topic.board.pk %}">{{ post.topic.board.name }}</a>
-      <a class="dropdown-item" href="{% url 'boards' %}">Boards</a>
-      <a class="dropdown-item" href="{% url 'home' %}">Home</a>
-    </div>
-  </li>
-</ul>
+<li class="nav-item dropdown">
+  <a class="nav-link dropdown-toggle me-auto" href="#" role="button" data-bs-toggle="dropdown">
+    Edit contribution
+  </a>
+  <ul class="dropdown-menu">
+    <li><a class="dropdown-item" href="{% url 'topic_posts' post.topic.board.pk post.topic.pk %}">
+        {{ post.topic.topic_subject }}</a></li>
+    <li><a class="dropdown-item" href="{% url 'board_topics' post.topic.board.pk %}">
+        {{ post.topic.board.name }}</a></li>
+    <li><a class="dropdown-item" href="{% url 'boards' %}">Boards</a></li>
+    <li><a class="dropdown-item" href="{% url 'home' %}">Home</a></li>
+  </ul>
+</li>
 {% endblock %}
 
 {% block content %}
-  <form method="post" class="mb-4">
-    {% csrf_token %}
+<form method="post">
+  {% csrf_token %}
+  <div class="mb-4">
     <button type="submit" class="btn btn-primary btn-sm">Save changes</button>
-    <button style="margin:1px" class="btn btn-primary btn-sm"
-            name="deleted_post_pk" value="{{ post.pk }}"
-            onclick="return Validate()">Delete contribtion</button>
-    <button class="btn dropdown-toggle btn-primary btn-sm" data-toggle="dropdown"
-      >Allowed editors<span class="caret"></span></button>
-    <ul class="dropdown-menu"  style="height:40%; overflow:hidden; overflow-y:scroll;">
+    <button class="btn btn-primary btn-sm" name="deleted_post_pk" value="{{ post.pk }}"
+      onclick="return Validate()">Delete contribtion
+    </button>
+    <button class="btn dropdown-toggle btn-primary btn-sm" data-bs-toggle="dropdown">Allowed editors<span
+        class="caret"></span></button>
+    <ul class="dropdown-menu" style="height:40%; overflow:hidden; overflow-y:scroll;">
       {{ form.allowed_editor|as_crispy_field }}
     </ul>
-    <a href="{% url 'topic_posts' post.topic.board.pk post.topic.pk %}"
-       class="btn btn-outline-secondary btn-sm"
-       role="button">Cancel</a>
-    <br></br>
+    <a href="{% url 'topic_posts' post.topic.board.pk post.topic.pk %}" class="btn btn-outline-secondary btn-sm"
+      role="button">Cancel</a>
+  </div>
+  <div class="mb-4">
     {{ form.post_subject|as_crispy_field }}
     {{ form.message }}
-  </form>
-  <br>
-  <br>
+  </div>
+</form>
 {% endblock %}
 
 {% block javascript %}
-  <script src="{% static 'js/board.js' %}"></script>
+<script type="text/javascript" src="{% static 'plugins/js/ace.js' %}"></script>
+<script type="text/javascript" src="{% static 'plugins/js/mode-markdown.js' %}"></script>
+<script type="text/javascript" src="{% static 'plugins/js/ext-language_tools.js' %}"></script>
+<script type="text/javascript" src="{% static 'plugins/js/theme-github.js' %}"></script>
+<script type="text/javascript" src="{% static 'plugins/js/typo.js' %}"></script>
+<script type="text/javascript" src="{% static 'plugins/js/spellcheck.js' %}"></script>
+<script type="text/javascript" src="{% static 'plugins/js/highlight.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'plugins/js/resizable.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'plugins/js/emojis.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'martor/js/martor.bootstrap.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'js/board.js' %}"></script>
 {% endblock %}

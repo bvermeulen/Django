@@ -5,21 +5,19 @@
 {%block title %}Stock press{% endblock %}
 
 {% block navbutton %}
-<ul class="navbar-nav mr-auto">
-  <li class="nav-item dropdown">
-    <a class="nav-link dropdown-toggle mr-1" href="#" data-toggle="dropdown">
-      Stock press
-    </a>
-    <div class="dropdown-menu dropdown-menu-left">
-      {% if source == 'quotes' %}
-        <a class="dropdown-item" href="{% url 'stock_quotes' %}">Quotes</a>
-      {% else %}
-        <a class="dropdown-item" href="{% url 'portfolio' %}">Portfolio</a>
-      {% endif %}
-      <a class="dropdown-item" href="{% url 'home' %}">Home</a>
-    </div>
-  </li>
-</ul>
+<li class="nav-item dropdown">
+  <a class="nav-link dropdown-toggle me-auto" href="#" role="button" data-bs-toggle="dropdown">
+    Stock press
+  </a>
+  <ul class="dropdown-menu">
+    {% if source == 'quotes' %}
+    <li><a class="dropdown-item" href="{% url 'stock_quotes' %}">Quotes</a></li>
+    {% else %}
+    <li><a class="dropdown-item" href="{% url 'portfolio' %}">Portfolio</a></li>
+    {% endif %}
+    <li><a class="dropdown-item" href="{% url 'home' %}">Home</a></li>
+  </ul>
+</li>
 {% endblock %}
 
 {% block content %}

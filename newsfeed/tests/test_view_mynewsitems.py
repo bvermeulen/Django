@@ -2,7 +2,7 @@ from django.contrib.auth.models import User
 from django.urls import reverse, resolve
 from django.test import TestCase
 from howdimain.utils.html_utils import convert_string_to_html
-from ..views.mynewsitems import mynewsitems
+from ..views.mynewsitems import MyNewsItems
 from ..models import NewsSite, UserNewsSite, UserNewsItem
 from ..module_news import update_news, feedparser_time_to_datetime
 
@@ -19,11 +19,11 @@ class MyNewsSitesViewTests(TestCase):
 
     def test_newssites_url_resolves_mynewsitems_view(self):
         view = resolve('/news/mynewsitems/')
-        self.assertEqual(view.func, mynewsitems)
+        self.assertEqual(view.func.view_class, MyNewsItems)
 
     def test_newssites_view_not_logged_in_redirects_to_login_page(self):
         self.client.logout()
-        response = self.client.post(reverse('mynewsitems'))
+        response = self.client.get(reverse('mynewsitems'))
         login_url = reverse('login') + f'?next={reverse("mynewsitems")}'
         self.assertRedirects(response, login_url, fetch_redirect_response=False)
         self.assertEqual(response.status_code, 302)
@@ -33,12 +33,12 @@ class MyNewsSitesViewTests(TestCase):
         self.assertContains(response, 'csrfmiddlewaretoken')
 
     def test_mynewsitems_view_contains_link_to_home_page(self):
-        response = self.client.post(reverse('mynewsitems'))
+        response = self.client.get(reverse('mynewsitems'))
         home_url = reverse('home')
         self.assertContains(response, f'href="{home_url}"')
 
     def test_mynewsitems_view_contains_link_to_newspage(self):
-        response = self.client.post(reverse('mynewsitems'))
+        response = self.client.get(reverse('mynewsitems'))
         news_url = reverse('newspage')
         self.assertContains(response, f'href="{news_url}"')
 
@@ -70,7 +70,7 @@ class MyNewsSitesPostTests(TestCase):
 
     def setUp(self):
         self.client.login(username='testuser', password='123')
-        self.response = self.client.post(reverse('mynewsitems'))
+        self.response = self.client.get(reverse('mynewsitems'))
 
     def test_csrf(self):
         self.assertContains(self.response, 'csrfmiddlewaretoken')

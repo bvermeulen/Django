@@ -9,6 +9,7 @@
 }
 
 .item_select {
+  text-align: left;
   color: black;
   font-weight: normal;
   font-size: 1.0em;
@@ -16,6 +17,7 @@
 }
 
 .item_select:hover {
+  text-align: left;
   color: black;
   font-weight: bold;
   font-size: 1.1em;

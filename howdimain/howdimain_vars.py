@@ -21,6 +21,7 @@ IMG_WIDTH_PX = 900
 IMG_WIDTH_PERC = "70%"
 RIGHT_ARROW = "\u25B6"
 LEFT_ARROW = "\u25C0"
+ITEMS_PER_PAGE = 15
 
 # common values for app stock
 URL_ALPHAVANTAGE = "www.alphavantage.co"

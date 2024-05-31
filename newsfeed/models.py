@@ -27,4 +27,7 @@ class UserNewsItem(models.Model):
     published = models.DateTimeField(null=True)
 
     def __str__(self):
-        return self.user.username
+        return (
+            f"{self.news_site}: {self.title}, {self.published} ({self.link}) "
+            f"(username: {self.user.username})"
+        )

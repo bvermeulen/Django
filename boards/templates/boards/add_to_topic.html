@@ -16,15 +16,15 @@
 
 {% block navbutton %}
 <li class="nav-item dropdown">
-  <a class="nav-link btn-link me-auto" href="#" role="button" data-bs-toggle="dropdown">
+  <a class="nav-link me-auto" href="#" role="button" data-bs-toggle="dropdown">
     Post addition
   </a>
   <ul class="dropdown-menu">
-    <li><a class="dropdown-item btn-link" href="{% url 'topic_posts' topic.board.pk topic.pk %}">{{ topic.topic_subject }}</a>
+    <li><a class="dropdown-item" href="{% url 'topic_posts' topic.board.pk topic.pk %}">{{ topic.topic_subject }}</a>
     </li>
-    <li><a class="dropdown-item btn-link" href="{% url 'board_topics' topic.board.pk %}">{{ topic.board.name }}</a></li>
-    <li><a class="dropdown-item btn-link" href="{% url 'boards' %}">Boards</a></li>
-    <li><a class="dropdown-item btn-link" href="{% url 'home' %}">Home</a></li>
+    <li><a class="dropdown-item" href="{% url 'board_topics' topic.board.pk %}">{{ topic.board.name }}</a></li>
+    <li><a class="dropdown-item" href="{% url 'boards' %}">Boards</a></li>
+    <li><a class="dropdown-item" href="{% url 'home' %}">Home</a></li>
   </ul>
 </li>
 {% endblock %}

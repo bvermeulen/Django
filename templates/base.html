@@ -39,31 +39,31 @@
         <ul class="navbar-nav me-auto">
           {% block navbutton %}{% endblock %}
           {% if user.is_authenticated %}
-          <li class="nav-item"><a class="nav-link btn-link" href="{% url 'boards' %}">Boards</a></li>
+          <li class="nav-item"><a class="nav-link" href="{% url 'boards' %}">Boards</a></li>
           {% endif %}
-          <li class="nav-item"><a class="nav-link btn-link" href="{% url 'newspage' %}">News</a></li>
-          <li class="nav-item"><a class="nav-link btn-link" href="{% url 'play_top_tracks' %}">Music</a></li>
-          <li class="nav-item"><a class="nav-link btn-link" href="{% url 'stock_quotes' %}">Stock quote</a></li>
+          <li class="nav-item"><a class="nav-link" href="{% url 'newspage' %}">News</a></li>
+          <li class="nav-item"><a class="nav-link" href="{% url 'play_top_tracks' %}">Music</a></li>
+          <li class="nav-item"><a class="nav-link" href="{% url 'stock_quotes' %}">Stock quote</a></li>
         </ul>
         <ul class="navbar-nav mr-auto">
           {% if user.is_authenticated %}
-          <li class="nav-item dropdown btn-link">
+          <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
               {{ user.username }}
             </a>
             <ul class="dropdown-menu">
-              <li><a class="dropdown-item btn-link" href="{% url 'mynewsitems' %}">My news</a></li>
-              <li><a class="dropdown-item btn-link" href="{% url 'playlist' %}">My music</a></li>
-              <li><a class="dropdown-item btn-link" href="{% url 'portfolio' %}">My portfolio</a></li>
-              <li><a class="dropdown-item btn-link" href="{% url 'my_account' %}">My account</a></li>
-              <li><a class="dropdown-item btn-link" href="{% url 'password_change' %}">Change password</a></li>
+              <li><a class="dropdown-item" href="{% url 'mynewsitems' %}">My news</a></li>
+              <li><a class="dropdown-item" href="{% url 'playlist' %}">My music</a></li>
+              <li><a class="dropdown-item" href="{% url 'portfolio' %}">My portfolio</a></li>
+              <li><a class="dropdown-item" href="{% url 'my_account' %}">My account</a></li>
+              <li><a class="dropdown-item" href="{% url 'password_change' %}">Change password</a></li>
               {% if user.is_staff %}
-              <li><a class="dropdown-item btn-link" href="{% url 'admin:index' %}">Admin</a></li>
+              <li><a class="dropdown-item" href="{% url 'admin:index' %}">Admin</a></li>
               {% endif %}
               <div class="dropdown-divider"></div>
               <form id="form_logout" action="{% url 'logout' %}" method="post">
                 {% csrf_token %}
-                <li><a class="dropdown-item btn-link" href="javascript:$(form_logout).submit()">Log out</a></li>
+                <li><a class="dropdown-item" href="javascript:$(form_logout).submit()">Log out</a></li>
               </form>
             </ul>
           </li>
@@ -94,4 +94,5 @@
   {% endblock body %}
 </body>
 {% block javascript %}{% endblock %}
+
 </html>

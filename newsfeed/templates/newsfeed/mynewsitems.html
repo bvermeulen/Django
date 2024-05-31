@@ -6,8 +6,8 @@
     My news
   </a>
   <ul class="dropdown-menu">
-    <li><a class="dropdown-item btn-link" href="{% url 'newspage' %}">News</a></li>
-    <li><a class="dropdown-item btn-link" href="{% url 'home' %}">Home</a></li>
+    <li><a class="dropdown-item" href="{% url 'newspage' %}">News</a></li>
+    <li><a class="dropdown-item" href="{% url 'home' %}">Home</a></li>
   </ul>
 </li>
 {% endblock %}
@@ -32,7 +32,7 @@
         </td>
         <td class="align-middle align-left">{{ item.published|date:"d b Y" }}</td>
         <td class="align-middle">{{ item.title }}
-          <a href="{{ item.link}}" target="_blank"> (link)</a>
+          <a class="btn btn-link" href="{{ item.link}}" target="_blank"> (link)</a>
         </td>
         <td>
           <button class="btn btn-outline-secondary btn-sm" name="deleted_item_pk" value="{{ item.pk }}"
@@ -40,7 +40,9 @@
         </td>
       </tr>
       {% endfor %}
+    </tbody>
   </table>
+  {% include 'includes/pagination.html' %}
 </form>
 <br><br><br><br>
 {% endblock content %}

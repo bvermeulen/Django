@@ -19,12 +19,12 @@
     Edit contribution
   </a>
   <ul class="dropdown-menu">
-    <li><a class="dropdown-item btn-link" href="{% url 'topic_posts' post.topic.board.pk post.topic.pk %}">
+    <li><a class="dropdown-item" href="{% url 'topic_posts' post.topic.board.pk post.topic.pk %}">
         {{ post.topic.topic_subject }}</a></li>
-    <li><a class="dropdown-item btn-link" href="{% url 'board_topics' post.topic.board.pk %}">
+    <li><a class="dropdown-item" href="{% url 'board_topics' post.topic.board.pk %}">
         {{ post.topic.board.name }}</a></li>
-    <li><a class="dropdown-item btn-link" href="{% url 'boards' %}">Boards</a></li>
-    <li><a class="dropdown-item btn-link" href="{% url 'home' %}">Home</a></li>
+    <li><a class="dropdown-item" href="{% url 'boards' %}">Boards</a></li>
+    <li><a class="dropdown-item" href="{% url 'home' %}">Home</a></li>
   </ul>
 </li>
 {% endblock %}

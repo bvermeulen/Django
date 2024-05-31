@@ -103,7 +103,7 @@ class PostListView(ListView):
     paginate_by = POSTS_PER_PAGE
 
 
-    def get_context_data(self, **kwargs):  #pylint: disable=arguments-differ
+    def get_context_data(self, **kwargs): 
         session_key = f'viewed_topic_{self.topic.pk}'
         if not self.request.session.get(session_key, False):
             self.topic.views += 1

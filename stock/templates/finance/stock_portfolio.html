@@ -65,8 +65,7 @@
         <div class="dropdown-divider"></div>
         {% for portfolio in form.portfolios %}
         {% if not portfolio.data.selected %}
-        <button class="btn btn-link text-nowrap" value="{{ portfolio.data.value}}"
-          name="{{ portfolio.data.name }}">
+        <button class="btn btn-link text-nowrap" value="{{ portfolio.data.value}}" name="{{ portfolio.data.name }}">
           <a>{{ portfolio.choice_label }}</a></button>
         {% endif %}
         {% endfor %}
@@ -97,8 +96,7 @@
       <div class="dropdown-content">
         {% for currency in form.currencies %}
         {% if not currency.data.selected %}
-        <button class="btn btn-link text-nowrap" value="{{ currency.data.value }}"
-          name="{{ currency.data.name }}">
+        <button class="btn btn-link text-nowrap" value="{{ currency.data.value }}" name="{{ currency.data.name }}">
           {{ currency.choice_label }}</button>
         {% endif %}
         {% endfor %}
@@ -108,18 +106,19 @@
     <input type="hidden" id="id_datepicked" name="datepicked" value="01/01/1970">
     {% endif %}
   </div>
-  <div class="d-inline-flex responsive-float mt-2">
-    {% if form.portfolio_name.value != '' %}
+  {% if form.portfolio_name.value != '' %}
+  <div class="d-flex float-lg-right mt-2">
     <strong class="me-2">Value:</strong>
     <strong class="me-2">{{ totals.value }}</strong>
     <strong class="me-1">Change:</strong>
     <strong class="me-2" style="color:{{ totals.color }}">{{ totals.caret}} {{ totals.value_change }}</strong>
     <strong class="me-2">{{ exchangerate }}</strong>
-    {% endif %}
   </div>
+  {% endif %}
 
   <div class="text-nowrap mt-2 mb-2" style="overflow: hidden; clear:both">
-    <table id="dtHorizontalVerticalScroll" class="table table-striped table-responsive table-sm" cellspacing="0" width="100%">
+    <table id="dtHorizontalVerticalScroll" class="table table-striped table-responsive table-sm" cellspacing="0"
+      width="100%">
       <thead class="col-sm-8 custom-thead-grey">
         <tr>
           <th width="17%">Company</th>
@@ -139,13 +138,16 @@
         {% for stock in stocks %}
         <tr>
           {% if form.stockdetails.value == form.stockdetails.field.choices.0.0 %}
-          <td width="17%"><a class="btn-link" href="{% url 'stock_intraday' source stock.symbol %}">{{ stock.name|truncatechars:20 }}</a>
+          <td width="17%"><a class="btn-link" href="{% url 'stock_intraday' source stock.symbol %}">
+              {{ stock.name|truncatechars:20 }}</a>
           </td>
           {% elif form.stockdetails.value == form.stockdetails.field.choices.1.0 %}
-          <td width="17%"><a class="btn-link" href="{% url 'stock_news' source stock.symbol %}">{{ stock.name|truncatechars:20 }}</a>
+          <td width="17%"><a class="btn-link" href="{% url 'stock_news' source stock.symbol %}">
+              {{ stock.name|truncatechars:20 }}</a>
           </td>
           {% elif form.stockdetails.value == form.stockdetails.field.choices.2.0 %}
-          <td width="17%"><a class="btn-link" href="{% url 'stock_press' source stock.symbol %}">{{ stock.name|truncatechars:20 }}</a>
+          <td width="17%"><a class="btn-link" href="{% url 'stock_press' source stock.symbol %}">
+              {{ stock.name|truncatechars:20 }}</a>
           </td>
           {% endif %}
           <td width="10%">{{ stock.symbol }}</td>

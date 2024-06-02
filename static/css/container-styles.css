@@ -53,7 +53,15 @@
   text-align: left;
 }
 
-.hideOnMobile {}
+.hideOnMobile {
+  display: inline;
+}
+
+media screen and (max-width: 420px) {
+  .hideOnMobile {
+    display: none
+  }
+}
 
 img {
   max-width: 100%
@@ -62,5 +70,15 @@ img {
 @media (min-width: 768px) {
   .dropdown-container {
     width: 500px;
+  }
+}
+
+.float-lg-right {
+  float: right;
+}
+
+@media screen and (max-width: 992px) {
+  .float-lg-right {
+    float: left;
   }
 }

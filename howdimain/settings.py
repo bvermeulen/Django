@@ -22,7 +22,7 @@ logformat = "%(asctime)s:%(levelname)s:%(message)s"
 Logger.set_logger(config("LOG_FILE"), logformat, "INFO")
 logger = Logger.getlogger()
 HOWDIMAIN_VERSION = (
-    "https://github.com/bvermeulen/Django/tree/howdimain-digitalocean_v9"
+    "https://github.com/bvermeulen/Django/bootstrap5"
 )
 HOWDIMAIN_DATE = "June, 2024: implement bootstrap 5"
 HOWDIMAIN_AUTHOR = "bruno.vermeulen@hotmail.com"

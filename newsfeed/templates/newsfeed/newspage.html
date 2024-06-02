@@ -31,7 +31,7 @@
 	<div class="container">
 		{% csrf_token %}
 
-		<button class="btn btn-primary btn-sm dropdown-toggle" type="button" id="SiteButton" data-bs-toggle="dropdown">
+		<button class="btn btn-primary btn-sm dropdown-toggle mt-1" type="button" id="SiteButton" data-bs-toggle="dropdown">
 			Sites<span class="caret"></span></button>
 		<ul class="dropdown-menu" style="height:40%; overflow:hidden; overflow-y:scroll">
 			{% for site in news_sites %}
@@ -40,51 +40,54 @@
 			{% endfor %}
 		</ul>
 
-		<button class="btn dropdown-toggle btn-primary btn-sm" type="button" data-bs-toggle="dropdown">
+		<button class="btn dropdown-toggle btn-primary btn-sm mt-1" type="button" data-bs-toggle="dropdown">
 			Titles<span class="caret"></span>
 		</button>
 		<ul class="dropdown-menu container dropdown-container"
 			style="height:40%; overflow:hidden; overflow-y:scroll; overflow-x:scroll">
 			{% for item, title in news_titles %}
 			<li><button type="submit" class="btn btn-sm item_select" name="title_btn" value="{{ item }}">
-				{{ title|safe }}
-			</button></li>
+					{{ title|safe }}
+				</button></li>
 			{% endfor %}
 		</ul>
 
 		<input type="hidden" name="control_btn" id="keyinput"></input>
-		<input type="submit" class="hideOnMobile btn btn-primary btn-sm" name="control_btn"
+		<input type="submit" class="hideOnMobile btn btn-primary btn-sm mt-1" name="control_btn"
 			value="{{ controls.previous }}"></input>
-		<input type="submit" class="hideOnMobile btn btn-primary btn-sm" name="control_btn"
+		<input type="submit" class="hideOnMobile btn btn-primary btn-sm mt-1" name="control_btn"
 			value="{{ controls.next }}"></input>
 
 		{% if user.is_authenticated %}
-		<a class="btn btn-primary btn-sm" href="{% url 'newssites' %}">Select</a>
-		<a class="btn btn-primary btn-sm" href="{% url 'mynewsitems' %}">My news</a>
+		<a class="btn btn-primary btn-sm mt-1" href="{% url 'newssites' %}">Select</a>
+		<a class="btn btn-primary btn-sm mt-1" href="{% url 'mynewsitems' %}">My news</a>
 		{% endif %}
 	</div>
 
 	<div class="container" style="clear:both">
-		<div style="font-size:smaller; text-align:left;">{{ reference }}</div>
+		<div class="text-muted" style="font-size: 10px; text-align:left">
+			{{ reference }}
+		</div>
 		<div class="card" style="border-width: 2px">
 			<card class="card-body">
 				<h2 class="card-title" style="background-color:lightgrey">{{ news_title|safe }}</h2>
 
 				<a style="padding:0px" class="btn btn-link" href="{{ news_link }}" target="_blank">link</a>
-				<input style="padding:0px" type="submit" class="btn btn-link" id="id_scroll"
-					name="control_btn" value="{{ controls.scroll }}"></input>
+				<input style="padding:0px" type="submit" class="btn btn-link" id="id_scroll" name="control_btn"
+					value="{{ controls.scroll }}"></input>
 
 				{% if show_banner_button %}
-				<input style="padding:0px" type="submit" class="hideOnMobile btn btn-link" id="id_banner"
-					name="control_btn" value="{{ controls.banner }}"></input>
+				<input style="padding:0px" type="submit" class="hideOnMobile btn btn-link" id="id_banner" name="control_btn"
+					value="{{ controls.banner }}"></input>
 				{% endif %}
 
 				{% if user.is_authenticated %}
 				<input style="padding:0px" type="submit" class="btn btn-link" name="control_btn"
 					value="{{ controls.store }}"></input>
 				{% endif %}
-				<a style="float: right"><small style="font-size:smaller; vertical-align: sub">{{ status }}</small></a>
-
+				<div class="text-muted" style="position: relative; bottom: -10px; font-size: 10px; float:right;">
+					{{ status }}
+				</div>
 				<div class="card-text">
 					{% if banner and show_banner_button and news_summary_flat_text %}
 					<script>
@@ -96,17 +99,21 @@
 						};
 					</script>
 					<svg style="background-color:lightgrey;" viewBox="0, 0, 300, 30">
-						<text x="500" y="15" style="font-size:10px; font-weight: bold">
+						<text x="500" y="20" style="font-weight: bold;">
 							{{ news_summary_flat_text|safe }}
 							<animate attributeName="x" from="300" to="-300" dur="{{ delay }}s" repeatCount="indefinite">
 						</text>
 					</svg>
 					{% else %}
-					<div class="textarea" contenteditable="false" style="font-size:large; background-color:lightgrey">{{ news_summary|safe }}</div>
+					<div class="textarea" contenteditable="false" style="font-size:large; background-color:lightgrey">
+						{{ news_summary|safe }}
+					</div>
 					{% endif %}
 				</div>
 		</div>
-		<div class="hideOnMobile" style="font-size:smaller; float: right; padding:0px">{{ help_arrows }}{{ help_banner }}</div>
+		<div class="hideOnMobile text-muted" style="font-size: 10px; float: right; padding:0px">
+			{{ help_arrows }}{{ help_banner }}
+		</div>
 	</div>
 	<br><br><br><br>
 </form>

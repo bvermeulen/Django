@@ -54,12 +54,12 @@
 }
 
 .hideOnMobile {
-  display: inline;
+  display: none;
 }
 
-media screen and (max-width: 420px) {
+@media screen and (min-device-width: 420px) {
   .hideOnMobile {
-    display: none
+    display: inline;
   }
 }
 

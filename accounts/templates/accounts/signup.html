@@ -22,10 +22,14 @@
           {% for field in form %}
           <div class="form-group">
             {% if field.label != 'Captcha' %}
-            {{ field.label}}
-            {% render_field field class=field|input_class %}
+            <div class="mt-2">
+              {{ field.label}}
+              {% render_field field class=field|input_class %}
+            </div>
             {% else %}
-            {{ field }}
+            <div class="mt-4">
+              {{ field }}
+            </div>
             {% endif %}
             {% for error in field.errors %}
             <div class="text-danger">
@@ -40,7 +44,7 @@
           </div>
           {% endfor %}
           {{ error_message }}
-          <button type="submit" class="btn btn-primary btn-block">Create an account</button>
+          <button type="submit" class="btn btn-primary mt-2">Create an account</button>
         </form>
       </div>
       <div class="card-footer text-muted text-center">

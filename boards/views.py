@@ -2,7 +2,8 @@ import itertools
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect, get_object_or_404, reverse
-from django.views.generic import UpdateView, ListView, FormView
+from django.views.generic import UpdateView, ListView
+from django.db.utils import IntegrityError
 from django.utils import timezone
 from django.utils.decorators import method_decorator
 from django.db.models import Count
@@ -43,9 +44,18 @@ class BoardListView(ListView):
         if form.is_valid() and user.is_authenticated:
             board = form.save(commit=False)
             board.owner = user
-            board.save()
-            form.save_m2m()
-
+            try:
+                board.save()
+                form.save_m2m()
+                logger.info(
+                    f"{request.user.username} ({get_client_ip(request)}) added a new "
+                    f"board: {board.name}"
+                )
+            except IntegrityError:
+                logger.warn(
+                    f"{request.user.username} ({get_client_ip(request)}) tried to add a new "
+                    f"board: {board.name}, this name already exists"
+                )
         return redirect('boards')
 
 

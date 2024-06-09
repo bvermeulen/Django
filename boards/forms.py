@@ -1,9 +1,32 @@
 from django.contrib.auth.models import User
 from django import forms
 from howdimain.howdimain_vars import EXCLUDE_USERS
-from .models import Topic, Post
+from .models import Board, Topic, Post
 
-class NewTopicForm(forms.ModelForm):
+
+class BoardForm(forms.ModelForm):
+    contributor = forms.ModelMultipleChoiceField(
+        widget=forms.CheckboxSelectMultiple(),
+        required=False,
+        label='',
+        help_text='Selection is not required',
+        queryset=User.objects.all().exclude(
+            username__in=EXCLUDE_USERS).order_by('username')
+    )
+
+    def __init__(self, *args, **kwargs):
+        super(BoardForm, self).__init__(*args, **kwargs)
+
+        self.fields['name'].widget.attrs['style'] = "width:300px;"
+
+
+    class Meta:
+        model = Board
+        fields = ['name', 'description', 'contributor']
+        labels = {'name': 'Board name'}
+
+
+class TopicForm(forms.ModelForm):
 
     class Meta:
         model = Topic
@@ -18,7 +41,8 @@ class PostForm(forms.ModelForm):
         label='',
         help_text='Selection is not required',
         queryset=User.objects.all().exclude(
-            username__in=EXCLUDE_USERS).order_by('username'))
+            username__in=EXCLUDE_USERS).order_by('username')
+    )
 
     class Meta:
         model = Post

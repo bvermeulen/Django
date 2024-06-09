@@ -10,10 +10,14 @@ from howdimain.howdimain_vars import (
     POSTS_PER_PAGE,
 )
 
-
 class Board(models.Model):
-    name = models.CharField(max_length=BOARD_NAME_SIZE, unique=True)
-    description = models.CharField(max_length=DESCRIPTION_SIZE)
+    name = models.CharField(max_length=BOARD_NAME_SIZE)
+    description = models.TextField(max_length=DESCRIPTION_SIZE)
+    owner = models.ForeignKey(User, on_delete=models.PROTECT, related_name="boards")
+    contributor = models.ManyToManyField(User, blank=True)
+
+    class Meta:
+        unique_together = ["name", "owner"]
 
     def get_posts_count(self):
         return Post.objects.filter(topic__board=self).count()
@@ -22,7 +26,7 @@ class Board(models.Model):
         return Post.objects.filter(topic__board=self).order_by('-created_at').first()
 
     def __str__(self):
-        return str(self.name)
+        return f'board: {self.name} ({self.owner.username}): {self.description}'
 
 
 class Topic(models.Model):

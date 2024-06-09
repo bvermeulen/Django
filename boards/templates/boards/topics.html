@@ -20,6 +20,9 @@
 {% block content %}
 <div class="mb-2">
   <a href="{% url 'new_topic' board.pk %}" class="btn btn-primary">New topic</a>
+  {% if not topics %}
+    <button class="btn btn-primary">Delete board</button>
+  {% endif %}
 </div>
 
 <table class="table table-striped mb-4">

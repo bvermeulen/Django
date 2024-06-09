@@ -1,7 +1,8 @@
+import itertools
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect, get_object_or_404, reverse
-from django.views.generic import UpdateView, ListView
+from django.views.generic import UpdateView, ListView, FormView
 from django.utils import timezone
 from django.utils.decorators import method_decorator
 from django.db.models import Count
@@ -9,38 +10,52 @@ from django.core.exceptions import ObjectDoesNotExist
 from howdimain.howdimain_vars import POSTS_PER_PAGE, TOPICS_PER_PAGE
 from howdimain.utils.plogger import Logger
 from howdimain.utils.get_ip import get_client_ip
-from .forms import NewTopicForm, PostForm
+from .forms import BoardForm, TopicForm, PostForm
 from .models import Board, Topic, Post
 
 logger = Logger.getlogger()
 
 
-def log_record(user, comment, subject, ip):
-    logger.info(f'user {user}, {comment}{subject}, ip: {ip}')
-
-
-@method_decorator(login_required, name='dispatch')
 class BoardListView(ListView):
     model = Board
+    board_form = BoardForm
     context_object_name = 'boards'
     template_name = 'boards/boards.html'
 
-    def get_context_data(self, **kwargs):  #pylint: disable=arguments-differ
-        log_record(self.request.user,
-                   'showing boards',
-                   '',
-                   get_client_ip(self.request))
+    def get_context_data(self, **kwargs):
+        kwargs['form'] = self.board_form
         return super().get_context_data(**kwargs)
 
+    def get_queryset(self):
+        default_user = get_object_or_404(User, username='default_user')
+        user = self.request.user
+        boards_user = self.request.user.boards.all() if user.is_authenticated else []
+        boards_default_user = default_user.boards.all()
+        boards = (
+            boards_default_user if user == default_user else
+            list(itertools.chain(boards_user, boards_default_user))
+        )
+        return boards
 
-@method_decorator(login_required, name='dispatch')
+    def post(self, request):
+        user = request.user
+        form = self.board_form(request.POST)
+        if form.is_valid() and user.is_authenticated:
+            board = form.save(commit=False)
+            board.owner = user
+            board.save()
+            form.save_m2m()
+
+        return redirect('boards')
+
+
 class TopicListView(ListView):
     model = Topic
     context_object_name = 'topics'
     template_name = 'boards/topics.html'
     paginate_by = TOPICS_PER_PAGE
 
-    def get_context_data(self, **kwargs):  #pylint: disable=arguments-differ
+    def get_context_data(self, **kwargs):
         kwargs['board'] = self.board
         return super().get_context_data(**kwargs)
 
@@ -48,12 +63,6 @@ class TopicListView(ListView):
         self.board = get_object_or_404(Board, pk=self.kwargs.get('board_pk'))
         queryset = self.board.topics.order_by('-last_updated', )\
                                     .annotate(contributions=Count('posts'))
-
-        log_record(self.request.user,
-                   'showing topics for board ',
-                   self.board.name,
-                   get_client_ip(self.request))
-
         return queryset
 
 
@@ -62,16 +71,16 @@ def new_topic(request, board_pk):
     board = get_object_or_404(Board, pk=board_pk)
 
     if request.method == 'POST':
-        form1 = NewTopicForm(request.POST)
+        form1 = TopicForm(request.POST)
         form2 = PostForm(request.POST)
         if form1.is_valid() and form2.is_valid():
             topic = form1.save(commit=False)
-            post = form2.save(commit=False)
             topic.board = board
             topic.starter = request.user
             topic.last_updated = timezone.now()
             topic.save()
 
+            post = form2.save(commit=False)
             post.topic = topic
             post.created_by = topic.starter
             post.created_at = topic.last_updated
@@ -81,11 +90,14 @@ def new_topic(request, board_pk):
             post.save()
             # save the m2m field 'allowed user'
             form2.save_m2m()
-
+            logger.info(
+                f"{request.user.username} ({get_client_ip(request)}) created new "
+                f"topic: {topic.topic_subject} with post: {post.post_subject}"
+            )
             return redirect('topic_posts', board_pk=board.pk, topic_pk=topic.pk)
 
     else:
-        form1 = NewTopicForm()
+        form1 = TopicForm()
         form2 = PostForm()
 
     context = {'board': board,
@@ -95,15 +107,13 @@ def new_topic(request, board_pk):
     return render(request, 'boards/new_topic.html', context)
 
 
-@method_decorator(login_required, name='dispatch')
 class PostListView(ListView):
     model = Post
     context_object_name = 'posts'
     template_name = 'boards/topic_posts.html'
     paginate_by = POSTS_PER_PAGE
 
-
-    def get_context_data(self, **kwargs): 
+    def get_context_data(self, **kwargs):
         session_key = f'viewed_topic_{self.topic.pk}'
         if not self.request.session.get(session_key, False):
             self.topic.views += 1
@@ -124,33 +134,21 @@ class PostListView(ListView):
                                        pk=self.kwargs.get('topic_pk'))
 
         queryset = self.topic.posts.order_by('-updated_at')
-
-        log_record(self.request.user,
-                   'showing posts for topic ',
-                   self.topic.topic_subject,
-                   get_client_ip(self.request))
-
         return queryset
 
     # handle deletion of a post
-    def post(self, *args, **kwargs):
+    def post(self, request, **kwargs):
         deleted_post_pk = int(self.request.POST.get('deleted_post_pk'))
         original_post_pks = [post.pk for post in self.get_queryset()]
         deleted_index_pk = original_post_pks.index(deleted_post_pk)
-        if deleted_index_pk == 0:
-            # note index 0 will be deleted so index 1 will become index 0
-            new_index_pk = 1
-        else:
-            new_index_pk = deleted_index_pk - 1
-
-        if len(original_post_pks) == 1:
-            new_post_pk = None
-            # new_index_pk = None
-        else:
-            new_post_pk = original_post_pks[new_index_pk]
-
-        get_object_or_404(Post, pk=deleted_post_pk).delete()
-
+        new_index_pk = 1 if deleted_index_pk == 0 else deleted_index_pk - 1
+        new_post_pk = None  if len(original_post_pks) == 1 else original_post_pks[new_index_pk]
+        post_candidate_delete = get_object_or_404(Post, pk=deleted_post_pk)
+        logger.info(
+            f"{request.user.username} ({get_client_ip(request)}) deleted "
+            f"post: {post_candidate_delete.post_subject}"
+        )
+        post_candidate_delete.delete()
         self.topic.last_updated = timezone.now()
         self.topic.save()
 
@@ -168,7 +166,7 @@ class PostListView(ListView):
 
 
 @login_required
-def add_to_topic(request, board_pk, topic_pk):
+def add_post_to_topic(request, board_pk, topic_pk):
     topic = get_object_or_404(Topic, board__pk=board_pk, pk=topic_pk)
     if request.method == 'POST':
         form = PostForm(request.POST)
@@ -177,13 +175,10 @@ def add_to_topic(request, board_pk, topic_pk):
             post.topic = topic
             post.created_by = request.user
             post.created_at = timezone.now()
-            # if new post is added then make updated same as created
             post.updated_by = post.created_by
             post.updated_at = post.created_at
-
             post.save()
             form.save_m2m()
-
             topic.last_updated = timezone.now()
             topic.save()
 
@@ -191,6 +186,10 @@ def add_to_topic(request, board_pk, topic_pk):
                                 kwargs={'board_pk': board_pk,
                                         'topic_pk': topic_pk})
             topic_post_url = f'{topic_url}?page={topic.get_page_number(post.pk)}'
+            logger.info(
+                f"{request.user.username} ({get_client_ip(request)}) added a new "
+                f"post: {post.post_subject}"
+            )
             return redirect(topic_post_url)
     else:
         form = PostForm()
@@ -233,22 +232,18 @@ class PostUpdateView(UpdateView):
         except TypeError:
             return False
 
+        # obtain the new_post_pk; if the last post is deleted new_post_pk is None
         original_post_pks = [post.pk for post in self.get_queryset()]
         deleted_index_pk = original_post_pks.index(deleted_post_pk)
+        new_index_pk = 1 if deleted_index_pk == 0 else deleted_index_pk - 1
+        self.new_post_pk = None if len(original_post_pks) == 1 else original_post_pks[new_index_pk]
 
-        if deleted_index_pk == 0:
-            # note index 0 will be deleted so index 1 will become index 0
-            new_index_pk = 1
-        else:
-            new_index_pk = deleted_index_pk - 1
-
-        if len(original_post_pks) == 1:
-            self.new_post_pk = None
-            # new_index_pk = None
-        else:
-            self.new_post_pk = original_post_pks[new_index_pk]
-
-        get_object_or_404(Post, pk=deleted_post_pk).delete()
+        post_candidate_delete = get_object_or_404(Post, pk=deleted_post_pk)
+        logger.info(
+            f"{self.request.user.username} ({get_client_ip(self.request)}) deleted "
+            f"post: {post_candidate_delete.post_subject}"
+        )
+        post_candidate_delete.delete()
         return True
 
     def form_valid(self, form):
@@ -290,7 +285,10 @@ class PostUpdateView(UpdateView):
             post.updated_at = self.topic.last_updated
             post.save()
             form.save_m2m()
-
+            logger.info(
+                f"{self.request.user.username} ({get_client_ip(self.request)}) updated "
+                f"post {post.post_subject}"
+            )
             topic_url = reverse('topic_posts',
                                 kwargs={'board_pk': self.topic.board.pk,
                                         'topic_pk': self.topic.pk},)

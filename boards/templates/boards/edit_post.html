@@ -37,8 +37,7 @@
     <button class="btn btn-primary btn-sm" name="deleted_post_pk" value="{{ post.pk }}"
       onclick="return Validate()">Delete contribtion
     </button>
-    <button class="btn dropdown-toggle btn-primary btn-sm" data-bs-toggle="dropdown">Allowed editors<span
-        class="caret"></span></button>
+    <button class="btn dropdown-toggle btn-primary btn-sm" data-bs-toggle="dropdown">Allowed editors</button>
     <ul class="dropdown-menu ps-1" style="height:40%; overflow:hidden; overflow-y:scroll;">
       {{ form.allowed_editor|as_crispy_field }}
     </ul>

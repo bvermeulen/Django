@@ -35,7 +35,7 @@
   <div class="mb-4">
     <button type="submit" class="btn btn-primary btn-sm">Save changes</button>
     <button class="btn btn-primary btn-sm" name="deleted_post_pk" value="{{ post.pk }}"
-      onclick="return Validate()">Delete contribtion
+      onclick="return validateDelete('{{ post.post_subject }}')">Delete contribtion
     </button>
     <button class="btn dropdown-toggle btn-primary btn-sm" data-bs-toggle="dropdown">Allowed editors</button>
     <ul class="dropdown-menu ps-1" style="height:40%; overflow:hidden; overflow-y:scroll;">

@@ -62,7 +62,7 @@
           <form method="post">
             {% csrf_token %}
             <button style="margin:1px" class="btn btn-primary btn-sm" name="deleted_post_pk" value="{{ post.pk }}"
-              onclick="return Validate()">Delete</button>
+              onclick="return validateDelete('{{ post.post_subject }}')">Delete</button>
           </form>
         </div>
         {% endif %}

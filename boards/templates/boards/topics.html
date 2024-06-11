@@ -1,6 +1,8 @@
-{% extends 'base.html' %}
+name{% extends 'base.html' %}
 
+{% load static %}
 {% load humanize %}
+{% load crispy_forms_tags %}
 {% block title %}
 {{ board.name }} - {{ block.super }}
 {% endblock %}
@@ -18,54 +20,85 @@
 {% endblock %}
 
 {% block content %}
-<div class="mb-2">
-  <a href="{% url 'new_topic' board.pk %}" class="btn btn-primary">New topic</a>
-  {% if not topics %}
-    <button class="btn btn-primary">Delete board</button>
+<form id="id_topics_form" method="post">
+  {% csrf_token %}
+  <a style="display: none">{{ form.name }}{{ form.description }} {{ form.new_board_name }}</a>
+  {% if user.is_authenticated %}
+  <div class="mb-2">
+    <a href="{% url 'new_topic' board.pk %}" class="btn btn-primary">New topic</a>
+    {% if not topics %}
+    <button class="btn btn-primary" name="{{ form.delete_btn.name }}" value="delete_btn_pressed"
+      onclick="return validateDelete('{{ board.name }}')">
+      Delete board</button>
+    {% endif %}
+    <button class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown">Contributors</button>
+    <ul class="dropdown-menu ps-1" style="height:40%; overflow:hidden; overflow-y:scroll;">
+      <div class="d-flex justify-content-start mb-1"><button type="submit"
+          class="btn btn-outline-primary btn-sm justify-content-center">Submit</button></div>
+      {{ form.contributor|as_crispy_field }}
+    </ul>
+    <button class="btn btn-primary" name="{{ form.rename_btn.name }}" value="rename_btn_pressed"
+      onclick="return SubmitNewBoardName('{{ board.name }}')">Rename board</button>
+  </div>
   {% endif %}
-</div>
 
-<table class="table table-striped mb-4">
-  <thead class="thead-inverse">
-    <tr>
-      <th>Topic</th>
-      <th>Starter</th>
-      <th>Posts</th>
-      <th>Views</th>
-      <th>Last Update</th>
-    </tr>
-  </thead>
-  <tbody>
-    {% for topic in topics %}
-    {% url 'topic_posts' board.pk topic.pk as topic_url %}
-    <tr>
-      <td>
-        <p class="mb-0">
-          <a class="btn-link" href="{{ topic_url }}">{{ topic.topic_subject }}</a>
-        </p>
-        <small class="text-muted">
-          Pages:
-          {% for i in topic.get_page_range %}
-          <a class="btn-link" href="{{ topic_url }}?page={{ i }}">{{ i }}</a>
-          {% endfor %}
-          {% if topic.has_many_pages %}
-          ... <a class="btn-link" href="{{ topic_url }}?page={{ topic.get_page_count }}">Last Page</a>
-          {% endif %}
-        </small>
-      </td>
-      <td>{{ topic.starter.username }}</td>
-      <td>{{ topic.contributions }}</td>
-      <td>{{ topic.views }}</td>
-      <td>{{ topic.last_updated|naturaltime }}</td>
-    </tr>
-    {% endfor %}
-  </tbody>
-</table>
+  <table class="table table-striped mb-4">
+    <thead class="thead-inverse">
+      <tr>
+        <th>Topic</th>
+        <th>Starter</th>
+        <th>Posts</th>
+        <th>Views</th>
+        <th>Last Update</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for topic in topics %}
+      {% url 'topic_posts' board.pk topic.pk as topic_url %}
+      <tr>
+        <td>
+          <p class="mb-0">
+            <a class="btn-link" href="{{ topic_url }}">{{ topic.topic_subject }}</a>
+          </p>
+          <small class="text-muted">
+            Pages:
+            {% for i in topic.get_page_range %}
+            <a class="btn-link" href="{{ topic_url }}?page={{ i }}">{{ i }}</a>
+            {% endfor %}
+            {% if topic.has_many_pages %}
+            ... <a class="btn-link" href="{{ topic_url }}?page={{ topic.get_page_count }}">Last Page</a>
+            {% endif %}
+          </small>
+        </td>
+        <td>{{ topic.starter.username }}</td>
+        <td>{{ topic.contributions }}</td>
+        <td>{{ topic.views }}</td>
+        <td>{{ topic.last_updated|naturaltime }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
 
-{% include 'includes/pagination.html' %}
-<br>
-<br>
+  {% include 'includes/pagination.html' %}
+  <br>
+  <br>
+</form>
 {% endblock %}
 
-{% block javascript %}{% endblock %}
+{% block javascript %}
+<script type="text/javascript" src="{% static 'js/board.js' %}"></script>
+<script>
+  var form = document.getElementById('id_topics_form');
 
+  function SubmitNewBoardName(BoardNameString) {
+    var NewBoardNameString = prompt('Give a new board name', BoardNameString);
+    if (NewBoardNameString != null && NewBoardNameString != "''" && NewBoardNameString != '') {
+      form.new_board_name.value = NewBoardNameString;
+      return true;
+    }
+    else {
+      return false;
+    }
+  }
+</script>
+{% endblock %}

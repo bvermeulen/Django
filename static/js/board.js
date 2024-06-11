@@ -1,5 +1,5 @@
-function Validate() {
-  confirmed = confirm('Do you really want to delete?');
+function validateDelete(objectName) {
+  confirmed = confirm('Do you really want to delete ' + objectName + '?');
   if (confirmed) {
     form.submit();
   }

@@ -1,6 +1,5 @@
 {% extends 'base.html' %}
 
-{% load static %}
 {% load humanize %}
 {% load crispy_forms_tags %}
 
@@ -16,10 +15,12 @@
 {% endblock %}
 
 {% block content %}
+{% if user.is_authenticated %}
 <div class="mb-2">
-  <button class="btn btn-primary" data-bs-toggle="modal"
-    data-bs-target="#AddBoardModal">Add board</button>
+  <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#AddBoardModal">Add board</button>
 </div>
+{% endif %}
+
 <table class="table table-striped mb-4">
   <thead class="thead-inverse">
     <tr>
@@ -63,8 +64,8 @@
 <!-- Modal for Boards -->
 <form method="post">
   {% csrf_token %}
-  <div class="modal fade" id="AddBoardModal" tabindex="0" role="dialog"
-    aria-labelledby="BoardModalLabel" aria-hidden="true">
+  <div class="modal fade" id="AddBoardModal" tabindex="0" role="dialog" aria-labelledby="BoardModalLabel"
+    aria-hidden="true">
     <div class="modal-dialog" role="document">
       <div class="modal-content">
         <div class="modal-header">
@@ -74,7 +75,7 @@
         </div>
         <div class="modal-body">
           {{ form.name|as_crispy_field }}
-          <button class="btn btn-outline-secondary dropdown-toggle mb-2" data-bs-toggle="dropdown" >Contributors</button>
+          <button class="btn btn-outline-secondary dropdown-toggle mb-2" data-bs-toggle="dropdown">Contributors</button>
           <ul class="dropdown-menu ps-1" style="height:40%; overflow:hidden; overflow-y:scroll;">
             {{ form.contributor|as_crispy_field }}
           </ul>

@@ -20,21 +20,22 @@ logger = Logger.getlogger()
 class BoardListView(ListView):
     model = Board
     board_form = BoardForm
-    context_object_name = 'boards'
-    template_name = 'boards/boards.html'
+    context_object_name = "boards"
+    template_name = "boards/boards.html"
 
     def get_context_data(self, **kwargs):
-        kwargs['form'] = self.board_form
+        kwargs["form"] = self.board_form
         return super().get_context_data(**kwargs)
 
     def get_queryset(self):
-        default_user = get_object_or_404(User, username='default_user')
+        default_user = get_object_or_404(User, username="default_user")
         user = self.request.user
         boards_user = self.request.user.boards.all() if user.is_authenticated else []
         boards_default_user = default_user.boards.all()
         boards = (
-            boards_default_user if user == default_user else
-            list(itertools.chain(boards_user, boards_default_user))
+            boards_default_user
+            if user == default_user
+            else list(itertools.chain(boards_user, boards_default_user))
         )
         return boards
 
@@ -56,31 +57,75 @@ class BoardListView(ListView):
                     f"{request.user.username} ({get_client_ip(request)}) tried to add a new "
                     f"board: {board.name}, this name already exists"
                 )
-        return redirect('boards')
+        return redirect("boards")
+
+
+class MyBoardListView(BoardListView):
+    def get_queryset(self):
+        user = self.request.user
+        boards_user = self.request.user.boards.all() if user.is_authenticated else []
+        return boards_user
 
 
 class TopicListView(ListView):
     model = Topic
-    context_object_name = 'topics'
-    template_name = 'boards/topics.html'
+    board_form = BoardForm
+    context_object_name = "topics"
+    template_name = "boards/topics.html"
     paginate_by = TOPICS_PER_PAGE
 
     def get_context_data(self, **kwargs):
-        kwargs['board'] = self.board
+        kwargs["board"] = self.board
+        kwargs["form"] = self.board_form(
+            None,
+            initial={
+                "name": self.board.name,
+                "description": self.board.description,
+                "contributor": [i.id for i in self.board.contributor.all()],
+            },
+        )
         return super().get_context_data(**kwargs)
 
     def get_queryset(self):
-        self.board = get_object_or_404(Board, pk=self.kwargs.get('board_pk'))
-        queryset = self.board.topics.order_by('-last_updated', )\
-                                    .annotate(contributions=Count('posts'))
-        return queryset
+        self.board = get_object_or_404(Board, pk=self.kwargs.get("board_pk"))
+        topics = self.board.topics.order_by(
+            "-last_updated",
+        ).annotate(contributions=Count("posts"))
+        return topics
+
+    def post(self, request, board_pk):
+        user = request.user
+        board = get_object_or_404(Board, pk=board_pk)
+        form = self.board_form(request.POST)
+        if user.is_authenticated and form.is_valid():
+            print(f"{form.cleaned_data}")
+            rename_btn = form.cleaned_data.get("rename_btn", "")
+            delete_btn = form.cleaned_data.get("delete_btn", "")
+            new_board_name = form.cleaned_data.get("new_board_name", "")
+            contributors = form.cleaned_data.get("contributor", [])
+            if delete_btn == "delete_btn_pressed" and not board.topics.all():
+                logger.info(
+                    f"{user.username} ({get_client_ip(request)}) "
+                    f"deleted board: {board.name}"
+                )
+                board.delete()
+                return redirect("boards")
+
+            if rename_btn == "rename_btn_pressed":
+                board.name = new_board_name
+
+            board.contributor.clear()
+            board.contributor.set(contributors)
+            board.save()
+
+        return redirect("board_topics", board_pk=board_pk)
 
 
 @login_required
 def new_topic(request, board_pk):
     board = get_object_or_404(Board, pk=board_pk)
 
-    if request.method == 'POST':
+    if request.method == "POST":
         form1 = TopicForm(request.POST)
         form2 = PostForm(request.POST)
         if form1.is_valid() and form2.is_valid():
@@ -104,55 +149,58 @@ def new_topic(request, board_pk):
                 f"{request.user.username} ({get_client_ip(request)}) created new "
                 f"topic: {topic.topic_subject} with post: {post.post_subject}"
             )
-            return redirect('topic_posts', board_pk=board.pk, topic_pk=topic.pk)
+            return redirect("topic_posts", board_pk=board.pk, topic_pk=topic.pk)
 
     else:
         form1 = TopicForm()
         form2 = PostForm()
 
-    context = {'board': board,
-               'form1': form1,
-               'form2': form2,
-              }
-    return render(request, 'boards/new_topic.html', context)
+    context = {
+        "board": board,
+        "form1": form1,
+        "form2": form2,
+    }
+    return render(request, "boards/new_topic.html", context)
 
 
 class PostListView(ListView):
     model = Post
-    context_object_name = 'posts'
-    template_name = 'boards/topic_posts.html'
+    context_object_name = "posts"
+    template_name = "boards/topic_posts.html"
     paginate_by = POSTS_PER_PAGE
 
     def get_context_data(self, **kwargs):
-        session_key = f'viewed_topic_{self.topic.pk}'
+        session_key = f"viewed_topic_{self.topic.pk}"
         if not self.request.session.get(session_key, False):
             self.topic.views += 1
             self.topic.save()
             self.request.session[session_key] = True
 
         try:
-            moderator = User.objects.get(username='moderator')
+            moderator = User.objects.get(username="moderator")
         except ObjectDoesNotExist:
-            moderator = ''
-        kwargs['topic'] = self.topic
-        kwargs['moderator'] = moderator
+            moderator = ""
+        kwargs["topic"] = self.topic
+        kwargs["moderator"] = moderator
         return super().get_context_data(**kwargs)
 
     def get_queryset(self):
-        self.topic = get_object_or_404(Topic,
-                                       board__pk=self.kwargs.get('board_pk'),
-                                       pk=self.kwargs.get('topic_pk'))
+        self.topic = get_object_or_404(
+            Topic, board__pk=self.kwargs.get("board_pk"), pk=self.kwargs.get("topic_pk")
+        )
 
-        queryset = self.topic.posts.order_by('-updated_at')
+        queryset = self.topic.posts.order_by("-updated_at")
         return queryset
 
     # handle deletion of a post
     def post(self, request, **kwargs):
-        deleted_post_pk = int(self.request.POST.get('deleted_post_pk'))
+        deleted_post_pk = int(self.request.POST.get("deleted_post_pk"))
         original_post_pks = [post.pk for post in self.get_queryset()]
         deleted_index_pk = original_post_pks.index(deleted_post_pk)
         new_index_pk = 1 if deleted_index_pk == 0 else deleted_index_pk - 1
-        new_post_pk = None  if len(original_post_pks) == 1 else original_post_pks[new_index_pk]
+        new_post_pk = (
+            None if len(original_post_pks) == 1 else original_post_pks[new_index_pk]
+        )
         post_candidate_delete = get_object_or_404(Post, pk=deleted_post_pk)
         logger.info(
             f"{request.user.username} ({get_client_ip(request)}) deleted "
@@ -163,22 +211,30 @@ class PostListView(ListView):
         self.topic.save()
 
         if new_post_pk:
-            topic_url = reverse('topic_posts',
-                                kwargs={'board_pk': self.topic.board.pk,
-                                        'topic_pk': self.topic.pk,})
-            topic_post_url = f'{topic_url}?page={self.topic.get_page_number(new_post_pk)}'
+            topic_url = reverse(
+                "topic_posts",
+                kwargs={
+                    "board_pk": self.topic.board.pk,
+                    "topic_pk": self.topic.pk,
+                },
+            )
+            topic_post_url = (
+                f"{topic_url}?page={self.topic.get_page_number(new_post_pk)}"
+            )
             return redirect(topic_post_url)
         else:
             # if no posts left for the topic then also delete the topic
             get_object_or_404(Topic, pk=self.topic.pk).delete()
-            topics_url = reverse('board_topics', kwargs={'board_pk': self.topic.board.pk})
+            topics_url = reverse(
+                "board_topics", kwargs={"board_pk": self.topic.board.pk}
+            )
             return redirect(topics_url)
 
 
 @login_required
 def add_post_to_topic(request, board_pk, topic_pk):
     topic = get_object_or_404(Topic, board__pk=board_pk, pk=topic_pk)
-    if request.method == 'POST':
+    if request.method == "POST":
         form = PostForm(request.POST)
         if form.is_valid():
             post = form.save(commit=False)
@@ -192,10 +248,10 @@ def add_post_to_topic(request, board_pk, topic_pk):
             topic.last_updated = timezone.now()
             topic.save()
 
-            topic_url = reverse('topic_posts',
-                                kwargs={'board_pk': board_pk,
-                                        'topic_pk': topic_pk})
-            topic_post_url = f'{topic_url}?page={topic.get_page_number(post.pk)}'
+            topic_url = reverse(
+                "topic_posts", kwargs={"board_pk": board_pk, "topic_pk": topic_pk}
+            )
+            topic_post_url = f"{topic_url}?page={topic.get_page_number(post.pk)}"
             logger.info(
                 f"{request.user.username} ({get_client_ip(request)}) added a new "
                 f"post: {post.post_subject}"
@@ -204,41 +260,43 @@ def add_post_to_topic(request, board_pk, topic_pk):
     else:
         form = PostForm()
 
-    context = {'topic': topic, 'form': form}
-    return render(request, 'boards/add_to_topic.html', context)
+    context = {"topic": topic, "form": form}
+    return render(request, "boards/add_to_topic.html", context)
 
 
-@method_decorator(login_required, name='dispatch')
+@method_decorator(login_required, name="dispatch")
 class PostUpdateView(UpdateView):
     model = Post
     form_class = PostForm
-    template_name = 'boards/edit_post.html'
-    pk_url_kwarg = 'post_pk'
-    context_object_name = 'post'
+    template_name = "boards/edit_post.html"
+    pk_url_kwarg = "post_pk"
+    context_object_name = "post"
 
     def get_queryset(self):
-        self.topic = get_object_or_404(Topic,
-                                       board__pk=self.kwargs.get('board_pk'),
-                                       pk=self.kwargs.get('topic_pk'))
-        queryset = self.topic.posts.order_by('-updated_at')
+        self.topic = get_object_or_404(
+            Topic, board__pk=self.kwargs.get("board_pk"), pk=self.kwargs.get("topic_pk")
+        )
+        queryset = self.topic.posts.order_by("-updated_at")
 
-        _post = get_object_or_404(Post, pk=self.kwargs.get('post_pk'))
+        _post = get_object_or_404(Post, pk=self.kwargs.get("post_pk"))
         try:
-            moderator = User.objects.get(username='moderator')
+            moderator = User.objects.get(username="moderator")
 
         except ObjectDoesNotExist:
-            moderator = ''
+            moderator = ""
 
-        self.allowed_to_edit = self.request.user == _post.created_by or \
-                               self.request.user == moderator or \
-                               self.request.user in _post.allowed_editor.all()
+        self.allowed_to_edit = (
+            self.request.user == _post.created_by
+            or self.request.user == moderator
+            or self.request.user in _post.allowed_editor.all()
+        )
 
         return queryset
 
     # handle deletion of a post
     def delete_post(self):
         try:
-            deleted_post_pk = int(self.request.POST.get('deleted_post_pk'))
+            deleted_post_pk = int(self.request.POST.get("deleted_post_pk"))
         except TypeError:
             return False
 
@@ -246,7 +304,9 @@ class PostUpdateView(UpdateView):
         original_post_pks = [post.pk for post in self.get_queryset()]
         deleted_index_pk = original_post_pks.index(deleted_post_pk)
         new_index_pk = 1 if deleted_index_pk == 0 else deleted_index_pk - 1
-        self.new_post_pk = None if len(original_post_pks) == 1 else original_post_pks[new_index_pk]
+        self.new_post_pk = (
+            None if len(original_post_pks) == 1 else original_post_pks[new_index_pk]
+        )
 
         post_candidate_delete = get_object_or_404(Post, pk=deleted_post_pk)
         logger.info(
@@ -261,11 +321,14 @@ class PostUpdateView(UpdateView):
         # check against manual editing of html input in browser if  user is
         # allowed to edit this post
         if not self.allowed_to_edit:
-            topic_url = reverse('topic_posts',
-                                kwargs={'board_pk': self.topic.board.pk,
-                                        'topic_pk': self.topic.pk},)
-            topic_post_url = (f'{topic_url}?page='
-                              f'{self.topic.get_page_number(self.kwargs.get("post_pk"))}')
+            topic_url = reverse(
+                "topic_posts",
+                kwargs={"board_pk": self.topic.board.pk, "topic_pk": self.topic.pk},
+            )
+            topic_post_url = (
+                f"{topic_url}?page="
+                f'{self.topic.get_page_number(self.kwargs.get("post_pk"))}'
+            )
             return redirect(topic_post_url)
 
         self.topic.last_updated = timezone.now()
@@ -274,17 +337,24 @@ class PostUpdateView(UpdateView):
         if self.delete_post():
             if self.new_post_pk:
                 # redirect to the topic post page
-                topic_url = reverse('topic_posts',
-                                    kwargs={'board_pk': self.topic.board.pk,
-                                            'topic_pk': self.topic.pk,})
-                url_after_delete = (f'{topic_url}?page='
-                                    f'{self.topic.get_page_number(self.new_post_pk)}')
+                topic_url = reverse(
+                    "topic_posts",
+                    kwargs={
+                        "board_pk": self.topic.board.pk,
+                        "topic_pk": self.topic.pk,
+                    },
+                )
+                url_after_delete = (
+                    f"{topic_url}?page="
+                    f"{self.topic.get_page_number(self.new_post_pk)}"
+                )
             else:
                 # if no posts left for the topic then also delete the topic
                 # and redirect to the boards page
                 get_object_or_404(Topic, pk=self.topic.pk).delete()
                 url_after_delete = reverse(
-                    'board_topics', kwargs={'board_pk': self.topic.board.pk})
+                    "board_topics", kwargs={"board_pk": self.topic.board.pk}
+                )
 
             return redirect(url_after_delete)
 
@@ -299,9 +369,10 @@ class PostUpdateView(UpdateView):
                 f"{self.request.user.username} ({get_client_ip(self.request)}) updated "
                 f"post {post.post_subject}"
             )
-            topic_url = reverse('topic_posts',
-                                kwargs={'board_pk': self.topic.board.pk,
-                                        'topic_pk': self.topic.pk},)
-            topic_post_url = f'{topic_url}?page={self.topic.get_page_number(post.pk)}'
+            topic_url = reverse(
+                "topic_posts",
+                kwargs={"board_pk": self.topic.board.pk, "topic_pk": self.topic.pk},
+            )
+            topic_post_url = f"{topic_url}?page={self.topic.get_page_number(post.pk)}"
 
             return redirect(topic_post_url)

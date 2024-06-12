@@ -14,8 +14,8 @@ class BoardForm(forms.ModelForm):
         .exclude(username__in=EXCLUDE_USERS)
         .order_by("username"),
     )
-    rename_btn = forms.CharField(required=False)
     delete_btn = forms.CharField(required=False)
+    board_selection = forms.CharField(required=False)
     new_board_name = forms.CharField(required=False)
 
     def __init__(self, *args, **kwargs):
@@ -25,7 +25,14 @@ class BoardForm(forms.ModelForm):
 
     class Meta:
         model = Board
-        fields = ["name", "description", "contributor", "delete_btn", "rename_btn"]
+        fields = [
+            "name",
+            "description",
+            "contributor",
+            "delete_btn",
+            "board_selection",
+            "new_board_name",
+        ]
         labels = {"name": "Board name"}
 
 

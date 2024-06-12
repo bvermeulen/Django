@@ -26,8 +26,9 @@ name{% extends 'base.html' %}
   {% if user.is_authenticated %}
   <div class="mb-2">
     <a href="{% url 'new_topic' board.pk %}" class="btn btn-primary">New topic</a>
+    {% if user == board.owner %}
     {% if not topics %}
-    <button class="btn btn-primary" name="{{ form.delete_btn.name }}" value="delete_btn_pressed"
+    <button class="btn btn-primary" name="{{ form.delete_btn.name }}" value="delete_board"
       onclick="return validateDelete('{{ board.name }}')">
       Delete board</button>
     {% endif %}
@@ -37,8 +38,9 @@ name{% extends 'base.html' %}
           class="btn btn-outline-primary btn-sm justify-content-center">Submit</button></div>
       {{ form.contributor|as_crispy_field }}
     </ul>
-    <button class="btn btn-primary" name="{{ form.rename_btn.name }}" value="rename_btn_pressed"
+    <button class="btn btn-primary" name="{{ form.rename_btn.name }}"
       onclick="return SubmitNewBoardName('{{ board.name }}')">Rename board</button>
+    {% endif %}
   </div>
   {% endif %}
 

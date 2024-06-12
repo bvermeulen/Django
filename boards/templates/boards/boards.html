@@ -18,6 +18,16 @@
 {% if user.is_authenticated %}
 <div class="mb-2">
   <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#AddBoardModal">Add board</button>
+  <form style="display: inline-block;" class="" method="post">
+    {% csrf_token %}
+    {% if form.board_selection.value == "user_boards" %}
+    <button type="submit" class="btn btn-primary" name="{{ form.board_selection.name }}" value="all_boards">
+      all boards</button>
+    {% else %}
+    <button type="submit" class="btn btn-primary" name="{{ form.board_selection.name }}" value="user_boards">
+      my boards</button>
+    {% endif %}
+  </form>
 </div>
 {% endif %}
 

@@ -24,24 +24,47 @@ class BoardListView(ListView):
     template_name = "boards/boards.html"
 
     def get_context_data(self, **kwargs):
-        kwargs["form"] = self.board_form
+        kwargs["form"] = self.board_form(
+            None, initial={"board_selection": self.board_selection}
+        )
         return super().get_context_data(**kwargs)
 
     def get_queryset(self):
         default_user = get_object_or_404(User, username="default_user")
         user = self.request.user
-        boards_user = self.request.user.boards.all() if user.is_authenticated else []
-        boards_default_user = default_user.boards.all()
-        boards = (
-            boards_default_user
-            if user == default_user
-            else list(itertools.chain(boards_user, boards_default_user))
-        )
-        return boards
+        self.board_selection = self.request.session.get("board_selection", "all_boards")
+        if user.is_authenticated:
+            boards_user = user.boards.all().order_by("name")
+            boards_contributor = Board.objects.filter(contributor=user).order_by("name")
+        else:
+            boards_user = []
+            boards_contributor = []
+
+        boards_default_user = default_user.boards.all().order_by("name")
+
+        match self.board_selection:
+            case "all_boards":
+                if user == default_user:
+                    return list(itertools.chain(
+                        boards_default_user, boards_contributor
+                    ))
+                else:
+                    return list(itertools.chain(
+                        boards_user, boards_contributor, boards_default_user
+                    ))
+
+            case "user_boards":
+                return list(itertools.chain(boards_user, boards_contributor))
+
+            case _:
+                return boards_default_user
 
     def post(self, request):
         user = request.user
         form = self.board_form(request.POST)
+        request.session["board_selection"] = form.data.get(
+            "board_selection", "all_boards"
+        )
         if form.is_valid() and user.is_authenticated:
             board = form.save(commit=False)
             board.owner = user
@@ -60,11 +83,10 @@ class BoardListView(ListView):
         return redirect("boards")
 
 
-class MyBoardListView(BoardListView):
-    def get_queryset(self):
-        user = self.request.user
-        boards_user = self.request.user.boards.all() if user.is_authenticated else []
-        return boards_user
+@login_required
+def my_boards(request):
+    request.session["board_selection"] = "user_boards"
+    return redirect("boards")
 
 
 class TopicListView(ListView):
@@ -98,12 +120,14 @@ class TopicListView(ListView):
         board = get_object_or_404(Board, pk=board_pk)
         form = self.board_form(request.POST)
         if user.is_authenticated and form.is_valid():
-            print(f"{form.cleaned_data}")
-            rename_btn = form.cleaned_data.get("rename_btn", "")
             delete_btn = form.cleaned_data.get("delete_btn", "")
             new_board_name = form.cleaned_data.get("new_board_name", "")
             contributors = form.cleaned_data.get("contributor", [])
-            if delete_btn == "delete_btn_pressed" and not board.topics.all():
+            if (
+                delete_btn == "delete_board"
+                and not board.topics.all()
+                and user == board.owner
+            ):
                 logger.info(
                     f"{user.username} ({get_client_ip(request)}) "
                     f"deleted board: {board.name}"
@@ -111,12 +135,23 @@ class TopicListView(ListView):
                 board.delete()
                 return redirect("boards")
 
-            if rename_btn == "rename_btn_pressed":
-                board.name = new_board_name
+            old_board_name = board.name
+            if new_board_name and user == board.owner:
+                board.name = new_board_name[0:30]
+                logger.info(
+                    f"{user.username} ({get_client_ip(request)}) "
+                    f"renamed board: {old_board_name} to {board.name}"
+                )
 
-            board.contributor.clear()
-            board.contributor.set(contributors)
-            board.save()
+            if user == board.owner:
+                if set(board.contributor.all().all()) != set(contributors):
+                    board.contributor.clear()
+                    board.contributor.set(contributors)
+                    logger.info(
+                        f"{user.username} ({get_client_ip(request)}) "
+                        f"changed contributors for board: {board.name}"
+                    )
+                board.save()
 
         return redirect("board_topics", board_pk=board_pk)
 

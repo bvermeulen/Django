@@ -4,8 +4,15 @@ from howdimain.howdimain_vars import EXCLUDE_USERS
 from .models import Board, Topic, Post
 
 
+class UserMultipleChoiceField(forms.ModelMultipleChoiceField):
+    def label_from_instance(self, obj):
+        return (
+            f"{obj.first_name} {obj.last_name} ({obj.username})"
+        )
+
+
 class BoardForm(forms.ModelForm):
-    contributor = forms.ModelMultipleChoiceField(
+    contributor = UserMultipleChoiceField(
         widget=forms.CheckboxSelectMultiple(),
         required=False,
         label="",
@@ -45,7 +52,7 @@ class TopicForm(forms.ModelForm):
 
 
 class PostForm(forms.ModelForm):
-    allowed_editor = forms.ModelMultipleChoiceField(
+    allowed_editor = UserMultipleChoiceField(
         widget=forms.CheckboxSelectMultiple(),
         required=False,
         label="",

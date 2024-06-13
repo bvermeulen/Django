@@ -33,7 +33,9 @@ class BoardListView(ListView):
         default_user = get_object_or_404(User, username="default_user")
         user = self.request.user
         if user.is_authenticated:
-            self.board_selection = self.request.session.get("board_selection", "all_boards")
+            self.board_selection = self.request.session.get(
+                "board_selection", "all_boards"
+            )
             boards_user = user.boards.all().order_by("name")
             boards_contributor = Board.objects.filter(contributor=user).order_by("name")
         else:
@@ -46,13 +48,15 @@ class BoardListView(ListView):
         match self.board_selection:
             case "all_boards":
                 if user == default_user:
-                    return list(itertools.chain(
-                        boards_default_user, boards_contributor
-                    ))
+                    return list(
+                        itertools.chain(boards_default_user, boards_contributor)
+                    )
                 else:
-                    return list(itertools.chain(
-                        boards_user, boards_contributor, boards_default_user
-                    ))
+                    return list(
+                        itertools.chain(
+                            boards_user, boards_contributor, boards_default_user
+                        )
+                    )
 
             case "user_boards":
                 return list(itertools.chain(boards_user, boards_contributor))
@@ -64,7 +68,7 @@ class BoardListView(ListView):
         user = request.user
         form = self.board_form(request.POST)
         request.session["board_selection"] = form.data.get(
-            "board_selection", request.session["board_selection"]
+            "board_selection", request.session.get("board_selection", "all_boards")
         )
         if form.is_valid() and user.is_authenticated:
             board = form.save(commit=False)

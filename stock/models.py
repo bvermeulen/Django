@@ -43,6 +43,7 @@ class CurrencyHistory(models.Model):
     usd_exchange_rate_low = models.CharField(max_length=20, default="1.0")
     usd_exchange_rate_high = models.CharField(max_length=20, default="1.0")
     usd_exchange_rate = models.CharField(max_length=20, default="1.0")
+    created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True)
 
     def __str__(self) -> str:
         return (
@@ -138,6 +139,7 @@ class StockHistory(models.Model):
     close_yesterday = models.CharField(max_length=20, default=0.0)
     change_pct = models.CharField(max_length=20, default=0.0)
     day_change = models.CharField(max_length=20, default=0.0)
+    created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True)
 
     class Meta:
         unique_together = ["stock", "last_trading_time"]
@@ -157,6 +159,7 @@ class PortfolioHistory(models.Model):
     trading_date = models.DateField()
     quantity = models.CharField(max_length=20, default=0.0)
     stock_history = models.ForeignKey(StockHistory, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True)
 
     class Meta:
         unique_together = ["portfolio", "stock_history"]

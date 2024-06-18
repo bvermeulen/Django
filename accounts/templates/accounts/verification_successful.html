@@ -4,23 +4,17 @@
 
 {% block content %}
 <div class="row justify-content-center">
-    <div class="col-lg-4 col-md-6 col-sm-8">
-        <div class="card">
-            <div class="card-body">
-                <h3 class="card-title">{{ status }}</h3>
-                <form method="post" novalidate>
-                    {{ msg }}
-                </form>
-            </div>
-        </div>
+  <div class="col-lg-4 col-md-6 col-sm-8">
+    <div class="card">
+      <div class="card-body">
+        <h3 class="card-title">{{ status }}</h3>
+        <form method="post" novalidate>
+          {{ msg }}
+        </form>
+      </div>
+      <a class="btn btn-primary mt-4 mb-2 ms-4 me-4" href="{{ link }}" style="border-radius: 20px;">Log In
+      </a>
     </div>
-</div>
-</div>
-<div class="row justify-content-center mt-4">
-    <a class="btn btn-primary btn-link" href="{{ link }}"
-        style="align-items: center; border-radius: 20px; margin-left: 10px; margin-right: 10px;">
-        Log In
-    </a>
-</div>
+  </div>
 </div>
 {% endblock %}

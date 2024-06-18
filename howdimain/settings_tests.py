@@ -13,7 +13,12 @@ https://docs.djangoproject.com/en/1.11/ref/settings/
 import os
 from decouple import config, Csv
 from howdimain.utils.plogger import Logger
+# keep únused constants, they are used outside this module
 from howdimain.howdimain_vars import (
+    CAPTCHA_FONT_SIZE,
+    CAPTCHA_LETTER_ROTATION,
+    CAPTCHA_BACKGROUND_COLOR,
+    CAPTCHA_FOREGROUND_COLOR,
     TEXT_VERIFICATION_SUCCESS_MESSAGE,
     TEXT_VERIFICATION_FAILED_MESSAGE,
 )

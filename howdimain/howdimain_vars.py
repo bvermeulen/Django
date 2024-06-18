@@ -35,7 +35,11 @@ CARET_DOWN = "\u25BC"  # down triangle
 CARET_NO_CHANGE = "\u25AC"  # rectangle
 PLOT_PERIODS = ["0.5", "1", "3", "max"]
 
-# verification messages
+# accoount variables
+CAPTCHA_FONT_SIZE = 30
+CAPTCHA_LETTER_ROTATION = (-40, 20)
+CAPTCHA_BACKGROUND_COLOR = "yellow"
+CAPTCHA_FOREGROUND_COLOR = "blue"
 TEXT_VERIFICATION_SUCCESS_MESSAGE = """
 Your email is verified successfully and your account has been activated.
 You can login with your credentials now...

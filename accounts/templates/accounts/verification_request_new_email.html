@@ -4,22 +4,19 @@
 
 {%block content%}
 <form method='POST'>
-{% csrf_token %}
-<div class="row justify-content-center">
+  {% csrf_token %}
+  <div class="row justify-content-center">
     <div class="col-lg-4 col-md-6 col-sm-8">
-        <div class="card">
-            <div class="card-body">
-                <h3 class="card-title">Request Verification</h3>
-                <fieldset>
-                    {{form}}
-                </fieldset>
-            </div>
+      <div class="card">
+        <div class="card-body">
+          <h3 class="card-title">Request Verification</h3>
+          {{form}}
         </div>
+        <button class="btn btn-primary mt-4 mb-2 ms-4 me-4"
+          style="border-radius: 20px;" type="submit">Request New Email
+        </button>
+      </div>
     </div>
-</div>
-<div class="row justify-content-center mt-4">
-    <button class="btn btn-primary" type="submit">Request New Email</button>
-</div>
+  </div>
 </form>
-
 {% endblock %}

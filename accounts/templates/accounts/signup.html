@@ -10,13 +10,16 @@
     <div class="card">
       <div class="card-body">
         <h3 class="card-title">Join now</h3>
+        {% if error_message != "" %}
+        <h4>{{ error_message }}</h4>
+        {% endif %}
         <form method="post" novalidate>
           {% csrf_token %}
           {% if form.non_field_errors %}
           <div class="alert alert-danger" role="alert">
             {% for error in form.non_field_errors %}
             <p{% if forloop.last %} class="mb-0" {% endif %}>{{ error }}</p>
-              {% endfor %}
+            {% endfor %}
           </div>
           {% endif %}
           {% for field in form %}
@@ -43,7 +46,6 @@
             {% endif %}
           </div>
           {% endfor %}
-          {{ error_message }}
           <button type="submit" class="btn btn-primary mt-2">Create an account</button>
         </form>
       </div>

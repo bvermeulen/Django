@@ -2,90 +2,86 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <link href="https://fonts.googleapis.com/css?family=Peralta|Teko|Russo+One" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css?family=Peralta|Teko|Russo+One" rel="stylesheet">
 
-    <title>Howdimain Verify Email address</title>
+  <title>Howdimain Verify Email address</title>
 
-    <style>
-        .format-font {
-            font-family: 'Russo', sans-serif;
-        }
+  <style>
+    .format-font {
+      font-family: 'Russo', sans-serif;
+    }
 
-        .my-container {
-            margin: 10px;
-            padding: 10px;
-            padding-top: 0px;
-            justify-content: center;
-            border-radius: 5px;
-            border: 1px solid rgb(30, 144, 255);
-        }
+    .my-container {
+      margin: 10px;
+      padding: 10px;
+      padding-top: 0px;
+      justify-content: center;
+      border-radius: 5px;
+      border: 1px solid rgb(30, 144, 255);
+    }
 
-        .my-button {
-            padding: 10px;
-            padding-left: 35px;
-            padding-right: 35px;
-            background-color: rgb(30, 144, 255);
-            color: white;
-            border-radius: 25px;
-            transition-duration: 500ms;
-            text-decoration: none;
+    .my-button {
+      padding: 10px;
+      padding-left: 35px;
+      padding-right: 35px;
+      background-color: rgb(30, 144, 255);
+      color: white;
+      border-radius: 25px;
+      transition-duration: 500ms;
+      text-decoration: none;
+    }
 
-        }
-
-        .my-button:hover {
-            color: rgb(30, 144, 255);
-            background-color: white;
-            border-radius: 0px;
-            border: 2px solid rgb(30, 144, 255);
-            border-radius: 25px;
-            transition-duration: 200ms;
-            font-weight: bolder;
-        }
-    </style>
+    .my-button:hover {
+      color: rgb(30, 144, 255);
+      background-color: white;
+      border-radius: 0px;
+      border: 2px solid rgb(30, 144, 255);
+      border-radius: 25px;
+      transition-duration: 200ms;
+      font-weight: bolder;
+    }
+  </style>
 </head>
 
 <body>
 
-    <div class="my-container">
+  <div class="my-container">
 
-        <div style="border-radius: 15px; background-color: rgb(30, 144, 255)">
-            <h1 class="format-font" style="text-align: center; padding: 2px; color:rgb(255,255,255);">
-                <strong>Howdiweb</strong> Account Activation
-            </h1>
-        </div>
-
-        <h2 class="format-font" style="text-align: center;">E-mail Confirmation</h2>
-        <hr style="width:100px">
-
-        <div class="format-font" style="margin-top: 20px; line-height: 1.5;">
-            <p style="text-align: center; font-weight: bold;">Greetings!</p>
-            You received this mail because you attempted to make an account on Howdiweb,
-            Please click on the link below to confirm the email and activate your account.
-        </div>
-
-        <p class="format-font" style="text-align: center; margin-top: 50px;">
-            Please verify your e-mail :
-            <hr style="background-color:  rgb(30,144,255); width:50px">
-        <div class="format-font" style="text-align: center; margin-top: 30px;">
-            <a href="{{link}}" class="my-button">Verify</a>
-        </div>
-
-        </p>
-
-        <p class="format-font" style="margin-top: 50px;">
-            Thank you! You'll be joining us right after the verification.
-        </p>
-
-        <p class="format-font" style="line-height: 1.5;">
-            This email is machine generated, do not reply.
-            If you have questions or suggestions please contact the howdimain team at
-            <a class="btn-link" href="mailto:info@howdiweb.nl">info@howdiweb.nl</a>.
-        </p>
-
+    <div style="border-radius: 15px; background-color: rgb(30, 144, 255)">
+      <h1 class="format-font text-center" style="padding: 2px; color:rgb(255,255,255);">
+        <strong>Howdiweb</strong> Account Activation
+      </h1>
     </div>
+
+    <h2 class="format-font" style="text-align: center;">E-mail Confirmation</h2>
+    <hr style="width:150px">
+
+    <div class="format-font" style="margin-top: 20px; line-height: 1.5;">
+      <p style="font-weight: bold;">Greetings!</p>
+      You received this mail because you attempted to make an account on Howdiweb,
+      Please click on the link below to confirm the email and activate your account.
+    </div>
+
+    <p class="format-font" style="text-align: center">
+      Please verify your e-mail :
+    </p>
+    <div class="format-font mt-1" style="text-align: center">
+      <a href="{{link}}" class="my-button">Verify</a>
+    </div>
+    <hr style="background-color: rgb(30,144,255); width:90px; margin-top: 20px">
+
+    <p class="format-font" style="margin-top: 30px;">
+      Thank you! You'll be joining us right after the verification.
+    </p>
+    <p class="format-font" style="line-height: 1.5;">
+      This email is machine generated, do not reply.
+      If you have questions or suggestions please contact the howdimain team at
+      <a class="btn-link" href="mailto:info@howdiweb.nl">info@howdiweb.nl</a>.
+    </p>
+  </div>
 </body>
 
 </html>

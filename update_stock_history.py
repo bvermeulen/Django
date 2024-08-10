@@ -1,5 +1,6 @@
 import os
 import contextlib
+import warnings
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "howdimain.settings")
 import datetime
@@ -17,6 +18,7 @@ from howdimain.utils.plogger import Logger
 td = TradingData()
 td.setup()
 logger = Logger.getlogger()
+warnings.filterwarnings("ignore")
 
 
 def update_stock_history():
@@ -53,14 +55,14 @@ def update_stock_history():
                     StockHistory.objects.create(
                         stock=stock_object,
                         last_trading_time=datetime_stock,
-                        open=stock["open"],
-                        latest_price=stock["price"],
-                        day_low=stock["day_low"],
-                        day_high=stock["day_high"],
-                        volume=stock["volume"],
-                        close_yesterday=stock["close_yesterday"],
-                        change_pct=stock["change_pct"],
-                        day_change=stock["day_change"],
+                        open=str(stock["open"])[:20],
+                        latest_price=str(stock["price"])[:20],
+                        day_low=str(stock["day_low"])[:20],
+                        day_high=str(stock["day_high"])[:20],
+                        volume=str(stock["volume"])[:20],
+                        close_yesterday=str(stock["close_yesterday"])[:20],
+                        change_pct=str(stock["change_pct"])[:20],
+                        day_change=str(stock["day_change"])[:20],
                     )
 
                 stock_history = StockHistory.objects.get(

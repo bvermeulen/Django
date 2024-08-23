@@ -59,7 +59,7 @@ class BoardListView(ListView):
                     )
 
             case "user_boards":
-                return list(itertools.chain(boards_user, boards_contributor))
+                return boards_user
 
             case _:
                 return boards_default_user

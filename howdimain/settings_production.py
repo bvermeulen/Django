@@ -23,9 +23,6 @@ from howdimain.howdimain_vars import (
     TEXT_VERIFICATION_FAILED_MESSAGE,
 )
 
-logformat = "%(asctime)s:%(levelname)s:%(message)s"
-Logger.set_logger(config("LOG_FILE"), logformat, "INFO")
-logger = Logger.getlogger()
 HOWDIMAIN_VERSION = (
     "https://github.com/bvermeulen/Django/bootstrap5"
 )
@@ -43,6 +40,11 @@ DEBUG = config("DEBUG", default=False, cast=bool)
 ALLOWED_HOSTS = config("ALLOWED_HOSTS", cast=Csv())
 CSRF_TRUSTED_ORIGINS = [f"https://{domain}" for domain in ALLOWED_HOSTS]
 
+log_level = "DEBUG" if DEBUG else "INFO"
+logformat = "%(asctime)s:%(levelname)s:%(message)s"
+Logger.set_logger(config("LOG_FILE"), logformat, log_level)
+logger = Logger.getlogger()
+
 WSGI_APPLICATION = "howdimain.wsgi.application"
 
 INSTALLED_APPS = [
@@ -54,7 +56,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "django.contrib.humanize",
     "captcha",
-    "verify_email.apps.VerifyEmailConfig",
+    "accounts.verify_email.apps.VerifyEmailConfig",
     "widget_tweaks",
     "martor",
     "crispy_forms",

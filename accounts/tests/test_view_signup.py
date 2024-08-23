@@ -1,3 +1,4 @@
+import re
 from django.core import mail
 from django.contrib.auth.models import User
 from django.urls import reverse
@@ -78,7 +79,7 @@ class SuccessfulSignUpTests(TestCase):
         """
         self.assertFalse(User.objects.all()[0].is_active)
 
-    def test_send_verfication_email(self):
+    def test_send_verification_email(self):
         """test if verification email has been send"""
         self.assertEqual(["johndean@hotmail.com"], self.email_verification.to)
         self.assertEqual(
@@ -86,6 +87,28 @@ class SuccessfulSignUpTests(TestCase):
         )
         self.assertIn("info@howdiweb.nl", self.email_verification.body)
         self.assertIn("This email is machine generated", self.email_verification.body)
+
+    def test_verification_valid_token(self):
+        html_text = self.email_verification.alternatives[0][0]
+        regex = r'verify-email\/(.*?)\/(.*?)/'
+        m = re.search(regex, html_text)
+        email_token = m.group(1)
+        token = m.group(2)
+        url = reverse("verify-email", args=(email_token, token))
+        response = self.client.post(url)
+        self.assertContains(response, 'verified successfully')
+        self.assertTrue(User.objects.all()[0].is_active)
+
+    def test_verification_invalid_token(self):
+        html_text = self.email_verification.alternatives[0][0]
+        regex = r"verify-email\/(.*?)\/(.*?)/"
+        m = re.search(regex, html_text)
+        email_token = m.group(1)
+        token = 'false_token'
+        url = reverse("verify-email", args=(email_token, token))
+        response = self.client.post(url)
+        self.assertNotContains(response, "verified successfully")
+        self.assertFalse(User.objects.all()[0].is_active)
 
     def test_send_welcome_mail(self):
         """test if welcome email has been send"""

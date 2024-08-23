@@ -6,40 +6,19 @@ from ..models import Board, Post, Topic
 from ..views import add_post_to_topic
 
 
-# TODO additional tests
-"""
-    not user.is_authenticated
-        - no buttons only view boards of default_user
-
-    user.is_authenticated
-        - button: new topic
-        - new topic -> redirection: add_post_to_topic
-
-    for board instance of user as owner:
-        - buttons: new topic, contributor, rename
-
-        - button: delete if not topics
-        - new topic -> redirection: add_post_to_topic
-        - contributor -> change in board.contribut
-        - rename -> change in board.name
-
-    for board instance user is contributor
-        - button: new topic
-        - new topic -> redirection: add_post_to_topic
-"""
-
-
 class AddToTopicTestCase(TestCase):
     """
     Base test case to be used in all `add_to_topic` view tests
     """
 
     def setUp(self):
-        self.board = Board.objects.create(name="Django", description="Django board.")
         self.username = "john"
         self.password = "123"
         self.user = User.objects.create_user(
             username=self.username, email="john@doe.com", password=self.password
+        )
+        self.board = Board.objects.create(
+            name="Django", description="Django board", owner=self.user
         )
         self.topic = Topic.objects.create(
             topic_subject="Hello, world", board=self.board, starter=self.user
@@ -54,7 +33,6 @@ class AddToTopicTestCase(TestCase):
             "add_to_topic",
             kwargs={"board_pk": self.board.pk, "topic_pk": self.topic.pk},
         )
-
 
 class LoginRequiredNewTopicTests(AddToTopicTestCase):
 
@@ -99,7 +77,6 @@ class SuccessfulAddToTopicTests(AddToTopicTestCase):
         super().setUp()
         self.client.login(username=self.username, password=self.password)
         context = {"post_subject": "quod totem", "message": "imperfectum totibus"}
-
         self.response = self.client.post(self.url, context)
 
     def test_redirection(self):

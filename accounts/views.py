@@ -1,4 +1,4 @@
-from django.contrib.auth import login, logout
+from django.contrib.auth import logout
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.signals import (
@@ -11,7 +11,7 @@ from django.shortcuts import render, redirect
 from django.views.generic import UpdateView
 from django.utils.decorators import method_decorator
 from django.urls import reverse_lazy
-from verify_email.email_handler import send_verification_email
+from accounts.verify_email.email_handler import send_verification_email
 from howdimain.utils.plogger import Logger
 from howdimain.utils.get_ip import get_client_ip
 from .models import Signup, Home

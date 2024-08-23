@@ -8,7 +8,7 @@ urlpatterns = [
     path("home/", views.home_page, name="home"),
     path("signup/", views.signup, name="signup"),
     path("captcha/", include("captcha.urls")),
-    path("verification/", include("verify_email.urls")),
+    path("verification/", include("accounts.verify_email.urls")),
     path("settings/account/", views.UserUpdateView.as_view(), name="my_account"),
     path("admin/", admin.site.urls),
     path(

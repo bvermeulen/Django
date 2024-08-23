@@ -1,5 +1,3 @@
-import logging
-
 from django.http import Http404, HttpResponse
 from django.urls import reverse
 from django.shortcuts import render, redirect
@@ -18,8 +16,9 @@ from .errors import (
     UserAlreadyActive,
     UserNotFound,
 )
+from howdimain.utils.plogger import Logger
 
-logger = logging.getLogger(__name__)
+logger = Logger.getlogger()
 
 pkg_configs = GetFieldFromSettings()
 

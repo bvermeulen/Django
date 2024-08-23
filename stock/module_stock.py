@@ -253,12 +253,12 @@ class TradingData:
     based on FMP and as fall back to Marketstack
     """
 
-    cash_stocks = []
-    if Exchange.objects.filter(mic="CASH").exists():
-        cash_stocks = [
-            symbol.symbol_ric
-            for symbol in Exchange.objects.get(mic="CASH").stocks.all()
-        ]
+    cash_stocks = ["EUR.CASH", "USD.CASH"]
+    #if Exchange.objects.filter(mic="CASH").exists():
+    #    cash_stocks = [
+    #        symbol.symbol_ric
+    #        for symbol in Exchange.objects.get(mic="CASH").stocks.all()
+    #    ]
 
     @classmethod
     def setup(cls):
@@ -741,8 +741,10 @@ class TradingData:
         return str(total_value), str(total_value_change)
 
     @staticmethod
-    def get_usd_euro_exchangerate(currency: str, trading_date: str=None):
-        exchange_rate = float(Currency.objects.get(currency="EUR").get_exchangerate_on_date(trading_date))
+    def get_usd_euro_exchangerate(currency: str, trading_date: str = None):
+        exchange_rate = float(
+            Currency.objects.get(currency="EUR").get_exchangerate_on_date(trading_date)
+        )
         if currency == "USD":
             return f"USD/EUR: {exchange_rate:.4f}"
 

@@ -19,7 +19,7 @@
           <div class="alert alert-danger" role="alert">
             {% for error in form.non_field_errors %}
             <p{% if forloop.last %} class="mb-0" {% endif %}>{{ error }}</p>
-            {% endfor %}
+              {% endfor %}
           </div>
           {% endif %}
           {% for field in form %}
@@ -50,7 +50,7 @@
         </form>
       </div>
       <div class="card-footer text-muted text-center">
-        Have an account?></a><a style="margin-left: 2px" href="{% url 'login' %}">Log in</a>
+        Have an account?<a style="margin-left: 2px" href="{% url 'login' %}">Log in</a>
         <a style="margin-left: 20px">New verification?</a><a style="margin-left: 2px"
           href="{% url 'request-new-link-from-email' %}">Provide email</a>
       </div>

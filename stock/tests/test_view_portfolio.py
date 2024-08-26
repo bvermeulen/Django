@@ -5,7 +5,16 @@ from django.urls import reverse, resolve
 from django.test import TestCase
 from howdimain.howdimain_vars import URL_FMP
 from ..views.portfolios import PortfolioView
-from ..models import Currency, Exchange, Stock, StockSelection, Portfolio
+from ..models import (
+    Currency,
+    Exchange,
+    Stock,
+    StockSelection,
+    Portfolio,
+    CurrencyHistory,
+    StockHistory,
+    PortfolioHistory,
+)
 
 URL_PROVIDER = URL_FMP
 d = Decimal
@@ -14,6 +23,9 @@ d = Decimal
 class PortfolioTestSetup(TestCase):
 
     def setUp(self):
+        self.history_datetime = datetime.datetime(
+            2024, 8, 20, 16, 35, 00, tzinfo=datetime.timezone.utc
+        )
         self.test_user_name = "test_user"
         self.test_user_pw = "123"
 
@@ -29,6 +41,13 @@ class PortfolioTestSetup(TestCase):
         eur = Currency.objects.create(
             currency="EUR",
             usd_exchange_rate="0.9",
+        )
+        CurrencyHistory.objects.create(
+            currency=eur,
+            currency_date=self.history_datetime.date(),
+            usd_exchange_rate_low="0.85",
+            usd_exchange_rate_high="0.92",
+            usd_exchange_rate="0.88",
         )
         nyse = Exchange.objects.create(
             mic="XNYS",
@@ -75,6 +94,30 @@ class PortfolioTestSetup(TestCase):
             currency=eur,
             exchange=aex,
         )
+        apple_hist = StockHistory.objects.create(
+            stock=self.apple,
+            last_trading_time=self.history_datetime,
+            open="130.0",
+            latest_price="131.4",
+            day_low="128.1",
+            day_high="132.2",
+            volume="1100300",
+            close_yesterday="130.5",
+            change_pct="0.685",
+            day_change="0.9",
+        )
+        asml_hist = StockHistory.objects.create(
+            stock=self.asml,
+            last_trading_time=self.history_datetime,
+            open="250.0",
+            latest_price="245.1",
+            day_low="239.2",
+            day_high="252.8",
+            volume="21522",
+            close_yesterday="250.5",
+            change_pct="-2.156",
+            day_change="-5.4",
+        )
         self.test_portfolio = Portfolio.objects.create(
             portfolio_name="test_portfolio",
             user=self.test_user,
@@ -84,12 +127,23 @@ class PortfolioTestSetup(TestCase):
             quantity=10,
             portfolio=self.test_portfolio,
         )
-
+        PortfolioHistory.objects.create(
+            portfolio=self.test_portfolio,
+            trading_date=self.history_datetime.date(),
+            quantity="20",
+            stock_history=asml_hist,
+        )
+        PortfolioHistory.objects.create(
+            portfolio=self.test_portfolio,
+            trading_date=self.history_datetime.date(),
+            quantity="300",
+            stock_history=apple_hist,
+        )
         self.client.login(username=self.test_user_name, password=self.test_user_pw)
 
         self.data = {
             "currencies": "USD",
-            "datepicked_pressed": "false",
+            "date_is_today": True,
             "datepicked": datetime.datetime.now().date().strftime("%d/%m/%Y"),
             "stockdetails": "Graphs",
         }
@@ -121,12 +175,11 @@ class PortfolioViewGetTests(PortfolioTestSetup):
 
     def test_correct_number_input_tags(self):
         """
-        7 <input> tags to be found:
+        5 <input> tags to be found:
         csrf token (2x), new_portfolio, portfolio_name, symbol,
-        datepicked_pressed, datepicked
         """
         response = self.client.get(reverse("portfolio"))
-        self.assertContains(response, "<input", 7)
+        self.assertContains(response, "<input", 5)
 
     def test_select_portfolio(self):
         s = self.client.session
@@ -157,31 +210,37 @@ class PortfolioViewPostTests(PortfolioTestSetup):
 
     def test_new_portfolio(self):
         url = reverse("portfolio")
-        self.data.update({
-            "new_portfolio": "my_new_portfolio",
-            "btn1_pressed": "new_portfolio",
-        })
+        self.data.update(
+            {
+                "new_portfolio": "my_new_portfolio",
+                "btn1_pressed": "new_portfolio",
+            }
+        )
         self.client.post(url, self.data)
         self.assertEqual(2, len(Portfolio.objects.filter(user=self.test_user)))
 
+    def response_post(self, data):
+        self.data.update(data)
+        return self.client.post(reverse("portfolio"), self.data)
+
     def test_delete_portfolio(self):
         Portfolio.objects.create(user=self.test_user, portfolio_name="my_new_portfolio")
-        self.data.update({
+        data = {
             "btn1_pressed": "delete_portfolio",
             "portfolios": "my_new_portfolio",
             "portfolio_name": "my_new_portfolio",
-        })
-        self.client.post(reverse("portfolio"), self.data)
+        }
+        _ = self.response_post(data)
         self.assertEqual(1, len(Portfolio.objects.filter(user=self.test_user)))
 
     def test_rename_portfolio(self):
         Portfolio.objects.create(user=self.test_user, portfolio_name="my_new_portfolio")
-        self.data.update({
+        data = {
             "btn1_pressed": "rename_portfolio",
             "portfolios": "my_new_portfolio",
             "portfolio_name": "HAHA MAIN",
-        })
-        response = self.client.post(reverse("portfolio"), self.data)
+        }
+        response = self.response_post(data)
         self.assertEqual(
             1,
             len(
@@ -196,13 +255,13 @@ class PortfolioViewPostTests(PortfolioTestSetup):
         self.assertEqual("HAHA MAIN", response.context["form"]["portfolios"].value())
 
     def test_add_symbol(self):
-        self.data.update({
+        data = {
             "portfolios": "test_portfolio",
             "portfolio_name": "test_portfolio",
             "btn1_pressed": "add_symbol",
             "symbol": "ASML.AS",
-        })
-        response = self.client.post(reverse("portfolio"), self.data)
+        }
+        response = self.response_post(data)
         stocks_portfolio_db = (
             Portfolio.objects.filter(
                 user=self.test_user, portfolio_name="test_portfolio"
@@ -215,19 +274,20 @@ class PortfolioViewPostTests(PortfolioTestSetup):
         self.assertEqual("ASML.AS", response.context["stocks"][1]["symbol"])
 
     def test_link_to_intraday_view(self):
-        self.data.update({
+        data = {
             "portfolios": "test_portfolio",
             "portfolio_name": "test_portfolio",
-        })
-        response = self.client.post(reverse("portfolio"), self.data)
+        }
+        response = self.response_post(data)
         self.assertContains(response, 'href="/finance/stock_intraday/portfolio/AAPL/"')
 
     def test_add_invalid_symbol(self):
-        self.data.update({
+        data = {
             "portfolios": "test_portfolio",
             "btn1_pressed": "add_symbol",
             "symbol": "HAHAHA",
-        })
+        }
+        response = self.response_post(data)
         stocks_portfolio_db = (
             Portfolio.objects.filter(
                 user=self.test_user, portfolio_name="test_portfolio"
@@ -237,15 +297,14 @@ class PortfolioViewPostTests(PortfolioTestSetup):
         )
         self.assertEqual(1, len(stocks_portfolio_db))
         self.assertEqual("AAPL", stocks_portfolio_db[0].stock.symbol)
-        response = self.client.post(reverse("portfolio"), self.data)
         self.assertEqual(1, len(response.context["stocks"]))
 
     def test_change_quantity(self):
-        self.data.update({
+        data = {
             "portfolios": "test_portfolio",
             "change_qty_btn_pressed": "AAPL, 5",
-        })
-        response = self.client.post(reverse("portfolio"), self.data)
+        }
+        response = self.response_post(data)
         aapl = StockSelection.objects.filter(
             stock=self.apple, portfolio=self.test_portfolio
         )
@@ -257,11 +316,11 @@ class PortfolioViewPostTests(PortfolioTestSetup):
         StockSelection.objects.create(
             stock=self.asml, quantity=0, portfolio=self.test_portfolio
         )
-        self.data.update({
+        data = {
             "portfolios": "test_portfolio",
             "delete_symbol_btn_pressed": "ASML.AS",
-        })
-        response = self.client.post(reverse("portfolio"), self.data)
+        }
+        response = self.response_post(data)
         stocks_portfolio_db = (
             Portfolio.objects.filter(
                 user=self.test_user, portfolio_name="test_portfolio"
@@ -274,11 +333,11 @@ class PortfolioViewPostTests(PortfolioTestSetup):
         self.assertEqual("AAPL", response.context["stocks"][0]["symbol"])
 
     def test_portfolio_euro_value(self):
-        self.data.update({
+        data = {
             "portfolios": "test_portfolio",
             "currencies": "EUR",
-        })
-        response = self.client.post(reverse("portfolio"), self.data)
+        }
+        response = self.response_post(data)
         stocks_value = d(response.context["totals"]["value"].replace(",", ""))
         value_eur = 0
         for stock in response.context["stocks"]:
@@ -289,10 +348,10 @@ class PortfolioViewPostTests(PortfolioTestSetup):
         )
 
     def test_portfolio_usd_value(self):
-        self.data.update({
+        data = {
             "portfolios": "test_portfolio",
-        })
-        response = self.client.post(reverse("portfolio"), self.data)
+        }
+        response = self.response_post(data)
         stocks_value = d(response.context["totals"]["value"].replace(",", ""))
         value_usd = 0
         for stock in response.context["stocks"]:
@@ -309,10 +368,10 @@ class PortfolioViewPostTests(PortfolioTestSetup):
         )
 
     def test_portfolio_value_change(self):
-        self.data.update({
+        data = {
             "portfolios": "test_portfolio",
-        })
-        response = self.client.post(reverse("portfolio"), self.data)
+        }
+        response = self.response_post(data)
         stocks_value = d(response.context["totals"]["value_change"].replace(",", ""))
 
         value = 0
@@ -321,12 +380,56 @@ class PortfolioViewPostTests(PortfolioTestSetup):
 
         self.assertEqual(stocks_value.quantize(d("0.01")), value.quantize(d("0.01")))
 
-    def test_create_html(self):
-        self.client.get(reverse("portfolio"))
-        self.data.update({
+    def test_portfolio_contains_controls(self):
+        data = {
             "portfolios": "test_portfolio",
-        })
-        response = self.client.post(reverse("portfolio"), self.data)
+        }
+        response = self.response_post(data)
+        self.assertContains(response, "ConfirmDeleteSymbol(", 2)
+        self.assertContains(response, "ChangeQuantity(", 2),
+        self.assertContains(response, "AddSymbol(", 2)
+        self.assertContains(response, "PromptNewPortfolioName(", 2)
+        self.assertContains(response, "RenamePortfolio(", 2)
+        self.assertContains(response, "CopyPortfolio(", 2)
+        self.assertContains(response, "ConfirmDeletePortfolio(", 2)
+        self.assertContains(response, "dropdown-divider", 2)
+
+    def test_history_portfolio_does_not_contain_controls(self):
+        data = {
+            "portfolios": "test_portfolio",
+            "datepicked": self.history_datetime.date().strftime("%d/%m/%Y"),
+            "date_is_today": False,
+        }
+        response = self.response_post(data)
+        self.assertContains(response, "ConfirmDeleteSymbol(", 1)
+        self.assertContains(response, "ChangeQuantity(", 1)
+        self.assertContains(response, "AddSymbol(", 1)
+        self.assertContains(response, "PromptNewPortfolioName(", 1)
+        self.assertContains(response, "RenamePortfolio(", 1)
+        self.assertContains(response, "CopyPortfolio(", 1)
+        self.assertContains(response, "ConfirmDeletePortfolio(", 1)
+        self.assertContains(response, "ConfirmDeletePortfolio(", 1)
+        self.assertContains(response, "dropdown-divider", 1)
+
+    def test_historic_portfolio_value(self):
+        """ 300 apple @ USD 131.40 = 39420
+             20 asml @ EUR 245.10 = 4902 @ (1/0.88) = 5570
+            Total: 44990
+        """
+        data = {
+            "portfolios": "test_portfolio",
+            "datepicked": self.history_datetime.date().strftime("%d/%m/%Y"),
+            "date_is_today": False,
+        }
+        response = self.response_post(data)
+        stocks_value = d(response.context["totals"]["value"].replace(",", ""))
+        self.assertEqual(stocks_value, 44990)
+
+    def test_create_html(self):
+        data = {
+            "portfolios": "test_portfolio",
+        }
+        response = self.response_post(data)
         file_name = "stock/tests/test_portfolio.html"
         with open(file_name, "wt", encoding="utf-8") as f:
             f.write(response.content.decode())

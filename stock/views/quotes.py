@@ -53,6 +53,7 @@ class QuoteView(View):
                 "markets": markets,
                 "stockdetails": stockdetail,
                 "datepicked": datepicked,
+                "date_is_today": True,
             },
         )
         stock_info = add_display_tokens(stock_info)
@@ -77,6 +78,7 @@ class QuoteView(View):
         datepicked = request.session.get("datepicked", date_today)
         markets = request.session.get("markets", MARKETS)
         stockdetail = request.session.get("stockdetail", STOCK_DETAILS[0][0])
+        date_is_today = True
 
         form = self.stockquote_form(request.POST, user=user)
         if form.is_valid():
@@ -85,19 +87,15 @@ class QuoteView(View):
             new_selected_portfolio = form_data.get("portfolios")
             markets = form_data.get("markets")
             stockdetail = form_data.get("stockdetails")
-            datepicked_pressed = form_data.get("datepicked_pressed")
-
-            if datepicked_pressed == "true":
-                datepicked = form_data.get("datepicked").strftime("%d/%m/%Y")
+            datepicked = form_data.get("datepicked").strftime("%d/%m/%Y")
+            date_is_today = True if datepicked == date_today else False
 
             if new_selected_portfolio != selected_portfolio:
                 selected_portfolio = new_selected_portfolio
                 quote_string = ""
-
             elif new_quote_string != quote_string:
                 quote_string = new_quote_string
                 selected_portfolio = ""
-
             else:
                 pass
 
@@ -119,7 +117,6 @@ class QuoteView(View):
                 stock_info = self.td.get_stock_trade_info_on_date(
                     dateval_query, symbols
                 )
-
             else:
                 datepicked = date_today
                 symbols = self.td.parse_stock_quote(quote_string, markets=markets)
@@ -143,9 +140,9 @@ class QuoteView(View):
                 "markets": markets,
                 "stockdetails": stockdetail,
                 "datepicked": datepicked,
+                "date_is_today": date_is_today,
             },
         )
-
         request.session["quote_string"] = quote_string
         request.session["selected_portfolio"] = selected_portfolio
         request.session["markets"] = markets

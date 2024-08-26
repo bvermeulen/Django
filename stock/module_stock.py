@@ -253,12 +253,17 @@ class TradingData:
     based on FMP and as fall back to Marketstack
     """
 
-    cash_stocks = ["EUR.CASH", "USD.CASH"]
-    #if Exchange.objects.filter(mic="CASH").exists():
-    #    cash_stocks = [
-    #        symbol.symbol_ric
-    #        for symbol in Exchange.objects.get(mic="CASH").stocks.all()
-    #    ]
+    "try-except introduced for tests when no DB has yet been created"
+    try:
+        cash_stocks = []
+        if Exchange.objects.filter(mic="CASH").exists():
+            cash_stocks = [
+                symbol.symbol_ric
+                for symbol in Exchange.objects.get(mic="CASH").stocks.all()
+            ]
+    except Exception as error:
+        cash_stocks = ["EUR.CASH", "USD.CASH"]
+        logger.info(f"{error=}, {cash_stocks=}")
 
     @classmethod
     def setup(cls):
@@ -273,7 +278,6 @@ class TradingData:
         cls.news_url = "https://financialmodelingprep.com/api/v3/stock_news"
         cls.press_url = "https://financialmodelingprep.com/api/v3/press-releases/"
         cls.time_interval = "5min"
-
         cls.data_provider_url = URL_FMP
 
     @staticmethod
@@ -650,14 +654,18 @@ class TradingData:
     def get_portfolio_stock_info(
         cls, portfolio: Portfolio, base_currency_name: str, trading_date: str = None
     ) -> list:
-        if trading_date is None:
-            symbols_quantities = portfolio.get_stock()
-
-        else:
+        if trading_date:
             symbols_quantities = portfolio.get_stock_on_date(trading_date)
 
+        else:
+            symbols_quantities = portfolio.get_stock()
+
         list_symbols = list(symbols_quantities.keys())
-        if trading_date is None:
+        if trading_date:
+            stock_trade_info = cls.get_stock_trade_info_on_date(
+                trading_date, list_symbols
+            )
+        else:
             # split cash components
             cash_symbols = []
             for cash_stock in cls.cash_stocks:
@@ -677,11 +685,6 @@ class TradingData:
                     f"maximum of {2 * MAX_SYMBOLS_ALLOWED}"
                 )
             stock_trade_info += cls.get_cash_trade_info(cash_symbols)
-
-        else:
-            stock_trade_info = cls.get_stock_trade_info_on_date(
-                trading_date, list_symbols
-            )
 
         stock_info = []
         for stock in stock_trade_info:

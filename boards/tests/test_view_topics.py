@@ -39,6 +39,9 @@ class TopicsTestsNoLogin(TestCase):
         url = reverse("board_topics", kwargs={"board_pk": self.default_board.pk})
         return self.client.get(url)
 
+    def test_csrf(self):
+        self.assertContains(self.get_response(), "csrfmiddlewaretoken")
+
     def test_topics_view_not_found_status_code(self):
         url = reverse("board_topics", kwargs={"board_pk": 99})
         response = self.client.get(url)

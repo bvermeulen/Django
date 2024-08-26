@@ -1,5 +1,4 @@
-from django.contrib.auth.decorators import login_required
-from django.shortcuts import render, redirect, reverse
+from django.shortcuts import render
 from django.views.generic import View
 from howdimain.utils.plogger import Logger
 from stock.module_stock import TradingData
@@ -24,13 +23,6 @@ class StockNewsView(View):
         }
         return render(request, self.template_name, context)
 
-    def post(self, request, source, symbol):
-        view_kwargs = {
-            'source': source,
-            'symbol': symbol,
-        }
-        return redirect(reverse('stock_news', kwargs=view_kwargs))
-
 
 class StockPressView(View):
 
@@ -48,10 +40,3 @@ class StockPressView(View):
             'stock_press': stock_press,
         }
         return render(request, self.template_name, context)
-
-    def post(self, request, source, symbol):
-        view_kwargs = {
-            'source': source,
-            'symbol': symbol,
-        }
-        return redirect(reverse('stock_press', kwargs=view_kwargs))

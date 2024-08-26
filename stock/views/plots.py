@@ -153,9 +153,6 @@ class IntraDayView(View):
                     f'intraday trades for {symbol}')
         return render(request, self.template_name, context)
 
-    def post(self, request, source, symbol):
-        pass
-
 
 class HistoryView(View):
     template_name = 'finance/stock_history.html'
@@ -260,6 +257,3 @@ class HistoryView(View):
         logger.info(f'user {user} [ip: {get_client_ip(request)}] is looking '
                     f'historic trades for {symbol}')
         return render(request, self.template_name, context)
-
-    def post(self, request, source, symbol, period):
-        pass

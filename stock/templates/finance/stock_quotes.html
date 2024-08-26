@@ -23,12 +23,14 @@
 <form id="id_stockquote" method="post">
   {% csrf_token %}
   <a style="display: none">{{ form.quote_string }} {{ form.stockdetails }} {{ form.portfolios }}
-    {{ form.markets }} {{ form.datepicked_pressed }}</a>
+    {{ form.markets }}</a>
 
   <div class="d-inline-flex flex-wrap">
+    {% if form.date_is_today.value %}
     <button class="btn btn-outline-primary btn-sm mt-1"
       onclick="return SubmitQuoteString('{{ form.quote_string.value }}')">Quote
     </button>
+    {% endif %}
     <div class="dropdown">
       <button type="button" class="dropdown-toggle btn btn-outline-primary btn-sm ms-1 mt-1">
         {% if form.portfolios.value == '' %}
@@ -40,8 +42,7 @@
       <div class="dropdown-content">
         {% for portfolio in form.portfolios %}
         {% if not portfolio.data.selected %}
-        <button class="btn btn-link text-nowrap" value="{{ portfolio.data.value}}"
-          name="{{ portfolio.data.name }}">
+        <button class="btn btn-link text-nowrap" value="{{ portfolio.data.value}}" name="{{ portfolio.data.name }}">
           <a>{{ portfolio.choice_label }}</a>
         </button>
         {% endif %}
@@ -73,7 +74,8 @@
   </div>
 
   <div class="text-nowrap mb-2 mt-2" style="overflow: hidden; clear:both">
-    <table id="dtHorizontalVerticalScroll" class="table table-responsive table-striped table-sm" cellspacing="0" width="100%">
+    <table id="dtHorizontalVerticalScroll" class="table table-responsive table-striped table-sm" cellspacing="0"
+      width="100%">
       <thead class="custom-thead-grey">
         <tr>
           <th width="17%">Company</th>
@@ -94,13 +96,16 @@
         {% for stock in stock_info %}
         <tr>
           {% if form.stockdetails.value == form.stockdetails.field.choices.0.0 %}
-          <td width="17%"><a class="btn-link" href="{% url 'stock_intraday' source stock.symbol %}">{{ stock.name|truncatechars:20 }}</a>
+          <td width="17%"><a class="btn-link" href="{% url 'stock_intraday' source stock.symbol %}">
+              {{ stock.name|truncatechars:20 }}</a>
           </td>
           {% elif form.stockdetails.value == form.stockdetails.field.choices.1.0 %}
-          <td width="17%"><a class="btn-link" href="{% url 'stock_news' source stock.symbol %}">{{ stock.name|truncatechars:20 }}</a>
+          <td width="17%"><a class="btn-link" href="{% url 'stock_news' source stock.symbol %}">
+              {{ stock.name|truncatechars:20 }}</a>
           </td>
           {% elif form.stockdetails.value == form.stockdetails.field.choices.2.0 %}
-          <td width="17%"><a class="btn-link" href="{% url 'stock_press' source stock.symbol %}">{{ stock.name|truncatechars:20 }}</a>
+          <td width="17%"><a class="btn-link" href="{% url 'stock_press' source stock.symbol %}">
+              {{ stock.name|truncatechars:20 }}</a>
           </td>
           {% endif %}
           <td width="10%">{{ stock.symbol }}</td>
@@ -144,7 +149,6 @@
   }
 
   $('#id_datepicked').change(function () {
-    form.datepicked_pressed.value = 'true';
     form.submit();
   })
 

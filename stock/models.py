@@ -24,12 +24,12 @@ class Currency(models.Model):
         return self.usd_exchange_rate
 
     def get_exchangerate_on_date(self, currency_date: str) -> str:
-        if not currency_date:
-            return self.usd_exchange_rate
-
-        else:
+        if currency_date:
             currency = self.history.filter(currency_date=currency_date)
             return currency.last().usd_exchange_rate if currency else self.usd_exchange_rate
+
+        else:
+            return self.usd_exchange_rate
 
     def __str__(self) -> str:
         return str(self.currency)

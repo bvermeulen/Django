@@ -18,6 +18,9 @@ class BoardsTestsNoLogin(TestCase):
     def get_response(self):
         return self.client.get(self.boards_url)
 
+    def test_csrf(self):
+        self.assertContains(self.get_response(), "csrfmiddlewaretoken")
+
     def test_boards_url_resolves_boards_view(self):
         view = resolve("/boards/")
         self.assertEqual(view.func.view_class, BoardListView)

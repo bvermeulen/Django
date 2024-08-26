@@ -24,7 +24,7 @@
 <form id="id_portfolio" method="post">
   {% csrf_token %}
   <a style="display: none">{{ form.new_portfolio }} {{ form.portfolio_name }} {{ form.portfolios }}
-    {{ form.currencies }} {{ form.symbol }} {{ form.stockdetails }} {{ form.datepicked_pressed }}
+    {{ form.currencies }} {{ form.symbol }} {{ form.stockdetails }}
   </a>
 
   <div class="d-inline-flex flex-wrap">
@@ -37,6 +37,7 @@
         {% endif %}
       </button>
       <div class="dropdown-content">
+        {% if form.date_is_today.value %}
         <button class="btn btn-primary btn-sm mb=1 mb-1" name="btn1_pressed" value="new_portfolio"
           onclick="return PromptNewPortfolioName()">New</button>
         {% if form.portfolio_name.value != '' %}
@@ -51,6 +52,7 @@
           Delete</button>
         {% endif %}
         <div class="dropdown-divider"></div>
+        {% endif %}
         {% for portfolio in form.portfolios %}
         {% if not portfolio.data.selected %}
         <button class="btn btn-link text-nowrap" value="{{ portfolio.data.value}}" name="{{ portfolio.data.name }}">
@@ -61,9 +63,11 @@
     </div>
     {% if form.portfolio_name.value != '' %}
     {{ form.datepicked }}
+    {% if form.date_is_today.value %}
     <button class="btn btn-outline-primary btn-sm ms-1 mt-1" name="btn1_pressed" value="add_symbol"
       onclick="return AddSymbol('{{ form.symbol.value }}')">Add symbol
     </button>
+    {% endif %}
     <div class="dropdown">
       <button type="button" class="btn dropdown-toggle btn-outline-primary btn-sm ms-1 mt-1">
         {{ form.stockdetails.value }}
@@ -90,8 +94,6 @@
         {% endfor %}
       </div>
     </div>
-    {% else %}
-    <input type="hidden" id="id_datepicked" name="datepicked" value="01/01/1970">
     {% endif %}
   </div>
   {% if form.portfolio_name.value != '' %}
@@ -147,12 +149,15 @@
           <td width="10%">{{ stock.value }}</td>
           <td style="width: 3%; color:{{ stock.font_color }}">{{ stock.caret_up_down }}</td>
           <td style="width: 10%; color:{{ stock.font_color }}">{{ stock.value_change }}</td>
+          {% if form.date_is_today.value %}
           <td width="10%">
             <button class="btn btn-outline-secondary btn-sm" name="change_qty_btn_pressed" value="{{ stock.symbol }}, "
               onclick="return ChangeQuantity('{{ stock.name }}', '{{ stock.quantity }}', '{{ change_btn_counter }}')">Change</button>
           </td>
           {% increment change_btn_counter as change_btn_counter %}
-
+          {% else %}
+          <td width="10%"></td>
+          {% endif %}
           {% else %}
           <td width="10%"></td>
           <td width="10%"></td>
@@ -161,10 +166,14 @@
           <td width="10%"></td>
           {% endif %}
 
+          {% if form.date_is_today.value %}
           <td width="10%">
             <button class="btn btn-outline-secondary btn-sm" name="delete_symbol_btn_pressed" value="{{ stock.symbol }}"
               onclick="return ConfirmDeleteSymbol('{{ stock.name }}' )">Delete</button>
           </td>
+          {% else %}
+          <td width="10%"></td>
+          {% endif %}
         </tr>
         {% endfor %}
       </tbody>
@@ -271,7 +280,6 @@
   }
 
   $('#id_datepicked').change(function () {
-    form.datepicked_pressed.value = 'true';
     form.submit()
   })
 

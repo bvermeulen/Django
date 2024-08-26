@@ -59,6 +59,9 @@ class IntraDayTests(PlotsTestCase):
             'source': 'quotes', 'symbol':'AAPL'})
         self.response = self.client.get(self.url)
 
+    def test_csrf_not_set(self):
+        self.assertNotContains(self.response, "csrfmiddlewaretoken")
+
     def test_intraday_view_status_code(self):
         self.assertEqual(self.response.status_code, 200)
 
@@ -68,7 +71,7 @@ class IntraDayTests(PlotsTestCase):
         self.assertEqual(response.status_code, 302)
         self.assertRedirects(response, reverse('stock_quotes'))
 
-    def test_intraday_url_resolves_IntraDayView(self):
+    def test_intraday_url_resolves_intradayView(self):
         view = resolve(self.url)
         self.assertEqual(view.func.view_class, IntraDayView)
 
@@ -87,6 +90,11 @@ class IntraDayTests(PlotsTestCase):
         portfolio_url = reverse('portfolio')
         self.assertContains(local_response, f'href="{portfolio_url}"')
 
+    def test_intraday_view_contains_link_to_history_0_5(self):
+        history_url = reverse('stock_history', kwargs={
+            'source': 'quotes', 'symbol': 'AAPL', 'period': '0.5'})
+        self.assertContains(self.response, f"href='{history_url}'")
+
     def test_intraday_view_contains_link_to_history_1(self):
         history_url = reverse('stock_history', kwargs={
             'source': 'quotes', 'symbol': 'AAPL', 'period': '1'})
@@ -97,19 +105,27 @@ class IntraDayTests(PlotsTestCase):
             'source': 'quotes', 'symbol': 'AAPL', 'period': '3'})
         self.assertContains(self.response, f"href='{history_url}'")
 
-    def test_intraday_view_contains_link_to_history_0_5(self):
-        history_url = reverse('stock_history', kwargs={
-            'source': 'quotes', 'symbol': 'AAPL', 'period': '0.5'})
-        self.assertContains(self.response, f"href='{history_url}'")
-
     def test_intraday_view_contains_link_to_history_max(self):
         history_url = reverse('stock_history', kwargs={
             'source': 'quotes', 'symbol': 'AAPL', 'period': 'max'})
         self.assertContains(self.response, f"href='{history_url}'")
 
+    def test_intraday_view_contains_link_to_stock_press(self):
+        news_url = reverse(
+            "stock_press",
+            kwargs={"source": "quotes", "symbol": "AAPL"},
+        )
+        self.assertContains(self.response, f"href='{news_url}'")
+
+    def test_intraday_view_contains_link_to_stock_news(self):
+        news_url = reverse(
+            "stock_news",
+            kwargs={"source": "quotes", "symbol": "AAPL"},
+        )
+        self.assertContains(self.response, f"href='{news_url}'")
+
     def test_response_contains_ref_to_url_provider(self):
         self.assertEqual(URL_PROVIDER, self.response.context['data_provider_url'])
-
         file_name = 'stock/tests/test_intraday.html'
         with open(file_name, 'wt', encoding='utf-8') as f:
             f.write(self.response.content.decode())
@@ -121,23 +137,50 @@ class HistoryTests(PlotsTestCase):
             'source': 'quotes', 'symbol': 'AAPL', 'period': '1'})
         self.response = self.client.get(self.url)
 
+    def test_csrf_not_set(self):
+        self.assertNotContains(self.response, "csrfmiddlewaretoken")
+
     def test_history_view_status_code(self):
         self.assertEqual(self.response.status_code, 200)
 
-        history_url = reverse('stock_history', kwargs={
-            'source': 'quotes', 'symbol': 'AAPL', 'period': '3'})
-        response = self.client.get(history_url)
-        self.assertEqual(response.status_code, 200)
+    def test_history_view_contains_link_to_intraday(self):
+        symbol = self.response.context["stock_symbol"]
+        url = reverse("stock_intraday", kwargs={"source": "quotes", "symbol": symbol})
+        self.assertContains(self.response, f'href="{url}"')
 
+    def test_history_view_contains_link_to_history_0_5(self):
         history_url = reverse('stock_history', kwargs={
             'source': 'quotes', 'symbol': 'AAPL', 'period': '0.5'})
         response = self.client.get(history_url)
         self.assertEqual(response.status_code, 200)
 
+    def test_history_view_contains_link_to_history_3(self):
         history_url = reverse('stock_history', kwargs={
-            'source': 'quotes', 'symbol': 'AAPL', 'period': 'max'})
+            'source': 'quotes', 'symbol': 'AAPL', 'period': '3'})
         response = self.client.get(history_url)
         self.assertEqual(response.status_code, 200)
+
+    def test_history_view_contains_link_to_history_max(self):
+        history_url = reverse(
+            "stock_history",
+            kwargs={"source": "quotes", "symbol": "AAPL", "period": "max"},
+        )
+        response = self.client.get(history_url)
+        self.assertEqual(response.status_code, 200)
+
+    def test_history_view_contains_link_to_stock_press(self):
+        news_url = reverse(
+            "stock_press",
+            kwargs={"source": "quotes", "symbol": "AAPL"},
+        )
+        self.assertContains(self.response, f"href='{news_url}'")
+
+    def test_history_view_contains_link_to_stock_news(self):
+        news_url = reverse(
+            "stock_news",
+            kwargs={"source": "quotes", "symbol": "AAPL"},
+        )
+        self.assertContains(self.response, f"href='{news_url}'")
 
     def test_history_view_incorrect_symbol_redirects(self):
         history_url = reverse('stock_history', kwargs={
@@ -153,7 +196,7 @@ class HistoryTests(PlotsTestCase):
         self.assertEqual(response.status_code, 302)
         self.assertRedirects(response, reverse('stock_quotes'))
 
-    def test_intraday_url_resolves_HistoryView(self):
+    def test_intraday_url_resolves_historyview(self):
         view = resolve(self.url)
         self.assertEqual(view.func.view_class, HistoryView)
 
@@ -172,15 +215,8 @@ class HistoryTests(PlotsTestCase):
         portfolio_url = reverse('portfolio')
         self.assertContains(local_response, f'href="{portfolio_url}"')
 
-    def test_history_view_contains_link_to_intraday(self):
-        symbol = self.response.context['stock_symbol']
-        url = reverse('stock_intraday', kwargs={
-            'source': 'quotes', 'symbol': symbol})
-        self.assertContains(self.response, f'href="{url}"')
-
     def test_response_contains_ref_to_url_provider(self):
         self.assertEqual(URL_PROVIDER, self.response.context['data_provider_url'])
-
         file_name = 'stock/tests/test_history.html'
         with open(file_name, 'wt', encoding='utf-8') as f:
             f.write(self.response.content.decode())

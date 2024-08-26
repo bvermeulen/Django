@@ -76,6 +76,7 @@ class PortfolioView(View):
                 "currencies": currency,
                 "stockdetails": stockdetail,
                 "datepicked": datepicked,
+                "date_is_today": True,
             },
         )
         totals_values = format_totals_values(*self.td.calculate_stocks_value(stocks))
@@ -100,16 +101,13 @@ class PortfolioView(View):
         date_today = datetime.datetime.now().date().strftime("%d/%m/%Y")
         currency = request.session.get("currency", BASE_CURRENCIES[0][0])
         stockdetail = request.session.get("stockdetail", STOCK_DETAILS[0][0])
-        datepicked = request.session.get("datepicked", date_today)
 
         form = self.portfolio_form(request.POST, user=user)
         if form.is_valid():
             previous_currency = currency
-            previous_datepicked = datepicked
+            previous_datepicked = request.session.get("datepicked", date_today)
             form_data = form.cleaned_data
             currency = form_data.get("currencies")
-            if (dp := form_data.get("datepicked").strftime("%d/%m/%Y")) != '01/01/1970':
-                datepicked = dp
             stockdetail = form_data.get("stockdetails")
             self.selected_portfolio = form_data.get("portfolios")
             self.portfolio_name = form_data.get("portfolio_name")
@@ -118,16 +116,14 @@ class PortfolioView(View):
             self.btn1_pressed = form_data.get("btn1_pressed")
             self.change_qty_btn_pressed = form_data.get("change_qty_btn_pressed")
             self.delete_symbol_btn_pressed = form_data.get("delete_symbol_btn_pressed")
-            self.previous_selected = request.session.get("selected_portfolio")
             datepicked = (
-                datepicked
-                if datepicked
-                and not (
-                    self.btn1_pressed
-                    or self.delete_symbol_btn_pressed
-                    or self.change_qty_btn_pressed
-                )
+                dp.strftime("%d/%m/%Y")
+                if (dp := form_data.get("datepicked"))
                 else date_today
+            )
+            self.previous_selected = request.session.get("selected_portfolio")
+            date_is_today = (
+                True if datepicked == date_today else False
             )
             get_stock = (
                 GetStock.YES
@@ -145,30 +141,32 @@ class PortfolioView(View):
                 self.selected_portfolio = ""
                 get_stock = GetStock.EMPTY
 
-            match self.btn1_pressed:
-                case "new_portfolio":
-                    get_stock = self.create_new_portfolio(user)
+            if date_is_today:
+                # fallback these controls can only be done when date_is_today 
+                match self.btn1_pressed:
+                    case "new_portfolio":
+                        get_stock = self.create_new_portfolio(user)
 
-                case "rename_portfolio":
-                    get_stock = self.rename_portfolio()
+                    case "rename_portfolio":
+                        get_stock = self.rename_portfolio()
 
-                case "copy_portfolio":
-                    get_stock = self.copy_portfolio()
+                    case "copy_portfolio":
+                        get_stock = self.copy_portfolio()
 
-                case "delete_portfolio":
-                    get_stock = self.delete_portfolio()
+                    case "delete_portfolio":
+                        get_stock = self.delete_portfolio()
 
-                case "add_symbol":
-                    get_stock = self.add_symbol()
+                    case "add_symbol":
+                        get_stock = self.add_symbol()
 
-                case _:
-                    pass
+                    case _:
+                        pass
 
-            if self.change_qty_btn_pressed:
-                get_stock = self.change_quantity_symbol()
+                if self.change_qty_btn_pressed:
+                    get_stock = self.change_quantity_symbol()
 
-            if self.delete_symbol_btn_pressed:
-                get_stock = self.delete_symbol()
+                if self.delete_symbol_btn_pressed:
+                    get_stock = self.delete_symbol()
 
             # set portfolio name except if the portfolio has been deleted or does not exist
             try:
@@ -198,6 +196,7 @@ class PortfolioView(View):
                     "currencies": currency,
                     "stockdetails": stockdetail,
                     "datepicked": datepicked,
+                    "date_is_today": date_is_today,
                 },
             )
             logger.info(
@@ -214,6 +213,7 @@ class PortfolioView(View):
                     "currencies": currency,
                     "stockdetails": stockdetail,
                     "datepicked": date_today,
+                    "date_is_today": True,
                 },
             )
             stocks = []

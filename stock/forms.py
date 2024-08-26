@@ -58,7 +58,7 @@ class StockQuoteForm(forms.Form):
             required=True,
         )
 
-        self.fields["datepicked_pressed"] = forms.CharField(required=False)
+        self.fields["date_is_today"] = forms.BooleanField(required=False)
 
 
 class PortfolioForm(forms.Form):
@@ -104,6 +104,6 @@ class PortfolioForm(forms.Form):
             widget=FengyuanChenDatePickerInput(
                 attrs={"size": "9", "class": "btn btn-outline-primary btn-sm ms-1 mt-1"}
             ),
-            required=True,
+            required=False,
         )
-        self.fields["datepicked_pressed"] = forms.CharField(required=False)
+        self.fields["date_is_today"] = forms.BooleanField(required=False)

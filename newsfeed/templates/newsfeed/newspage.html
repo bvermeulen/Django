@@ -47,7 +47,7 @@
 			style="height:40%; overflow:hidden; overflow-y:scroll; overflow-x:scroll">
 			{% for item, title in news_titles %}
 			<li><button type="submit" class="btn btn-sm item_select" name="title_btn" value="{{ item }}">
-					{{ title|safe }}
+					{{ title }}
 				</button></li>
 			{% endfor %}
 		</ul>
@@ -70,7 +70,7 @@
 		</div>
 		<div class="card" style="border-width: 2px">
 			<card class="card-body">
-				<h2 class="card-title" style="background-color:lightgrey">{{ news_title|safe }}</h2>
+				<h2 class="card-title" style="background-color:lightgrey">{{ news_title }}</h2>
 
 				<a style="padding:0px" class="btn btn-link" href="{{ news_link }}" target="_blank">link</a>
 				<input style="padding:0px" type="submit" class="btn btn-link" id="id_scroll" name="control_btn"

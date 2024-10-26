@@ -65,10 +65,7 @@ def store_news_item(user, ns, feed_items, ip):
     link = feed_items[ns.item].link
     usernewsitem = UserNewsItem.objects.filter(user=user).filter(link=link).first()
     news_published = feedparser_time_to_datetime(feed_items[ns.item])
-    if (
-        usernewsitem
-        and news_published > usernewsitem.published
-    ):
+    if usernewsitem and news_published > usernewsitem.published:
         usernewsitem.delete()
         usernewsitem = None
 
@@ -82,9 +79,7 @@ def store_news_item(user, ns, feed_items, ip):
         usernewsitem.news_site = NewsSite.objects.get(news_site=ns.current_news_site)
         usernewsitem.save()
 
-        logger.info(
-            f"user {user.username}, storing news: {usernewsitem}"
-        )
+        logger.info(f"user {user.username}, storing news: {usernewsitem}")
 
 
 def add_img_tag_adjust_width(summary, image_src):

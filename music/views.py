@@ -47,7 +47,9 @@ class PlayTopTracksView(View):
                 artist_name = artist_query
                 top_tracks = []
                 try:
-                    artists = spotify.search(q="artist:" + artist_query, type="artist")
+                    artists = spotify.search(
+                        q=artist_query, type="artist",
+                    )
                     top_tracks = spotify.artist_top_tracks(
                         artists["artists"]["items"][0]["uri"][15:]
                     )["tracks"][:10]

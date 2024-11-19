@@ -4,23 +4,33 @@ from django.views.generic import View
 from django.db import IntegrityError
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
-from howdimain.settings import SPOTIFY_CLIENT_ID, SPOTIFY_CLIENT_SECRET
+from howdimain.settings import (
+    SPOTIFY_CLIENT_ID,
+    SPOTIFY_CLIENT_SECRET,
+    SPOTIFY_REDIRECT_URI,
+)
 from howdimain.utils.get_ip import get_client_ip
 from howdimain.utils.plogger import Logger
 from music.models import MusicTrack
 import spotipy
-from spotipy.oauth2 import SpotifyClientCredentials
+from spotipy.oauth2 import SpotifyOAuth
 from spotipy.exceptions import SpotifyException
+
 
 logger = Logger.getlogger()
 
-
-spotify = spotipy.Spotify(
-    client_credentials_manager=SpotifyClientCredentials(
-        client_id=SPOTIFY_CLIENT_ID,
-        client_secret=SPOTIFY_CLIENT_SECRET,
-    )
+SCOPE = "user-library-read"
+CACHE = ".cache"
+spotify_authorization = SpotifyOAuth(
+    SPOTIFY_CLIENT_ID,
+    SPOTIFY_CLIENT_SECRET,
+    SPOTIFY_REDIRECT_URI,
+    scope=SCOPE,
+    cache_path=CACHE,
+    # show_dialog=True,
+    # open_browser=False,
 )
+spotify = spotipy.Spotify(auth_manager=spotify_authorization)
 
 
 class PlayTopTracksView(View):
@@ -48,10 +58,11 @@ class PlayTopTracksView(View):
                 top_tracks = []
                 try:
                     artists = spotify.search(
-                        q=artist_query, type="artist",
+                        q=artist_query,
+                        type="artist",
                     )
                     top_tracks = spotify.artist_top_tracks(
-                        artists["artists"]["items"][0]["uri"][15:]
+                        artists["artists"]["items"][0]["uri"]
                     )["tracks"][:10]
 
                 except Exception as e:
@@ -65,13 +76,18 @@ class PlayTopTracksView(View):
 
             elif user.is_authenticated and track_id:
                 try:
-                    track_data = spotify.track(track_id)
-                    MusicTrack.objects.create(
+                    track_data = spotify.track(track_id, market="US")
+                    song = MusicTrack.objects.create(
                         track_id=track_data.get("id"),
                         artist=track_data.get("artists")[0].get("name")[:100],
+                        album=track_data.get("album").get("name")[:100],
                         name=track_data.get("name")[:100],
                         preview_url=track_data.get("preview_url", "")[:100],
                         user=user,
+                    )
+                    song.store_image(
+                        ".".join([song.track_id, "jpg"]),
+                        track_data.get("album").get("images")[1].get("url"),
                     )
                     logger.info(
                         f"user {user} [ip: {get_client_ip(request)}] "

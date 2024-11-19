@@ -37,23 +37,28 @@
       <div class="swiper-wrapper">
         {% for track in track_list %}
         <div id="slide" class="swiper-slide">
-          <h5>{{ track.name }}</h5>
-          <iframe src="https://open.spotify.com/embed/track/{{ track.track_id }}" width="100%" height="300"
-            frameborder="0" allowtransparency="true" allow="encrypted-media">
-          </iframe>
-          {% if track.preview_url %}
-          <audio controls style="float: left; width: 60%; margin: 5px">
-            <source src="{{ track.preview_url }}">
-          </audio>
-          {% endif %}
-          <button style="float: left" type="submit" class="btn btn-link btn-sm" name="track_pk" value="{{ track.pk }}">
-            delete from playlist
-          </button>
+          <div style="height:150px">
+            <h4>{{ track.name }}</h4>
+            <h6>{{ track.artist }} </h6>
+            <h6>{{ track.album }}</h6>
+          </div>
+          <img src="{{ track.image_url }}" alt="">
+          <div style="display:flex">
+            {% if track.preview_url %}
+            <audio controls style="float: left; width: 60%; margin: 2px">
+              <source src="{{ track.preview_url }}">
+            </audio>
+            {% endif %}
+            <button style="float: left" type="submit" class="btn btn-link btn-sm" name="track_pk"
+              value="{{ track.pk }}">
+              delete from playlist
+            </button>
+          </div>
         </div>
         {% endfor %}
       </div>
       <!-- Add Pagination -->
-      <!-- <div class="swiper-pagination"></div> -->
+      <!--<div class="swiper-pagination"></div>-->
       <div class="swiper-button-next"></div>
       <div class="swiper-button-prev"></div>
     </div>

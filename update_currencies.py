@@ -7,7 +7,7 @@ from decouple import config
 import datetime
 from datetime import timezone
 import requests
-import psycopg2
+import psycopg
 from howdimain.utils.plogger import Logger
 
 logformat = "%(asctime)s:%(levelname)s:%(message)s"
@@ -41,7 +41,7 @@ class UpdateCurrencies:
             f"password='{cls.db_user_pw}'"
         )
 
-        connection = psycopg2.connect(connect_string)
+        connection = psycopg.connect(connect_string)
         cursor = connection.cursor()
 
         params = {"access_key": cls.access_key}

@@ -43,15 +43,14 @@
             <h6>{{ track.album }}</h6>
           </div>
           <img src="{{ track.image_url }}" alt="">
-          <div style="display:flex">
+          <div style="display:flex; margin-top: 3px">
             {% if track.preview_url %}
-            <audio controls style="float: left; width: 60%; margin-right: 10px">
+            <audio controls style="float: left; width: 60%; margin-right: 10px; margin-top: 10px">
               <source src="{{ track.preview_url }}">
             </audio>
             {% endif %}
             <a href="https://open.spotify.com/track/{{ track.track_id }}" target="_blank"><img
-                src="{% static 'img/Spotify_logo_without_text.png' %}"
-                style="float: left; width:40px; height:30px;margin-top: 10px;">
+                src="{% static 'img/Spotify_logo_without_text.png' %}" style="float: left; width:40px; margin-top: 50%">
             </a>
             <button style="float: left" class="btn btn-link btn-sm" name="track_pk" value="{{ track.pk }}"
               onclick="return validateDelete(`{{ track.name }}`)">

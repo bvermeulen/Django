@@ -36,7 +36,7 @@
         </td>
         <td>
           <button class="btn btn-outline-secondary btn-sm" name="deleted_item_pk" value="{{ item.pk }}"
-            onclick="return validateDelete('{{ item.title }}')">Delete</button>
+            onclick="return validateDelete(`{{ item.title }}`)">Delete</button>
         </td>
       </tr>
       {% endfor %}

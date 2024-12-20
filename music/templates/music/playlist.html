@@ -30,9 +30,21 @@
 
 {% block content %}
 <form id="id_playlist" method="post">
+  <div class="d-flex">
+    <h2 class="mb-4">Playlist {{ user.first_name }}</h2>
+    <div class="dropdown ms-2 mt-2" style="z-index: 5; width: 200px">
+      <button type="button" class="dropdown-toggle btn btn-light btn-sm">Sort</button>
+      <div class="dropdown-content">
+        {% for name in music_form.sort_choice %}
+        <a class="btn btn-light btn-sm mt-0 mb-0">{{ name }}</a><br>
+        {% endfor %}
+        <button class="btn link-secondary ms-1 float-left">Submit</button>
+      </div>
+    </div>
+  </div>
+
   {% csrf_token %}
   <div class="netflix-slider">
-    <h2 class="mb-4">Playlist {{ user.first_name }}</h2>
     <div class="swiper-container">
       <div class="swiper-wrapper">
         {% for track in track_list %}
@@ -52,8 +64,8 @@
             <a href="https://open.spotify.com/track/{{ track.track_id }}" target="_blank"><img
                 src="{% static 'img/Spotify_logo_without_text.png' %}" style="float: left; width:40px; margin-top: 50%">
             </a>
-            <button style="float: left" class="btn btn-link btn-sm" name="track_pk" value="{{ track.pk }}"
-              onclick="return validateDelete(`{{ track.name }}`)">
+            <button class="btn link-secondary btn-sm float-left" name="{{ music_form.track_pk.name }}"
+              value="{{ track.pk }}" onclick="return validateDelete(`{{ track.name }}`)">
               delete from playlist
             </button>
           </div>
@@ -65,7 +77,6 @@
       <div class="swiper-button-next"></div>
       <div class="swiper-button-prev"></div>
     </div>
-  </div>
 </form>
 {% endblock %}
 
@@ -127,5 +138,6 @@
       return false;
     }
   }
+
 </script>
 {% endblock %}

@@ -135,31 +135,21 @@ class PlayListView(View):
     def get(self, request, sort_choice):
         user = request.user
 
-        music_form = self.music_form(initial={'sort_choice':sort_choice})
+        music_form = self.music_form(initial={"sort_choice": sort_choice})
 
         if SortChoices.ARTIST.value[0] == sort_choice:
-            track_list = list(
-                MusicTrack.objects.filter(user=user).order_by("artist")
-            )
+            track_list = list(MusicTrack.objects.filter(user=user).order_by("artist"))
         elif SortChoices.ALBUM.value[0] == sort_choice:
-            track_list = list(
-                MusicTrack.objects.filter(user=user).order_by("album")
-            )
+            track_list = list(MusicTrack.objects.filter(user=user).order_by("album"))
         elif SortChoices.SONG.value[0] == sort_choice:
-            track_list = list(
-                MusicTrack.objects.filter(user=user).order_by("name")
-            )
+            track_list = list(MusicTrack.objects.filter(user=user).order_by("name"))
         elif SortChoices.DATE.value[0] == sort_choice:
-            track_list = list(
-                MusicTrack.objects.filter(user=user).order_by("added_at")
-            )
+            track_list = list(MusicTrack.objects.filter(user=user).order_by("added_at"))
         elif SortChoices.RANDOM.value[0] == sort_choice:
             track_list = list(MusicTrack.objects.filter(user=user))
             random.shuffle(track_list)
         else:
-            track_list = list(
-                MusicTrack.objects.filter(user=user).order_by("artist")
-            )
+            track_list = list(MusicTrack.objects.filter(user=user).order_by("artist"))
         context = {"track_list": track_list, "music_form": music_form}
         return render(request, self.template_name, context)
 

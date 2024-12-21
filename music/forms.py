@@ -16,7 +16,7 @@ class MusicForm(forms.Form):
 
         sort_choices = [(v.value[0], v.value[1]) for v in SortChoices]
         self.fields["sort_choice"] = forms.ChoiceField(
-            widget=forms.RadioSelect(attrs={"style":"width:20px; accent-color:grey"}),
+            widget=forms.RadioSelect(attrs={"style": "width:20px; accent-color:grey"}),
             choices=sort_choices,
             required=False,
         )

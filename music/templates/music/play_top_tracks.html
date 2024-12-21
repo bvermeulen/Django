@@ -35,6 +35,7 @@
     {% for track in artist_dict.top_tracks %}
     <div class="col">
       <div class="card h-100">
+        <h4 class="fw-bold fst-italic">{{ track.name }}</h4>
         <iframe src="https://open.spotify.com/embed/track/{{ track.id }}" width="100%" height="300" frameborder="0"
           allowtransparency="true" allow="encrypted-media" class="card-img-top"></iframe>
         <div class="card-body">

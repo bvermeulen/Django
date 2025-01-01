@@ -23,3 +23,4 @@ class MusicForm(forms.Form):
         self.fields["track_pk"] = forms.IntegerField(required=False)
         self.fields["track_id"] = forms.CharField(max_length=50, required=False)
         self.fields["artist_query"] = forms.CharField(max_length=50, required=False)
+        self.fields["artist_dict"] = forms.JSONField(required=False)

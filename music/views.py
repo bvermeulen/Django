@@ -48,16 +48,19 @@ class PlayTopTracksView(View):
         if not artist_dict.get("top_tracks"):
             artist_dict = self.artist_empty
 
-        music_form = self.music_form(initial={"sort_choice": sort_choice})
-        context = {"artist_dict": artist_dict, "music_form": music_form}
+        music_form = self.music_form(
+            initial={"sort_choice": sort_choice, "artist_dict": artist_dict}
+        )
+        context = {"music_form": music_form}
         return render(request, self.template_name, context)
 
     def post(self, request):
         user = request.user
-        music_form = self.music_form(request.POST)
         artist_dict = request.session.get("artist_dict", self.artist_empty)
+        sort_choice = request.session.get("music_sort_choice", 1)
         top_tracks = []
         artist_object = {"name": ""}
+        music_form = self.music_form(request.POST)
 
         if music_form.is_valid():
             artist_query = music_form.cleaned_data.get("artist_query")
@@ -122,8 +125,11 @@ class PlayTopTracksView(View):
         else:
             pass
 
+        music_form = self.music_form(
+            initial={"artist_dict": artist_dict, "sort_choice": sort_choice}
+        )
         request.session["artist_dict"] = artist_dict
-        context = {"artist_dict": artist_dict, "music_form": music_form}
+        context = {"music_form": music_form}
         return render(request, self.template_name, context)
 
 
@@ -134,7 +140,7 @@ class PlayListView(View):
 
     def get(self, request, sort_choice):
         user = request.user
-
+        request.session["music_sort_choice"] = sort_choice
         music_form = self.music_form(initial={"sort_choice": sort_choice})
 
         if SortChoices.ARTIST.value[0] == sort_choice:

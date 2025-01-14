@@ -22,8 +22,7 @@
 
 <form id="id_stockquote" method="post">
   {% csrf_token %}
-  <a style="display: none">{{ form.quote_string }} {{ form.stockdetails }} {{ form.portfolios }}
-    {{ form.markets }}</a>
+  <a style="display: none">{{ form.quote_string }} {{ form.stockdetails }} {{ form.portfolios }}</a>
 
   <div class="d-inline-flex flex-wrap">
     {% if form.date_is_today.value %}

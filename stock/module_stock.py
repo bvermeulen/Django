@@ -700,9 +700,10 @@ class TradingData:
                     d(stock["quantity"]) * d(stock["day_change"]) / d(exchange_rate)
                 )
 
-            except (NameError, decimal.InvalidOperation):
+            except (TypeError, NameError, decimal.InvalidOperation):
                 value = "n/a"
                 value_change = "n/a"
+                stock["change_pct"] = "0"
 
             if base_currency_name == "USD" or value == "n/a":
                 pass

@@ -1,5 +1,4 @@
-""" Functions for display tokens
-"""
+"""Functions for display tokens"""
 
 import decimal
 from decimal import Decimal as d
@@ -14,7 +13,7 @@ def add_display_tokens(orig_stock_info):
         try:
             _ = float(stock.get("change_pct"))
 
-        except ValueError:
+        except (TypeError, ValueError):
             stock["change_pct"] = "0"
 
         if abs(float(stock.get("change_pct"))) < 0.001:

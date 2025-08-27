@@ -42,10 +42,12 @@ def update_stock_history():
         for stock in stock_info:
             stock_object = Stock.objects.get(symbol_ric=stock["symbol"])
             exchange_timezone = get_exchange_timezone(stock_object.exchange.mic)
-            datetime_now_at_exchange = (
-                datetime.datetime.now(ZoneInfo(exchange_timezone))
-            ).replace(tzinfo=None)
-            datetime_stock = stock["last_trade_time"]
+            datetime_now_at_exchange = datetime.datetime.now(
+                ZoneInfo(exchange_timezone)
+            )
+            datetime_stock = stock["last_trade_time"].replace(
+                tzinfo=ZoneInfo(exchange_timezone)
+            )
 
             # check if the stock has not been updated for 4 hours, then it is assumed the exchange is closed
             if datetime_now_at_exchange > datetime_stock + datetime.timedelta(hours=4):

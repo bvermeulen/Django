@@ -10,7 +10,6 @@ import django
 django.setup()
 from stock.module_stock import TradingData
 from stock.models import Portfolio, Stock, StockHistory, PortfolioHistory
-from django.db.utils import IntegrityError
 from howdimain.howdimain_vars import MAX_SYMBOLS_ALLOWED
 from howdimain.utils.tradetime import get_exchange_timezone
 from howdimain.utils.plogger import Logger
@@ -51,6 +50,8 @@ def update_stock_history():
 
             # check if the stock has not been updated for 4 hours, then it is assumed the exchange is closed
             if datetime_now_at_exchange > datetime_stock + datetime.timedelta(hours=4):
+                datetime_stock = datetime_stock.replace(tzinfo=None)
+
                 if not StockHistory.objects.filter(
                     stock=stock_object, last_trading_time=datetime_stock
                 ).exists():

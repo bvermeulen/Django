@@ -1,4 +1,8 @@
 import itertools
+import json
+import uuid
+from pathlib import Path
+from django.conf import settings
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect, get_object_or_404, reverse
@@ -8,6 +12,9 @@ from django.utils import timezone
 from django.utils.decorators import method_decorator
 from django.db.models import Count
 from django.core.exceptions import ObjectDoesNotExist
+from django.http import HttpResponse
+from django.core.files.storage import default_storage
+from django.core.files.base import ContentFile
 from howdimain.howdimain_vars import POSTS_PER_PAGE, TOPICS_PER_PAGE
 from howdimain.utils.plogger import Logger
 from howdimain.utils.get_ip import get_client_ip
@@ -416,3 +423,32 @@ class PostUpdateView(UpdateView):
             topic_post_url = f"{topic_url}?page={self.topic.get_page_number(post.pk)}"
 
             return redirect(topic_post_url)
+
+@login_required
+def markdown_uploader(request):
+    """
+    Markdown image upload for locale storage and represent as json to markdown editor.
+    """
+    if request.method != "POST":
+        return HttpResponse("Invalid request!")        
+        
+    if "markdown-image-upload" not in request.FILES:
+        return HttpResponse("Invalid request!")        
+        
+    image = request.FILES["markdown-image-upload"]
+    if image.size > (max_size := settings.MAX_IMAGE_UPLOAD_SIZE):
+        data = json.dumps(
+            {
+                "status": 405,
+                "error": f"Maximum image file is {max_size / (1024 * 1024):,} MB."
+            },
+        )
+        return HttpResponse(data, content_type="application/json", status=405)
+
+    img_uuid = f"{uuid.uuid4().hex[:10]}-{image.name.replace(" ", "-")}"
+    tmp_file = Path(settings.MARTOR_UPLOAD_PATH) / img_uuid
+    def_path = default_storage.save(tmp_file, ContentFile(image.read()))
+    img_url = ''.join([settings.MEDIA_URL, def_path])
+
+    data = json.dumps({"status": 200, "link": img_url, "name": image.name})
+    return HttpResponse(data, content_type="application/json")

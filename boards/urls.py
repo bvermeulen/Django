@@ -25,4 +25,7 @@ urlpatterns = [
         views.PostUpdateView.as_view(),
         name="edit_post",
     ),
+    path(
+        "api/uploader/", views.markdown_uploader, name="markdown_uploader_page"
+    ),
 ]

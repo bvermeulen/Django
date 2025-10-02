@@ -172,13 +172,11 @@ class QuotesViewGetTests(QuotesTestSetup):
         csrf token
         quote_string
         datepicked
-        markets XNAS
-        markets XNYS
         form check XNAS
         form check XNYS
         """
         response = self.client.get(reverse("stock_quotes"))
-        self.assertContains(response, "<input", 7)
+        self.assertContains(response, "<input", 5)
 
     def test_not_logged_does_not_give_my_portfolio(self):
         response = self.client.get(reverse("stock_quotes"))

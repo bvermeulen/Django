@@ -26,7 +26,7 @@ from howdimain.howdimain_vars import (
 HOWDIMAIN_VERSION = (
     "https://github.com/bvermeulen/Django/bootstrap5"
 )
-HOWDIMAIN_DATE = "June, 2024: implement bootstrap 5"
+HOWDIMAIN_DATE = "September, 2025: markdown upload local"
 HOWDIMAIN_AUTHOR = "bruno.vermeulen@hotmail.com"
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
@@ -182,7 +182,6 @@ SPOTIFY_REDIRECT_URI = config("SPOTIFY_REDIRECT_URI", default="")
 
 # Global martor settings
 MARTOR_THEME = "bootstrap"
-
 MARTOR_ENABLE_CONFIGS = {
     "emoji": "true",  # to enable/disable emoji icons.
     "imgur": "true",  # to enable/disable imgur/custom uploader.
@@ -192,21 +191,17 @@ MARTOR_ENABLE_CONFIGS = {
     "spellcheck": "false",  # to enable/disable spellcheck in form textareas
     "hljs": "true",  # to enable/disable hljs highlighting in preview
 }
-
 # To setup the martor editor with label or not (default is False)
 MARTOR_ENABLE_LABEL = False
-
 # Imgur API Keys
 MARTOR_IMGUR_CLIENT_ID = config("IMGUR_CLIENT_ID")
 MARTOR_IMGUR_API_KEY = config("IMGUR_SECRET_KEY")
-
 # Safe Mode
 MARTOR_MARKDOWN_SAFE_MODE = "escape"  # default
-
+MAX_IMAGE_UPLOAD_SIZE = 5 * 1024 * 1024 # in megabyte
 # Markdownify
 MARTOR_MARKDOWNIFY_FUNCTION = "martor.utils.markdownify"  # default
 MARTOR_MARKDOWNIFY_URL = "/martor/markdownify/"  # default
-
 # Markdown extensions (default)
 MARTOR_MARKDOWN_EXTENSIONS = [
     "markdown.extensions.extra",
@@ -220,14 +215,12 @@ MARTOR_MARKDOWN_EXTENSIONS = [
     "martor.extensions.emoji",  # to parse markdown emoji
     "martor.extensions.mdx_video",  # to parse embed/iframe video
 ]
-
 # Markdown Extensions Configs
 MARTOR_MARKDOWN_EXTENSION_CONFIGS = {}
-
-# Markdown urls
-MARTOR_UPLOAD_URL = "/martor/uploader/"  # default
+# Markdown data path and urls
+MARTOR_UPLOAD_PATH = "martor_images/"
+MARTOR_UPLOAD_URL = "/api/uploader/"  # default
 MARTOR_SEARCH_USERS_URL = "/martor/search-user/"  # default
-
 # Markdown Extensions
 MARTOR_MARKDOWN_BASE_EMOJI_URL = (
     "https://github.githubassets.com/images/icons/emoji/"  # default from github

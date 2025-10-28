@@ -256,7 +256,7 @@
     if (newQuantity >= 0 && newQuantity != qty) {
       // if there is only one change button then change_qty_btn_pressed is not an array
       try {
-        form.change_qty_btn_pressed[counter].value += newQuantity;
+        form.change_qty_btn_pressed.item(counter).value += newQuantity;
       }
       catch (err) {
         form.change_qty_btn_pressed.value += newQuantity;

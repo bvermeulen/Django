@@ -1,3 +1,4 @@
+from datetime import datetime, timezone
 from django.db import models
 from django.contrib.auth.models import User
 
@@ -5,6 +6,8 @@ from django.contrib.auth.models import User
 class NewsSite(models.Model):
     news_site = models.CharField(max_length=15, unique=True)
     news_url = models.URLField()
+    cached_feed = models.TextField(default="")
+    last_update = models.DateTimeField(default = datetime.now(timezone.utc))
 
     def __str__(self):
         return self.news_site

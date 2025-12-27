@@ -1,8 +1,10 @@
 import re
 import requests
 from datetime import datetime, timezone
+from howdimain.settings import NEWSFEED_UPDATE_INHIBIT, oxylab_username, oxylab_password
 from django.contrib.auth.models import User
 from django.db.utils import IntegrityError
+import cloudscraper
 import feedparser
 from .models import NewsSite, UserNewsSite
 
@@ -32,35 +34,55 @@ news_list = {'CNN World News':
              'https://www.slb.com/news/press_releases.aspx?r=1',
              }
 
+proxy_user = oxylab_username
+proxy_password = oxylab_password
+proxy_ip_port = "pr.oxylabs.io:7777"
 
 def update_news(news_url):
+
     '''  Function to update the news and display the news site
     '''
-    raw = ''
-    try:
-        response = requests.get(news_url)
+    entry = f"http://customer-{proxy_user}-cc-nl-ams:{proxy_password}@{proxy_ip_port}"
+    proxies = {
+        'http': entry,
+        'https': entry
+    }
+    scraper = cloudscraper.create_scraper()
+    newssite = NewsSite.objects.get(news_url=news_url)
+    response = None
+    time_diff = (datetime.now(tz=timezone.utc) - newssite.last_update).seconds
+    if time_diff > NEWSFEED_UPDATE_INHIBIT:
+        response = scraper.get(news_url, proxies=proxies, allow_redirects=True)
+        try:
+            if response and response.status_code in [200]:
 
-        if response and response.status_code == 200:
-            raw = response.text
+                raw = response.text
+                newssite.cached_feed = raw
+                newssite.last_update = datetime.now(tz=timezone.utc)
+                newssite.save()
 
-        else:
-            pass
+            else:
+                raw = newssite.cached_feed
 
-    except (requests.exceptions.ConnectionError, requests.exceptions.MissingSchema):
-        pass
+        except Exception:
+            raw = newssite.cached_feed
+
+    else:
+        raw = newssite.cached_feed
 
     # if raw <item>'s have a '<image> ... </image>' pattern extract the image url and
     # put this image url in an <enclosure /> tag which can be handled by feedparser
-    raw = re.sub(r'(<item>.*?)<image>.*?(http.*?jpg|png|gif).*?</image>(.*?</item>)',
-                 r'\1<enclosure url="\2" />\3', raw)
 
     # some url give an empty raw string, in that case parse with the url instead of
     # the raw string
     if raw:
+        raw = re.sub(r'(<item>.*?)<image>.*?(http.*?jpg|png|gif).*?</image>(.*?</item>)',
+                     r'\1<enclosure url="\2" />\3', raw)
+
         parser = feedparser.parse(raw)
 
     else:
-        parser = feedparser.parse(news_url)
+        parser = feedparser.parse(news_url, agent="Howdimain/1.0 +http://howdiweb.nl/")
 
     return parser.entries
 

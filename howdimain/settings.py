@@ -26,7 +26,7 @@ from howdimain.howdimain_vars import (
 HOWDIMAIN_VERSION = (
     "https://github.com/bvermeulen/Django/bootstrap5"
 )
-HOWDIMAIN_DATE = "September, 2025: markdown upload local"
+HOWDIMAIN_DATE = "December, 2025: newsfeed updates"
 HOWDIMAIN_AUTHOR = "bruno.vermeulen@hotmail.com"
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
@@ -175,10 +175,15 @@ LOGIN_REDIRECT_URL = "home"
 
 DEFAULT_AUTO_FIELD = "django.db.models.AutoField"
 
-# Spofity credetials
+# Spofity credentials
 SPOTIFY_CLIENT_ID = config("SPOTIFY_CLIENT_ID", default="")
 SPOTIFY_CLIENT_SECRET = config("SPOTIFY_CLIENT_SECRET", default="")
 SPOTIFY_REDIRECT_URI = config("SPOTIFY_REDIRECT_URI", default="")
+
+# Oxylab credentials
+oxylab_username = config("oxylab_username", default="")
+oxylab_password = config("oxylab_password", default="")
+NEWSFEED_UPDATE_INHIBIT = 600
 
 # Global martor settings
 MARTOR_THEME = "bootstrap"

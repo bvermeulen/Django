@@ -52,8 +52,8 @@ def update_news(news_url):
     response = None
     time_diff = (datetime.now(tz=timezone.utc) - newssite.last_update).seconds
     if time_diff > NEWSFEED_UPDATE_INHIBIT:
-        response = scraper.get(news_url, proxies=proxies, allow_redirects=True)
         try:
+            response = scraper.get(news_url, proxies=proxies, allow_redirects=True)
             if response and response.status_code in [200]:
 
                 raw = response.text

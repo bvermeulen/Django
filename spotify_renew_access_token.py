@@ -19,7 +19,6 @@ def refresh_the_token(refresh_token):
     }
 
     data = {"grant_type": "refresh_token", "refresh_token": refresh_token}
-
     form = {"grant_type": "client_credentials"}
 
     response = requests.post(

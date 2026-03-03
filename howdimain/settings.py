@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/1.11/ref/settings/
 import os
 from decouple import config, Csv
 from howdimain.utils.plogger import Logger
+
 # keep únused constants, they are used outside this module
 from howdimain.howdimain_vars import (
     CAPTCHA_FONT_SIZE,
@@ -23,9 +24,7 @@ from howdimain.howdimain_vars import (
     TEXT_VERIFICATION_FAILED_MESSAGE,
 )
 
-HOWDIMAIN_VERSION = (
-    "https://github.com/bvermeulen/Django/bootstrap5"
-)
+HOWDIMAIN_VERSION = "https://github.com/bvermeulen/Django/bootstrap5"
 HOWDIMAIN_DATE = "December, 2025: newsfeed updates"
 HOWDIMAIN_AUTHOR = "bruno.vermeulen@hotmail.com"
 
@@ -183,6 +182,8 @@ SPOTIFY_REDIRECT_URI = config("SPOTIFY_REDIRECT_URI", default="")
 # Oxylab credentials
 oxylab_username = config("oxylab_username", default="")
 oxylab_password = config("oxylab_password", default="")
+isp_username = config("isp_username", default="")
+isp_password = config("isp_password", default="")
 NEWSFEED_UPDATE_INHIBIT = 600
 
 # Global martor settings
@@ -203,7 +204,7 @@ MARTOR_IMGUR_CLIENT_ID = config("IMGUR_CLIENT_ID")
 MARTOR_IMGUR_API_KEY = config("IMGUR_SECRET_KEY")
 # Safe Mode
 MARTOR_MARKDOWN_SAFE_MODE = "escape"  # default
-MAX_IMAGE_UPLOAD_SIZE = 5 * 1024 * 1024 # in megabyte
+MAX_IMAGE_UPLOAD_SIZE = 5 * 1024 * 1024  # in megabyte
 # Markdownify
 MARTOR_MARKDOWNIFY_FUNCTION = "martor.utils.markdownify"  # default
 MARTOR_MARKDOWNIFY_URL = "/martor/markdownify/"  # default

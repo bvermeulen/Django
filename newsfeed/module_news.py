@@ -1,7 +1,7 @@
 import re
 import requests
 from datetime import datetime, timezone
-from howdimain.settings import NEWSFEED_UPDATE_INHIBIT, oxylab_username, oxylab_password
+from howdimain.settings import NEWSFEED_UPDATE_INHIBIT, oxylab_username, oxylab_password, isp_username, isp_password
 from django.contrib.auth.models import User
 from django.db.utils import IntegrityError
 import cloudscraper
@@ -38,37 +38,60 @@ proxy_user = oxylab_username
 proxy_password = oxylab_password
 proxy_ip_port = "pr.oxylabs.io:7777"
 
+# proxy_isp_user = isp_username
+# proxy_isp_password = isp_password
+# proxy_isp_port = "dc.oxylabs.io:8000"
+
+def test_proxy(news_url):
+    entry = f"http://customer-{proxy_user}-cc-nl-ams:{proxy_password}@{proxy_ip_port}"
+    proxies = {"http": entry, "https": entry}
+    scraper = cloudscraper.create_scraper()
+    response = scraper.get(news_url, proxies=proxies, allow_redirects=True)
+    return response
+
 def update_news(news_url):
 
     '''  Function to update the news and display the news site
     '''
     entry = f"http://customer-{proxy_user}-cc-nl-ams:{proxy_password}@{proxy_ip_port}"
-    proxies = {
-        'http': entry,
-        'https': entry
-    }
+    proxies = {'http': entry, 'https': entry}
+
+    # entry = f"https://user-{proxy_isp_user}:{proxy_isp_password}@{proxy_isp_port}"
+    # proxies = { 'https': entry }
     scraper = cloudscraper.create_scraper()
-    newssite = NewsSite.objects.get(news_url=news_url)
+    # note: this function is also used for testing, before the site has been saved
+    try:
+        newssite = NewsSite.objects.get(news_url=news_url)
+        time_diff = (datetime.now(tz=timezone.utc) - newssite.last_update).seconds
+
+    except NewsSite.DoesNotExist:
+        newssite = None
+        time_diff = NEWSFEED_UPDATE_INHIBIT + 1
+
     response = None
-    time_diff = (datetime.now(tz=timezone.utc) - newssite.last_update).seconds
     if time_diff > NEWSFEED_UPDATE_INHIBIT:
         try:
             response = scraper.get(news_url, proxies=proxies, allow_redirects=True)
-            if response and response.status_code in [200]:
 
-                raw = response.text
-                newssite.cached_feed = raw
-                newssite.last_update = datetime.now(tz=timezone.utc)
-                newssite.save()
+        except Exception as e:
+            try:
+                response = requests.get(news_url)
 
-            else:
-                raw = newssite.cached_feed
+            except Exception as e:
+                pass
 
-        except Exception:
-            raw = newssite.cached_feed
+    if response and response.status_code == 200:
+        raw = response.text
+        if newssite:
+            newssite.cached_feed = raw
+            newssite.last_update = datetime.now(tz=timezone.utc)
+            newssite.save()
+
+    elif time_diff < 3600:
+        raw = newssite.cached_feed
 
     else:
-        raw = newssite.cached_feed
+        raw = ""
 
     # if raw <item>'s have a '<image> ... </image>' pattern extract the image url and
     # put this image url in an <enclosure /> tag which can be handled by feedparser
@@ -78,10 +101,10 @@ def update_news(news_url):
     if raw:
         raw = re.sub(r'(<item>.*?)<image>.*?(http.*?jpg|png|gif).*?</image>(.*?</item>)',
                      r'\1<enclosure url="\2" />\3', raw)
-
         parser = feedparser.parse(raw)
 
     else:
+        # note: a last attempt to get a parser, this will not be cached
         parser = feedparser.parse(news_url, agent="Howdimain/1.0 +http://howdiweb.nl/")
 
     return parser.entries

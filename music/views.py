@@ -6,34 +6,15 @@ from django.views.generic import View
 from django.db import IntegrityError
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
-from howdimain.settings import (
-    SPOTIFY_CLIENT_ID,
-    SPOTIFY_CLIENT_SECRET,
-    SPOTIFY_REDIRECT_URI,
-)
 from howdimain.utils.get_ip import get_client_ip
 from howdimain.utils.plogger import Logger
 from music.models import MusicTrack
 from music.forms import MusicForm, SortChoices
-import spotipy
-from spotipy.oauth2 import SpotifyOAuth
-from spotipy.exceptions import SpotifyException
+from howdimain.utils.spotify import authorize_spotify, refresh_token_spotify, SpotifyException
 
 
 logger = Logger.getlogger()
-
-SCOPE = "user-library-read"
-CACHE = ".cache"
-spotify_authorization = SpotifyOAuth(
-    SPOTIFY_CLIENT_ID,
-    SPOTIFY_CLIENT_SECRET,
-    SPOTIFY_REDIRECT_URI,
-    scope=SCOPE,
-    cache_path=CACHE,
-    # show_dialog=True,
-    # open_browser=False,
-)
-spotify = spotipy.Spotify(auth_manager=spotify_authorization)
+spotify = authorize_spotify()
 
 
 class PlayTopTracksView(View):
@@ -65,6 +46,7 @@ class PlayTopTracksView(View):
         if music_form.is_valid():
             artist_query = music_form.cleaned_data.get("artist_query")
             track_id = music_form.cleaned_data.get("track_id")
+            refresh_token_spotify()
 
             if artist_query and artist_query != artist_dict.get("artist"):
                 try:

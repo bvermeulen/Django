@@ -7,7 +7,9 @@ class NewsSite(models.Model):
     news_site = models.CharField(max_length=15, unique=True)
     news_url = models.URLField()
     cached_feed = models.TextField(default="")
-    last_update = models.DateTimeField(default=datetime.now(tz=timezone.utc))
+    last_update = models.DateTimeField(
+        default=datetime(1970, 1, 1, 0, 0, 0, tzinfo=timezone.utc)
+    )
 
     def __str__(self):
         return self.news_site

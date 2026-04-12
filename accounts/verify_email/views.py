@@ -34,6 +34,13 @@ request_new_email_template = pkg_configs.get('request_new_email_template')
 new_email_sent_template = pkg_configs.get('new_email_sent_template')
 
 
+def confirm_email(request, useremail, usertoken):
+    context = {
+        'email': useremail,
+        'token': usertoken
+    }
+    return render(request, "accounts/confirm_email.html", context)
+
 def verify_user_and_activate(request, useremail, usertoken):
     """
     A view function already implemented for you so you don't have to implement any function for verification
@@ -41,8 +48,12 @@ def verify_user_and_activate(request, useremail, usertoken):
 
     verify the user's email and token and redirect'em accordingly.
     """
-    if request.method == 'HEAD':
-        return HttpResponse("OK")
+    if request.method in ["HEAD", "GET"]:
+        context = {
+            'email': useremail,
+            'token': usertoken
+        }
+        return render(request, "accounts/confirm_email.html", context)
 
     try:
         verified = verify_user(useremail, usertoken)

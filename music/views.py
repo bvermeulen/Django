@@ -1,8 +1,9 @@
 import re
 import random
 import requests
-from django.shortcuts import render, redirect, reverse
+from django.shortcuts import render, redirect, get_object_or_404, reverse
 from django.views.generic import View
+from django.contrib.auth.models import User
 from django.db import IntegrityError
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
@@ -115,13 +116,17 @@ class PlayTopTracksView(View):
         return render(request, self.template_name, context)
 
 
-@method_decorator(login_required, name="dispatch")
+#@method_decorator(login_required, name="dispatch")
 class PlayListView(View):
     template_name = "music/playlist.html"
     music_form = MusicForm
+    default_user = get_object_or_404(User, username="default_user")
 
     def get(self, request, sort_choice):
         user = request.user
+        if not user.is_authenticated:
+            user = self.default_user
+
         request.session["music_sort_choice"] = sort_choice
         music_form = self.music_form(initial={"sort_choice": sort_choice})
 
@@ -145,7 +150,7 @@ class PlayListView(View):
         user = request.user
         music_form = self.music_form(request.POST)
 
-        if music_form.is_valid():
+        if music_form.is_valid() and user.is_authenticated:
             new_sort_choice = music_form.cleaned_data.get("sort_choice")
             sort_choice = new_sort_choice if new_sort_choice else sort_choice
             track_pk = music_form.cleaned_data.get("track_pk")

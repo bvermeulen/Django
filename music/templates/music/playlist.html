@@ -64,10 +64,12 @@
             <a href="https://open.spotify.com/track/{{ track.track_id }}" target="_blank"><img
                 src="{% static 'img/Spotify_logo_without_text.png' %}" style="float: left; width:40px; margin-top: 50%">
             </a>
-            <button class="btn link-secondary btn-sm float-left" name="{{ music_form.track_pk.name }}"
-              value="{{ track.pk }}" onclick="return validateDelete(`{{ track.name }}`)">
-              delete from playlist
-            </button>
+            {% if user.is_authenticated %}
+              <button class="btn link-secondary btn-sm float-left" name="{{ music_form.track_pk.name }}"
+                value="{{ track.pk }}" onclick="return validateDelete(`{{ track.name }}`)">
+                  delete from playlist
+              </button>
+            {% endif %}
           </div>
         </div>
         {% endfor %}

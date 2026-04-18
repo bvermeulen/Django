@@ -27,9 +27,7 @@
 <div class="d-flex mb-4">
   <input name="{{ music_form.artist_query.name }}" type="text" class="form-control w-50" placeholder="{{ artist_dict.artist }}">
   </input>
-  {% if user.is_authenticated %}
   <a class="btn btn-primary ms-1" href="{% url 'playlist' music_form.sort_choice.value %}">Playlist</a>
-  {% endif %}
 </div>
 
 {% if artist_dict.top_tracks %}

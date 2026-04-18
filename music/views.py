@@ -5,8 +5,6 @@ from django.shortcuts import render, redirect, get_object_or_404, reverse
 from django.views.generic import View
 from django.contrib.auth.models import User
 from django.db import IntegrityError
-from django.contrib.auth.decorators import login_required
-from django.utils.decorators import method_decorator
 from howdimain.utils.get_ip import get_client_ip
 from howdimain.utils.plogger import Logger
 from music.models import MusicTrack
@@ -116,7 +114,6 @@ class PlayTopTracksView(View):
         return render(request, self.template_name, context)
 
 
-#@method_decorator(login_required, name="dispatch")
 class PlayListView(View):
     template_name = "music/playlist.html"
     music_form = MusicForm

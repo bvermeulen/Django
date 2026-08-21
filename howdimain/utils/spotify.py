@@ -3,7 +3,7 @@ import datetime
 import json
 import requests
 import spotipy
-from spotipy.oauth2 import SpotifyOAuth
+from spotipy.oauth2 import SpotifyOAuth, SpotifyClientCredentials
 from spotipy.exceptions import SpotifyException
 from howdimain.settings import (
     SPOTIFY_CLIENT_ID,
@@ -41,6 +41,7 @@ def refresh_token_spotify():
 
 
 def authorize_spotify():
+    # 21-Aug-2026: this option is depreciated for artist top-tracks
     spotify_authorization = SpotifyOAuth(
         SPOTIFY_CLIENT_ID,
         SPOTIFY_CLIENT_SECRET,
@@ -52,3 +53,10 @@ def authorize_spotify():
     )
     spotify = spotipy.Spotify(auth_manager=spotify_authorization)
     return spotify
+
+def client_spotify():
+    auth_manager = SpotifyClientCredentials(
+        client_id=SPOTIFY_CLIENT_ID, 
+        client_secret=SPOTIFY_CLIENT_SECRET
+    )
+    return spotipy.Spotify(auth_manager=auth_manager)

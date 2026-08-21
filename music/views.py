@@ -9,10 +9,11 @@ from howdimain.utils.get_ip import get_client_ip
 from howdimain.utils.plogger import Logger
 from music.models import MusicTrack
 from music.forms import MusicForm, SortChoices
-from howdimain.utils.spotify import authorize_spotify, refresh_token_spotify, SpotifyException
+from howdimain.utils.spotify import client_spotify, authorize_spotify, SpotifyException, refresh_token_spotify
 
 
 logger = Logger.getlogger()
+spotify_client = client_spotify()
 spotify = authorize_spotify()
 
 
@@ -49,21 +50,35 @@ class PlayTopTracksView(View):
 
             if artist_query and artist_query != artist_dict.get("artist"):
                 try:
-                    artists = spotify.search(
+                    results = spotify_client.search(
                         q=artist_query,
-                        type="artist",
+                        type="track",
+                        limit=10
                     )
-                    artist_object = artists["artists"]["items"][0]
-                    top_tracks = spotify.artist_top_tracks(artist_object["uri"])[
-                        "tracks"
-                    ][:10]
+                    tracks = results.get("tracks", {}).get("items", [])
+                    top_tracks = []
+                    for track in tracks:
+                        top_tracks.append(
+                            {
+                                "id": track.get("id"),
+                                "uri": track.get("uri"),
+                                "name": track.get("name"),
+                                "album_name": (
+                                    track.get("album", {}).get("name")
+                                    if track.get("album")
+                                    else None
+                                ),
+                                "preview_url": track.get("preview_url"),
+                            }
+                        )
+
                     artist_dict = {
                         "artist": artist_object["name"],
                         "top_tracks": top_tracks,
                     }
 
                 except Exception as e:
-                    pass
+                    logger.warning(f"unable to get tracks from: {artist_query}")
 
             elif user.is_authenticated and track_id:
                 try:

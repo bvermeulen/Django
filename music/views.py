@@ -40,7 +40,6 @@ class PlayTopTracksView(View):
         artist_dict = request.session.get("artist_dict", self.artist_empty)
         sort_choice = request.session.get("music_sort_choice", 1)
         top_tracks = []
-        artist_object = {"name": ""}
         music_form = self.music_form(request.POST)
 
         if music_form.is_valid():
@@ -56,9 +55,9 @@ class PlayTopTracksView(View):
                         limit=10
                     )
                     tracks = results.get("tracks", {}).get("items", [])
-                    top_tracks = []
+                    top_tracks = {"artist_query": artist_query, "top_tracks": []}
                     for track in tracks:
-                        top_tracks.append(
+                        top_tracks["top_tracks"].append(
                             {
                                 "id": track.get("id"),
                                 "uri": track.get("uri"),
@@ -73,7 +72,7 @@ class PlayTopTracksView(View):
                         )
 
                     artist_dict = {
-                        "artist": artist_object["name"],
+                        "artist": artist_query,
                         "top_tracks": top_tracks,
                     }
 

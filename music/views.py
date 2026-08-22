@@ -55,9 +55,9 @@ class PlayTopTracksView(View):
                         limit=10
                     )
                     tracks = results.get("tracks", {}).get("items", [])
-                    top_tracks = {"artist_query": artist_query, "top_tracks": []}
+                    top_tracks = []
                     for track in tracks:
-                        top_tracks["top_tracks"].append(
+                        top_tracks.append(
                             {
                                 "id": track.get("id"),
                                 "uri": track.get("uri"),

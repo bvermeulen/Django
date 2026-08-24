@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Playlist</title>
+    <style>
+      :root {
+        --bg: #111827;
+        --panel: #1f2937;
+        --panel-alt: #0f172a;
+        --row: #f9fafb;
+        --text: #111827;
+        --muted: #6b7280;
+        --primary: #1db954;
+        --danger: #dc2626;
+        --shadow: rgba(15, 23, 42, 0.15);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        font-family: Arial, Helvetica, sans-serif;
+        background: linear-gradient(135deg, #0f172a, #1f2937 50%, #111827);
+        color: var(--text);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 32px;
+      }
+
+      .playlist-shell {
+        width: min(1200px, 100%);
+        background: rgba(255, 255, 255, 0.96);
+        border-radius: 18px;
+        box-shadow: 0 24px 60px var(--shadow);
+        overflow: hidden;
+      }
+
+      .playlist-header {
+        background: linear-gradient(135deg, var(--bg), var(--panel));
+        color: white;
+        padding: 28px 32px;
+      }
+
+      .playlist-header h1 {
+        margin: 0;
+        font-size: clamp(1.8rem, 2vw, 2.5rem);
+      }
+
+      .playlist-header p {
+        margin: 8px 0 0;
+        color: rgba(255, 255, 255, 0.75);
+      }
+
+      .table-wrap {
+        padding: 20px 24px 24px;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        background: white;
+        border-radius: 12px;
+        overflow: hidden;
+      }
+
+      thead th {
+        background: #f3f4f6;
+        color: var(--text);
+        padding: 14px 12px;
+        text-align: left;
+        font-size: 0.8rem;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      tbody td {
+        padding: 16px 12px;
+        border-bottom: 1px solid #e5e7eb;
+        vertical-align: middle;
+      }
+
+      tbody tr:hover {
+        background: #f9fafb;
+      }
+
+      .track-number {
+        font-weight: 700;
+        color: var(--muted);
+      }
+
+      .track-cover {
+        width: 56px;
+        height: 56px;
+        border-radius: 12px;
+        object-fit: cover;
+        box-shadow: 0 8px 18px rgba(17, 24, 39, 0.12);
+      }
+
+      .track-name {
+        font-weight: 700;
+        color: var(--text);
+      }
+
+      .muted {
+        color: var(--muted);
+      }
+
+      .button {
+        appearance: none;
+        border: none;
+        border-radius: 999px;
+        padding: 10px 16px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: transform 0.2s ease, opacity 0.2s ease;
+      }
+
+      .button:hover {
+        transform: translateY(-1px);
+      }
+
+      .button:active {
+        transform: translateY(0);
+      }
+
+      .preview-btn {
+        background: #dcfce7;
+        color: #166534;
+      }
+
+      .spotify-btn {
+        background: var(--primary);
+        color: white;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 44px;
+        height: 44px;
+        padding: 0;
+      }
+
+      .spotify-btn svg {
+        width: 22px;
+        height: 22px;
+        fill: currentColor;
+      }
+
+      .delete-btn {
+        background: #fee2e2;
+        color: #991b1b;
+      }
+
+      .table-controls {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 12px;
+      }
+
+      .left-controls {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .right-controls {
+        display: flex;
+        align-items: center;
+      }
+
+      .sort-btn {
+        background: #eef2ff;
+        color: #3730a3;
+        padding: 8px 12px;
+        border-radius: 10px;
+        font-weight: 700;
+        border: none;
+        cursor: pointer;
+      }
+
+      .audio-box {
+        margin: 0;
+        display: flex;
+        align-items: center;
+      }
+
+      audio {
+        width: min(420px, 100%);
+        border-radius: 12px;
+        background: #f3f4f6;
+      }
+
+      @media (max-width: 768px) {
+        body {
+          padding: 18px;
+        }
+
+        .table-wrap {
+          padding: 12px;
+          overflow-x: auto;
+        }
+
+        table {
+          min-width: 820px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="playlist-shell">
+      <div class="playlist-header">
+        <h1>My Playlist</h1>
+        <p>Track list and quick actions</p>
+      </div>
+
+      <div class="table-wrap">
+        <div class="table-controls" role="toolbar" aria-label="Table controls">
+          <div class="left-controls">
+            <button class="button sort-btn" id="sort-button" type="button" aria-pressed="false">Sort</button>
+          </div>
+          <div class="right-controls">
+            <div class="audio-box">
+              <audio id="audio-player" controls preload="none"></audio>
+            </div>
+          </div>
+        </div>
+
+        <table aria-label="Playlist tracks table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Image</th>
+              <th>Track</th>
+              <th>Artist</th>
+              <th>Album</th>
+              <th>Preview</th>
+              <th>Spotify</th>
+              <th>Delete</th>
+            </tr>
+          </thead>
+          <tbody id="track-table-body"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <script>
+      const tracks = [
+        {
+          id: 1,
+          name: 'Midnight City',
+          artist: 'M83',
+          album: 'Hurry Up, We\'re Dreaming',
+          image: 'https://images.unsplash.com/photo-1516280440614-37939bbacd81?auto=format&fit=crop&w=200&q=80',
+          previewUrl: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3',
+          spotifyUrl: 'https://open.spotify.com/track/5yl2uJ8Y2vNOrWP7T3m0uB'
+        },
+        {
+          id: 2,
+          name: 'Levitating',
+          artist: 'Dua Lipa',
+          album: 'Future Nostalgia',
+          image: 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?auto=format&fit=crop&w=200&q=80',
+          previewUrl: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3',
+          spotifyUrl: 'https://open.spotify.com/track/39LLxExYz6ewLAcYrzQQyP'
+        },
+        {
+          id: 3,
+          name: 'Good 4 U',
+          artist: 'Olivia Rodrigo',
+          album: 'SOUR',
+          image: 'https://images.unsplash.com/photo-1501386761578-eac5c94b800a?auto=format&fit=crop&w=200&q=80',
+          previewUrl: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3',
+          spotifyUrl: 'https://open.spotify.com/track/4ZtFanR9U6ndgddUvNcjcG'
+        }
+      ];
+
+      const trackTableBody = document.getElementById('track-table-body');
+      const audioPlayer = document.getElementById('audio-player');
+      const sortButton = document.getElementById('sort-button');
+      let sortAsc = true;
+
+      if (sortButton) {
+        sortButton.addEventListener('click', () => {
+          tracks.sort((a, b) => (sortAsc ? a.name.localeCompare(b.name) : b.name.localeCompare(a.name)));
+          sortAsc = !sortAsc;
+          sortButton.textContent = sortAsc ? 'Sort ▲' : 'Sort ▼';
+          renderTracks();
+        });
+        sortButton.textContent = 'Sort ▲';
+      }
+
+      function renderTracks() {
+        if (!tracks.length) {
+          trackTableBody.innerHTML = `
+            <tr>
+              <td colspan="8" class="muted" style="text-align:center; padding: 30px;">No tracks in this playlist.</td>
+            </tr>
+          `;
+          return;
+        }
+
+        trackTableBody.innerHTML = tracks
+          .map(
+            (track, index) => `
+              <tr>
+                <td class="track-number">${index + 1}</td>
+                <td>
+                  <img class="track-cover" src="${track.image}" alt="${track.name} cover" />
+                </td>
+                <td class="track-name">${track.name}</td>
+                <td>${track.artist}</td>
+                <td>${track.album}</td>
+                <td>
+                  <button class="button preview-btn" data-id="${track.id}" type="button">Preview</button>
+                </td>
+                <td>
+                  <a class="button spotify-btn" href="${track.spotifyUrl}" target="_blank" rel="noreferrer" aria-label="">
+                    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                      <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.6 17.1c-.2.3-.6.4-.9.2-2.5-1.5-5.6-1.8-9.3-1-.4-.1-.7-.4-.8-.8-.1-.4.2-.8.6-.9 4.1-1 7.7-.6 10.6 1.1.3.2.4.7.1 1zm1.3-2.9c-.3.4-.7.6-1.1.3-2.9-1.8-7.2-2.3-10.5-1.2-.5.2-1-.1-1.2-.6-.2-.5.1-1 .6-1.2 3.9-1.3 8.7-.7 12.1 1.5.4.3.5.9.1 1.2zm.1-3c-3.5-2.1-9.2-2.3-12.5-1.3-.6.2-1.2-.2-1.4-.8-.2-.6.2-1.2.8-1.4 3.9-1.2 10.5-.9 14.6 1.7.5.3.7 1 .4 1.5-.3.5-1 .7-1.5.4z"/>
+                    </svg>
+                  </a>
+                </td>
+                <td>
+                  <button class="button delete-btn" data-id="${track.id}" type="button">Delete</button>
+                </td>
+              </tr>
+            `
+          )
+          .join('');
+      }
+
+      document.addEventListener('click', (event) => {
+        const previewButton = event.target.closest('.preview-btn');
+        if (previewButton) {
+          const selectedTrack = tracks.find((track) => track.id === Number(previewButton.dataset.id));
+          if (selectedTrack) {
+            audioPlayer.src = selectedTrack.previewUrl;
+            audioPlayer.play();
+          }
+          return;
+        }
+
+        const deleteButton = event.target.closest('.delete-btn');
+        if (deleteButton) {
+          const trackId = Number(deleteButton.dataset.id);
+          const trackIndex = tracks.findIndex((track) => track.id === trackId);
+
+          if (trackIndex >= 0) {
+            tracks.splice(trackIndex, 1);
+            renderTracks();
+          }
+        }
+      });
+
+      renderTracks();
+    </script>
+  </body>
+</html>

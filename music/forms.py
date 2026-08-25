@@ -10,6 +10,11 @@ class SortChoices(Enum):
     RANDOM = (5, "Random")
 
 
+class ViewChoices(Enum):
+    SCROLL = (1, "Scroll")
+    SWIPE = (2, "Swipe")
+
+
 class MusicForm(forms.Form):
     def __init__(self, *args, **kwargs):
         super(MusicForm, self).__init__(*args, **kwargs)
@@ -18,9 +23,14 @@ class MusicForm(forms.Form):
         self.fields["sort_choice"] = forms.ChoiceField(
             widget=forms.RadioSelect(attrs={"style": "width:20px; accent-color:grey"}),
             choices=sort_choices,
+            initial=1,
             required=False,
         )
         self.fields["track_pk"] = forms.IntegerField(required=False)
         self.fields["track_id"] = forms.CharField(max_length=50, required=False)
         self.fields["artist_query"] = forms.CharField(max_length=50, required=False)
         self.fields["artist_dict"] = forms.JSONField(required=False)
+        view_choices = [(v.value[0], v.value[1]) for v in ViewChoices]
+        self.fields["view_choice"] = forms.ChoiceField(
+            widget=forms.HiddenInput(), choices=view_choices, initial=1, required=False
+        )

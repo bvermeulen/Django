@@ -8,7 +8,7 @@ from django.db import IntegrityError
 from howdimain.utils.get_ip import get_client_ip
 from howdimain.utils.plogger import Logger
 from music.models import MusicTrack
-from music.forms import MusicForm, SortChoices
+from music.forms import MusicForm, SortChoices, ViewChoices
 from howdimain.utils.spotify import client_spotify, authorize_spotify, SpotifyException, refresh_token_spotify
 
 
@@ -127,20 +127,17 @@ class PlayTopTracksView(View):
         context = {"music_form": music_form}
         return render(request, self.template_name, context)
 
-
 class PlayListView(View):
-    template_name = "music/playlist.html"
+    template_name = None
     music_form = MusicForm
     default_user = get_object_or_404(User, username="default_user")
 
-    def get(self, request, sort_choice):
+    def get(self, request):
         user = request.user
         if not user.is_authenticated:
             user = self.default_user
 
-        request.session["music_sort_choice"] = sort_choice
-        music_form = self.music_form(initial={"sort_choice": sort_choice})
-
+        sort_choice = int(request.session.get("music_sort_choice", 1))
         if SortChoices.ARTIST.value[0] == sort_choice:
             track_list = list(MusicTrack.objects.filter(user=user).order_by("artist"))
         elif SortChoices.ALBUM.value[0] == sort_choice:
@@ -154,16 +151,45 @@ class PlayListView(View):
             random.shuffle(track_list)
         else:
             track_list = list(MusicTrack.objects.filter(user=user).order_by("artist"))
-        context = {"track_list": track_list, "music_form": music_form}
+
+        view_choice = int(request.session.get("view_choice", 1))
+        if ViewChoices.SCROLL.value[0] == view_choice:
+            self.template_name = "music/playlist_scroll.html"
+        elif ViewChoices.SWIPE.value[0] == view_choice:
+            self.template_name = "music/playlist_swipe.html"
+        else:
+            self.template_name = "music/playlist_scroll.html"
+
+        music_form = self.music_form(initial={"sort_choice": sort_choice, "view_choice": view_choice})
+
+        tracks = []
+        for track in track_list:
+            tracks.append(
+                {
+                    "pk": track.pk,
+                    "track_id": track.track_id,
+                    "name": track.name,
+                    "artist": track.artist,
+                    "album": track.album,
+                    "image_url": track.image_url,
+                    "preview_url": track.preview_url,
+                }
+            )
+
+        context = {"track_list": tracks, "music_form": music_form}
         return render(request, self.template_name, context)
 
-    def post(self, request, sort_choice):
+    def post(self, request):
         user = request.user
         music_form = self.music_form(request.POST)
 
         if music_form.is_valid() and user.is_authenticated:
+            sort_choice = request.session.get("music_sort_choice", 1)
             new_sort_choice = music_form.cleaned_data.get("sort_choice")
             sort_choice = new_sort_choice if new_sort_choice else sort_choice
+            view_choice = request.session.get("view_choice", 1)
+            new_view_choice = music_form.cleaned_data.get("view_choice")
+            view_choice = new_view_choice if new_view_choice else view_choice
             track_pk = music_form.cleaned_data.get("track_pk")
 
             try:
@@ -177,4 +203,6 @@ class PlayListView(View):
             except MusicTrack.DoesNotExist:
                 pass
 
-        return redirect(reverse("playlist", kwargs={"sort_choice": sort_choice}))
+            request.session["music_sort_choice"] = sort_choice
+            request.session["view_choice"] = view_choice
+        return redirect(reverse("playlist"))

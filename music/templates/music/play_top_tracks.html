@@ -6,6 +6,9 @@
 
 {% block stylesheet %}
 <link rel="stylesheet" type="text/css" href="{% static 'css/container-styles.css' %}">
+<style>
+.button{border:none;padding:8px 12px;border-radius:999px;cursor:pointer;font-weight:700}
+</style>
 {% endblock %}
 
 {% block navbutton %}
@@ -25,9 +28,9 @@
 {% with music_form.artist_dict.value|jsonify as artist_dict %}
 
 <div class="d-flex mb-4">
-  <input name="{{ music_form.artist_query.name }}" type="text" class="form-control w-50" placeholder="{{ artist_dict.artist }}">
+  <input name="{{ music_form.artist_query.name }}" type="text" class="form-control w-50 rounded-pill" placeholder="{{ artist_dict.artist }}">
   </input>
-  <a class="btn btn-primary ms-1" href="{% url 'playlist' music_form.sort_choice.value %}">Playlist</a>
+  <a class="btn btn-light btn-lg rounded-pill ms-1" href="{% url 'playlist' %}">Playlist</a>
 </div>
 
 {% if artist_dict.top_tracks %}
@@ -40,7 +43,7 @@
         allowtransparency="true" allow="encrypted-media" class="card-img-top"></iframe>
       <div class="card-body">
         {% if user.is_authenticated %}
-        <button style="float: left" type="submit" class="btn btn-link" name="{{ music_form.track_id.name }}"
+        <button style="float: left" type="submit" class="btn btn-light btn-lg rounded-pill" name="{{ music_form.track_id.name }}"
           value="{{ track.id }}">add to playlist
         </button>
         {% endif %}

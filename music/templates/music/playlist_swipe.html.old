@@ -63,7 +63,29 @@
 
   <div class="netflix-slider-container mt-4">
     <div class="swiper-container">
-      <div class="swiper-wrapper"></div>
+      <div class="swiper-wrapper">
+        {% for track in track_list %}
+        <div id="slide" class="swiper-slide">
+          <div style="height:150px; margin-left: 3px">
+            <h4>{{ track.name }}</h4>
+            <h6>{{ track.artist }} </h6>
+            <h6>{{ track.album }}</h6>
+          </div>
+          <img src="{{ track.image_url }}" alt=""/>
+          <div class="table-controls mt-1">
+            {% if track.preview_url %}
+              <button class="button play-btn" data-id="{{track.pk}}" type="button">Play</button>
+            {% endif %}
+            <a href="https://open.spotify.com/track/{{ track.track_id }}" target="_blank"><img
+                src="{% static 'img/Spotify_logo_without_text.png' %}" style="float: left; width:40px; margin-top: 0%">
+            </a>
+            {% if user.is_authenticated %}
+              <button class="button delete-btn" data-id="{{ track.pk}}" type="button">delete</button>
+            {% endif %}
+          </div>
+        </div>
+        {% endfor %}
+      </div>
       <div class="swiper-button-next"></div>
       <div class="swiper-button-prev"></div>
     </div>
@@ -78,104 +100,69 @@
   const form = document.getElementById('id_form');
   const track_list = JSON.parse(document.getElementById('track_list-id').textContent);
   const audioPlayer = document.getElementById('audio-player');
-  const base_url_playlist = "{% url 'playlist' 98 99 %}";
   let currentPlayId = null;
-
-  function renderTracks() {
-    const slidesHTML = track_list
-      .map(
-        (track, index) => `
-          <div class="swiper-slide">
-            <div style="height:150px; margin-left: 3px">
-              <h4>${track.name}</h4>
-              <h6>${track.artist} </h6>
-              <h6>${track.album}</h6>
-            </div>
-            <img src="${track.image_url}" alt="${track.name}" />
-            <div class="table-controls mt-1">
-              {% if '${track.preview_url}' %}
-                <button class="button play-btn" data-id="${track.pk}" type="button">Play</button>
-              {% endif %}
-              <a href="https://open.spotify.com/track/${track.track_id}" target="_blank"><img
-                  src="{% static 'img/Spotify_logo_without_text.png' %}" style="float: left; width:40px; margin-top: 0%">
-              </a>
-              {% if user.is_authenticated %}
-                <button class="button delete-btn" data-id="${track.pk}" type="button">delete</button>
-              {% endif %}
-            </div>
-          </div>
-        `
-      )
-    .join('');
-    setActivePlay();
-    document.querySelector('.swiper-wrapper').innerHTML = slidesHTML;
-    const swiper = new Swiper('.swiper-container', {
-      keyboard: {
-        enabled: true,
-      },
-
-      loop: {
-        enabled: true,
-      },
-
-      // Responsive breakpoints for screen size
-      breakpoints: {
-        240: {
-          slidesPerView: 1,
-          spaceBetween: 5,
-          slidesPerGroup: 1,
-        },
-        480: {
-          slidesPerView: 2,
-          spaceBetween: 5,
-          slidesPerGroup: 1,
-        },
-        720: {
-          slidesPerView: 3,
-          spaceBetween: 5,
-          slidesPerGroup: 1,
-        },
-        900: {
-          slidesPerView: 4,
-          spaceBetween: 10,
-          slidesPerGroup: 2,
-        },
-        1200: {
-          slidesPerView: 5,
-          spaceBetween: 10,
-          slidesPerGroup: 3,
-        }
-      },
-
-      pagination: {
-        el: '.swiper-pagination',
-        clickable: false,
-      },
-
-      navigation: {
-        nextEl: '.swiper-button-next',
-        prevEl: '.swiper-button-prev',
-      }
-    });
-  }
 
   function assignValueView(value) {
     form.view_choice.value = value;
     return;
   }
 
-  function setActivePlay() {
-    const targetBtn = document.querySelector(`.play-btn[data-id="${currentPlayId}"]`);
-    if (targetBtn) targetBtn.classList.add('active');
-  }
+  var swiper = new Swiper('.swiper-container', {
+    keyboard: {
+      enabled: true,
+    },
 
-  function clearActivePlay() {
+    loop: {
+      enabled: true,
+    },
+
+    // Responsive breakpoints for screen size
+    breakpoints: {
+      240: {
+        slidesPerView: 1,
+        spaceBetween: 5,
+        slidesPerGroup: 1,
+      },
+      480: {
+        slidesPerView: 2,
+        spaceBetween: 5,
+        slidesPerGroup: 1,
+      },
+      720: {
+        slidesPerView: 3,
+        spaceBetween: 5,
+        slidesPerGroup: 1,
+      },
+      900: {
+        slidesPerView: 4,
+        spaceBetween: 10,
+        slidesPerGroup: 2,
+      },
+      1200: {
+        slidesPerView: 5,
+        spaceBetween: 10,
+        slidesPerGroup: 3,
+      }
+    },
+
+    pagination: {
+      el: '.swiper-pagination',
+      clickable: false,
+    },
+
+    navigation: {
+      nextEl: '.swiper-button-next',
+      prevEl: '.swiper-button-prev',
+    },
+  });
+
+  function clearActivePlay(){
     document.querySelectorAll('.play-btn.active').forEach((b)=>b.classList.remove('active'));
     currentPlayId = null;
     audioPlayer.src = null;
   }
 
-    document.addEventListener('click', (event) => {
+  document.addEventListener('click', (event) => {
     const playButton = event.target.closest('.play-btn');
     if (playButton) {
       const id = Number(playButton.dataset.id);
@@ -196,40 +183,19 @@
     }
   
     const deleteButton = event.target.closest('.delete-btn');
-    if (deleteButton) {
-      const trackPk = Number(deleteButton.dataset.id);
-      const selectedTrack = track_list.find(x=>x.pk===trackPk);
-      confirmed = confirm("Do you really want to delete? " + selectedTrack.name.slice(0, 40) + " ...");
-      if (confirmed) {
-        const idx = track_list.findIndex(x=>x.pk===trackPk);
-        if(idx>=0) {
-          track_list.splice(idx,1);
-          if(currentPlayId === trackPk){
-            audioPlayer.pause();
-            clearActivePlay();
-          }
-          renderTracks();
+      if (deleteButton) {
+        const trackPk = Number(deleteButton.dataset.id);
+        const selectedTrack = track_list.find(x=>x.pk===trackPk);
+        confirmed = confirm("Do you really want to delete? " + selectedTrack.name.slice(0, 40) + " ...");
+        if (confirmed) {
+          form_submit(trackPk);
         }
-        form_submit(trackPk);
       }
-    }
-    setActivePlay();
-  });
+    });
 
   function form_submit(trackPk) {
-    form.track_pk.value = trackPk;
-    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
-    const newForm = new FormData(form);
-    let playlist_url = base_url_playlist
-      .replace('98', form.sort_choice.value)
-      .replace('99', form.view_choice.value);
-    fetch(playlist_url, {
-        method: 'POST',
-        headers: {
-            'X-CSRFToken': csrfToken
-        },
-        body: newForm
-    })
+      form.track_pk.value = trackPk;
+      form.submit();
   };
 
   audioPlayer.addEventListener('pause', ()=>{
@@ -239,7 +205,5 @@
   audioPlayer.addEventListener('ended', ()=>{
     clearActivePlay();
   });
-
-  renderTracks()
 </script>
 {% endblock %}

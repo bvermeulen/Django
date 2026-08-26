@@ -80,7 +80,6 @@
       <audio id="audio-player" controls preload="none"></audio>
     </div>
   </div>
-
   
   <div class="table-scroll" role="region" aria-label="Scrollable playlist table">
     <table aria-label="Playlist tracks table">
@@ -109,6 +108,7 @@
   const track_list = JSON.parse(document.getElementById('track_list-id').textContent);
   const trackTableBody = document.getElementById('track-table-body');
   const audioPlayer = document.getElementById('audio-player');
+  const base_url_playlist = "{% url 'playlist' 98 99 %}";
   let currentPlayId = null;
   
   function assignValueView(value) {
@@ -161,7 +161,7 @@
         `
       )
       .join('');
-  }
+    }
 
   document.addEventListener('click', (event) => {
     const playButton = event.target.closest('.play-btn');
@@ -189,32 +189,34 @@
       const selectedTrack = track_list.find(x=>x.pk===trackPk);
       confirmed = confirm("Do you really want to delete? " + selectedTrack.name.slice(0, 40) + " ...");
       if (confirmed) {
-          const idx = track_list.findIndex(x=>x.pk===trackPk);
-          if(idx>=0){
-            track_list.splice(idx,1);
-            if(currentPlayId === trackPk){
-              audioPlayer.pause();
-              clearActivePlay();
-            }
-            renderTracks();
+        const idx = track_list.findIndex(x=>x.pk===trackPk);
+        if(idx>=0){
+          track_list.splice(idx,1);
+          if(currentPlayId === trackPk){
+            audioPlayer.pause();
+            clearActivePlay();
           }
+          renderTracks();
+        }
         form_submit(trackPk);
       }
     }
   });
 
   function form_submit(trackPk) {
-      form.track_pk.value = trackPk;
-      const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
-      // const url = "{% url 'playlist' %}";
-      const newForm = new FormData(form);
-      fetch("{% url 'playlist' %}", {
-          method: 'POST',
-          headers: {
-              'X-CSRFToken': csrfToken
-          },
-          body: newForm
-      })
+    form.track_pk.value = trackPk;
+    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+    const newForm = new FormData(form);
+    let playlist_url = base_url_playlist
+      .replace('98', form.sort_choice.value)
+      .replace('99', form.view_choice.value);
+    fetch(playlist_url, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': csrfToken
+        },
+        body: newForm
+    })
   };
 
   audioPlayer.addEventListener('pause', ()=>{
@@ -226,9 +228,5 @@
   });
 
   renderTracks();
-</script>
-
-<script>
-
 </script>
 {% endblock %}

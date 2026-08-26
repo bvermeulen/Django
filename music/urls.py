@@ -4,7 +4,7 @@ from .views import PlayTopTracksView, PlayListView
 urlpatterns = [
     path("music/play_top_tracks/", PlayTopTracksView.as_view(), name="play_top_tracks"),
     path(
-        "music/playlist/",
+        "music/playlist/<int:sort_choice>/<int:view_choice>/",
         PlayListView.as_view(),
         name="playlist",
     )

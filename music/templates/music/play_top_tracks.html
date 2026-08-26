@@ -30,7 +30,11 @@
 <div class="d-flex mb-4">
   <input name="{{ music_form.artist_query.name }}" type="text" class="form-control w-50 rounded-pill" placeholder="{{ artist_dict.artist }}">
   </input>
-  <a class="btn btn-light btn-lg rounded-pill ms-1" href="{% url 'playlist' %}">Playlist</a>
+  {% if request.session.sort_choice %}
+    <a class="btn btn-light btn-lg rounded-pill ms-1" href="{% url 'playlist' request.session.sort_choice request.session.view_choice %}">Playlist</a>
+  {% else %}
+    <a class="btn btn-light btn-lg rounded-pill ms-1" href="{% url 'playlist' 1 1 %}">Playlist</a>
+  {% endif %}
 </div>
 
 {% if artist_dict.top_tracks %}

@@ -132,12 +132,11 @@ class PlayListView(View):
     music_form = MusicForm
     default_user = get_object_or_404(User, username="default_user")
 
-    def get(self, request):
+    def get(self, request, sort_choice: int, view_choice: int):
         user = request.user
         if not user.is_authenticated:
             user = self.default_user
 
-        sort_choice = int(request.session.get("music_sort_choice", 1))
         if SortChoices.ARTIST.value[0] == sort_choice:
             track_list = list(MusicTrack.objects.filter(user=user).order_by("artist"))
         elif SortChoices.ALBUM.value[0] == sort_choice:
@@ -152,7 +151,6 @@ class PlayListView(View):
         else:
             track_list = list(MusicTrack.objects.filter(user=user).order_by("artist"))
 
-        view_choice = int(request.session.get("view_choice", 1))
         if ViewChoices.SCROLL.value[0] == view_choice:
             self.template_name = "music/playlist_scroll.html"
         elif ViewChoices.SWIPE.value[0] == view_choice:
@@ -179,7 +177,7 @@ class PlayListView(View):
         context = {"track_list": tracks, "music_form": music_form}
         return render(request, self.template_name, context)
 
-    def post(self, request):
+    def post(self, request, sort_choice: int, view_choice: int):
         user = request.user
         music_form = self.music_form(request.POST)
 
@@ -203,6 +201,6 @@ class PlayListView(View):
             except MusicTrack.DoesNotExist:
                 pass
 
-            request.session["music_sort_choice"] = sort_choice
+            request.session["sort_choice"] = sort_choice
             request.session["view_choice"] = view_choice
-        return redirect(reverse("playlist"))
+        return redirect(reverse("playlist", kwargs={"sort_choice":sort_choice, "view_choice":view_choice}))

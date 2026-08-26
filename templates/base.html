@@ -53,7 +53,11 @@
             <ul class="dropdown-menu">
               <li><a class="dropdown-item" href="{% url 'my_boards' %}">My boards</a></li>
               <li><a class="dropdown-item" href="{% url 'mynewsitems' %}">My news</a></li>
-              <li><a class="dropdown-item" href="{% url 'playlist' %}">My music</a></li>
+              {% if request.session.sort_choice %}
+                <li><a class="dropdown-item" href="{% url 'playlist' request.session.sort_choice request.session.view_choice %}">My music</a></li>
+              {% else %}
+                <li><a class="dropdown-item" href="{% url 'playlist' 1 1 %}">My music</a></li>
+              {% endif %}
               <li><a class="dropdown-item" href="{% url 'portfolio' %}">My portfolio</a></li>
               <li><a class="dropdown-item" href="{% url 'my_account' %}">My account</a></li>
               <li><a class="dropdown-item" href="{% url 'password_change' %}">Change password</a></li>

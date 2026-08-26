@@ -107,7 +107,6 @@
         `
       )
     .join('');
-    setActivePlay();
     document.querySelector('.swiper-wrapper').innerHTML = slidesHTML;
     const swiper = new Swiper('.swiper-container', {
       keyboard: {
@@ -175,7 +174,7 @@
     audioPlayer.src = null;
   }
 
-    document.addEventListener('click', (event) => {
+  document.addEventListener('click', (event) => {
     const playButton = event.target.closest('.play-btn');
     if (playButton) {
       const id = Number(playButton.dataset.id);
@@ -212,8 +211,8 @@
         }
         form_submit(trackPk);
       }
+      setActivePlay();
     }
-    setActivePlay();
   });
 
   function form_submit(trackPk) {

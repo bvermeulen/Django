@@ -115,13 +115,18 @@
     form.view_choice.value = value;
     return;
   }
-
+  
+  function setActivePlay() {
+    const targetBtn = document.querySelector(`.play-btn[data-id="${currentPlayId}"]`);
+    if (targetBtn) targetBtn.classList.add('active');
+  }
+  
   function clearActivePlay(){
     document.querySelectorAll('.play-btn.active').forEach((b)=>b.classList.remove('active'));
     currentPlayId = null;
     audioPlayer.src = null;
   }
-
+  
   function renderTracks() {
     if (!track_list.length) {
       trackTableBody.innerHTML = `
@@ -200,6 +205,7 @@
         }
         form_submit(trackPk);
       }
+      setActivePlay();
     }
   });
 

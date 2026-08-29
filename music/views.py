@@ -181,7 +181,7 @@ class PlayListView(View):
         user = request.user
         music_form = self.music_form(request.POST)
 
-        if music_form.is_valid() and user.is_authenticated:
+        if music_form.is_valid():
             sort_choice = request.session.get("music_sort_choice", 1)
             new_sort_choice = music_form.cleaned_data.get("sort_choice")
             sort_choice = new_sort_choice if new_sort_choice else sort_choice
@@ -190,16 +190,17 @@ class PlayListView(View):
             view_choice = new_view_choice if new_view_choice else view_choice
             track_pk = music_form.cleaned_data.get("track_pk")
 
-            try:
-                track_to_be_deleted = MusicTrack.objects.get(pk=track_pk)
-                logger.info(
-                    f"user {user} [ip: {get_client_ip(request)}] "
-                    f"removed {track_to_be_deleted.name} from playlist"
-                )
-                track_to_be_deleted.delete()
+            if user.is_authenticated:
+                try:
+                    track_to_be_deleted = MusicTrack.objects.get(pk=track_pk)
+                    logger.info(
+                        f"user {user} [ip: {get_client_ip(request)}] "
+                        f"removed {track_to_be_deleted.name} from playlist"
+                    )
+                    track_to_be_deleted.delete()
 
-            except MusicTrack.DoesNotExist:
-                pass
+                except MusicTrack.DoesNotExist:
+                    pass
 
             request.session["sort_choice"] = sort_choice
             request.session["view_choice"] = view_choice
